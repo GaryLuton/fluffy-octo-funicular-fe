@@ -60,36 +60,36 @@
       </div>
 
       <!-- Login Form -->
-      <form id="login-form" onsubmit="handleLogin(event)">
+      <form id="login-form" onsubmit="handleLogin(event)" novalidate>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" id="login-email" placeholder="your@email.com" required/>
+          <input type="text" id="login-email" placeholder="your@email.com"/>
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="login-password" placeholder="your password" required/>
+          <input type="password" id="login-password" placeholder="your password"/>
         </div>
         <div id="login-error" class="error-msg"></div>
         <button type="submit" class="submit-btn" id="login-btn">Sign In</button>
       </form>
 
       <!-- Register Form -->
-      <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+      <form id="register-form" class="hidden" onsubmit="handleRegister(event)" novalidate>
         <div class="form-group">
           <label>Username</label>
-          <input type="text" id="reg-username" placeholder="pick a username" required minlength="2"/>
+          <input type="text" id="reg-username" placeholder="pick a username"/>
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" id="reg-email" placeholder="your@email.com" required/>
+          <input type="text" id="reg-email" placeholder="your@email.com"/>
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="reg-password" placeholder="6+ characters" required minlength="6"/>
+          <input type="password" id="reg-password" placeholder="6+ characters"/>
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
-          <input type="password" id="reg-confirm" placeholder="same password again" required/>
+          <input type="password" id="reg-confirm" placeholder="same password again"/>
         </div>
         <div id="reg-error" class="error-msg"></div>
         <div id="reg-success" class="success-msg"></div>
@@ -116,6 +116,10 @@ async function handleLogin(e) {
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
   const btn = document.getElementById('login-btn');
+  if (!email || !password) {
+    errEl.textContent = 'Please enter your email and password';
+    return;
+  }
   errEl.textContent = '';
   btn.disabled = true;
   btn.textContent = 'SIGNING IN...';
@@ -155,6 +159,14 @@ async function handleRegister(e) {
   errEl.textContent = '';
   successEl.textContent = '';
 
+  if (!username || !email || !password) {
+    errEl.textContent = 'All fields are required';
+    return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = 'Password must be at least 6 characters';
+    return;
+  }
   if (password !== confirm) {
     errEl.textContent = 'Passwords do not match';
     return;
