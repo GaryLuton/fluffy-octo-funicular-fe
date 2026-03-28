@@ -92,6 +92,12 @@ app.get('/api/auth/me', auth, (req, res) => {
   res.json({ user });
 });
 
+app.delete('/api/auth/account', auth, (req, res) => {
+  stmts.deleteAllUserData.run(req.user.id);
+  stmts.deleteUser.run(req.user.id);
+  res.json({ ok: true });
+});
+
 // ─── Data Routes (CRUD for user data) ───
 
 // Valid keys that map to the frontend's localStorage keys

@@ -114,6 +114,12 @@ const stmts = {
   deleteData: {
     run: (userId, key) => run('DELETE FROM user_data WHERE user_id = ? AND key = ?', [userId, key]),
   },
+  deleteAllUserData: {
+    run: (userId) => run('DELETE FROM user_data WHERE user_id = ?', [userId]),
+  },
+  deleteUser: {
+    run: (userId) => run('DELETE FROM users WHERE id = ?', [userId]),
+  },
 };
 
 module.exports = { initDb, stmts };

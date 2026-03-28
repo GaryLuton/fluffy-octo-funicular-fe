@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Account — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
+      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
+      --brown:#1e0c06; --white:#ffffff;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;}
+    h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.93);backdrop-filter:blur(10px);border-bottom:2px solid rgba(30,12,6,0.08);}
+    .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);text-decoration:none;}
+    nav ul{list-style:none;display:flex;gap:32px;}
+    nav ul a{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:2px;text-transform:uppercase;color:var(--brown);text-decoration:none;transition:opacity 0.2s;}
+    nav ul a:hover{opacity:0.45;}
+
+    .account-container{max-width:520px;margin:0 auto;padding:120px 24px 60px;}
+
+    .welcome-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
+    .welcome-title{font-size:2.4rem;letter-spacing:3px;margin-bottom:4px;}
+    .welcome-email{font-size:0.88rem;color:rgba(30,12,6,0.4);margin-bottom:8px;}
+    .welcome-joined{font-size:0.78rem;color:rgba(30,12,6,0.3);}
+
+    .section-card{background:var(--white);border-radius:24px;padding:32px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
+    .section-title{font-size:1.2rem;letter-spacing:3px;margin-bottom:6px;}
+    .section-desc{font-size:0.88rem;color:rgba(30,12,6,0.45);line-height:1.7;margin-bottom:20px;}
+
+    .btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.2s,transform 0.15s;margin-bottom:10px;}
+    .btn:hover{transform:translateY(-1px);}
+    .btn-primary{background:var(--terracotta);color:white;}
+    .btn-primary:hover{background:var(--terracotta-dark);}
+    .btn-outline{background:transparent;color:var(--brown);border:2px solid rgba(30,12,6,0.15);}
+    .btn-outline:hover{border-color:var(--brown);}
+    .btn-danger{background:transparent;color:#c0392b;border:2px solid rgba(192,57,43,0.2);}
+    .btn-danger:hover{background:#c0392b;color:white;}
+
+    .status-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;text-align:center;}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">Stuflover</a>
+  <ul>
+    <li><a href="lifestyle.html">My Page</a></li>
+    <li><a href="index.html">Home</a></li>
+  </ul>
+</nav>
+
+<div class="account-container">
+  <div class="welcome-card">
+    <h1 class="welcome-title" id="welcomeName">Welcome</h1>
+    <div class="welcome-email" id="welcomeEmail"></div>
+    <div class="welcome-joined" id="welcomeJoined"></div>
+  </div>
+
+  <div class="section-card">
+    <h2 class="section-title">Your Style Profile</h2>
+    <div class="section-desc" id="profileDesc">Your style preferences power Flovee, your shop, and your whole experience.</div>
+    <button class="btn btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
+    <button class="btn btn-outline" onclick="window.location.href='lifestyle.html'">View My Page</button>
+  </div>
+
+  <div class="section-card">
+    <h2 class="section-title">Sign Out</h2>
+    <div class="section-desc">You will need to sign in again next time.</div>
+    <button class="btn btn-outline" onclick="stufloverLogout()">Sign Out</button>
+  </div>
+
+  <div class="section-card">
+    <h2 class="section-title">Delete Account</h2>
+    <div class="section-desc">This permanently deletes your account and all your data. This cannot be undone.</div>
+    <div class="status-msg" id="deleteStatus"></div>
+    <button class="btn btn-danger" id="deleteBtn" onclick="deleteAccount()">Delete My Account</button>
+  </div>
+</div>
+
+<script src="/stuflover-config.js"></script>
+<script src="/stuflover-backend.js"></script>
+<script>
+var API_BASE = window.STUFLOVER_API_URL || '';
+
+// Load user info
+var user = window.stufloverUser ? window.stufloverUser() : null;
+if (user) {
+  document.getElementById('welcomeName').textContent = 'Welcome, ' + user.username;
+  document.getElementById('welcomeEmail').textContent = user.email || '';
+}
+
+// Load profile info
+var profile;
+try { profile = JSON.parse(localStorage.getItem('stuflover_profile') || 'null'); } catch(e) { profile = null; }
+if (profile && profile.aesthetics) {
+  var sorted = Object.entries(profile.aesthetics).sort(function(a,b){ return b[1]-a[1]; });
+  var topAe = sorted[0] ? sorted[0][0] : '';
+  var aeNames = {kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
+  document.getElementById('profileDesc').textContent = 'Your aesthetic: ' + (aeNames[topAe] || topAe) + '. Retake the quiz to update your style.';
+} else {
+  document.getElementById('profileDesc').textContent = 'You have not taken the quiz yet. Take it to personalise your experience.';
+}
+
+// Fetch joined date from server
+(async function(){
+  try {
+    var token = localStorage.getItem('stuflover_token');
+    if (!token) return;
+    var res = await fetch(API_BASE + '/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var data = await res.json();
+    if (data.user && data.user.created_at) {
+      var d = new Date(data.user.created_at);
+      document.getElementById('welcomeJoined').textContent = 'Joined ' + d.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+    }
+  } catch(e) {}
+})();
+
+function retakeQuiz() {
+  // Clear saved profile so the quiz shows again
+  localStorage.removeItem('stuflover_profile');
+  // Also clear it on the server
+  var token = localStorage.getItem('stuflover_token');
+  if (token) {
+    fetch(API_BASE + '/api/data/profile', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).catch(function(){});
+  }
+  window.location.href = '/lifestyle.html';
+}
+
+async function deleteAccount() {
+  if (!confirm('Are you sure? This will permanently delete your account and all your data.')) return;
+  if (!confirm('Really sure? There is no going back.')) return;
+
+  var btn = document.getElementById('deleteBtn');
+  var status = document.getElementById('deleteStatus');
+  btn.disabled = true;
+  btn.textContent = 'DELETING...';
+
+  try {
+    var token = localStorage.getItem('stuflover_token');
+    var res = await fetch(API_BASE + '/api/auth/account', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); } catch(e) { throw new Error('Server error'); }
+    if (!res.ok) throw new Error(data.error || 'Failed to delete');
+
+    // Clear all local data
+    localStorage.clear();
+    window.location.href = '/auth.html';
+  } catch(err) {
+    status.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'DELETE MY ACCOUNT';
+  }
+}
+</script>
+</body>
+</html>
