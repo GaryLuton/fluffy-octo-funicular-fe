@@ -157,7 +157,11 @@
 
 <nav id="mainNav">
   <a class="logo bc" id="navLogo" href="index.html">Stuflover</a>
-  <a class="nav-home bc" id="navHome" href="index.html">Home</a>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="navWelcome" class="bc" style="font-size:0.72rem;letter-spacing:2px;opacity:0.5;display:none;"></span>
+    <a class="nav-home bc" id="navAccount" href="account.html" style="font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);">Account</a>
+    <a class="nav-home bc" id="navHome" href="index.html">Home</a>
+  </div>
 </nav>
 
 <!-- LANDING -->
@@ -913,6 +917,13 @@ function buildPage(){
 
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
+
+  // Show welcome message
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  if(user && user.username){
+    var wel = document.getElementById('navWelcome');
+    if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
+  }
 }
 
 // ─── SECTIONS DATA ────────────────────────────────────────
@@ -1443,6 +1454,41 @@ function showShopMenu(e, item, pal){
   setTimeout(()=>{ document.addEventListener('click', ()=>menu.remove(), {once:true}); }, 50);
 }
 
+// ─── AUTO-LOAD SAVED PROFILE ─────────────────────────────
+// If the user already completed the quiz, skip it and show their page
+(function autoLoad(){
+  var saved;
+  try { saved = JSON.parse(localStorage.getItem('stuflover_profile')||'null'); } catch(e) { saved=null; }
+  if(!saved || !saved.aesthetics || Object.keys(saved.aesthetics).length===0) return;
+
+  // Restore profile data into P
+  P.aesthetics = saved.aesthetics||{};
+  P.music = saved.music||[];
+  P.interests = saved.interests||[];
+  P.social = saved.social||null;
+  P.faveColour = saved.faveColour||null;
+  P.faveShop = saved.faveShop||null;
+  P.friendGroup = saved.friendGroup||null;
+  P.energyWord = saved.energyWord||null;
+  P.moodToday = saved.moodToday||null;
+  P.phoneScreen = saved.phoneScreen||null;
+  P.saturdayMorning = saved.saturdayMorning||null;
+  P.coffeeOrder = saved.coffeeOrder||null;
+  P.notesApp = saved.notesApp||null;
+  P.lastBought = saved.lastBought||null;
+  P.extraTags = saved.extraTags||[];
+
+  // Hide the landing hero and show the result page
+  document.getElementById('heroSection').style.display='none';
+  buildPage();
+
+  // Show welcome message
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  if(user && user.username){
+    var wel = document.getElementById('navWelcome');
+    if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
+  }
+})();
 
 </script>
 

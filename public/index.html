@@ -116,11 +116,12 @@
 <nav>
   <div class="logo">Stuflover</div>
   <ul>
+    <li><span id="navWelcome" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;opacity:0.5;"></span></li>
     <li><a href="#boredom">Boredom Hub</a></li>
     <li><a href="#viral">Viral</a></li>
     <li><a href="#style">Style</a></li>
     <li><a href="#videos">Videos</a></li>
-    <li><a href="#" onclick="stufloverLogout();return false;">Logout</a></li>
+    <li><a href="account.html">Account</a></li>
   </ul>
 </nav>
 
@@ -320,6 +321,13 @@
   });
 
   render();
+
+  // Welcome message
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  if(user && user.username){
+    var wel = document.getElementById('navWelcome');
+    if(wel) wel.textContent = 'Welcome, ' + user.username;
+  }
 </script>
 </body>
 </html>
