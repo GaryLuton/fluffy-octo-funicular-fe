@@ -9,11 +9,15 @@
 (function () {
   'use strict';
 
-  const TOKEN_KEY = 'stuflover_token';
-  const USER_KEY = 'stuflover_user';
+  var TOKEN_KEY = 'stuflover_token';
+  var USER_KEY = 'stuflover_user';
+
+  // API base URL — set window.STUFLOVER_API_URL before this script loads,
+  // or it defaults to '' (same origin) for Railway hosting
+  var API_BASE = window.STUFLOVER_API_URL || '';
 
   // Key mapping: server key -> localStorage key
-  const KEY_MAP = {
+  var KEY_MAP = {
     profile: 'stuflover_profile',
     wishlist: 'stuflover_wishlist',
     catalog: 'stuflover_catalog',
@@ -22,30 +26,28 @@
     convos: 'stuflover_convos',
     vids: 'stuflover_vids',
   };
-  const LS_TO_SERVER = {};
-  for (const [k, v] of Object.entries(KEY_MAP)) LS_TO_SERVER[v] = k;
+  var LS_TO_SERVER = {};
+  for (var k in KEY_MAP) LS_TO_SERVER[KEY_MAP[k]] = k;
 
   function getToken() {
     return localStorage.getItem(TOKEN_KEY) || '';
   }
 
   function getUser() {
-    try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch (e) { return null; }
   }
 
   // ─── Auth Gate ───
-  // Redirect to auth page if not logged in (skip if already on auth page)
   if (!getToken() && !window.location.pathname.includes('auth.html')) {
     window.location.href = '/auth.html';
   }
 
   // ─── Override fetch to proxy Anthropic calls ───
-  const _origFetch = window.fetch;
+  var _origFetch = window.fetch;
   window.fetch = function (url, opts) {
     if (typeof url === 'string' && url.includes('api.anthropic.com')) {
-      // Rewrite to use our proxy
-      const body = opts && opts.body ? JSON.parse(opts.body) : {};
-      return _origFetch.call(this, '/api/chat', {
+      var body = opts && opts.body ? JSON.parse(opts.body) : {};
+      return _origFetch.call(this, API_BASE + '/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,39 +60,34 @@
   };
 
   // ─── Sync localStorage changes to server ───
-  // Wrap localStorage.setItem to auto-sync relevant keys
-  const _origSetItem = Storage.prototype.setItem;
+  var _origSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function (key, value) {
     _origSetItem.call(this, key, value);
-    const serverKey = LS_TO_SERVER[key];
+    var serverKey = LS_TO_SERVER[key];
     if (serverKey && getToken()) {
-      let parsed;
-      try { parsed = JSON.parse(value); } catch { parsed = value; }
-      _origFetch.call(window, '/api/data/' + serverKey, {
+      var parsed;
+      try { parsed = JSON.parse(value); } catch (e) { parsed = value; }
+      _origFetch.call(window, API_BASE + '/api/data/' + serverKey, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + getToken(),
         },
         body: JSON.stringify({ value: parsed }),
-      }).catch(function () {}); // fire and forget
+      }).catch(function () {});
     }
   };
 
   // ─── Remove the old API key banner ───
-  // Hide any existing API key banners since the key is now server-side
   window.addEventListener('DOMContentLoaded', function () {
-    // Remove API key banners (they have ids like 'api-key-banner' or contain api key inputs)
     document.querySelectorAll('[id*="api-key"], [id*="apiKey"], [id*="api_key"]').forEach(function (el) {
       el.style.display = 'none';
     });
-    // Also hide the old getApiKey banner if it was created dynamically
     var banners = document.querySelectorAll('.api-banner, #apiBanner');
     banners.forEach(function (b) { b.style.display = 'none'; });
   });
 
   // ─── Provide global getApiKey that returns a placeholder ───
-  // Pages that call getApiKey() will get a truthy value so they don't show the banner
   window.getApiKey = function () {
     return getToken() ? 'server-proxied' : '';
   };
@@ -102,7 +99,8 @@
     window.location.href = '/auth.html';
   };
 
-  // ─── Expose user info ───
+  // ─── Expose user info and API base ───
   window.stufloverUser = getUser;
+  window.STUFLOVER_API_URL = API_BASE;
 
 })();

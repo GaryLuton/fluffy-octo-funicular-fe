@@ -6,12 +6,27 @@ const fetch = require('node-fetch');
 const path = require('path');
 const { initDb, stmts } = require('./db');
 
+const cors = require('cors');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // Middleware
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow all origins if none configured, otherwise check the list
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(null, false);
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '1mb' }));
 
 // Auth middleware
