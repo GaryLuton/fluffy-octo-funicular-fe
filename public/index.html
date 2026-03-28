@@ -120,6 +120,7 @@
     <li><a href="#viral">Viral</a></li>
     <li><a href="#style">Style</a></li>
     <li><a href="#videos">Videos</a></li>
+    <li><a href="#" onclick="stufloverLogout();return false;">Logout</a></li>
   </ul>
 </nav>
 
@@ -222,6 +223,7 @@
   <p class="lb-tip">press ESC or click outside to close</p>
 </div>
 
+<script src="/stuflover-backend.js"></script>
 <script>
   let videos = JSON.parse(localStorage.getItem('stuflover_vids') || '[]');
   function save(){ localStorage.setItem('stuflover_vids', JSON.stringify(videos)); }
