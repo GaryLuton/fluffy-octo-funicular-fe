@@ -180,20 +180,28 @@ app.get('/api/health', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SPA fallback: serve index.html for non-API routes
+// Catch-all for unknown API routes — must return JSON, not HTML
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// SPA fallback: serve HTML files for non-API routes
 app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'Not found' });
-  }
   const filePath = path.join(__dirname, 'public', req.path);
   res.sendFile(filePath, (err) => {
     if (err) res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 });
 
+// Global error handler — always return JSON for API errors
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Initialize database then start server
 initDb().then(() => {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Stuflover backend running on port ${PORT}`);
   });
 }).catch(err => {
