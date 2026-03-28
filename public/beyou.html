@@ -180,43 +180,8 @@
   </div>
 </div>
 
+<script src="/stuflover-backend.js"></script>
 <script>
-
-// ─── API KEY MANAGEMENT ───────────────────────────────────
-function getApiKey(){ return localStorage.getItem('stuflover_api_key')||''; }
-function saveApiKey(){
-  const val = document.getElementById('apiKeyInput')?.value.trim();
-  if(!val) return;
-  localStorage.setItem('stuflover_api_key', val);
-  document.getElementById('apiBanner').style.display='none';
-  // Reload so everything picks up the key
-  window.location.reload();
-}
-function checkApiKey(){
-  const banner = document.getElementById('apiBanner');
-  if(!banner) return;
-  if(!getApiKey()){
-    banner.style.display='flex';
-    // Apply body colour to banner
-    banner.style.background = document.body.style.background || '#fff';
-  } else {
-    banner.style.display='none';
-  }
-}
-// Patch fetch to always include key and required headers
-const _origFetch = window.fetch;
-window.fetch = function(url, opts){
-  if(typeof url === 'string' && url.includes('anthropic.com')){
-    opts = opts || {};
-    opts.headers = Object.assign({}, opts.headers, {
-      'x-api-key': getApiKey(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'Content-Type': 'application/json',
-    });
-  }
-  return _origFetch.call(this, url, opts);
-};
 
 // ─── PROFILE ─────────────────────────────────────────────
 const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
@@ -733,16 +698,8 @@ function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scr
 
 // ─── INIT ─────────────────────────────────────────────────
 applyStyles();
-  checkApiKey();
-</script>
 
-<!-- API KEY BANNER -->
-<div id="apiBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 24px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);border-top:1px solid rgba(128,128,128,0.12);" id="apiBanner">
-  <span style="font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.5;white-space:nowrap">Anthropic Key</span>
-  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;padding:8px 14px;font-size:0.85rem;font-family:Space Grotesk,sans-serif;border:1.5px solid rgba(128,128,128,0.2);border-radius:6px;background:rgba(128,128,128,0.06);color:inherit;outline:none;"/>
-  <button onclick="saveApiKey()" style="padding:8px 20px;border:none;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:#c4522a;color:white;">Save</button>
-  <a href="https://console.anthropic.com" target="_blank" style="font-size:0.7rem;opacity:0.4;white-space:nowrap;color:inherit;">Get a key</a>
-</div>
+</script>
 
 </body>
 </html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stuflover - Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
+      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
+      --brown:#1e0c06; --white:#ffffff;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    .auth-container{width:90%;max-width:440px;animation:fadeUp 0.5s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    .logo-top{text-align:center;margin-bottom:40px;}
+    .logo-top h1{font-size:3.2rem;letter-spacing:5px;color:var(--brown);}
+    .logo-top p{font-size:0.85rem;color:rgba(30,12,6,0.45);margin-top:4px;letter-spacing:1px;}
+
+    .auth-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 12px 48px rgba(30,12,6,0.12);}
+
+    .tabs{display:flex;gap:0;margin-bottom:32px;border-radius:12px;overflow:hidden;border:2px solid rgba(30,12,6,0.1);}
+    .tab{flex:1;text-align:center;padding:13px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(30,12,6,0.35);transition:all 0.25s;}
+    .tab.active{background:var(--terracotta);color:white;}
+
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.45);margin-bottom:6px;}
+    .form-group input{width:100%;padding:14px 18px;border:2px solid rgba(30,12,6,0.12);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;color:var(--brown);outline:none;transition:border-color 0.2s;}
+    .form-group input:focus{border-color:var(--terracotta);}
+    .form-group input::placeholder{color:rgba(30,12,6,0.25);}
+
+    .error-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;}
+    .success-msg{font-size:0.82rem;color:#2a8a4a;font-weight:700;min-height:22px;margin-bottom:8px;}
+
+    .submit-btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+    .submit-btn:hover{background:var(--terracotta-dark);transform:translateY(-1px);}
+    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+    .hidden{display:none;}
+
+    .divider{text-align:center;margin:24px 0 16px;font-size:0.78rem;color:rgba(30,12,6,0.3);letter-spacing:1px;}
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="logo-top">
+      <h1>Stuflover</h1>
+      <p>your vibe, your world</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('login')">Sign In</button>
+        <button class="tab" onclick="showTab('register')">Create Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="your@email.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="your password" required/>
+        </div>
+        <div id="login-error" class="error-msg"></div>
+        <button type="submit" class="submit-btn" id="login-btn">Sign In</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="reg-username" placeholder="pick a username" required minlength="2"/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="your@email.com" required/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="6+ characters" required minlength="6"/>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="reg-confirm" placeholder="same password again" required/>
+        </div>
+        <div id="reg-error" class="error-msg"></div>
+        <div id="reg-success" class="success-msg"></div>
+        <button type="submit" class="submit-btn" id="reg-btn">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+  document.getElementById('reg-success').textContent = '';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'SIGNING IN...';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    localStorage.setItem('stuflover_token', data.token);
+    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
+
+    // Pull user data from server into localStorage
+    await syncFromServer(data.token);
+
+    window.location.href = '/index.html';
+  } catch (err) {
+    errEl.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'SIGN IN';
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  const errEl = document.getElementById('reg-error');
+  const successEl = document.getElementById('reg-success');
+  const btn = document.getElementById('reg-btn');
+  errEl.textContent = '';
+  successEl.textContent = '';
+
+  if (password !== confirm) {
+    errEl.textContent = 'Passwords do not match';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'CREATING...';
+
+  try {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+    localStorage.setItem('stuflover_token', data.token);
+    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
+
+    window.location.href = '/lifestyle.html';
+  } catch (err) {
+    errEl.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'CREATE ACCOUNT';
+  }
+}
+
+async function syncFromServer(token) {
+  try {
+    const res = await fetch('/api/data', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+    const { data } = await res.json();
+    const keyMap = {
+      profile: 'stuflover_profile',
+      wishlist: 'stuflover_wishlist',
+      catalog: 'stuflover_catalog',
+      approved: 'stuflover_approved',
+      contacts: 'stuflover_contacts',
+      convos: 'stuflover_convos',
+      vids: 'stuflover_vids'
+    };
+    for (const [key, lsKey] of Object.entries(keyMap)) {
+      if (data[key] != null) {
+        localStorage.setItem(lsKey, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+      }
+    }
+  } catch {}
+}
+
+// If already logged in, redirect
+if (localStorage.getItem('stuflover_token')) {
+  window.location.href = '/index.html';
+}
+</script>
+</body>
+</html>
