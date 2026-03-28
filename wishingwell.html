@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WishingWell — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.5s,color 0.5s;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);}
+    .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
+    .nav-links{display:flex;gap:8px;align-items:center;}
+    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;cursor:pointer;background:transparent;color:inherit;}
+    .nav-btn:hover{opacity:0.6;}
+
+    .page-header{padding:48px 40px 28px;border-bottom:1px solid rgba(128,128,128,0.08);}
+    .page-eyebrow{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;margin-bottom:8px;}
+    .page-title{font-size:clamp(3rem,8vw,6rem);line-height:0.84;letter-spacing:-2px;margin-bottom:12px;}
+    .page-sub{font-size:0.9rem;opacity:0.5;line-height:1.8;}
+
+    .empty-state{min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 40px;gap:16px;}
+    .empty-title{font-size:2rem;letter-spacing:-0.5px;opacity:0.3;}
+    .empty-sub{opacity:0.3;font-size:0.9rem;max-width:340px;line-height:1.7;}
+    .empty-link{font-size:0.82rem;letter-spacing:2px;padding:12px 28px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;border:1.5px solid;transition:opacity 0.2s;}
+    .empty-link:hover{opacity:0.6;}
+
+    .section-bar{padding:20px 40px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(128,128,128,0.06);}
+    .section-label{font-size:0.64rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .clear-btn{font-size:0.7rem;letter-spacing:2px;padding:6px 14px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:opacity 0.2s;}
+    .clear-btn:hover{opacity:0.8;}
+
+    .products-wrap{padding:28px 40px 60px;}
+    .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+    .product-card{display:flex;flex-direction:column;}
+    .product-img-wrap{position:relative;overflow:hidden;border-radius:6px;aspect-ratio:3/4;background:rgba(128,128,128,0.08);cursor:pointer;}
+    .product-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s;}
+    .product-img-wrap:hover .product-img{transform:scale(1.04);}
+    .product-info{padding:12px 0 0;display:flex;flex-direction:column;gap:4px;}
+    .product-brand{font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.38;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .product-name{font-size:0.92rem;font-weight:600;line-height:1.35;}
+    .product-price{font-size:0.82rem;opacity:0.55;margin-top:2px;}
+    .product-actions{display:flex;gap:8px;margin-top:10px;}
+    .catalog-btn{flex:1;padding:9px 0;border-radius:4px;font-size:0.72rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;transition:opacity 0.2s;text-align:center;}
+    .catalog-btn:hover{opacity:0.8;}
+    .remove-btn{padding:9px 12px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;font-size:0.72rem;cursor:pointer;opacity:0.4;transition:opacity 0.2s;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    .remove-btn:hover{opacity:0.8;}
+    .in-catalog-badge{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:20px;font-size:0.6rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;}
+
+    @media(max-width:900px){.products-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(max-width:680px){nav{padding:13px 20px;}.products-grid{grid-template-columns:repeat(2,1fr);}.products-wrap,.page-header,.section-bar{padding-left:20px;padding-right:20px;}}
+  </style>
+</head>
+<body>
+<nav id="mainNav">
+  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
+    <a class="nav-btn bc" href="catalog.html">Catalog</a>
+    <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow bc">Your Saved Items</div>
+  <div class="page-title bc" id="pageTitle">WishingWell</div>
+  <p class="page-sub" id="pageSub">Everything you saved. Add to Catalog to try pieces on.</p>
+</div>
+
+<div id="emptyState" class="empty-state" style="display:none">
+  <div class="empty-title bc">Nothing saved yet</div>
+  <p class="empty-sub">Browse FitforIt and tap Save on anything you love.</p>
+  <a class="empty-link bc" href="fitforit.html" id="emptyLink">Go to FitforIt</a>
+</div>
+
+<div id="mainContent" style="display:none">
+  <div class="section-bar">
+    <div class="section-label bc" id="itemCount"></div>
+    <button class="clear-btn bc" onclick="clearAll()">Clear All</button>
+  </div>
+  <div class="products-wrap">
+    <div class="products-grid" id="productsGrid"></div>
+  </div>
+</div>
+
+<script>
+
+// ─── API KEY MANAGEMENT ───────────────────────────────────
+function getApiKey(){ return localStorage.getItem('stuflover_api_key')||''; }
+function saveApiKey(){
+  const val = document.getElementById('apiKeyInput')?.value.trim();
+  if(!val) return;
+  localStorage.setItem('stuflover_api_key', val);
+  document.getElementById('apiBanner').style.display='none';
+  // Reload so everything picks up the key
+  window.location.reload();
+}
+function checkApiKey(){
+  const banner = document.getElementById('apiBanner');
+  if(!banner) return;
+  if(!getApiKey()){
+    banner.style.display='flex';
+    // Apply body colour to banner
+    banner.style.background = document.body.style.background || '#fff';
+  } else {
+    banner.style.display='none';
+  }
+}
+// Patch fetch to always include key and required headers
+const _origFetch = window.fetch;
+window.fetch = function(url, opts){
+  if(typeof url === 'string' && url.includes('anthropic.com')){
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers, {
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'Content-Type': 'application/json',
+    });
+  }
+  return _origFetch.call(this, url, opts);
+};
+
+const wishlist = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_wishlist')||'[]'); }catch(e){return [];} })();
+const catalogItems = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_catalog')||'[]'); }catch(e){return [];} })();
+const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
+
+function saveCatalog(){ try{ localStorage.setItem('stuflover_catalog', JSON.stringify(catalogItems)); }catch(e){} }
+function saveWishlist(){ try{ localStorage.setItem('stuflover_wishlist', JSON.stringify(wishlist)); }catch(e){} }
+
+function resolvePalette(){
+  const fc=profile?.faveColour; const ae=profile?.aesthetics||{};
+  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+  if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.84),tx:darkenH(fc.hex,0.5),ac:fc.hex};
+  if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.3),tx:lightenH(fc.hex,0.72),ac:fc.hex};
+  const m={kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f2ede6',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#120810',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1e1208',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#141414',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'}};
+  return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+}
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+
+const PAL = resolvePalette();
+
+function applyStyles(){
+  document.body.style.background=PAL.bg; document.body.style.color=PAL.tx;
+  const nav=document.getElementById('mainNav'); nav.style.background=PAL.bg+'f0'; nav.style.borderColor=PAL.tx+'12';
+  document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{el.style.color=PAL.tx;el.style.borderColor=PAL.tx+'22';});
+  document.getElementById('emptyLink').style.color=PAL.tx; document.getElementById('emptyLink').style.borderColor=PAL.tx+'40';
+  document.getElementById('pageTitle').style.color=PAL.tx;
+}
+
+function addToCatalog(product){
+  if(!catalogItems.find(c=>c.id===product.id)){
+    catalogItems.push({...product, addedToCatalogAt:Date.now()});
+    saveCatalog();
+    render();
+  }
+}
+
+function removeFromCatalog(id){
+  const idx=catalogItems.findIndex(c=>c.id===id);
+  if(idx>-1){ catalogItems.splice(idx,1); saveCatalog(); render(); }
+}
+
+function removeFromWishlist(id){
+  const idx=wishlist.findIndex(w=>w.id===id);
+  if(idx>-1){ wishlist.splice(idx,1); saveWishlist(); render(); }
+}
+
+function clearAll(){
+  if(!confirm('Remove all saved items?')) return;
+  wishlist.length=0; saveWishlist(); render();
+}
+
+function render(){
+  applyStyles();
+  checkApiKey();
+  if(wishlist.length===0){
+    document.getElementById('emptyState').style.display='flex';
+    document.getElementById('mainContent').style.display='none';
+    return;
+  }
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  document.getElementById('itemCount').textContent=wishlist.length+' '+(wishlist.length===1?'item':'items');
+
+  const grid=document.getElementById('productsGrid');
+  grid.innerHTML = wishlist.map(p=>{
+    const inCat = catalogItems.some(c=>c.id===p.id);
+    const seed = p.id?p.id.split('').reduce((a,b)=>a+b.charCodeAt(0),0):42;
+    // Use Unsplash CDN with fashion photo IDs
+    const FASHION_PHOTOS=['1434389677669-e08b4cac3105','1515886657613-9f3515b0c78f','1542060748-2c35da05fd48','1503342217505-b0a15ec3261c','1524360367517-1b5c73e07e58','1490481651871-ab68de25d43d','1506629082955-511b1aa562c8','1542291026-7eec264c27ff','1599643478519-b1a4b037c1a8','1544923246-b77d6b77c4eb','1558618666-fcd25c85cd64','1583743814966-8d4d0ec60851','1541099649105-f69ad21f3246','1543163521-1bf539c55dd2','1551028719-00167b16eac5'];
+    const photoIdx=seed%15;
+    const imgUrl='https://images.unsplash.com/photo-'+FASHION_PHOTOS[photoIdx]+'?w=400&h=530&fit=crop&crop=center';//+encodeURIComponent((p.imageQuery||p.name).replace(/[^a-zA-Z0-9 ]/g,'').trim())+',fashion&sig='+seed;
+    const shopUrl=p.shopUrl||'#';
+    return `<div class="product-card">
+      <div class="product-img-wrap" onclick="window.open('${shopUrl}','_blank')">
+        <img class="product-img" src="${imgUrl}" alt="${p.name}" onerror="this.style.background='rgba(128,128,128,0.1)'"/>
+        ${inCat?`<div class="in-catalog-badge" style="background:${PAL.ac};color:${PAL.bg}">In Catalog</div>`:''}
+      </div>
+      <div class="product-info">
+        <div class="product-brand" style="color:${PAL.tx}">${p.brand||''}</div>
+        <div class="product-name" style="color:${PAL.tx}">${p.name}</div>
+        <div class="product-price" style="color:${PAL.tx}">${p.price||''}</div>
+        <div class="product-actions">
+          ${inCat
+            ? `<button class="catalog-btn bc" style="background:${PAL.tx}18;color:${PAL.tx}" onclick="removeFromCatalog('${p.id}')">Remove from Catalog</button>`
+            : `<button class="catalog-btn bc" style="background:${PAL.ac};color:${PAL.bg}" onclick='addToCatalog(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Add to Catalog</button>`
+          }
+          <button class="remove-btn bc" style="border-color:${PAL.tx}20;color:${PAL.tx}" onclick="removeFromWishlist('${p.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+
+<!-- API KEY BANNER -->
+<div id="apiBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 24px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);border-top:1px solid rgba(128,128,128,0.12);" id="apiBanner">
+  <span style="font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.5;white-space:nowrap">Anthropic Key</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;padding:8px 14px;font-size:0.85rem;font-family:Space Grotesk,sans-serif;border:1.5px solid rgba(128,128,128,0.2);border-radius:6px;background:rgba(128,128,128,0.06);color:inherit;outline:none;"/>
+  <button onclick="saveApiKey()" style="padding:8px 20px;border:none;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:#c4522a;color:white;">Save</button>
+  <a href="https://console.anthropic.com" target="_blank" style="font-size:0.7rem;opacity:0.4;white-space:nowrap;color:inherit;">Get a key</a>
+</div>
+
+</body>
+</html>

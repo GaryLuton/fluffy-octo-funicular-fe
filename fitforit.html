@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FitforIt — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.5s,color 0.5s;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);}
+    .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
+    .nav-links{display:flex;gap:8px;align-items:center;}
+    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;cursor:pointer;background:transparent;color:inherit;}
+    .nav-btn:hover{opacity:0.6;}
+    .nav-btn.active{border-color:currentColor;opacity:1;}
+    .wishlist-count{position:relative;}
+    .wishlist-badge{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;font-size:0.55rem;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+
+    /* NO PROFILE STATE */
+    #noProfile{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+    #noProfile h1{font-size:clamp(3rem,10vw,7rem);line-height:0.88;letter-spacing:-2px;margin-bottom:20px;}
+    #noProfile p{font-size:1rem;opacity:0.5;max-width:400px;line-height:1.85;margin-bottom:32px;}
+    .cta{font-size:1.2rem;letter-spacing:3px;background:currentColor;border:none;border-radius:4px;padding:16px 44px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;display:inline-block;transition:opacity 0.2s;}
+    .cta:hover{opacity:0.7;}
+
+    /* MAIN SHOP */
+    #shopMain{display:none;}
+    #shopMain.active{display:block;}
+
+    /* HERO BANNER */
+    .shop-hero{padding:48px 40px 36px;border-bottom:1px solid rgba(128,128,128,0.08);}
+    .hero-eyebrow{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;margin-bottom:8px;}
+    .hero-title{font-size:clamp(3rem,8vw,7rem);line-height:0.84;letter-spacing:-2px;margin-bottom:16px;}
+    .hero-sub{font-size:0.9rem;opacity:0.5;max-width:500px;line-height:1.8;}
+    .hero-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;}
+    .hero-tag{padding:5px 12px;border-radius:3px;font-size:0.66rem;letter-spacing:2px;text-transform:uppercase;background:rgba(128,128,128,0.08);border:1px solid rgba(128,128,128,0.12);font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+
+    /* FILTER BAR */
+    .filter-bar{padding:16px 40px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(128,128,128,0.08);flex-wrap:wrap;}
+    .filter-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-right:4px;}
+    .filter-chip{padding:7px 16px;border-radius:20px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:all 0.15s;}
+    .filter-chip:hover,.filter-chip.on{background:currentColor;}
+    .filter-chip.on{opacity:1;}
+    .filter-chip.on span{mix-blend-mode:difference;color:white;}
+    .refresh-btn{margin-left:auto;font-size:0.72rem;letter-spacing:2px;padding:8px 18px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .refresh-btn:hover{opacity:0.6;}
+
+    /* PRODUCT GRID */
+    .products-wrap{padding:32px 40px 60px;}
+    .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+    .product-card{display:flex;flex-direction:column;cursor:default;position:relative;}
+    .product-img-wrap{position:relative;overflow:hidden;border-radius:6px;aspect-ratio:3/4;background:rgba(128,128,128,0.08);}
+    .product-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease;cursor:pointer;}
+    .product-img-wrap:hover .product-img{transform:scale(1.04);}
+    .product-img.shimmer{background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.16) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .product-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.2s;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+    .product-img-wrap:hover .product-img-overlay{opacity:1;background:rgba(0,0,0,0.12);}
+    .product-shop-btn{padding:10px 20px;border-radius:4px;font-size:0.75rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;backdrop-filter:blur(8px);background:rgba(255,255,255,0.9);color:#111;transition:transform 0.15s;}
+    .product-shop-btn:hover{transform:scale(1.04);}
+    .product-info{padding:12px 0 0;display:flex;flex-direction:column;gap:4px;}
+    .product-brand{font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.38;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .product-name{font-size:0.92rem;font-weight:600;line-height:1.35;}
+    .product-price{font-size:0.82rem;opacity:0.55;margin-top:2px;}
+    .product-actions{display:flex;align-items:center;gap:8px;margin-top:10px;}
+    .wish-btn{flex:1;padding:9px 0;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;font-size:0.72rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .wish-btn:hover{background:rgba(128,128,128,0.08);}
+    .wish-btn.wished{border-color:currentColor;}
+    .wish-btn.wished .wish-icon{opacity:1;}
+    .wish-icon{font-size:0.9rem;opacity:0.4;transition:opacity 0.15s;}
+    .buy-btn{padding:9px 14px;border-radius:4px;font-size:0.72rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;text-decoration:none;display:flex;align-items:center;transition:opacity 0.2s;}
+    .buy-btn:hover{opacity:0.75;}
+
+    /* SKELETON CARDS */
+    .skeleton{animation:shimmer 1.5s infinite;}
+    .skeleton .product-img-wrap{background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.14) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+    .skeleton-line{height:10px;border-radius:4px;margin-top:8px;background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.14) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+
+    /* EMPTY / LOADING */
+    .load-msg{padding:80px 40px;text-align:center;opacity:0.35;font-style:italic;}
+
+    @media(max-width:900px){.products-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(max-width:680px){nav{padding:13px 20px;}.products-grid{grid-template-columns:repeat(2,1fr);gap:12px;}.products-wrap{padding:20px;}.shop-hero,.filter-bar{padding-left:20px;padding-right:20px;}}
+    @media(max-width:400px){.products-grid{grid-template-columns:1fr 1fr;gap:10px;}}
+  </style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-btn bc" href="wishingwell.html" id="navWish">
+      WishingWell
+      <span class="wishlist-badge" id="wishBadge" style="display:none"></span>
+    </a>
+    <a class="nav-btn bc" href="catalog.html">Catalog</a>
+    <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+  </div>
+</nav>
+
+<!-- NO PROFILE -->
+<div id="noProfile">
+  <h1 class="bc">FitforIt</h1>
+  <p>Do the lifestyle quiz first so we can build your personal shop.</p>
+  <a class="cta bc" href="lifestyle.html" id="noProfileCta" style="color:white;background:#c4522a;">Take the Quiz</a>
+</div>
+
+<!-- MAIN SHOP -->
+<div id="shopMain">
+  <div class="shop-hero">
+    <div class="hero-eyebrow bc" id="heroEyebrow">Your Personal Shop</div>
+    <div class="hero-title bc" id="heroTitle"></div>
+    <p class="hero-sub" id="heroSub"></p>
+    <div class="hero-tags" id="heroTags"></div>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <span class="filter-label">Filter</span>
+    <button class="filter-chip bc on" data-cat="all" onclick="setFilter('all')"><span>All</span></button>
+    <button class="filter-chip bc" data-cat="tops" onclick="setFilter('tops')"><span>Tops</span></button>
+    <button class="filter-chip bc" data-cat="bottoms" onclick="setFilter('bottoms')"><span>Bottoms</span></button>
+    <button class="filter-chip bc" data-cat="shoes" onclick="setFilter('shoes')"><span>Shoes</span></button>
+    <button class="filter-chip bc" data-cat="accessories" onclick="setFilter('accessories')"><span>Accessories</span></button>
+    <button class="filter-chip bc" data-cat="outerwear" onclick="setFilter('outerwear')"><span>Outerwear</span></button>
+    <button class="refresh-btn bc" onclick="loadProducts(true)">Refresh ↻</button>
+  </div>
+
+  <div class="products-wrap">
+    <div class="products-grid" id="productsGrid"></div>
+    <div class="load-msg" id="loadMsg" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+
+// ─── API KEY MANAGEMENT ───────────────────────────────────
+function getApiKey(){ return localStorage.getItem('stuflover_api_key')||''; }
+function saveApiKey(){
+  const val = document.getElementById('apiKeyInput')?.value.trim();
+  if(!val) return;
+  localStorage.setItem('stuflover_api_key', val);
+  document.getElementById('apiBanner').style.display='none';
+  // Reload so everything picks up the key
+  window.location.reload();
+}
+function checkApiKey(){
+  const banner = document.getElementById('apiBanner');
+  if(!banner) return;
+  if(!getApiKey()){
+    banner.style.display='flex';
+    // Apply body colour to banner
+    banner.style.background = document.body.style.background || '#fff';
+  } else {
+    banner.style.display='none';
+  }
+}
+// Patch fetch to always include key and required headers
+const _origFetch = window.fetch;
+window.fetch = function(url, opts){
+  if(typeof url === 'string' && url.includes('anthropic.com')){
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers, {
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'Content-Type': 'application/json',
+    });
+  }
+  return _origFetch.call(this, url, opts);
+};
+
+// ─── LOAD PROFILE ─────────────────────────────────────────
+const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
+const wishlist = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_wishlist')||'[]'); }catch(e){return [];} })();
+
+function saveWishlist(){ try{ localStorage.setItem('stuflover_wishlist', JSON.stringify(wishlist)); }catch(e){} }
+
+// ─── PALETTE FROM PROFILE ─────────────────────────────────
+function resolvePalette(){
+  if(!profile) return {bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+  const fc = profile.faveColour;
+  const ae = profile.aesthetics||{};
+  const top = Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+  if(fc){
+    const h = fc.hex;
+    const isDark = fc.dark;
+    if(isDark) return {bg:darkenH(h,0.3), tx:lightenH(h,0.72), ac:h};
+    return {bg:lightenH(h,0.84), tx:darkenH(h,0.5), ac:h};
+  }
+  const map={
+    kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},
+    softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},
+    cleangirl:{bg:'#f2ede6',tx:'#1a1408',ac:'#8a7a5a'},
+    coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},
+    goth:{bg:'#120810',tx:'#e8d0f0',ac:'#9040c0'},
+    darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},
+    grunge:{bg:'#1e1208',tx:'#f0d4a0',ac:'#c4943a'},
+    y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},
+    street:{bg:'#141414',tx:'#f4c8a0',ac:'#e08040'},
+    cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},
+    hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},
+    oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},
+    preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},
+    tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},
+    indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},
+  };
+  return map[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+}
+
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+
+const PAL = resolvePalette();
+
+// ─── APPLY STYLES ─────────────────────────────────────────
+function applyStyles(){
+  document.body.style.background = PAL.bg;
+  document.body.style.color = PAL.tx;
+  const nav = document.getElementById('mainNav');
+  nav.style.background = PAL.bg+'f0';
+  nav.style.borderColor = PAL.tx+'12';
+  document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{ el.style.color=PAL.tx; el.style.borderColor=PAL.tx+'22'; });
+  const badge = document.getElementById('wishBadge');
+  if(badge){ badge.style.background=PAL.ac; badge.style.color=PAL.bg; }
+}
+
+// ─── RESOLVE AE NAME ─────────────────────────────────────
+function resolveAeName(){
+  if(!profile) return 'Your Style';
+  const ae=profile.aesthetics||{};
+  const et=profile.extraTags||[];
+  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  const map={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
+  const specials={'pastel_goth':'Pastel Goth','dark_fem':'Dark Feminine','emo_core':'Emo','quiet_luxury':'Quiet Luxury','that_girl':'That Girl','full_grunge':'Grunge','full_indie':'Indie Alt','kawaii_full':'Kawaii'};
+  for(const [tag,name] of Object.entries(specials)) if(et.includes(tag)) return name;
+  return map[top]||'Your Style';
+}
+
+// ─── SHOP URLS ────────────────────────────────────────────
+const SHOP_URLS = {
+  'Depop / Vinted':    {name:'Depop',   url:'https://www.depop.com/search/?q='},
+  'ASOS / H&M':        {name:'ASOS',    url:'https://www.asos.com/search/?q='},
+  'Urban Outfitters':  {name:'UO',      url:'https://www.urbanoutfitters.com/search?q='},
+  'Sezane / Rouje':    {name:'Sezane',  url:'https://www.sezane.com/uk/result?keywords='},
+  'Nike / NB':         {name:'Nike',    url:'https://www.nike.com/gb/search?q='},
+  'Charity Shops':     {name:'Depop',   url:'https://www.depop.com/search/?q='},
+  'Brandy Melville':   {name:'Brandy',  url:'https://www.brandymelvilleusa.com/search?q='},
+  'Princess Polly':    {name:'PP',      url:'https://us.princesspolly.com/search?q='},
+  'No favourite':      {name:'ASOS',    url:'https://www.asos.com/search/?q='},
+};
+
+function getShop(){ return SHOP_URLS[profile?.faveShop||''] || {name:'Shop',url:'https://www.asos.com/search/?q='}; }
+
+// ─── STATE ────────────────────────────────────────────────
+let allProducts = [];
+let activeFilter = 'all';
+let isLoading = false;
+
+// ─── INIT ─────────────────────────────────────────────────
+function init(){
+  applyStyles();
+  checkApiKey();
+  updateWishBadge();
+
+  if(!profile){
+    document.getElementById('noProfile').style.display='flex';
+    return;
+  }
+
+  document.getElementById('noProfile').style.display='none';
+  document.getElementById('shopMain').classList.add('active');
+
+  // Hero
+  const aeName = resolveAeName();
+  document.getElementById('heroTitle').textContent = aeName;
+  document.getElementById('heroTitle').style.color = PAL.tx;
+  document.getElementById('heroSub').textContent = 'Items picked for you based on your style, your colours, and where you shop.';
+
+  // Tags
+  const tags = [
+    aeName,
+    ...(profile.faveColour?[profile.faveColour.name]:[]),
+    ...(profile.faveShop?[profile.faveShop.split('/')[0].trim()]:[]),
+    ...(profile.interests||[]).slice(0,2).map(k=>({fashion:'Fashion',thrifting:'Thrifting',dance:'Dance',sport:'Sport',art:'Art',music_make:'Music',photography:'Photography'})[k]).filter(Boolean),
+  ].filter(Boolean);
+  document.getElementById('heroTags').innerHTML = tags.map(t=>`<span class="hero-tag" style="border-color:${PAL.tx}14;color:${PAL.tx}">${t}</span>`).join('');
+
+  // Style filter chips
+  document.querySelectorAll('.filter-chip').forEach(btn=>{
+    btn.style.color=PAL.tx; btn.style.borderColor=PAL.tx+'20';
+    if(btn.classList.contains('on')){ btn.style.background=PAL.ac; btn.querySelector('span').style.color=PAL.bg; }
+  });
+  document.querySelector('.refresh-btn').style.borderColor=PAL.tx+'20';
+  document.querySelector('.refresh-btn').style.color=PAL.tx;
+
+  loadProducts();
+}
+
+// ─── SET FILTER ───────────────────────────────────────────
+function setFilter(cat){
+  activeFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(btn=>{
+    const isOn = btn.dataset.cat===cat;
+    btn.classList.toggle('on', isOn);
+    btn.style.background = isOn ? PAL.ac : 'transparent';
+    btn.querySelector('span').style.color = isOn ? PAL.bg : PAL.tx;
+  });
+  renderProducts();
+}
+
+// ─── LOAD PRODUCTS FROM CLAUDE API ────────────────────────
+async function loadProducts(forceRefresh=false){
+  if(isLoading) return;
+  isLoading=true;
+
+  // Show skeletons
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML = Array(12).fill(0).map(()=>`
+    <div class="product-card skeleton">
+      <div class="product-img-wrap" style="height:280px"></div>
+      <div class="skeleton-line" style="width:60%;margin-top:12px"></div>
+      <div class="skeleton-line" style="width:80%;margin-top:6px"></div>
+      <div class="skeleton-line" style="width:40%;margin-top:6px"></div>
+    </div>`).join('');
+
+  try{
+    const ae = resolveAeName();
+    const colour = profile.faveColour?.name || 'neutral';
+    const shop = profile.faveShop?.split('/')[0].trim() || 'various shops';
+    const interests = (profile.interests||[]).slice(0,4).join(', ') || 'fashion';
+    const top = Object.entries(profile.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+    const mood = profile.moodToday||'good';
+    const music = (profile.music||[]).slice(0,3).join(', ');
+    const extraTags = (profile.extraTags||[]).join(', ');
+
+    const systemPrompt = `You are a personal fashion AI. You generate product recommendations as structured JSON only. No markdown, no preamble, just the JSON object.`;
+
+    const userPrompt = `Generate 16 fashion product recommendations for someone with this profile:
+- Aesthetic: ${ae}
+- Favourite colour: ${colour}
+- Shops at: ${shop}
+- Interests: ${interests}
+- Mood: ${mood}
+- Music: ${music}
+- Extra style tags: ${extraTags}
+
+Return ONLY a JSON object like this (no markdown, no explanation):
+{
+  "products": [
+    {
+      "id": "p1",
+      "name": "Black Platform Mary Janes",
+      "brand": "ASOS",
+      "price": "£45",
+      "category": "shoes",
+      "searchQuery": "black platform mary janes",
+      "shopUrl": "https://www.asos.com/search/?q=black+platform+mary+janes",
+      "imageQuery": "black platform mary janes shoes fashion",
+      "why": "Perfect for your dark aesthetic"
+    }
+  ]
+}
+
+Categories must be one of: tops, bottoms, shoes, accessories, outerwear.
+Make items specific to their aesthetic — someone kawaii gets pink bows and cute details, someone goth gets black and chunky, someone clean girl gets neutrals and minimalist pieces.
+shopUrl should use their preferred shop: ${shop}.
+imageQuery should be descriptive for finding a fashion product photo.
+Include a mix of all categories. Make items they would genuinely love based on their profile.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        system: systemPrompt,
+        messages:[{role:'user',content:userPrompt}]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '{}';
+    const clean = text.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    allProducts = parsed.products || [];
+
+  }catch(e){
+    console.error(e);
+    allProducts = getFallbackProducts();
+  }
+
+  isLoading = false;
+  renderProducts();
+}
+
+
+// ─── PRODUCT PHOTO LIBRARY ────────────────────────────────
+// Real Unsplash photo IDs curated by category and aesthetic
+// Format: https://images.unsplash.com/photo-{id}?w=400&h=530&fit=crop
+
+const PHOTO_LIBRARY = {
+  tops: {
+    dark:     ['1594938298870-c1fa2df3c7a0','1558618666-fcd25c85cd64','1503342217505-b0a15ec3261c','1583743814966-8d4d0ec60851','1542060748-2c35da05fd48'],
+    kawaii:   ['1515886657613-9f3515b0c78f','1567401893414-76b7b1e5a7a5','1490481651871-ab68de25d43d','1614676471928-2ed0ad1061a4','1518895949257-6b3f82c07e8b'],
+    clean:    ['1434389677669-e08b4cac3105','1524360367517-1b5c73e07e58','1521572163474-6864f9cf17ab','1491553895911-0055eca6402d','1516762689617-e1cffcef479d'],
+    y2k:      ['1515886657613-9f3515b0c78f','1567401893414-76b7b1e5a7a5','1529139574466-a303027bc851','1583744584823-3f3f78c5ac04','1468495244123-6c6c332eeece'],
+    street:   ['1542060748-2c35da05fd48','1503342217505-b0a15ec3261c','1556905055-8f358a7a47b2','1583743814966-8d4d0ec60851','1583744584823-3f3f78c5ac04'],
+    cottage:  ['1490481651871-ab68de25d43d','1614676471928-2ed0ad1061a4','1518895949257-6b3f82c07e8b','1524360367517-1b5c73e07e58','1516762689617-e1cffcef479d'],
+    default:  ['1434389677669-e08b4cac3105','1524360367517-1b5c73e07e58','1521572163474-6864f9cf17ab','1515886657613-9f3515b0c78f','1490481651871-ab68de25d43d'],
+  },
+  bottoms: {
+    dark:     ['1542272454315-4c01d7abdf4a','1624378441584-f7e9b4a25a56','1506629082955-511b1aa562c8','1541099649105-f69ad21f3246','1527719327859-a9e28d16c2a3'],
+    kawaii:   ['1583744584823-3f3f78c5ac04','1606107557195-0e29a4b5b4aa','1553545985-fd0f0069c2d0','1559561853-08f79f2296b4','1541099649105-f69ad21f3246'],
+    clean:    ['1506629082955-511b1aa562c8','1542272454315-4c01d7abdf4a','1624378441584-f7e9b4a25a56','1527719327859-a9e28d16c2a3','1541099649105-f69ad21f3246'],
+    default:  ['1542272454315-4c01d7abdf4a','1506629082955-511b1aa562c8','1624378441584-f7e9b4a25a56','1541099649105-f69ad21f3246','1553545985-fd0f0069c2d0'],
+  },
+  shoes: {
+    dark:     ['1542291026-7eec264c27ff','1608256246096-0e32a4f4d63f','1528701800489-717bc2d0e06c','1460353581641-37baddab0fa2','1605408499391-84ea0da8d888'],
+    kawaii:   ['1543163521-1bf539c55dd2','1535043934128-cf0b28d52f95','1549298916-b41d501d3772','1605100804763-247f67b3557e','1596484252834-c7ef3cabd8f7'],
+    clean:    ['1542291026-7eec264c27ff','1516478177764-9fe5bd7e9717','1549298916-b41d501d3772','1542291026-7eec264c27ff','1460353581641-37baddab0fa2'],
+    street:   ['1542291026-7eec264c27ff','1608256246096-0e32a4f4d63f','1542291026-7eec264c27ff','1605100804763-247f67b3557e','1519562078-6f7d0346be90'],
+    default:  ['1542291026-7eec264c27ff','1528701800489-717bc2d0e06c','1543163521-1bf539c55dd2','1460353581641-37baddab0fa2','1516478177764-9fe5bd7e9717'],
+  },
+  accessories: {
+    dark:     ['1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a','1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527'],
+    kawaii:   ['1599643478519-b1a4b037c1a8','1586861203927-4d6a8e27c9a8','1611591437281-460bfbe1220a','1629480052703-b9b82b98f4e4','1527814246094-591e9e85c1cc'],
+    clean:    ['1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527','1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a'],
+    default:  ['1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a','1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527'],
+  },
+  outerwear: {
+    dark:     ['1544923246-b77d6b77c4eb','1564557287817-3b9d2b65c5c8','1551028719-00167b16eac5','1556905055-8f358a7a47b2','1548036161-18c9e3f4e5ad'],
+    kawaii:   ['1517841905240-472988babdf9','1542060748-2c35da05fd48','1548036161-18c9e3f4e5ad','1551028719-00167b16eac5','1564557287817-3b9d2b65c5c8'],
+    clean:    ['1551028719-00167b16eac5','1544923246-b77d6b77c4eb','1548036161-18c9e3f4e5ad','1564557287817-3b9d2b65c5c8','1556905055-8f358a7a47b2'],
+    default:  ['1544923246-b77d6b77c4eb','1551028719-00167b16eac5','1548036161-18c9e3f4e5ad','1564557287817-3b9d2b65c5c8','1542060748-2c35da05fd48'],
+  },
+};
+
+function getProductImage(product, seed){
+  const cat = product.category || 'tops';
+  const ae = Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'default';
+  // Map aesthetic to photo style
+  const styleKey = ['goth','darkacad','grunge','emo'].includes(ae) ? 'dark'
+    : ['kawaii','softgirl','coquette','ballet'].includes(ae) ? 'kawaii'
+    : ['cleangirl','oldmoney','preppy','tomato'].includes(ae) ? 'clean'
+    : ['street','y2k'].includes(ae) ? 'street'
+    : 'default';
+
+  const catPhotos = PHOTO_LIBRARY[cat] || PHOTO_LIBRARY.tops;
+  const photos = catPhotos[styleKey] || catPhotos.default || catPhotos[Object.keys(catPhotos)[0]];
+  const idx = seed % photos.length;
+  const photoId = photos[idx];
+  return `https://images.unsplash.com/photo-${photoId}?w=400&h=530&fit=crop&crop=center`;
+}
+
+// ─── RENDER PRODUCTS ──────────────────────────────────────
+function renderProducts(){
+  const filtered = activeFilter==='all' ? allProducts : allProducts.filter(p=>p.category===activeFilter);
+  const grid = document.getElementById('productsGrid');
+  const loadMsg = document.getElementById('loadMsg');
+
+  if(filtered.length===0){
+    grid.innerHTML='';
+    loadMsg.style.display='block';
+    loadMsg.textContent = isLoading ? 'Building your shop...' : 'No items in this category yet.';
+    return;
+  }
+  loadMsg.style.display='none';
+
+  grid.innerHTML = filtered.map(p => {
+    const isWished = wishlist.some(w=>w.id===p.id);
+    const shopInfo = getShop();
+    const shopUrl = p.shopUrl || (shopInfo.url + encodeURIComponent(p.searchQuery||p.name));
+    const seed = p.id ? p.id.split('').reduce((a,b)=>a+b.charCodeAt(0),0) : Math.random()*9999|0;
+    const imgUrl = getProductImage(p, seed);
+    const fallbackUrl = `https://picsum.photos/seed/${seed}/400/530`;
+
+    return `<div class="product-card" id="card-${p.id}">
+      <div class="product-img-wrap">
+        <img class="product-img shimmer"
+          src="${imgUrl}"
+          alt="${p.name}"
+          onload="this.classList.remove('shimmer')"
+          onerror="this.src='${fallbackUrl}';this.classList.remove('shimmer')"
+        />
+        <div class="product-img-overlay">
+          ${isApproved(p.id)
+            ? `<a class="product-shop-btn" href="${shopUrl}" target="_blank" rel="noopener">Shop Now</a>`
+            : `<button class="product-shop-btn" onclick="showLockedMsg()" style="cursor:not-allowed;opacity:0.7;">🔒 Try on first</button>`
+          }
+        </div>
+      </div>
+      <div class="product-info">
+        ${isApproved(p.id) ? `<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;color:${PAL.ac};margin-bottom:4px;">✓ Flovee Approved</div>` : ''}
+        <div class="product-brand" style="color:${PAL.tx}">${p.brand||getShop().name}</div>
+        <div class="product-name" style="color:${PAL.tx}">${p.name}</div>
+        <div class="product-price" style="color:${PAL.tx}">${p.price||''}</div>
+        <div class="product-actions">
+          <button class="wish-btn ${isWished?'wished':''}" style="border-color:${PAL.tx}22;color:${PAL.tx}" onclick="toggleWish(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+            <span class="wish-icon" style="color:${PAL.ac}">${isWished?'♥':'♡'}</span>
+            ${isWished?'Saved':'Save'}
+          </button>
+${isApproved(p.id)
+            ? `<a class="buy-btn bc" href="${shopUrl}" target="_blank" rel="noopener" style="background:${PAL.ac};color:${PAL.bg}">Buy</a>`
+            : `<button class="buy-btn bc locked-btn" onclick="showLockedMsg()" style="background:${PAL.tx}18;color:${PAL.tx};opacity:0.5;cursor:not-allowed;border:none;">Locked</button>`
+          }
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── APPROVAL CHECK ──────────────────────────────────────
+function getApprovedIds(){
+  try{ return JSON.parse(localStorage.getItem('stuflover_approved')||'[]'); }catch(e){ return []; }
+}
+function isApproved(id){
+  return getApprovedIds().includes(id);
+}
+function showLockedMsg(){
+  // Show a brief toast message
+  let toast = document.getElementById('lockToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'lockToast';
+    toast.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;z-index:999;transition:opacity 0.3s;pointer-events:none;background:'+PAL.tx+';color:'+PAL.bg;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = 'Add to Catalog & get Flovee approval first';
+  toast.style.opacity = '1';
+  setTimeout(()=>{ toast.style.opacity='0'; }, 2800);
+}
+
+// ─── WISHLIST ─────────────────────────────────────────────
+function toggleWish(product){
+  const idx = wishlist.findIndex(w=>w.id===product.id);
+  if(idx>-1){
+    wishlist.splice(idx,1);
+  } else {
+    wishlist.push({...product, savedAt: Date.now()});
+  }
+  saveWishlist();
+  updateWishBadge();
+  renderProducts();
+}
+
+function updateWishBadge(){
+  const badge = document.getElementById('wishBadge');
+  if(!badge) return;
+  if(wishlist.length>0){
+    badge.style.display='flex';
+    badge.textContent = wishlist.length;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+// ─── FALLBACK PRODUCTS ────────────────────────────────────
+function getFallbackProducts(){
+  const ae = resolveAeName().toLowerCase();
+  const isGoth = ae.includes('goth')||ae.includes('dark')||ae.includes('grunge')||ae.includes('emo');
+  const isKawaii = ae.includes('kawaii')||ae.includes('soft');
+  const isClean = ae.includes('clean')||ae.includes('money')||ae.includes('preppy');
+  const isY2K = ae.includes('y2k')||ae.includes('bratz');
+
+  const fallbacks = isGoth ? [
+    {id:'f1',name:'Oversized Black Hoodie',brand:'ASOS',price:'£28',category:'tops',searchQuery:'oversized black hoodie',shopUrl:'https://www.asos.com/search/?q=oversized+black+hoodie',imageQuery:'oversized black hoodie streetwear'},
+    {id:'f2',name:'Black Platform Boots',brand:'ASOS',price:'£65',category:'shoes',searchQuery:'black platform boots',shopUrl:'https://www.asos.com/search/?q=black+platform+boots',imageQuery:'black platform boots gothic'},
+    {id:'f3',name:'Wide Leg Black Jeans',brand:'ASOS',price:'£35',category:'bottoms',searchQuery:'wide leg black jeans',shopUrl:'https://www.asos.com/search/?q=wide+leg+black+jeans',imageQuery:'wide leg black jeans fashion'},
+    {id:'f4',name:'Silver Layered Chains',brand:'ASOS',price:'£14',category:'accessories',searchQuery:'silver layered chains',shopUrl:'https://www.asos.com/search/?q=silver+layered+chains',imageQuery:'silver chain necklace layered gothic'},
+    {id:'f5',name:'Black Corset Top',brand:'ASOS',price:'£22',category:'tops',searchQuery:'black corset top',shopUrl:'https://www.asos.com/search/?q=black+corset+top',imageQuery:'black corset top fashion'},
+    {id:'f6',name:'Chunky Black Belt',brand:'ASOS',price:'£16',category:'accessories',searchQuery:'chunky black belt',shopUrl:'https://www.asos.com/search/?q=chunky+black+belt',imageQuery:'chunky black belt fashion'},
+  ] : isKawaii ? [
+    {id:'f1',name:'Pink Bow Hair Clip Set',brand:'ASOS',price:'£10',category:'accessories',searchQuery:'pink bow hair clips',shopUrl:'https://www.asos.com/search/?q=pink+bow+hair+clips',imageQuery:'pink bow hair clips cute kawaii'},
+    {id:'f2',name:'Lace Trim Cardigan',brand:'ASOS',price:'£32',category:'tops',searchQuery:'lace trim cardigan pink',shopUrl:'https://www.asos.com/search/?q=lace+trim+cardigan',imageQuery:'lace trim pink cardigan soft girl'},
+    {id:'f3',name:'Mary Jane Platform Shoes',brand:'ASOS',price:'£45',category:'shoes',searchQuery:'mary jane platform shoes',shopUrl:'https://www.asos.com/search/?q=mary+jane+platform+shoes',imageQuery:'mary jane platform shoes pink'},
+    {id:'f4',name:'Pleated Mini Skirt',brand:'ASOS',price:'£24',category:'bottoms',searchQuery:'pleated mini skirt pink',shopUrl:'https://www.asos.com/search/?q=pleated+mini+skirt',imageQuery:'pleated mini skirt pink soft girl'},
+    {id:'f5',name:'Baby Pink Knit Top',brand:'ASOS',price:'£20',category:'tops',searchQuery:'baby pink knit top',shopUrl:'https://www.asos.com/search/?q=baby+pink+knit+top',imageQuery:'baby pink knit top cute'},
+    {id:'f6',name:'Heart Charm Bag',brand:'ASOS',price:'£30',category:'accessories',searchQuery:'heart charm bag pink',shopUrl:'https://www.asos.com/search/?q=heart+charm+bag',imageQuery:'heart charm bag pink cute'},
+  ] : [
+    {id:'f1',name:'White Fitted T-Shirt',brand:'ASOS',price:'£14',category:'tops',searchQuery:'white fitted t-shirt',shopUrl:'https://www.asos.com/search/?q=white+fitted+tshirt',imageQuery:'white fitted t-shirt clean minimal'},
+    {id:'f2',name:'Straight Leg Jeans',brand:'ASOS',price:'£38',category:'bottoms',searchQuery:'straight leg jeans',shopUrl:'https://www.asos.com/search/?q=straight+leg+jeans',imageQuery:'straight leg jeans fashion'},
+    {id:'f3',name:'White Leather Trainers',brand:'ASOS',price:'£45',category:'shoes',searchQuery:'white leather trainers',shopUrl:'https://www.asos.com/search/?q=white+leather+trainers',imageQuery:'white leather trainers clean'},
+    {id:'f4',name:'Gold Hoop Earrings',brand:'ASOS',price:'£12',category:'accessories',searchQuery:'gold hoop earrings',shopUrl:'https://www.asos.com/search/?q=gold+hoop+earrings',imageQuery:'gold hoop earrings minimal'},
+    {id:'f5',name:'Oversized Blazer',brand:'ASOS',price:'£55',category:'outerwear',searchQuery:'oversized blazer',shopUrl:'https://www.asos.com/search/?q=oversized+blazer',imageQuery:'oversized blazer fashion minimal'},
+    {id:'f6',name:'Satin Slip Skirt',brand:'ASOS',price:'£28',category:'bottoms',searchQuery:'satin slip skirt',shopUrl:'https://www.asos.com/search/?q=satin+slip+skirt',imageQuery:'satin slip skirt fashion'},
+  ];
+  return fallbacks;
+}
+
+init();
+</script>
+
+<!-- API KEY BANNER -->
+<div id="apiBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 24px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);border-top:1px solid rgba(128,128,128,0.12);" id="apiBanner">
+  <span style="font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.5;white-space:nowrap">Anthropic Key</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;padding:8px 14px;font-size:0.85rem;font-family:Space Grotesk,sans-serif;border:1.5px solid rgba(128,128,128,0.2);border-radius:6px;background:rgba(128,128,128,0.06);color:inherit;outline:none;"/>
+  <button onclick="saveApiKey()" style="padding:8px 20px;border:none;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:#c4522a;color:white;">Save</button>
+  <a href="https://console.anthropic.com" target="_blank" style="font-size:0.7rem;opacity:0.4;white-space:nowrap;color:inherit;">Get a key</a>
+</div>
+
+</body>
+</html>

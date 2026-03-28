@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BeYou — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.8s,color 0.8s;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.08);}
+    .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
+    .nav-links{display:flex;gap:8px;}
+    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
+    .nav-btn:hover{opacity:0.6;}
+
+    /* ── LANDING ── */
+    #landingView{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 40px 60px;text-align:center;}
+    .landing-eyebrow{font-size:0.64rem;letter-spacing:6px;text-transform:uppercase;opacity:0.3;margin-bottom:14px;}
+    .landing-title{font-size:clamp(4rem,12vw,10rem);line-height:0.82;letter-spacing:-3px;margin-bottom:24px;}
+    .landing-sub{font-size:1rem;opacity:0.5;max-width:440px;line-height:1.9;margin-bottom:44px;}
+    .mood-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:40px;}
+    .mood-chip{padding:12px 24px;border-radius:30px;font-size:0.85rem;letter-spacing:0.5px;cursor:pointer;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-weight:500;transition:all 0.15s;}
+    .mood-chip:hover,.mood-chip.on{background:rgba(128,128,128,0.1);border-color:rgba(128,128,128,0.4);}
+    .start-btn{padding:16px 52px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .start-btn:hover{opacity:0.8;}
+
+    /* ── MAIN VIEW ── */
+    #mainView{display:none;padding-top:72px;min-height:100vh;flex-direction:column;}
+    #mainView.active{display:flex;}
+
+    /* MODE TABS */
+    .mode-tabs{display:flex;border-bottom:1px solid rgba(128,128,128,0.08);padding:0 40px;}
+    .mode-tab{padding:16px 24px;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border-bottom:2px solid transparent;opacity:0.3;transition:all 0.2s;background:transparent;border-top:none;border-left:none;border-right:none;color:inherit;}
+    .mode-tab.on{opacity:1;border-bottom-color:currentColor;}
+
+    /* ── TALK VIEW ── */
+    #talkView{flex:1;display:flex;flex-direction:column;max-width:720px;margin:0 auto;width:100%;padding:0 40px 40px;}
+    .talk-header{padding:32px 0 24px;}
+    .talk-title{font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-0.5px;line-height:1.05;margin-bottom:8px;}
+    .talk-sub{font-size:0.88rem;opacity:0.45;line-height:1.8;}
+    .chat-msgs{flex:1;display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding:8px 0 20px;min-height:200px;}
+    .cmsg{padding:14px 18px;border-radius:16px;font-size:0.95rem;line-height:1.72;max-width:85%;word-break:break-word;}
+    .cmsg.flovee{align-self:flex-start;border-bottom-left-radius:4px;}
+    .cmsg.user{align-self:flex-end;border-bottom-right-radius:4px;opacity:0.85;}
+    .cmsg.typing{opacity:0.35;font-style:italic;align-self:flex-start;}
+    .chat-input-row{display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(128,128,128,0.08);}
+    .chat-input{flex:1;padding:14px 18px;font-size:0.95rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:14px;background:rgba(128,128,128,0.03);color:inherit;outline:none;resize:none;min-height:50px;max-height:120px;transition:border-color 0.2s;line-height:1.55;}
+    .chat-input:focus{border-color:rgba(128,128,128,0.32);}
+    .chat-send{padding:14px 22px;border:none;border-radius:12px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;transition:opacity 0.2s;flex-shrink:0;}
+    .chat-send:hover{opacity:0.72;}
+    .chat-send:disabled{opacity:0.25;cursor:not-allowed;}
+
+    /* Activity prompt that appears mid-chat */
+    .activity-prompt{border-radius:12px;padding:18px 20px;margin:6px 0;border:1.5px solid rgba(128,128,128,0.12);}
+    .activity-prompt-label{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.32;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .activity-prompt-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+    .activity-prompt-desc{font-size:0.85rem;opacity:0.6;line-height:1.65;margin-bottom:14px;}
+    .activity-btn{padding:10px 22px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .activity-btn:hover{opacity:0.75;}
+
+    /* ── ACTIVITY VIEW ── */
+    #activityView{display:none;flex:1;flex-direction:column;}
+    #activityView.active{display:flex;}
+
+    .activity-header{padding:32px 40px 24px;border-bottom:1px solid rgba(128,128,128,0.08);}
+    .activity-nav{display:flex;gap:10px;flex-wrap:wrap;padding:20px 40px;border-bottom:1px solid rgba(128,128,128,0.06);}
+    .act-tab{padding:10px 20px;border-radius:20px;font-size:0.76rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;transition:all 0.15s;}
+    .act-tab:hover,.act-tab.on{background:rgba(128,128,128,0.1);border-color:rgba(128,128,128,0.35);}
+
+    .activity-body{flex:1;padding:32px 40px;max-width:680px;margin:0 auto;width:100%;}
+
+    /* BREATHING */
+    .breathe-wrap{display:flex;flex-direction:column;align-items:center;gap:32px;padding:20px 0;}
+    .breathe-circle{width:200px;height:200px;border-radius:50%;border:3px solid rgba(128,128,128,0.2);display:flex;align-items:center;justify-content:center;position:relative;transition:transform 4s ease-in-out;}
+    .breathe-inner{width:120px;height:120px;border-radius:50%;transition:transform 4s ease-in-out,opacity 4s ease-in-out;}
+    .breathe-text{font-size:0.8rem;letter-spacing:4px;text-transform:uppercase;opacity:0.5;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-align:center;}
+    .breathe-phase{font-size:1.4rem;font-weight:700;text-align:center;min-height:36px;transition:opacity 0.5s;}
+    .breathe-count{font-size:3rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-align:center;min-width:60px;}
+    .breathe-controls{display:flex;gap:12px;}
+    .ctrl-btn{padding:11px 28px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;transition:all 0.15s;}
+    .ctrl-btn.primary{border:none;}
+    .ctrl-btn:hover{opacity:0.7;}
+
+    /* JOURNALLING */
+    .journal-wrap{display:flex;flex-direction:column;gap:16px;}
+    .journal-prompt{font-size:1.1rem;font-weight:600;line-height:1.6;padding:20px;border-radius:10px;border-left:3px solid rgba(128,128,128,0.2);}
+    .journal-area{width:100%;min-height:200px;padding:18px;font-size:0.95rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:10px;background:rgba(128,128,128,0.03);color:inherit;outline:none;resize:vertical;line-height:1.75;}
+    .journal-area:focus{border-color:rgba(128,128,128,0.32);}
+    .journal-actions{display:flex;gap:10px;}
+    .journal-btn{padding:11px 24px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .journal-btn:hover{opacity:0.75;}
+    .journal-response{padding:18px 20px;border-radius:10px;font-size:0.92rem;line-height:1.75;margin-top:4px;display:none;}
+    .journal-response.visible{display:block;}
+
+    /* GROUNDING */
+    .ground-wrap{display:flex;flex-direction:column;gap:20px;}
+    .ground-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .ground-steps{display:flex;flex-direction:column;gap:12px;}
+    .ground-step{padding:18px 20px;border-radius:8px;border:1.5px solid rgba(128,128,128,0.1);display:flex;align-items:flex-start;gap:16px;cursor:pointer;transition:all 0.15s;}
+    .ground-step:hover{border-color:rgba(128,128,128,0.28);}
+    .ground-step.done{opacity:0.5;}
+    .step-num{font-size:1.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;flex-shrink:0;width:32px;}
+    .step-num.done{opacity:1;}
+    .step-text{font-size:0.92rem;line-height:1.65;}
+    .step-input{width:100%;padding:10px 14px;margin-top:10px;font-size:0.9rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:6px;background:transparent;color:inherit;outline:none;}
+    .step-input::placeholder{opacity:0.35;}
+
+    /* AFFIRMATIONS */
+    .affirm-wrap{display:flex;flex-direction:column;align-items:center;gap:28px;padding:20px 0;}
+    .affirm-card{width:100%;padding:40px 36px;border-radius:12px;text-align:center;border:1.5px solid rgba(128,128,128,0.1);}
+    .affirm-text{font-size:clamp(1.3rem,3vw,2rem);line-height:1.35;letter-spacing:-0.3px;font-weight:600;}
+    .affirm-sub{font-size:0.82rem;opacity:0.4;margin-top:14px;line-height:1.6;}
+    .affirm-controls{display:flex;gap:12px;}
+
+    @media(max-width:680px){
+      nav{padding:13px 20px;}
+      .mode-tabs,.activity-nav,.activity-header,.activity-body,.#talkView{padding-left:20px;padding-right:20px;}
+      #talkView{padding:0 20px 30px;}
+      .breathe-circle{width:160px;height:160px;}
+      .breathe-inner{width:90px;height:90px;}
+    }
+  </style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+    <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="landingView">
+  <div class="landing-eyebrow bc">Your Wellness Space</div>
+  <div class="landing-title bc" id="landingTitle">BeYou</div>
+  <p class="landing-sub" id="landingSub">This is your space. Talk about what is going on, or go straight into something calming.</p>
+  <div class="mood-row" id="moodRow"></div>
+  <button class="start-btn bc" id="startBtn" onclick="enterMain()">Enter</button>
+</div>
+
+<!-- MAIN -->
+<div id="mainView">
+  <div class="mode-tabs">
+    <button class="mode-tab bc on" id="tabTalk" onclick="switchTab('talk')">Talk it out</button>
+    <button class="mode-tab bc" id="tabActivity" onclick="switchTab('activity')">Calm down</button>
+  </div>
+
+  <!-- TALK VIEW -->
+  <div id="talkView">
+    <div class="talk-header">
+      <div class="talk-title" id="talkTitle">What is going on?</div>
+      <p class="talk-sub">Say whatever you need to. Your Flovee is here.</p>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="What is on your mind..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="chat-send bc" id="chatSend" onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+
+  <!-- ACTIVITY VIEW -->
+  <div id="activityView">
+    <div class="activity-header">
+      <div class="landing-eyebrow bc" style="margin-bottom:6px">Calm Down</div>
+      <div class="talk-title" id="activityTitle">Pick something to try</div>
+    </div>
+    <div class="activity-nav">
+      <button class="act-tab bc on" onclick="showActivity('breathe')">Box Breathing</button>
+      <button class="act-tab bc" onclick="showActivity('ground')">5-4-3-2-1</button>
+      <button class="act-tab bc" onclick="showActivity('journal')">Journal</button>
+      <button class="act-tab bc" onclick="showActivity('affirm')">Affirmations</button>
+    </div>
+    <div class="activity-body" id="activityBody"></div>
+  </div>
+</div>
+
+<script>
+
+// ─── API KEY MANAGEMENT ───────────────────────────────────
+function getApiKey(){ return localStorage.getItem('stuflover_api_key')||''; }
+function saveApiKey(){
+  const val = document.getElementById('apiKeyInput')?.value.trim();
+  if(!val) return;
+  localStorage.setItem('stuflover_api_key', val);
+  document.getElementById('apiBanner').style.display='none';
+  // Reload so everything picks up the key
+  window.location.reload();
+}
+function checkApiKey(){
+  const banner = document.getElementById('apiBanner');
+  if(!banner) return;
+  if(!getApiKey()){
+    banner.style.display='flex';
+    // Apply body colour to banner
+    banner.style.background = document.body.style.background || '#fff';
+  } else {
+    banner.style.display='none';
+  }
+}
+// Patch fetch to always include key and required headers
+const _origFetch = window.fetch;
+window.fetch = function(url, opts){
+  if(typeof url === 'string' && url.includes('anthropic.com')){
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers, {
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'Content-Type': 'application/json',
+    });
+  }
+  return _origFetch.call(this, url, opts);
+};
+
+// ─── PROFILE ─────────────────────────────────────────────
+const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
+
+function resolvePalette(){
+  const fc=profile?.faveColour; const ae=profile?.aesthetics||{};
+  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+  if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.88),tx:darkenH(fc.hex,0.55),ac:fc.hex};
+  if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.35),tx:lightenH(fc.hex,0.75),ac:fc.hex};
+  const m={kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
+  return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+}
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+
+const PAL = resolvePalette();
+
+function resolveAeName(){
+  if(!profile) return 'You';
+  const ae=profile.aesthetics||{}; const et=profile.extraTags||[];
+  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
+  const specials={'pastel_goth':'Pastel Goth','that_girl':'That Girl','full_grunge':'Grunge','kawaii_full':'Kawaii'};
+  for(const[tag,name] of Object.entries(specials)) if(et.includes(tag)) return name;
+  return m[top]||'You';
+}
+
+const FLOVEE_NAMES={kawaii:'Luna',softgirl:'Rosie',cleangirl:'Nora',coquette:'Coco',goth:'Raven',darkacad:'Lyra',grunge:'Sid',y2k:'Stacy',street:'Ace',cottage:'Wren',hippie:'Sage',oldmoney:'Eloise',preppy:'Blair',tomato:'Bea',indie:'Wren',emo:'Ember'};
+function getFloveeName(){ const top=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl'; return FLOVEE_NAMES[top]||'Flo'; }
+
+const floveeName = getFloveeName();
+const aeName = resolveAeName();
+const mood = profile?.moodToday||'okay';
+const interests = (profile?.interests||[]).slice(0,3).join(', ')||'various things';
+const music = (profile?.music||[]).slice(0,2).map(k=>({katseye:'Katseye',newjeans:'NewJeans',sabrina:'Sabrina Carpenter',olivia:'Olivia Rodrigo',lana:'Lana Del Rey',mcr:'MCR',phoebe:'Phoebe Bridgers',mitski:'Mitski',arctic:'Arctic Monkeys',nirvana:'Nirvana',taylor:'Taylor Swift',billie:'Billie Eilish',chappell:'Chappell Roan',charli:'Charli XCX',beabadoobee:'Beabadoobee',paramore:'Paramore',grunge:'Nirvana'})[k]||k).join(' and ')||'music';
+const social = profile?.social||'ambivert';
+
+// ─── APPLY STYLES ─────────────────────────────────────────
+function applyStyles(){
+  document.body.style.background=PAL.bg; document.body.style.color=PAL.tx;
+  const nav=document.getElementById('mainNav'); nav.style.background=PAL.bg+'f0'; nav.style.borderColor=PAL.tx+'10';
+  document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{el.style.color=PAL.tx;el.style.borderColor=PAL.tx+'22';});
+  document.getElementById('landingTitle').style.color=PAL.tx;
+  document.getElementById('startBtn').style.background=PAL.ac; document.getElementById('startBtn').style.color=PAL.bg;
+  document.getElementById('chatSend').style.background=PAL.ac; document.getElementById('chatSend').style.color=PAL.bg;
+
+  // Mood chips
+  const moods=[
+    {val:'stressed',label:'stressed'},
+    {val:'anxious',label:'anxious'},
+    {val:'low',label:'feeling low'},
+    {val:'overwhelmed',label:'overwhelmed'},
+    {val:'angry',label:'angry'},
+    {val:'lost',label:'a bit lost'},
+    {val:'okay',label:'just okay'},
+    {val:'lonely',label:'lonely'},
+  ];
+  document.getElementById('moodRow').innerHTML = moods.map(m=>`
+    <button class="mood-chip" data-mood="${m.val}" onclick="pickMood(this)"
+      style="border-color:${PAL.tx}1a;color:${PAL.tx}">${m.label}</button>`).join('');
+}
+
+// ─── MOOD PICK ────────────────────────────────────────────
+let selectedMood = profile?.moodToday||'';
+function pickMood(el){
+  document.querySelectorAll('.mood-chip').forEach(c=>{ c.classList.remove('on'); c.style.background='transparent'; });
+  el.classList.add('on'); el.style.background=PAL.ac+'28'; el.style.borderColor=PAL.ac;
+  selectedMood = el.dataset.mood;
+}
+
+// ─── ENTER MAIN ───────────────────────────────────────────
+function enterMain(){
+  document.getElementById('landingView').style.display='none';
+  document.getElementById('mainView').classList.add('active');
+  document.querySelectorAll('.mode-tab').forEach(t=>{ t.style.color=PAL.tx; });
+  document.getElementById('tabTalk').style.borderBottomColor=PAL.ac;
+  initTalk();
+  showActivity('breathe');
+}
+
+// ─── CHAT ─────────────────────────────────────────────────
+let chatHistory = [];
+let msgCount = 0;
+let activitySuggested = false;
+
+function initTalk(){
+  const opener = selectedMood
+    ? `hey. you said you are feeling ${selectedMood} — i am here. tell me what is going on.`
+    : `hey — this is your space. whatever is going on, you can say it here.`;
+  addMsg(opener, 'flovee');
+}
+
+function addMsg(text, role){
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'cmsg ' + role;
+  div.textContent = text;
+  div.style.background = role==='user' ? PAL.tx+'12' : PAL.ac+'1c';
+  div.style.color = PAL.tx;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function addActivityPrompt(activity){
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'activity-prompt';
+  div.style.background = PAL.ac+'0e';
+  div.style.borderColor = PAL.tx+'14';
+  div.innerHTML = `<div class="activity-prompt-label bc" style="color:${PAL.tx}">Try This</div>
+    <div class="activity-prompt-title" style="color:${PAL.tx}">${activity.name}</div>
+    <div class="activity-prompt-desc" style="color:${PAL.tx}">${activity.desc}</div>
+    <button class="activity-btn bc" onclick="goToActivity('${activity.id}')"
+      style="background:${PAL.ac};color:${PAL.bg}">Start Now</button>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendMsg(){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value=''; input.style.height='auto';
+
+  addMsg(msg, 'user');
+  chatHistory.push({role:'user', content:msg});
+  msgCount++;
+
+  const send = document.getElementById('chatSend');
+  send.disabled=true;
+  const typing = addMsg(floveeName+' is here...', 'flovee typing');
+
+  try{
+    const shouldSuggest = msgCount >= 2 && !activitySuggested;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:350,
+        system:`You are ${floveeName}, a caring Flovee AI wellness companion for someone with ${aeName} aesthetic. Their current mood: ${selectedMood||mood}. They are into: ${interests}. Social energy: ${social}.
+
+You are warm, real, and gentle — like a best friend who actually listens. You validate without being hollow. You never say "I understand" repeatedly. You never give clinical advice or tell them to seek help unless they say something very serious. You keep responses short — 2-4 sentences. You check in, you reflect back what they say, you are genuinely present.
+
+${shouldSuggest ? 'After your response, on a new line, write exactly: [SUGGEST_ACTIVITY]' : ''}`,
+        messages: chatHistory.slice(-12)
+      })
+    });
+
+    const data = await res.json();
+    let reply = data.content?.[0]?.text || 'i am here.';
+
+    const shouldSuggestActivity = reply.includes('[SUGGEST_ACTIVITY]');
+    reply = reply.replace('[SUGGEST_ACTIVITY]','').trim();
+
+    if(typing) typing.remove();
+    addMsg(reply, 'flovee');
+    chatHistory.push({role:'assistant', content:reply});
+    if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
+
+    // Suggest a calming activity after a couple messages
+    if(shouldSuggestActivity && !activitySuggested){
+      activitySuggested = true;
+      setTimeout(()=>{
+        const activity = suggestActivity(selectedMood||mood);
+        addActivityPrompt(activity);
+      }, 800);
+    }
+
+  }catch(e){
+    if(typing) typing.remove();
+    addMsg('i am here — try again in a sec.', 'flovee');
+  }
+  send.disabled=false;
+}
+
+function suggestActivity(mood){
+  const map = {
+    anxious:   {id:'breathe',name:'Box Breathing',desc:'4 counts in, hold, out, hold. Resets your nervous system in under 2 minutes.'},
+    stressed:  {id:'breathe',name:'Box Breathing',desc:'Slow your breathing down. Everything else can wait 2 minutes.'},
+    overwhelmed:{id:'ground',name:'5-4-3-2-1 Grounding',desc:'Brings you back to right now when your head is everywhere.'},
+    angry:     {id:'breathe',name:'Box Breathing',desc:'Before anything else — breathe. It actually works.'},
+    low:       {id:'affirm',name:'Affirmations',desc:'Not fake ones. Real things that are true about you.'},
+    lonely:    {id:'journal',name:'Journal Prompt',desc:'Write it out. Sometimes putting it into words helps.'},
+    lost:      {id:'journal',name:'Journal Prompt',desc:'A prompt to help you figure out what you actually want.'},
+    okay:      {id:'affirm',name:'Affirmations',desc:'You are doing okay. Let that land for a minute.'},
+  };
+  return map[mood]||{id:'breathe',name:'Box Breathing',desc:'A quick reset. Always helps.'};
+}
+
+function goToActivity(id){
+  switchTab('activity');
+  showActivity(id);
+}
+
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(tab){
+  const isTalk = tab==='talk';
+  document.getElementById('talkView').style.display = isTalk ? 'flex' : 'none';
+  document.getElementById('activityView').classList.toggle('active', !isTalk);
+  document.getElementById('tabTalk').classList.toggle('on', isTalk);
+  document.getElementById('tabActivity').classList.toggle('on', !isTalk);
+  document.getElementById('tabTalk').style.borderBottomColor = isTalk ? PAL.ac : 'transparent';
+  document.getElementById('tabActivity').style.borderBottomColor = !isTalk ? PAL.ac : 'transparent';
+}
+
+// ─── ACTIVITIES ───────────────────────────────────────────
+function showActivity(id){
+  // Update tab buttons
+  document.querySelectorAll('.act-tab').forEach(t=>t.classList.remove('on'));
+  const actTabMap={breathe:0,ground:1,journal:2,affirm:3};
+  const tabs=document.querySelectorAll('.act-tab');
+  if(tabs[actTabMap[id]]) tabs[actTabMap[id]].classList.add('on');
+
+  const body = document.getElementById('activityBody');
+  if(id==='breathe') body.innerHTML = buildBreathe();
+  else if(id==='ground') body.innerHTML = buildGround();
+  else if(id==='journal') body.innerHTML = buildJournal();
+  else if(id==='affirm') body.innerHTML = buildAffirm();
+
+  // Apply colours to dynamic elements
+  body.querySelectorAll('.ctrl-btn.primary,.activity-btn,.journal-btn,.affirm-btn-primary').forEach(el=>{
+    el.style.background=PAL.ac; el.style.color=PAL.bg;
+  });
+  body.querySelectorAll('.ctrl-btn:not(.primary),.affirm-btn-sec').forEach(el=>{
+    el.style.borderColor=PAL.tx+'22'; el.style.color=PAL.tx;
+  });
+  body.querySelectorAll('.breathe-inner').forEach(el=>el.style.background=PAL.ac+'40');
+  body.querySelectorAll('.breathe-circle').forEach(el=>el.style.borderColor=PAL.ac+'50');
+  body.querySelectorAll('.journal-prompt').forEach(el=>{ el.style.borderLeftColor=PAL.ac; el.style.background=PAL.ac+'0c'; });
+  body.querySelectorAll('.affirm-card').forEach(el=>{ el.style.background=PAL.ac+'0e'; el.style.borderColor=PAL.ac+'30'; });
+  body.querySelectorAll('.ground-step').forEach(el=>el.style.borderColor=PAL.tx+'12');
+}
+
+// ── BOX BREATHING ──────────────────────────────────────────
+let breatheInterval=null, breatheRunning=false, breathePhase=0, breatheCount=0;
+const breathePhases=['Breathe in','Hold','Breathe out','Hold'];
+const breatheDurations=[4,4,4,4];
+
+function buildBreathe(){
+  return `<div class="breathe-wrap">
+    <p style="text-align:center;opacity:0.5;font-size:0.88rem;line-height:1.7;max-width:380px">Box breathing: 4 counts in, hold 4, out 4, hold 4. Repeat for as long as you need.</p>
+    <div class="breathe-circle" id="breatheCircle">
+      <div class="breathe-inner" id="breatheInner"></div>
+    </div>
+    <div class="breathe-phase" id="breathePhase" style="color:${PAL.tx}">Ready when you are</div>
+    <div class="breathe-count" id="breatheCount" style="color:${PAL.ac}">4</div>
+    <div class="breathe-controls">
+      <button class="ctrl-btn primary bc" onclick="toggleBreathe()">Start</button>
+      <button class="ctrl-btn bc" onclick="resetBreathe()">Reset</button>
+    </div>
+    <div class="breathe-text" style="color:${PAL.tx}">tap start when you are ready</div>
+  </div>`;
+}
+
+function toggleBreathe(){
+  if(breatheRunning){ pauseBreathe(); return; }
+  breatheRunning=true;
+  document.querySelector('.ctrl-btn.primary').textContent='Pause';
+  runBreathePhase();
+}
+
+function runBreathePhase(){
+  if(!breatheRunning) return;
+  const phaseEl=document.getElementById('breathePhase');
+  const countEl=document.getElementById('breatheCount');
+  const inner=document.getElementById('breatheInner');
+  const circle=document.getElementById('breatheCircle');
+  if(!phaseEl) return;
+
+  phaseEl.textContent = breathePhases[breathePhase];
+  let count = breatheDurations[breathePhase];
+  countEl.textContent = count;
+
+  // Scale animation
+  const isIn = breathePhase===0;
+  const isOut = breathePhase===2;
+  if(isIn){ inner.style.transform='scale(1.5)'; circle.style.transform='scale(1.08)'; }
+  else if(isOut){ inner.style.transform='scale(0.7)'; circle.style.transform='scale(0.95)'; }
+
+  breatheInterval = setInterval(()=>{
+    count--;
+    if(countEl) countEl.textContent=Math.max(count,0);
+    if(count<=0){
+      clearInterval(breatheInterval);
+      breathePhase=(breathePhase+1)%4;
+      breatheCount++;
+      if(breatheRunning) setTimeout(runBreathePhase, 200);
+    }
+  },1000);
+}
+
+function pauseBreathe(){
+  breatheRunning=false;
+  clearInterval(breatheInterval);
+  const btn=document.querySelector('.ctrl-btn.primary');
+  if(btn) btn.textContent='Resume';
+}
+
+function resetBreathe(){
+  breatheRunning=false;
+  clearInterval(breatheInterval);
+  breathePhase=0; breatheCount=0;
+  const phaseEl=document.getElementById('breathePhase');
+  const countEl=document.getElementById('breatheCount');
+  const inner=document.getElementById('breatheInner');
+  const circle=document.getElementById('breatheCircle');
+  if(phaseEl) phaseEl.textContent='Ready when you are';
+  if(countEl) countEl.textContent='4';
+  if(inner){ inner.style.transform='scale(1)'; }
+  if(circle){ circle.style.transform='scale(1)'; }
+  const btn=document.querySelector('.ctrl-btn.primary');
+  if(btn) btn.textContent='Start';
+}
+
+// ── 5-4-3-2-1 GROUNDING ────────────────────────────────────
+function buildGround(){
+  const steps=[
+    {n:5,sense:'See',prompt:'Name 5 things you can see right now'},
+    {n:4,sense:'Touch',prompt:'Name 4 things you can physically feel'},
+    {n:3,sense:'Hear',prompt:'Name 3 things you can hear right now'},
+    {n:2,sense:'Smell',prompt:'Name 2 things you can smell, or think of 2 smells you like'},
+    {n:1,sense:'Taste',prompt:'Name 1 thing you can taste, or something you like the taste of'},
+  ];
+  return `<div class="ground-wrap">
+    <div class="ground-title bc" style="color:${PAL.tx}">5-4-3-2-1 Grounding — brings you back to right now</div>
+    <div class="ground-steps" id="groundSteps">
+      ${steps.map((s,i)=>`
+        <div class="ground-step" id="gstep${i}" style="border-color:${PAL.tx}12">
+          <div class="step-num" id="gnum${i}" style="color:${PAL.tx}">${s.n}</div>
+          <div style="flex:1">
+            <div style="font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;margin-bottom:4px;font-family:Barlow Condensed,sans-serif;font-weight:900">${s.sense}</div>
+            <div class="step-text" style="color:${PAL.tx}">${s.prompt}</div>
+            <input class="step-input" id="ginput${i}" placeholder="write yours here..." style="color:${PAL.tx};border-color:${PAL.tx}14;display:none"
+              oninput="checkGroundStep(${i})"/>
+          </div>
+        </div>`).join('')}
+    </div>
+    <p style="font-size:0.82rem;opacity:0.38;text-align:center;margin-top:8px">Tap each step to expand it</p>
+  </div>`;
+}
+
+// Make ground steps interactive
+setTimeout(()=>{
+  document.querySelectorAll('.ground-step').forEach((step,i)=>{
+    step.addEventListener('click',()=>{
+      const input=document.getElementById('ginput'+i);
+      if(input){
+        input.style.display=input.style.display==='none'?'block':'none';
+        if(input.style.display==='block') input.focus();
+      }
+    });
+  });
+},100);
+
+function checkGroundStep(i){
+  const input=document.getElementById('ginput'+i);
+  const num=document.getElementById('gnum'+i);
+  const step=document.getElementById('gstep'+i);
+  if(input&&input.value.trim().length>0){
+    step.classList.add('done');
+    if(num){ num.textContent='ok'; num.classList.add('done'); num.style.color=PAL.ac; }
+  }
+}
+
+// ── JOURNAL ────────────────────────────────────────────────
+const JOURNAL_PROMPTS = {
+  anxious: 'What is the specific thing making you feel anxious right now? Write it out without editing yourself.',
+  stressed: 'What would actually help right now — even if it feels impossible? What is the smallest version of that?',
+  overwhelmed: 'Write down everything that is in your head right now. All of it. Get it out of your head and onto the page.',
+  angry: 'What happened? What do you wish you could say or do? This is just for you.',
+  low: 'What is one small thing that felt even slightly okay today, or recently?',
+  lonely: 'Who do you miss or wish you could talk to right now? What would you say to them?',
+  lost: 'If nothing was stopping you, what would you actually want your life to look like right now?',
+  okay: 'What is something you are quietly proud of, even if no one else would notice it?',
+};
+
+function buildJournal(){
+  const moodKey=selectedMood||mood||'okay';
+  const prompt=JOURNAL_PROMPTS[moodKey]||JOURNAL_PROMPTS.okay;
+  return `<div class="journal-wrap">
+    <div class="journal-prompt" style="border-left-color:${PAL.ac};background:${PAL.ac}0c;color:${PAL.tx}">${prompt}</div>
+    <textarea class="journal-area" id="journalText" placeholder="Write here — this is only for you..." style="color:${PAL.tx};border-color:${PAL.tx}14;"></textarea>
+    <div class="journal-actions">
+      <button class="journal-btn bc" onclick="submitJournal()" style="background:${PAL.ac};color:${PAL.bg};border:none">Get a Response</button>
+      <button class="journal-btn bc" onclick="newJournalPrompt()" style="background:transparent;border:1.5px solid ${PAL.tx}22;color:${PAL.tx}">New Prompt</button>
+    </div>
+    <div class="journal-response" id="journalResponse" style="background:${PAL.ac}14;color:${PAL.tx}"></div>
+  </div>`;
+}
+
+async function submitJournal(){
+  const text=document.getElementById('journalText')?.value.trim();
+  if(!text||text.length<10) return;
+  const resp=document.getElementById('journalResponse');
+  if(!resp) return;
+  resp.className='journal-response visible';
+  resp.textContent='reading this...';
+  resp.style.display='block';
+  resp.style.background=PAL.ac+'14';
+  resp.style.color=PAL.tx;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        system:`You are ${floveeName}, a gentle and honest wellness companion for someone with ${aeName} aesthetic. They have just written a journal entry. Respond warmly and thoughtfully in 2-4 sentences. Reflect something specific from what they wrote. Be real, not hollow. Do not give advice unless they asked. Do not use therapy speak.`,
+        messages:[{role:'user',content:text}]
+      })
+    });
+    const data=await res.json();
+    resp.textContent=data.content?.[0]?.text||'thank you for writing that.';
+  }catch(e){ resp.textContent='that took courage to write down.'; }
+}
+
+let promptIdx=0;
+const allPrompts=Object.values(JOURNAL_PROMPTS);
+function newJournalPrompt(){
+  promptIdx=(promptIdx+1)%allPrompts.length;
+  const p=document.querySelector('.journal-prompt');
+  if(p) p.textContent=allPrompts[promptIdx];
+}
+
+// ── AFFIRMATIONS ────────────────────────────────────────────
+const BASE_AFFIRMATIONS = [
+  'You are allowed to take up space.',
+  'Your feelings are real and they matter.',
+  'You do not have to have everything figured out right now.',
+  'Being sensitive is not a weakness.',
+  'You are doing better than you think.',
+  'It is okay to rest without earning it.',
+  'Your worth is not measured by productivity.',
+  'You are allowed to change your mind.',
+  'Struggling does not mean failing.',
+  'You are enough exactly as you are today.',
+  'You are not a burden for having needs.',
+  'Small progress is still progress.',
+  'You deserve the same kindness you give to others.',
+  'Uncertainty is not the same as failure.',
+  'You have got through hard days before.',
+];
+
+const AE_AFFIRMATIONS = {
+  goth: ['Your darkness is part of your depth.','Feeling things intensely means you are alive.','Not everyone will understand you and that is fine.'],
+  kawaii: ['Your softness is strength.','Being gentle with the world takes courage.','You make things more beautiful by existing in them.'],
+  darkacad: ['Your mind is one of your best qualities.','Curiosity and depth are rare things. You have both.','Intelligence and vulnerability can coexist.'],
+  indie: ['Being yourself in a world that wants you to be someone else takes real bravery.','Your specific taste is not pretension — it is identity.','Quiet people notice everything.'],
+  cleangirl: ['You are allowed to want more than you currently have.','Standards are not the same as unrealistic expectations.','Taking care of yourself is an act of respect, not vanity.'],
+};
+
+let affirmIdx = 0;
+let personalAffirms = [];
+
+function buildAffirm(){
+  const topAe=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  personalAffirms = [...BASE_AFFIRMATIONS, ...(AE_AFFIRMATIONS[topAe]||[])];
+  affirmIdx = Math.floor(Math.random()*personalAffirms.length);
+  return renderAffirmCard();
+}
+
+function renderAffirmCard(){
+  const text=personalAffirms[affirmIdx%personalAffirms.length];
+  return `<div class="affirm-wrap">
+    <p style="font-size:0.82rem;opacity:0.4;text-align:center;line-height:1.7;max-width:380px">These are not hollow — they are things that are actually true. Read them slowly.</p>
+    <div class="affirm-card" style="background:${PAL.ac}0e;border-color:${PAL.ac}30">
+      <div class="affirm-text" style="color:${PAL.tx}">${text}</div>
+      <div class="affirm-sub" style="color:${PAL.tx}">read it again if you need to</div>
+    </div>
+    <div class="affirm-controls">
+      <button class="ctrl-btn primary bc" onclick="nextAffirm()" style="background:${PAL.ac};color:${PAL.bg};border:none">Next</button>
+      <button class="ctrl-btn bc" onclick="getPersonalAffirm()" style="border-color:${PAL.tx}22;color:${PAL.tx}">Make it personal</button>
+    </div>
+  </div>`;
+}
+
+function nextAffirm(){
+  affirmIdx++;
+  const body=document.getElementById('activityBody');
+  if(body) body.innerHTML=renderAffirmCard();
+}
+
+async function getPersonalAffirm(){
+  const body=document.getElementById('activityBody');
+  if(!body) return;
+  body.innerHTML=`<div class="affirm-wrap"><p style="opacity:0.4;font-style:italic">writing one for you...</p></div>`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:120,
+        system:`Write one short, specific, honest affirmation for someone with ${aeName} aesthetic who is feeling ${selectedMood||mood||'low'}. Not generic. Reference something specific to their vibe or aesthetic. 1-2 sentences. No quotation marks. No preamble.`,
+        messages:[{role:'user',content:'write me a personal affirmation'}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||personalAffirms[0];
+    personalAffirms.unshift(text);
+    affirmIdx=0;
+    body.innerHTML=renderAffirmCard();
+  }catch(e){
+    body.innerHTML=renderAffirmCard();
+  }
+}
+
+function handleKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } }
+function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+
+// ─── INIT ─────────────────────────────────────────────────
+applyStyles();
+  checkApiKey();
+</script>
+
+<!-- API KEY BANNER -->
+<div id="apiBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 24px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);border-top:1px solid rgba(128,128,128,0.12);" id="apiBanner">
+  <span style="font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.5;white-space:nowrap">Anthropic Key</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;padding:8px 14px;font-size:0.85rem;font-family:Space Grotesk,sans-serif;border:1.5px solid rgba(128,128,128,0.2);border-radius:6px;background:rgba(128,128,128,0.06);color:inherit;outline:none;"/>
+  <button onclick="saveApiKey()" style="padding:8px 20px;border:none;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:#c4522a;color:white;">Save</button>
+  <a href="https://console.anthropic.com" target="_blank" style="font-size:0.7rem;opacity:0.4;white-space:nowrap;color:inherit;">Get a key</a>
+</div>
+
+</body>
+</html>

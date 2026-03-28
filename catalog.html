@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8"/>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Catalog — Stuflover</title>
+ <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+ <style>
+ *{margin:0;padding:0;box-sizing:border-box;}
+ body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.5s,color 0.5s;}
+ .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);}
+ .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
+ .nav-links{display:flex;gap:8px;}
+ .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
+ .nav-btn:hover{opacity:0.6;}
+
+ /* PAGE HEADER */
+ .page-header{padding:48px 40px 32px;border-bottom:1px solid rgba(128,128,128,0.08);}
+ .page-eyebrow{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;margin-bottom:8px;}
+ .page-title{font-size:clamp(3rem,8vw,6rem);line-height:0.84;letter-spacing:-2px;margin-bottom:12px;}
+ .page-sub{font-size:0.9rem;opacity:0.5;line-height:1.8;max-width:560px;}
+
+ /* LAYOUT */
+ .catalog-layout{display:grid;grid-template-columns:1fr 400px;min-height:calc(100vh - 200px);}
+
+ /* LEFT — item picker */
+ .items-side{padding:32px 40px;border-right:1px solid rgba(128,128,128,0.08);}
+ .side-label{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.26;margin-bottom:20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+
+ .cat-section{margin-bottom:28px;}
+ .cat-label{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.24;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .cat-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+ .item-card{border-radius:6px;overflow:hidden;cursor:pointer;position:relative;border:2px solid transparent;transition:all 0.15s;}
+ .item-card:hover{transform:translateY(-2px);}
+ .item-card.selected{border-color:currentColor;}
+ .item-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+ .item-card-name{font-size:0.7rem;padding:6px 6px 8px;opacity:0.65;line-height:1.3;}
+ .item-check{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:900;opacity:0;}
+ .item-card.selected .item-check{opacity:1;}
+
+ .empty-cat{padding:24px;text-align:center;opacity:0.28;font-style:italic;font-size:0.82rem;border:1.5px dashed rgba(128,128,128,0.14);border-radius:6px;}
+ .empty-cat a{color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;font-size:0.72rem;text-transform:uppercase;text-decoration:none;display:block;margin-top:8px;opacity:0.7;}
+
+ /* RIGHT — outfit builder + Flovee */
+ .flovee-side{padding:32px;display:flex;flex-direction:column;gap:20px;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;}
+
+ /* Selected outfit summary */
+ .outfit-summary{border-radius:8px;padding:20px;border:1.5px solid rgba(128,128,128,0.12);}
+ .summary-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;margin-bottom:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .summary-items{display:flex;flex-direction:column;gap:8px;}
+ .summary-item{display:flex;align-items:center;gap:10px;}
+ .summary-img{width:40px;height:52px;border-radius:4px;object-fit:cover;flex-shrink:0;background:rgba(128,128,128,0.1);}
+ .summary-info{flex:1;}
+ .summary-name{font-size:0.82rem;font-weight:600;line-height:1.3;}
+ .summary-cat{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .summary-remove{font-size:0.7rem;opacity:0.3;cursor:pointer;padding:4px;transition:opacity 0.15s;}
+ .summary-remove:hover{opacity:0.8;}
+ .summary-empty{font-size:0.85rem;opacity:0.3;font-style:italic;padding:8px 0;}
+
+ /* Check button */
+ .check-btn{width:100%;padding:15px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+ .check-btn:hover{opacity:0.8;}
+ .check-btn:disabled{opacity:0.3;cursor:not-allowed;}
+
+ /* Flovee chat */
+ .flovee-chat-area{flex:1;display:flex;flex-direction:column;border-radius:8px;border:1.5px solid rgba(128,128,128,0.12);overflow:hidden;}
+ .flovee-chat-header{padding:14px 16px;border-bottom:1px solid rgba(128,128,128,0.08);display:flex;align-items:center;gap:10px;}
+ .flovee-avatar-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s ease-in-out infinite;}
+ @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+ .flovee-name-label{font-size:0.78rem;font-weight:600;letter-spacing:0.5px;}
+ .flovee-status{font-size:0.68rem;opacity:0.38;margin-left:auto;}
+ .flovee-msgs{flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:280px;}
+ .fmsg{padding:11px 14px;border-radius:12px;font-size:0.88rem;line-height:1.68;}
+ .fmsg.flovee{align-self:flex-start;border-bottom-left-radius:3px;max-width:90%;}
+ .fmsg.typing{opacity:0.4;font-style:italic;}
+
+ /* Buy section — unlocked after approval */
+ .buy-section{border-radius:8px;padding:18px;border:1.5px solid rgba(128,128,128,0.12);display:none;}
+ .buy-section.unlocked{display:block;}
+ .buy-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .buy-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(128,128,128,0.07);font-size:0.85rem;}
+ .buy-item:last-child{border-bottom:none;}
+ .buy-link-btn{font-size:0.7rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;padding:5px 12px;border-radius:3px;transition:opacity 0.2s;}
+ .buy-link-btn:hover{opacity:0.7;}
+
+ @media(max-width:900px){.catalog-layout{grid-template-columns:1fr;}.flovee-side{position:relative;top:0;height:auto;border-top:1px solid rgba(128,128,128,0.08);}.cat-items{grid-template-columns:repeat(3,1fr);}nav,.page-header,.items-side,.flovee-side{padding-left:20px;padding-right:20px;}}
+ </style>
+</head>
+<body>
+<nav id="mainNav">
+ <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+ <div class="nav-links">
+ <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
+ <a class="nav-btn bc" href="wishingwell.html">WishingWell</a>
+ <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+ </div>
+</nav>
+
+<div class="page-header">
+ <div class="page-eyebrow bc">Build Your Outfit</div>
+ <div class="page-title bc" id="pageTitle">Catalog</div>
+ <p class="page-sub">Select your items, then ask your Flovee to check the outfit against current trends and viral looks. Flovee approved = buy links unlock.</p>
+</div>
+
+<div class="catalog-layout">
+
+ <!-- LEFT: item selector -->
+ <div class="items-side" id="itemsSide">
+ <div class="side-label bc">Your Saved Items — tap to add to outfit</div>
+ <div id="itemsContainer"></div>
+ </div>
+
+ <!-- RIGHT: outfit + Flovee -->
+ <div class="flovee-side" id="floveeSide">
+
+ <!-- Outfit summary -->
+ <div class="outfit-summary" id="outfitSummary">
+ <div class="summary-label bc">Your Outfit</div>
+ <div class="summary-items" id="summaryItems">
+ <div class="summary-empty" id="summaryEmpty">No items selected yet</div>
+ </div>
+ </div>
+
+ <!-- Check button -->
+ <button class="check-btn bc" id="checkBtn" onclick="checkOutfit()" disabled>Ask Flovee to Check This Outfit</button>
+
+ <!-- Flovee chat -->
+ <div class="flovee-chat-area" id="floveeChatArea">
+ <div class="flovee-chat-header">
+ <div class="flovee-avatar-dot" id="floveeDot"></div>
+ <div class="flovee-name-label" id="floveeNameLabel"></div>
+ <div class="flovee-status" id="floveeStatus">ready</div>
+ </div>
+ <div class="flovee-msgs" id="floveeMsgs"></div>
+ </div>
+
+ <!-- Buy links — unlocked after approval -->
+ <div class="buy-section" id="buySection">
+ <div class="buy-label bc" id="buyLabel">Flovee Approved — Buy Now</div>
+ <div id="buyItems"></div>
+ </div>
+
+ </div>
+</div>
+
+<script>
+
+// ─── API KEY MANAGEMENT ───────────────────────────────────
+function getApiKey(){ return localStorage.getItem('stuflover_api_key')||''; }
+function saveApiKey(){
+  const val = document.getElementById('apiKeyInput')?.value.trim();
+  if(!val) return;
+  localStorage.setItem('stuflover_api_key', val);
+  document.getElementById('apiBanner').style.display='none';
+  // Reload so everything picks up the key
+  window.location.reload();
+}
+function checkApiKey(){
+  const banner = document.getElementById('apiBanner');
+  if(!banner) return;
+  if(!getApiKey()){
+    banner.style.display='flex';
+    // Apply body colour to banner
+    banner.style.background = document.body.style.background || '#fff';
+  } else {
+    banner.style.display='none';
+  }
+}
+// Patch fetch to always include key and required headers
+const _origFetch = window.fetch;
+window.fetch = function(url, opts){
+  if(typeof url === 'string' && url.includes('anthropic.com')){
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers, {
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'Content-Type': 'application/json',
+    });
+  }
+  return _origFetch.call(this, url, opts);
+};
+
+// ─── DATA ─────────────────────────────────────────────────
+const catalogItems = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_catalog')||'[]'); }catch(e){return [];} })();
+const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
+const approved = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_approved')||'[]'); }catch(e){return [];} })();
+function saveApproved(){ try{ localStorage.setItem('stuflover_approved', JSON.stringify(approved)); }catch(e){} }
+
+let selectedItems = {}; // category -> product
+
+// ─── PALETTE ─────────────────────────────────────────────
+function resolvePalette(){
+ const fc=profile?.faveColour; const ae=profile?.aesthetics||{};
+ const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+ if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.84),tx:darkenH(fc.hex,0.5),ac:fc.hex};
+ if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.3),tx:lightenH(fc.hex,0.72),ac:fc.hex};
+ const m={kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f2ede6',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#120810',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1e1208',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#141414',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'}};
+ return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+}
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+const PAL = resolvePalette();
+
+function resolveAeName(){
+ if(!profile) return 'Your Style';
+ const ae=profile.aesthetics||{}; const et=profile.extraTags||[];
+ const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
+ const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
+ const specials={'pastel_goth':'Pastel Goth','dark_fem':'Dark Feminine','emo_core':'Emo','quiet_luxury':'Quiet Luxury','that_girl':'That Girl','full_grunge':'Grunge','full_indie':'Indie Alt','kawaii_full':'Kawaii'};
+ for(const[tag,name] of Object.entries(specials)) if(et.includes(tag)) return name;
+ return m[top]||'Your Style';
+}
+
+const FLOVEE_NAMES={kawaii:'Luna',softgirl:'Rosie',cleangirl:'Nora',coquette:'Coco',goth:'Raven',darkacad:'Lyra',grunge:'Sid',y2k:'Stacy',street:'Ace',cottage:'Wren',hippie:'Sage',oldmoney:'Eloise',preppy:'Blair',tomato:'Bea',indie:'Wren',emo:'Ember'};
+function getFloveeName(){ const top=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl'; return FLOVEE_NAMES[top]||'Flo'; }
+
+// ─── APPLY STYLES ─────────────────────────────────────────
+function applyStyles(){
+ document.body.style.background=PAL.bg; document.body.style.color=PAL.tx;
+ const nav=document.getElementById('mainNav'); nav.style.background=PAL.bg+'f0'; nav.style.borderColor=PAL.tx+'12';
+ document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{el.style.color=PAL.tx;el.style.borderColor=PAL.tx+'22';});
+ document.getElementById('pageTitle').style.color=PAL.tx;
+ const checkBtn=document.getElementById('checkBtn'); checkBtn.style.background=PAL.ac; checkBtn.style.color=PAL.bg;
+ const dot=document.getElementById('floveeDot'); dot.style.background=PAL.ac;
+ document.getElementById('floveeNameLabel').textContent=getFloveeName();
+ document.getElementById('floveeNameLabel').style.color=PAL.tx;
+ document.getElementById('floveeStatus').style.color=PAL.tx;
+ // Outfit summary
+ document.getElementById('outfitSummary').style.borderColor=PAL.tx+'14';
+ document.getElementById('floveeChatArea').style.borderColor=PAL.tx+'14';
+ // Opening flovee message
+ addFloveeMsg(`hey — build your outfit by selecting items on the left, then hit the button and i'll check it against what's trending right now.`);
+}
+
+// ─── RENDER ITEMS ─────────────────────────────────────────
+const FASHION_PHOTOS=['1434389677669-e08b4cac3105','1515886657613-9f3515b0c78f','1542060748-2c35da05fd48','1503342217505-b0a15ec3261c','1524360367517-1b5c73e07e58','1490481651871-ab68de25d43d','1506629082955-511b1aa562c8','1542291026-7eec264c27ff','1599643478519-b1a4b037c1a8','1544923246-b77d6b77c4eb','1558618666-fcd25c85cd64','1583743814966-8d4d0ec60851','1541099649105-f69ad21f3246','1543163521-1bf539c55dd2','1551028719-00167b16eac5'];
+
+function getItemImg(item){
+ const seed=item.id?item.id.split('').reduce((a,b)=>a+b.charCodeAt(0),0):42;
+ return `https://images.unsplash.com/photo-${FASHION_PHOTOS[seed%15]}?w=200&h=260&fit=crop&crop=center`;
+}
+
+function renderItems(){
+ const container=document.getElementById('itemsContainer');
+ if(catalogItems.length===0){
+ container.innerHTML=`<div style="padding:60px 0;text-align:center;opacity:0.3;">
+ <div style="font-size:1.5rem;margin-bottom:12px;font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase">No Items Yet</div>
+ <p style="font-size:0.88rem;line-height:1.7;margin-bottom:16px">Save items in FitforIt, then add them to your catalog from WishingWell.</p>
+ <a href="fitforit.html" style="font-size:0.75rem;letter-spacing:2px;font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;color:${PAL.tx};border:1.5px solid ${PAL.tx}30;padding:10px 22px;border-radius:4px;">Go to FitforIt</a>
+ </div>`;
+ return;
+ }
+
+ const bycat={};
+ catalogItems.forEach(it=>{ if(!bycat[it.category]) bycat[it.category]=[]; bycat[it.category].push(it); });
+ const catOrder=['tops','bottoms','shoes','accessories','outerwear'];
+ const catLabels={tops:'Tops',bottoms:'Bottoms',shoes:'Shoes',accessories:'Accessories',outerwear:'Outerwear'};
+
+ container.innerHTML = catOrder.filter(cat=>bycat[cat]).map(cat=>`
+ <div class="cat-section">
+ <div class="cat-label bc" style="color:${PAL.tx}">${catLabels[cat]}</div>
+ <div class="cat-items">
+ ${bycat[cat].map(p=>{
+ const isOn = selectedItems[p.category]?.id===p.id;
+ const imgUrl = getItemImg(p);
+ return `<div class="item-card ${isOn?'selected':''}"
+ style="background:${PAL.ac}10;${isOn?'border-color:'+PAL.ac:''}"
+ onclick='toggleItem(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+ <img src="${imgUrl}" alt="${p.name}" onerror="this.style.display='none'"/>
+ <div class="item-check" style="background:${PAL.ac};color:${PAL.bg}">on</div>
+ <div class="item-card-name" style="color:${PAL.tx}">${p.name}</div>
+ </div>`;
+ }).join('')}
+ </div>
+ </div>`).join('');
+}
+
+function toggleItem(product){
+ if(selectedItems[product.category]?.id===product.id){
+ delete selectedItems[product.category];
+ } else {
+ selectedItems[product.category]=product;
+ }
+ renderItems();
+ renderSummary();
+ updateCheckBtn();
+ // Reset flovee verdict when outfit changes
+ document.getElementById('buySection').classList.remove('unlocked');
+}
+
+function renderSummary(){
+ const items=Object.values(selectedItems).filter(Boolean);
+ const empty=document.getElementById('summaryEmpty');
+ const container=document.getElementById('summaryItems');
+ if(items.length===0){ empty.style.display='block'; container.innerHTML='<div class="summary-empty" id="summaryEmpty">No items selected yet</div>'; return; }
+
+ const catLabels={tops:'Top',bottoms:'Bottom',shoes:'Shoes',accessories:'Accessory',outerwear:'Outerwear'};
+ container.innerHTML = items.map(p=>{
+ const imgUrl=getItemImg(p);
+ return `<div class="summary-item">
+ <img class="summary-img" src="${imgUrl}" alt="${p.name}" onerror="this.style.display='none'"/>
+ <div class="summary-info">
+ <div class="summary-name" style="color:${PAL.tx}">${p.name}</div>
+ <div class="summary-cat" style="color:${PAL.tx}">${catLabels[p.category]||p.category}</div>
+ </div>
+ <span class="summary-remove" onclick="removeItem('${p.category}')" title="Remove">remove</span>
+ </div>`;
+ }).join('');
+}
+
+function removeItem(category){
+ delete selectedItems[category];
+ renderItems();
+ renderSummary();
+ updateCheckBtn();
+ document.getElementById('buySection').classList.remove('unlocked');
+}
+
+function updateCheckBtn(){
+ const items=Object.values(selectedItems).filter(Boolean);
+ document.getElementById('checkBtn').disabled=items.length<2;
+}
+
+// ─── FLOVEE CHAT ─────────────────────────────────────────
+function addFloveeMsg(text, isTyping=false){
+ const msgs=document.getElementById('floveeMsgs');
+ const div=document.createElement('div');
+ div.className='fmsg flovee'+(isTyping?' typing':'');
+ div.textContent=text;
+ div.style.background=PAL.ac+'1a';
+ div.style.color=PAL.tx;
+ msgs.appendChild(div);
+ msgs.scrollTop=msgs.scrollHeight;
+ return div;
+}
+
+// ─── CHECK OUTFIT ─────────────────────────────────────────
+async function checkOutfit(){
+ const items=Object.values(selectedItems).filter(Boolean);
+ if(items.length<2) return;
+
+ const btn=document.getElementById('checkBtn');
+ btn.disabled=true;
+ btn.textContent='Checking...';
+ document.getElementById('floveeStatus').textContent='checking trends...';
+
+ const outfitDesc=items.map(i=>`${i.category}: ${i.name}${i.brand?' ('+i.brand+')':''}`).join(', ');
+ const ae=resolveAeName();
+ const colour=profile?.faveColour?.name||'neutral';
+ const music=(profile?.music||[]).slice(0,3).join(', ');
+ const mood=profile?.moodToday||'';
+
+ const typing=addFloveeMsg(getFloveeName()+' is checking trends...', true);
+
+ try{
+ const res=await fetch('https://api.anthropic.com/v1/messages',{
+ method:'POST',
+ headers:{},
+ body:JSON.stringify({
+ model:'claude-sonnet-4-20250514',
+ max_tokens:500,
+ tools:[{type:'web_search_20250305',name:'web_search'}],
+ system:`You are ${getFloveeName()}, a fashion-forward Flovee AI companion for someone whose aesthetic is ${ae}. You check outfits against current viral trends, TikTok fashion, and what is actually going viral right now. You are honest, specific, and fun. You text like a real person — short messages, direct opinions. You NEVER say anything negative about the person, only about whether the outfit works with trends.`,
+ messages:[{role:'user',content:`Search for current viral fashion trends, TikTok outfit trends, and what is trending in ${ae} fashion right now in 2026. Then judge this outfit for someone with ${ae} aesthetic (favourite colour: ${colour}, listens to: ${music||'various'}): ${outfitDesc}. Tell me if it works, what trends it matches or clashes with, and give a verdict: approved or rejected. Be specific about actual current trends you found. Keep it under 5 sentences, text like a friend.`}]
+ })
+ });
+ const data=await res.json();
+ // Extract text from response (may have tool use blocks)
+ let reply='';
+ if(data.content){
+ data.content.forEach(block=>{ if(block.type==='text') reply+=block.text; });
+ }
+ if(!reply) reply="couldn't check trends right now — try again?";
+
+ if(typing) typing.remove();
+ addFloveeMsg(reply);
+
+ // Determine verdict
+ const lowerReply=reply.toLowerCase();
+ const isApprovedOutfit = lowerReply.includes('approved') || lowerReply.includes('works') || lowerReply.includes('love') || lowerReply.includes('yes') || (lowerReply.includes('trend') && !lowerReply.includes('doesn\'t') && !lowerReply.includes('does not') && !lowerReply.includes('clash'));
+ const isRejected = lowerReply.includes('rejected') || lowerReply.includes('clash') || lowerReply.includes('doesn\'t work') || lowerReply.includes('not it');
+
+ if(isApprovedOutfit && !isRejected){
+ // Unlock buy buttons
+ items.forEach(p=>{ if(!approved.includes(p.id)) approved.push(p.id); });
+ saveApproved();
+ showBuyLinks(items);
+ document.getElementById('floveeStatus').textContent='approved ';
+ btn.textContent='Outfit Approved!';
+ btn.style.background='#20a050';
+ setTimeout(()=>{ btn.style.background=PAL.ac; btn.textContent='Check Another Outfit'; btn.disabled=false; }, 3000);
+ } else {
+ document.getElementById('floveeStatus').textContent='try again';
+ btn.textContent='Try a Different Combo';
+ btn.disabled=false;
+ }
+
+ }catch(e){
+ if(typing) typing.remove();
+ addFloveeMsg("can't reach the internet right now — try again in a sec");
+ btn.textContent='Ask Flovee to Check This Outfit';
+ btn.disabled=false;
+ document.getElementById('floveeStatus').textContent='ready';
+ }
+}
+
+function showBuyLinks(items){
+ const section=document.getElementById('buySection');
+ const buyItems=document.getElementById('buyItems');
+ section.classList.add('unlocked');
+ section.style.borderColor=PAL.ac+'50';
+ document.getElementById('buyLabel').style.color=PAL.ac;
+ buyItems.innerHTML=items.map(p=>`
+ <div class="buy-item" style="color:${PAL.tx}">
+ <span>${p.name}</span>
+ <a class="buy-link-btn" href="${p.shopUrl||'#'}" target="_blank" rel="noopener"
+ style="background:${PAL.ac};color:${PAL.bg}">Buy</a>
+ </div>`).join('');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+applyStyles();
+  checkApiKey();
+renderItems();
+renderSummary();
+</script>
+
+<!-- API KEY BANNER -->
+<div id="apiBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;padding:14px 24px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);border-top:1px solid rgba(128,128,128,0.12);" id="apiBanner">
+  <span style="font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.5;white-space:nowrap">Anthropic Key</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;padding:8px 14px;font-size:0.85rem;font-family:Space Grotesk,sans-serif;border:1.5px solid rgba(128,128,128,0.2);border-radius:6px;background:rgba(128,128,128,0.06);color:inherit;outline:none;"/>
+  <button onclick="saveApiKey()" style="padding:8px 20px;border:none;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:#c4522a;color:white;">Save</button>
+  <a href="https://console.anthropic.com" target="_blank" style="font-size:0.7rem;opacity:0.4;white-space:nowrap;color:inherit;">Get a key</a>
+</div>
+
+</body>
+</html>
