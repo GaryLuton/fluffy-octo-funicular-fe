@@ -98,7 +98,11 @@
     </div>
   </div>
 
+<script src="/stuflover-config.js"></script>
 <script>
+// API base URL — use Railway backend when not hosted there
+const API_BASE = window.STUFLOVER_API_URL || '';
+
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
     t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
@@ -125,12 +129,16 @@ async function handleLogin(e) {
   btn.textContent = 'SIGNING IN...';
 
   try {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(API_BASE + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch {
+      throw new Error('Server not reachable — make sure you are accessing this through your Railway URL');
+    }
     if (!res.ok) throw new Error(data.error || 'Login failed');
 
     localStorage.setItem('stuflover_token', data.token);
@@ -176,12 +184,16 @@ async function handleRegister(e) {
   btn.textContent = 'CREATING...';
 
   try {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch(API_BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password })
     });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch {
+      throw new Error('Server not reachable — make sure you are accessing this through your Railway URL');
+    }
     if (!res.ok) throw new Error(data.error || 'Registration failed');
 
     localStorage.setItem('stuflover_token', data.token);
@@ -197,7 +209,7 @@ async function handleRegister(e) {
 
 async function syncFromServer(token) {
   try {
-    const res = await fetch('/api/data', {
+    const res = await fetch(API_BASE + '/api/data', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     if (!res.ok) return;
