@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const path = require('path');
-const { stmts } = require('./db');
+const { initDb, stmts } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -191,6 +191,12 @@ app.get('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Stuflover backend running on port ${PORT}`);
+// Initialize database then start server
+initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Stuflover backend running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });
