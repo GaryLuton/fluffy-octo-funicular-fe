@@ -334,6 +334,97 @@
       .opts-single,.opts-multi{grid-template-columns:1fr;}
       .q-text{font-size:1.9rem;}
     }
+
+    /* ═══════════════════════════════════════
+       DECORATIVE ELEMENTS
+    ═══════════════════════════════════════ */
+
+    /* 1. Sparkle cursor trail */
+    .sparkle-dot {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      animation: sparkleFade 0.6s ease-out forwards;
+    }
+    @keyframes sparkleFade {
+      0%   { opacity: 0.85; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.2) translateY(-12px); }
+    }
+
+    /* 2. Soft glow on ae-title */
+    .ae-title-glow {
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 8px rgba(128,128,128,0.0); }
+      50%      { text-shadow: 0 0 18px rgba(128,128,128,0.25), 0 0 40px rgba(128,128,128,0.10); }
+    }
+
+    /* 3. Floating hearts */
+    .floating-heart {
+      position: fixed;
+      bottom: -40px;
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+      animation: floatUp 8s ease-in infinite;
+    }
+    .floating-heart:nth-child(1) { left: 8%; animation-delay: 0s; }
+    .floating-heart:nth-child(2) { left: 28%; animation-delay: 2.2s; }
+    .floating-heart:nth-child(3) { left: 72%; animation-delay: 4.5s; }
+    .floating-heart:nth-child(4) { left: 91%; animation-delay: 6.8s; }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.7); }
+      10%  { opacity: 0.18; }
+      70%  { opacity: 0.12; }
+      100% { opacity: 0; transform: translateY(-105vh) scale(1); }
+    }
+
+    /* 4. Hover sparkle / shimmer on browser tiles */
+    .browser-tile {
+      position: relative;
+      overflow: hidden;
+    }
+    .browser-tile::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+      transition: none;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+    .browser-tile:hover::after {
+      animation: tileShimmer 0.55s ease forwards;
+    }
+    @keyframes tileShimmer {
+      0%   { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* 5. NEW badge */
+    .new-badge {
+      display: inline-block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 0.52rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 20px;
+      line-height: 1.4;
+      margin-top: 2px;
+      animation: badgePulse 2.4s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.08); }
+    }
   </style>
 </head>
 <body>
@@ -712,7 +803,8 @@ const RECS = {
 const CORE_IDS = [
   "q_age","q_gender","q_mood","q_saturday","q_music","q_interests","q_fave_colour",
   "q_phone_screen","q_coffee","q_room","q_friday","q_notes_app",
-  "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_energy_word"
+  "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_dream_job",
+  "q_weekend_plan","q_wallpaper","q_energy_word"
 ];
 
 const QS = [
@@ -946,6 +1038,48 @@ const QS = [
    ]
   },
 
+  {id:"q_dream_job", cat:"YOUR FUTURE", multi:false,
+   text:"What is your dream job?",
+   hint:"No wrong answers — just what calls to you.",
+   opts:[
+     {t:"Creative director — running the vision",            ae:{indie:2,coquette:1,cleangirl:1},   dj:"creative_director"},
+     {t:"Influencer or content creator",                     ae:{y2k:2,softgirl:1,kawaii:1},         dj:"influencer"},
+     {t:"Doctor, scientist or something that helps people",  ae:{cleangirl:1,preppy:1},              dj:"doctor"},
+     {t:"Teacher or professor — sharing knowledge",          ae:{darkacad:2,cottage:1},              dj:"teacher"},
+     {t:"Artist — painter, illustrator, something visual",   ae:{indie:2,kawaii:1},                  dj:"artist"},
+     {t:"Musician or something in the music industry",       ae:{grunge:2,indie:1,goth:1},          dj:"musician"},
+     {t:"Entrepreneur — building my own thing",              ae:{street:2,oldmoney:1},               dj:"entrepreneur"},
+     {t:"Athlete or fitness coach",                          ae:{preppy:2,street:1},                 dj:"athlete"},
+   ]
+  },
+
+  {id:"q_weekend_plan", cat:"YOUR WEEKENDS", multi:false,
+   text:"Pick your ideal weekend plan:",
+   opts:[
+     {t:"Shopping with friends — trying things on, getting food after",  ae:{y2k:1,coquette:1,softgirl:1},     wp:"shopping"},
+     {t:"Cosy day in — blankets, candles, comfort content",             ae:{cottage:2,softgirl:1},             wp:"cosy_in"},
+     {t:"Going to a concert or live show",                              ae:{indie:2,grunge:1,goth:1},          wp:"concert"},
+     {t:"Exploring nature — a walk, a hike, being outside",             ae:{cottage:1,hippie:2,tomato:1},      wp:"nature"},
+     {t:"Creating something — art, music, writing, a project",          ae:{indie:2,darkacad:1},               wp:"creating"},
+     {t:"Gaming all day — no interruptions",                            ae:{indie:1,grunge:1},                 wp:"gaming"},
+     {t:"Studying or working on something I care about",                ae:{darkacad:2,cleangirl:1,preppy:1},  wp:"studying"},
+     {t:"Baking or cooking something from scratch",                     ae:{cottage:2,hippie:1},               wp:"baking"},
+   ]
+  },
+
+  {id:"q_wallpaper", cat:"YOUR PHONE", multi:false,
+   text:"What is your phone wallpaper usually?",
+   opts:[
+     {t:"An aesthetic photo — moody, curated, very specific vibe",  ae:{coquette:2,indie:1,darkacad:1},    wp2:"aesthetic"},
+     {t:"My pet — obviously",                                      ae:{cottage:1,softgirl:1,kawaii:1},     wp2:"pet"},
+     {t:"My favourite artist or a concert photo",                   ae:{indie:2,grunge:1,goth:1},          wp2:"artist"},
+     {t:"Nature — sky, ocean, flowers, something peaceful",         ae:{cottage:2,hippie:1},               wp2:"nature"},
+     {t:"Anime or cartoon character",                               ae:{kawaii:3},                          wp2:"anime"},
+     {t:"Solid colour or a simple gradient — clean vibes",          ae:{cleangirl:2,oldmoney:1},           wp2:"solid"},
+     {t:"A photo of me and my friends",                             ae:{preppy:1,y2k:1,softgirl:1},       wp2:"friends"},
+   ]
+  },
+
   {id:"q_energy_word", cat:"LAST ONE", multi:false,
    text:"One word — which is actually you?",
    opts:[
@@ -1047,7 +1181,8 @@ function startQuiz(){
   P.faveColour=null; P.faveShop=null; P.friendGroup=null;
   P.energyWord=null; P.moodToday=null; P.phoneScreen=null;
   P.saturdayMorning=null; P.coffeeOrder=null; P.notesApp=null;
-  P.lastBought=null; P.extraTags=[]; P.answered=new Set();
+  P.lastBought=null; P.dreamJob=null; P.weekendPlan=null; P.wallpaper=null;
+  P.extraTags=[]; P.answered=new Set();
   queue=[];
   document.getElementById('lifestylePage').classList.remove('active');
   document.getElementById('heroSection').style.display='none';
@@ -1124,6 +1259,9 @@ function applyOpt(opt){
   if(opt.co) P.coffeeOrder=opt.co;
   if(opt.na) P.notesApp=opt.na;
   if(opt.lb) P.lastBought=opt.lb;
+  if(opt.dj) P.dreamJob=opt.dj;
+  if(opt.wp) P.weekendPlan=opt.wp;
+  if(opt.wp2) P.wallpaper=opt.wp2;
 }
 
 
@@ -1276,6 +1414,7 @@ function buildPage(){
       friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
       phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
       coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
+      dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
       extraTags:P.extraTags,
     }));
   }catch(e){}
@@ -3157,7 +3296,7 @@ function formatDateSep(ts){
 function buildPreviousContext(secId){
   var saved = loadChat(secId);
   if(!saved.messages.length) return '';
-  var recent = saved.messages.slice(-20);
+  var recent = saved.messages.slice(-30);
   var lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
   return '\n\nPREVIOUS CONVERSATION (you already had this chat with them — remember it and reference things they told you naturally. Do not repeat yourself or re-introduce yourself):\n'+lines.join('\n');
 }
@@ -3359,7 +3498,7 @@ function buildSystemPrompt(sec){
   var chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
   var prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
 
-  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them.${styleHint}${prevContext}`;
+  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it.${styleHint}${prevContext}`;
 }
 
 function buildOpener(sec){
