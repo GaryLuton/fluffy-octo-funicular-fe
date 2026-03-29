@@ -2127,6 +2127,131 @@ var DTI_SVG = {
     '<path d="M50 158 Q48 165 52 168 Q56 165 54 158" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.4"/>'+
     '<path d="M106 158 Q104 165 108 168 Q112 165 110 158" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.4"/>'+
     '<path d="M70 2 Q78 -1 86 2" stroke="'+sh+'" stroke-width="2.5" fill="none" opacity="0.08" stroke-linecap="round"/>';},
+
+  hair_ponytail: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,20),sh=dtiShade(c,45);
+    // High ponytail — hair pulled back tight, long tail behind
+    return ''+
+    // Tight cap on head (slicked back look)
+    '<path d="M58 6 Q58 0 68 0 L92 0 Q102 0 102 6 L102 20 Q102 30 98 36 L98 56 Q96 60 92 58 L68 58 Q64 60 62 56 L62 36 Q58 30 58 20 Z" fill="'+c+'"/>'+
+    '<path d="M64 2 Q80 -2 96 2 L96 12 Q80 8 64 12 Z" fill="'+sh+'" opacity="0.1"/>'+
+    // Hair tie at crown
+    '<ellipse cx="80" cy="4" rx="8" ry="4" fill="'+dk+'" opacity="0.15"/>'+
+    // Ponytail flowing behind and down
+    '<path d="M76 4 Q78 -4 80 -2 Q82 -4 84 4" fill="'+c+'"/>'+
+    '<path d="M78 -2 Q80 -8 82 -2 L86 20 Q88 50 86 80 Q84 110 82 140 Q80 160 82 168 Q84 172 82 170" fill="'+c+'"/>'+
+    '<path d="M78 -2 L74 20 Q72 50 74 80 Q76 110 78 140 Q80 160 78 168 Q76 172 78 170" fill="'+c+'"/>'+
+    // Ponytail strand lines
+    '<path d="M82 10 Q84 50 82 90 Q80 130 82 160" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.08"/>'+
+    '<path d="M78 10 Q76 50 78 90 Q80 130 78 160" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.08"/>'+
+    '<path d="M80 0 Q80 40 80 80 Q80 120 80 160" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.05"/>'+
+    // Wavy end
+    '<path d="M76 165 Q78 172 82 168 Q84 172 80 176" stroke="'+c+'" stroke-width="2.5" fill="none" opacity="0.5"/>'+
+    '<path d="M72 4 Q78 1 84 4" stroke="'+sh+'" stroke-width="2" fill="none" opacity="0.08" stroke-linecap="round"/>';},
+
+  hair_spacebuns: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,18),sh=dtiShade(c,40);
+    // Space buns — two buns on top with loose strands
+    return ''+
+    // Hair cap
+    '<path d="M58 6 Q58 0 68 0 L92 0 Q102 0 102 6 L102 20 Q102 28 98 34 L98 56 Q96 60 92 58 L68 58 Q64 60 62 56 L62 34 Q58 28 58 20 Z" fill="'+c+'"/>'+
+    // Left bun
+    '<circle cx="64" cy="-2" r="14" fill="'+c+'"/>'+
+    '<circle cx="64" cy="-4" r="11" fill="'+lt+'"/>'+
+    '<path d="M56 -6 Q60 -12 64 -10 Q68 -12 72 -6" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.1"/>'+
+    '<circle cx="60" cy="-8" r="2.5" fill="'+sh+'" opacity="0.06"/>'+
+    // Right bun
+    '<circle cx="96" cy="-2" r="14" fill="'+c+'"/>'+
+    '<circle cx="96" cy="-4" r="11" fill="'+lt+'"/>'+
+    '<path d="M88 -6 Q92 -12 96 -10 Q100 -12 104 -6" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.1"/>'+
+    '<circle cx="92" cy="-8" r="2.5" fill="'+sh+'" opacity="0.06"/>'+
+    // Middle parting
+    '<path d="M80 0 L80 20" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.08"/>'+
+    // Loose face framing strands
+    '<path d="M60 24 Q58 36 56 48 Q54 58 52 66" fill="'+c+'"/>'+
+    '<path d="M100 24 Q102 36 104 48 Q106 58 108 66" fill="'+c+'"/>'+
+    '<path d="M58 30 Q56 42 54 56" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.06"/>'+
+    '<path d="M102 30 Q104 42 106 56" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.06"/>';},
+
+  hair_wolfcut: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,20),sh=dtiShade(c,45);
+    // Wolf cut — volume on top, choppy layered, mullet-like layers
+    return ''+
+    // Big voluminous top
+    '<path d="M54 4 Q54 -4 66 -4 L94 -4 Q106 -4 106 4 L106 22 Q106 32 100 38 L100 56 Q98 62 92 58 L68 58 Q62 62 60 56 L60 38 Q54 32 54 22 Z" fill="'+c+'"/>'+
+    '<path d="M60 -2 Q80 -6 100 -2 L100 12 Q80 6 60 12 Z" fill="'+sh+'" opacity="0.1"/>'+
+    // Curtain bangs — choppier
+    '<path d="M56 18 Q54 28 50 40 Q46 52 44 58" fill="'+c+'"/>'+
+    '<path d="M104 18 Q106 28 110 40 Q114 52 116 58" fill="'+c+'"/>'+
+    // Choppy layers at sides — shorter than long hair
+    '<path d="M52 34 Q50 50 48 68 Q46 86 48 100 Q50 108 52 104" fill="'+c+'"/>'+
+    '<path d="M108 34 Q110 50 112 68 Q114 86 112 100 Q110 108 108 104" fill="'+c+'"/>'+
+    // Choppy wispy ends (key wolf cut feature)
+    '<path d="M48 96 Q46 104 50 102 Q52 100 54 104 Q56 100 54 96" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.6"/>'+
+    '<path d="M112 96 Q114 104 110 102 Q108 100 106 104 Q104 100 106 96" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.6"/>'+
+    // Strand lines
+    '<path d="M54 24 Q52 40 50 58 Q48 76 48 96" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.08"/>'+
+    '<path d="M106 24 Q108 40 110 58 Q112 76 112 96" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.08"/>'+
+    '<path d="M58 20 Q56 34 54 48" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.05"/>'+
+    '<path d="M102 20 Q104 34 106 48" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.05"/>'+
+    // Parting
+    '<path d="M80 -4 Q80 6 78 16" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.08"/>'+
+    '<path d="M68 0 Q76 -3 84 0" stroke="'+sh+'" stroke-width="2.5" fill="none" opacity="0.08" stroke-linecap="round"/>';},
+
+  hair_curls: function(c){var dk=dtiShade(c,-40),lt=dtiShade(c,22),sh=dtiShade(c,50),md=dtiShade(c,-15);
+    // Long bouncy curls — volume, spiral curls at ends
+    return ''+
+    // Back hair
+    '<path d="M52 20 Q50 50 48 80 Q46 110 44 140 Q42 165 44 175" fill="'+md+'"/>'+
+    '<path d="M108 20 Q110 50 112 80 Q114 110 116 140 Q118 165 116 175" fill="'+md+'"/>'+
+    // Hair cap — bigger for volume
+    '<path d="M54 4 Q54 -2 66 -2 L94 -2 Q106 -2 106 4 L106 22 Q106 32 100 38 L98 56 Q96 62 92 58 L68 58 Q64 62 62 56 L60 38 Q54 32 54 22 Z" fill="'+c+'"/>'+
+    '<path d="M62 0 Q80 -4 98 0 L98 14 Q80 10 62 14 Z" fill="'+sh+'" opacity="0.1"/>'+
+    // Curtain bangs
+    '<path d="M56 18 Q54 28 52 40 Q48 52 46 58" fill="'+c+'"/>'+
+    '<path d="M104 18 Q106 28 108 40 Q112 52 114 58" fill="'+c+'"/>'+
+    // Side hair flowing down
+    '<path d="M52 36 Q50 55 48 80 Q46 105 44 130 Q42 155 40 170" fill="'+c+'"/>'+
+    '<path d="M108 36 Q110 55 112 80 Q114 105 116 130 Q118 155 120 170" fill="'+c+'"/>'+
+    // Spiral curl ends — left side
+    '<path d="M40 165 Q36 170 38 175 Q42 178 44 174 Q46 170 42 168" stroke="'+c+'" stroke-width="3" fill="none" opacity="0.7"/>'+
+    '<path d="M44 160 Q40 166 42 170 Q46 174 48 170" stroke="'+c+'" stroke-width="2.5" fill="none" opacity="0.5"/>'+
+    '<path d="M48 155 Q44 160 46 164 Q50 168 52 164" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.4"/>'+
+    // Spiral curl ends — right side
+    '<path d="M120 165 Q124 170 122 175 Q118 178 116 174 Q114 170 118 168" stroke="'+c+'" stroke-width="3" fill="none" opacity="0.7"/>'+
+    '<path d="M116 160 Q120 166 118 170 Q114 174 112 170" stroke="'+c+'" stroke-width="2.5" fill="none" opacity="0.5"/>'+
+    '<path d="M112 155 Q116 160 114 164 Q110 168 108 164" stroke="'+c+'" stroke-width="2" fill="none" opacity="0.4"/>'+
+    // Strand lines
+    '<path d="M54 40 Q52 70 50 100 Q48 130 44 160" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.07"/>'+
+    '<path d="M106 40 Q108 70 110 100 Q112 130 116 160" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.07"/>'+
+    '<path d="M80 -2 Q80 8 79 18" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.08"/>'+
+    '<path d="M66 2 Q76 -2 86 2" stroke="'+sh+'" stroke-width="3" fill="none" opacity="0.1" stroke-linecap="round"/>';},
+
+  hair_ribbon: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,20),sh=dtiShade(c,45);
+    // Long straight with ribbon bow — coquette style
+    return ''+
+    // Back hair
+    '<path d="M54 20 Q54 60 52 90 Q50 120 52 140 Q54 148 56 142" fill="'+dtiShade(c,-15)+'"/>'+
+    '<path d="M106 20 Q106 60 108 90 Q110 120 108 140 Q106 148 104 142" fill="'+dtiShade(c,-15)+'"/>'+
+    // Hair cap
+    '<path d="M56 4 Q56 -2 68 -2 L92 -2 Q104 -2 104 4 L104 20 Q104 30 100 36 L98 58 Q96 62 92 58 L68 58 Q64 62 62 58 L60 36 Q56 30 56 20 Z" fill="'+c+'"/>'+
+    '<path d="M64 0 Q80 -4 96 0 L96 16 Q80 12 64 16 Z" fill="'+sh+'" opacity="0.1"/>'+
+    // Side hair
+    '<path d="M54 36 Q52 55 50 80 Q48 105 50 130 Q52 140 54 135" fill="'+c+'"/>'+
+    '<path d="M106 36 Q108 55 110 80 Q112 105 110 130 Q108 140 106 135" fill="'+c+'"/>'+
+    // Curtain bangs
+    '<path d="M58 20 Q56 30 54 42 Q52 50 50 56" fill="'+c+'"/>'+
+    '<path d="M102 20 Q104 30 106 42 Q108 50 110 56" fill="'+c+'"/>'+
+    // Strand lines
+    '<path d="M56 40 Q54 70 52 100 Q50 120 52 135" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.08"/>'+
+    '<path d="M104 40 Q106 70 108 100 Q110 120 108 135" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.08"/>'+
+    // BIG RIBBON BOW on top
+    '<path d="M66 0 Q58 -8 54 -4 Q50 0 58 4 Q64 6 72 2 Z" fill="#e8829a" opacity="0.8"/>'+
+    '<path d="M94 0 Q102 -8 106 -4 Q110 0 102 4 Q96 6 88 2 Z" fill="#e8829a" opacity="0.8"/>'+
+    '<circle cx="80" cy="0" r="4" fill="#d06880"/>'+
+    '<circle cx="80" cy="0" r="2.5" fill="#e8829a" opacity="0.4"/>'+
+    // Ribbon tails
+    '<path d="M76 2 Q72 10 68 18 Q66 22 68 20" stroke="#d06880" stroke-width="2" fill="none" opacity="0.6"/>'+
+    '<path d="M84 2 Q88 10 92 18 Q94 22 92 20" stroke="#d06880" stroke-width="2" fill="none" opacity="0.6"/>'+
+    '<path d="M68 2 Q76 -1 84 2" stroke="'+sh+'" stroke-width="2.5" fill="none" opacity="0.08" stroke-linecap="round"/>';},
+
   // ── TOPS ── (shoulders~54-106, waist~90-94, hip~66-94 inner, torso ends~190)
   top_fitted: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,22),vdk=dtiShade(c,-50),ac=dtiShade(c,35);
     // Fitted top with collar, seams, buttons
@@ -2414,20 +2539,21 @@ var DTI_SVG = {
     '<rect x="76" y="164" width="10" height="12" rx="2" fill="'+dk+'"/>'+
     '<rect x="78" y="166" width="6" height="8" rx="1" fill="'+lt+'" opacity="0.15"/>'+
     '<circle cx="81" cy="170" r="1.5" fill="'+lt+'" opacity="0.2"/>';},
+};
 
 var DTI_WARDROBES = {
   hair:[
     {name:'Sleek Straight',color:'#2a1a0a',style:'clean',svg:'hair'},
     {name:'Messy Bun',color:'#4a2a10',style:'casual',svg:'hair_bun'},
     {name:'Loose Waves',color:'#3a2010',style:'soft',svg:'hair_long'},
-    {name:'High Ponytail',color:'#1a0a00',style:'sporty',svg:'hair'},
-    {name:'Space Buns',color:'#6a3a20',style:'cute',svg:'hair_bun'},
+    {name:'High Ponytail',color:'#1a0a00',style:'sporty',svg:'hair_ponytail'},
+    {name:'Space Buns',color:'#6a3a20',style:'cute',svg:'hair_spacebuns'},
     {name:'Braided Crown',color:'#5a3018',style:'cottage',svg:'hair_braids'},
     {name:'Curtain Bangs',color:'#2a1a08',style:'trendy',svg:'hair'},
     {name:'Pixie Cut',color:'#1a1a1a',style:'bold',svg:'hair_short'},
-    {name:'Long Curls',color:'#8a5a30',style:'glam',svg:'hair_long'},
-    {name:'Wolf Cut',color:'#3a1a0a',style:'edgy',svg:'hair_short'},
-    {name:'Ribbon Bow Hair',color:'#e8829a',style:'coquette',svg:'hair'},
+    {name:'Long Curls',color:'#8a5a30',style:'glam',svg:'hair_curls'},
+    {name:'Wolf Cut',color:'#3a1a0a',style:'edgy',svg:'hair_wolfcut'},
+    {name:'Ribbon Bow Hair',color:'#4a2818',style:'coquette',svg:'hair_ribbon'},
     {name:'Bubble Braids',color:'#4a2818',style:'y2k',svg:'hair_braids'},
     {name:'Blonde Beach',color:'#d4b070',style:'summer',svg:'hair_long'},
     {name:'Red Velvet',color:'#8a2020',style:'bold',svg:'hair_long'},
@@ -2559,7 +2685,7 @@ function dtiInit(){
   dtiSetSkin(dtiState.skinIdx);
 
   // Clear clothing layers
-  ['dtiLayerHair','dtiLayerTop','dtiLayerBottom','dtiLayerShoes','dtiLayerAcc'].forEach(function(id){
+  ['dtiLayerHair','dtiLayerHairBack','dtiLayerTop','dtiLayerBottom','dtiLayerShoes','dtiLayerAcc'].forEach(function(id){
     document.getElementById(id).innerHTML = '';
   });
 
@@ -2678,7 +2804,7 @@ function dtiRenderItems(cat){
 }
 
 function dtiUpdateFigure(){
-  var layerMap = {hair:'dtiLayerHair',tops:'dtiLayerTop',bottoms:'dtiLayerBottom',shoes:'dtiLayerShoes',accessories:'dtiLayerAcc'};
+  var layerMap = {tops:'dtiLayerTop',bottoms:'dtiLayerBottom',shoes:'dtiLayerShoes',accessories:'dtiLayerAcc'};
   for(var cat in layerMap){
     var layer = document.getElementById(layerMap[cat]);
     var pick = dtiState.picks[cat];
@@ -2687,6 +2813,18 @@ function dtiUpdateFigure(){
     } else {
       layer.innerHTML = '';
     }
+  }
+  // Hair in both layers: back (behind head for flowing hair) + front (bangs over face)
+  var hp = dtiState.picks.hair;
+  var bk = document.getElementById('dtiLayerHairBack');
+  var fr = document.getElementById('dtiLayerHair');
+  if(hp && DTI_SVG[hp.svg]){
+    var svg = DTI_SVG[hp.svg](hp.color);
+    bk.innerHTML = svg;
+    fr.innerHTML = svg;
+  } else {
+    bk.innerHTML = '';
+    fr.innerHTML = '';
   }
 }
 
