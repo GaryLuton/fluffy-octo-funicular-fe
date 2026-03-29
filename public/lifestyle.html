@@ -220,7 +220,7 @@
     /* Avatar panel — SVG figure */
     .dti-avatar-panel{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;padding:20px 16px;position:relative;overflow:hidden;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
-    .dti-figure-wrap{position:relative;width:160px;height:310px;margin:0 auto;}
+    .dti-figure-wrap{position:relative;width:160px;height:380px;margin:0 auto;}
     .dti-figure{width:100%;height:100%;}
     .dti-skin-row{display:flex;gap:6px;justify-content:center;margin-top:10px;}
     .dti-skin-btn{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.15s;padding:0;background:none;}
@@ -446,62 +446,74 @@
       <div class="dti-top" id="dtiGame">
         <div class="dti-avatar-panel" id="dtiAvatarPanel">
           <div class="dti-figure-wrap">
-            <svg class="dti-figure" id="dtiFigure" viewBox="0 0 160 310" xmlns="http://www.w3.org/2000/svg">
+            <svg class="dti-figure" id="dtiFigure" viewBox="0 0 160 380" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#f0d8b8" stop-opacity="1"/>
                   <stop offset="100%" stop-color="#e8c8a8" stop-opacity="1"/>
                 </linearGradient>
+                <linearGradient id="skinGradArm" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#e8c8a8" stop-opacity="1"/>
+                  <stop offset="100%" stop-color="#f0d8b8" stop-opacity="1"/>
+                </linearGradient>
               </defs>
-              <!-- Shadow -->
-              <ellipse cx="80" cy="278" rx="28" ry="5" fill="black" opacity="0.06"/>
-              <!-- Hair back layer (behind head) -->
+              <!-- Floor shadow -->
+              <ellipse cx="80" cy="348" rx="24" ry="4" fill="black" opacity="0.06"/>
+              <!-- Hair back layer -->
               <g id="dtiLayerHair"></g>
-              <!-- Head -->
-              <ellipse cx="80" cy="40" rx="22" ry="26" fill="url(#skinGrad)"/>
-              <ellipse cx="80" cy="40" rx="22" ry="26" fill="none" stroke="#c0a888" stroke-width="0.6" opacity="0.15" class="dti-outline"/>
+              <!-- Head — slightly smaller for fashion proportion -->
+              <ellipse cx="80" cy="32" rx="18" ry="22" fill="url(#skinGrad)"/>
               <!-- Ears -->
-              <ellipse cx="57" cy="42" rx="4" ry="6" fill="url(#skinGrad)"/>
-              <ellipse cx="103" cy="42" rx="4" ry="6" fill="url(#skinGrad)"/>
-              <!-- Eyes -->
-              <ellipse cx="71" cy="38" rx="3.5" ry="2" fill="#6a5a4a" opacity="0.25" class="dti-eye"/>
-              <ellipse cx="89" cy="38" rx="3.5" ry="2" fill="#6a5a4a" opacity="0.25" class="dti-eye"/>
-              <ellipse cx="70" cy="37.5" rx="1.5" ry="1.5" fill="#1a1a1a" opacity="0.2"/>
-              <ellipse cx="88" cy="37.5" rx="1.5" ry="1.5" fill="#1a1a1a" opacity="0.2"/>
+              <ellipse cx="61" cy="34" rx="3" ry="5" fill="url(#skinGrad)"/>
+              <ellipse cx="99" cy="34" rx="3" ry="5" fill="url(#skinGrad)"/>
+              <!-- Eyes — bigger, doll-like -->
+              <ellipse cx="73" cy="30" rx="4" ry="2.5" fill="#6a5a4a" opacity="0.22" class="dti-eye"/>
+              <ellipse cx="87" cy="30" rx="4" ry="2.5" fill="#6a5a4a" opacity="0.22" class="dti-eye"/>
+              <ellipse cx="73" cy="29.5" rx="2" ry="2" fill="#1a1a1a" opacity="0.18"/>
+              <ellipse cx="87" cy="29.5" rx="2" ry="2" fill="#1a1a1a" opacity="0.18"/>
+              <!-- Eye shine -->
+              <circle cx="74" cy="29" r="0.8" fill="white" opacity="0.15"/>
+              <circle cx="88" cy="29" r="0.8" fill="white" opacity="0.15"/>
+              <!-- Lashes -->
+              <path d="M68 28.5 Q73 27 78 28.5" stroke="#4a3a2a" stroke-width="0.6" fill="none" opacity="0.12"/>
+              <path d="M82 28.5 Q87 27 92 28.5" stroke="#4a3a2a" stroke-width="0.6" fill="none" opacity="0.12"/>
               <!-- Eyebrows -->
-              <path d="M65 34 Q71 31.5 76 33.5" stroke="#5a4a3a" stroke-width="1" fill="none" opacity="0.12"/>
-              <path d="M84 33.5 Q89 31.5 95 34" stroke="#5a4a3a" stroke-width="1" fill="none" opacity="0.12"/>
+              <path d="M68 26 Q73 24 77 25.5" stroke="#5a4a3a" stroke-width="0.8" fill="none" opacity="0.12"/>
+              <path d="M83 25.5 Q87 24 92 26" stroke="#5a4a3a" stroke-width="0.8" fill="none" opacity="0.12"/>
               <!-- Nose -->
-              <path d="M79 42 Q80 46 81 42" stroke="#c0a888" stroke-width="0.6" fill="none" opacity="0.15" class="dti-outline"/>
-              <!-- Lips -->
-              <path d="M74 49 Q77 47 80 49 Q83 47 86 49" stroke="#c8908a" stroke-width="1.2" fill="none" opacity="0.25" class="dti-lip"/>
-              <path d="M75 49.5 Q80 52 85 49.5" stroke="#c8908a" stroke-width="0.8" fill="none" opacity="0.15" class="dti-lip"/>
-              <!-- Neck -->
-              <path d="M72 64 Q72 58 74 56 L86 56 Q88 58 88 64 L88 78 L72 78 Z" fill="url(#skinGrad)"/>
-              <!-- Collarbones -->
-              <path d="M58 78 Q70 82 80 80 Q90 82 102 78" stroke="#c0a888" stroke-width="0.5" fill="none" opacity="0.1" class="dti-outline"/>
+              <path d="M79 34 Q80 37 81 34" stroke="#c0a888" stroke-width="0.5" fill="none" opacity="0.12" class="dti-outline"/>
+              <!-- Lips — cupid's bow -->
+              <path d="M75 40 Q77 38.5 80 40 Q83 38.5 85 40" stroke="#c8908a" stroke-width="1" fill="none" opacity="0.22" class="dti-lip"/>
+              <path d="M76 40.5 Q80 43 84 40.5" stroke="#c8908a" stroke-width="0.7" fill="none" opacity="0.14" class="dti-lip"/>
+              <!-- Neck — long, elegant -->
+              <path d="M74 52 L74 48 Q74 44 76 44 L84 44 Q86 44 86 48 L86 52 L86 68 L74 68 Z" fill="url(#skinGrad)"/>
+              <!-- Shoulders & collarbones -->
+              <path d="M50 70 Q65 74 80 72 Q95 74 110 70" stroke="#c0a888" stroke-width="0.4" fill="none" opacity="0.08" class="dti-outline"/>
               <!-- Top layer -->
               <g id="dtiLayerTop"></g>
-              <!-- Body (skin) -->
-              <path d="M52 82 Q52 78 58 76 L102 76 Q108 78 108 82 L108 158 Q108 162 102 162 L58 162 Q52 162 52 158 Z" fill="url(#skinGrad)"/>
-              <!-- Arms -->
-              <path d="M52 80 Q44 78 40 82 Q34 90 35 105 L37 130 Q38 138 42 136 L46 128 Q50 110 52 96" fill="url(#skinGrad)"/>
-              <path d="M108 80 Q116 78 120 82 Q126 90 125 105 L123 130 Q122 138 118 136 L114 128 Q110 110 108 96" fill="url(#skinGrad)"/>
-              <!-- Hands -->
-              <ellipse cx="40" cy="136" rx="6" ry="8" fill="url(#skinGrad)"/>
-              <ellipse cx="120" cy="136" rx="6" ry="8" fill="url(#skinGrad)"/>
-              <!-- Fingers (subtle) -->
-              <path d="M36 140 Q35 145 36 148" stroke="url(#skinGrad)" stroke-width="3" fill="none" opacity="0.5"/>
-              <path d="M40 142 Q39 147 40 150" stroke="url(#skinGrad)" stroke-width="3" fill="none" opacity="0.5"/>
-              <path d="M124 140 Q125 145 124 148" stroke="url(#skinGrad)" stroke-width="3" fill="none" opacity="0.5"/>
-              <path d="M120 142 Q121 147 120 150" stroke="url(#skinGrad)" stroke-width="3" fill="none" opacity="0.5"/>
+              <!-- Body — DTI proportions: narrow waist, wider hips -->
+              <path d="M50 72 Q48 68 54 66 L106 66 Q112 68 110 72 L108 98 Q106 108 100 112 L100 150 Q100 158 106 162 L60 162 Q54 158 60 150 L60 112 Q54 108 52 98 Z" fill="url(#skinGrad)"/>
+              <!-- Arms — long, slender -->
+              <path d="M50 70 Q42 68 38 72 Q32 82 33 100 L35 148 Q36 155 40 153 L43 146 Q46 120 50 92" fill="url(#skinGrad)"/>
+              <path d="M110 70 Q118 68 122 72 Q128 82 127 100 L125 148 Q124 155 120 153 L117 146 Q114 120 110 92" fill="url(#skinGrad)"/>
+              <!-- Hands — delicate -->
+              <ellipse cx="38" cy="154" rx="5" ry="7" fill="url(#skinGrad)"/>
+              <ellipse cx="122" cy="154" rx="5" ry="7" fill="url(#skinGrad)"/>
+              <path d="M35 158 Q34 163 35 166" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
+              <path d="M38 160 Q37 164 38 167" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
+              <path d="M125 158 Q126 163 125 166" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
+              <path d="M122 160 Q123 164 122 167" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
               <!-- Bottom layer -->
               <g id="dtiLayerBottom"></g>
-              <!-- Legs (skin) -->
-              <path d="M58 162 Q58 165 60 165 L60 252 Q60 258 66 258 L74 258 Q78 258 78 254 L78 165 Q80 162 82 165 L82 254 Q82 258 86 258 L94 258 Q100 258 100 252 L100 165 Q102 165 102 162 Z" fill="url(#skinGrad)"/>
-              <!-- Knee detail -->
-              <path d="M66 210 Q70 213 74 210" stroke="#c0a888" stroke-width="0.4" fill="none" opacity="0.08" class="dti-outline"/>
-              <path d="M86 210 Q90 213 94 210" stroke="#c0a888" stroke-width="0.4" fill="none" opacity="0.08" class="dti-outline"/>
+              <!-- Legs — long, slim (DTI style) -->
+              <path d="M60 162 L58 310 Q58 318 64 318 L74 318 Q78 318 78 312 L80 172" fill="url(#skinGrad)"/>
+              <path d="M80 172 L82 312 Q82 318 86 318 L96 318 Q102 318 102 310 L100 162" fill="url(#skinGrad)"/>
+              <!-- Knee hint -->
+              <path d="M64 240 Q68 243 74 240" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.06" class="dti-outline"/>
+              <path d="M86 240 Q92 243 96 240" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.06" class="dti-outline"/>
+              <!-- Ankle taper -->
+              <path d="M62 300 Q68 298 74 300" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.05" class="dti-outline"/>
+              <path d="M86 300 Q92 298 98 300" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.05" class="dti-outline"/>
               <!-- Shoes layer -->
               <g id="dtiLayerShoes"></g>
               <!-- Accessory layer -->
@@ -2057,105 +2069,162 @@ var DTI_SVG = {
     // Top shine
     '<path d="M70 12 Q76 9 82 12" stroke="'+sh+'" stroke-width="2" fill="none" opacity="0.1" stroke-linecap="round"/>';},
 
-  // ── TOPS ──
-  top_fitted: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);return '<path d="M56 82 Q56 78 62 76 L98 76 Q104 78 104 82 L106 152 Q106 156 100 156 L60 156 Q54 156 54 152 Z" fill="'+c+'"/>'+
-    '<path d="M56 82 Q56 78 62 76 L98 76 Q104 78 104 82 L106 90 Q80 95 54 90 Z" fill="'+lt+'" opacity="0.3"/>'+
-    '<path d="M46 80 L56 82 L56 94 L46 90 Z" fill="'+c+'"/><path d="M114 80 L104 82 L104 94 L114 90 Z" fill="'+c+'"/>'+
-    '<path d="M46 80 L56 82 L56 88 L46 86 Z" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M70 90 Q72 110 70 150" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M90 90 Q88 110 90 150" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M62 76 Q80 80 98 76" stroke="'+dk+'" stroke-width="1" fill="none" opacity="0.15"/>';},
-  top_crop: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);return '<path d="M54 82 Q54 78 60 76 L100 76 Q106 78 106 82 L106 122 Q106 126 100 126 L60 126 Q54 126 54 122 Z" fill="'+c+'"/>'+
-    '<path d="M54 82 Q54 78 60 76 L100 76 Q106 78 106 82 L106 90 Q80 94 54 90 Z" fill="'+lt+'" opacity="0.3"/>'+
-    '<path d="M44 80 L54 82 L54 92 L44 88 Z" fill="'+c+'"/><path d="M116 80 L106 82 L106 92 L116 88 Z" fill="'+c+'"/>'+
-    '<path d="M54 122 Q80 128 106 122" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.2"/>'+
-    '<path d="M72 88 Q74 105 72 122" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>';},
-  top_oversized: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,18);return '<path d="M40 80 Q42 74 58 72 L102 72 Q118 74 120 80 L122 148 Q122 154 112 154 L48 154 Q38 154 38 148 Z" fill="'+c+'"/>'+
-    '<path d="M40 80 Q42 74 58 72 L102 72 Q118 74 120 80 L120 92 Q80 98 40 92 Z" fill="'+lt+'" opacity="0.25"/>'+
-    '<path d="M32 78 L40 80 L40 102 L32 98 Z" fill="'+c+'"/><path d="M128 78 L120 80 L120 102 L128 98 Z" fill="'+c+'"/>'+
-    '<path d="M60 96 Q62 120 60 145" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.12"/>'+
-    '<path d="M100 96 Q98 120 100 145" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.12"/>'+
-    '<path d="M48 154 Q80 160 112 154" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.15"/>';},
-  top_offsh: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);return '<path d="M48 90 Q48 86 56 84 L104 84 Q112 86 112 90 L112 152 Q112 156 106 156 L54 156 Q48 156 48 152 Z" fill="'+c+'"/>'+
-    '<path d="M48 90 L112 90" stroke="'+lt+'" stroke-width="3" opacity="0.5"/>'+
-    '<path d="M48 92 Q80 96 112 92" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.2"/>'+
-    '<path d="M44 88 Q54 82 80 80 Q106 82 116 88" stroke="'+c+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
-    '<path d="M68 95 Q70 120 68 150" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>';},
+  // ── TOPS (fit to DTI body: shoulders~50-110, waist~100-108, torso ends~162) ──
+  top_fitted: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20),vdk=dtiShade(c,-50);
+    return '<path d="M50 72 Q48 68 56 66 L104 66 Q112 68 110 72 L108 100 Q104 112 98 115 L98 158 Q98 162 92 162 L68 162 Q62 162 62 158 L62 115 Q56 112 52 100 Z" fill="'+c+'"/>'+
+    // Chest highlight
+    '<path d="M50 72 Q48 68 56 66 L104 66 Q112 68 110 72 L108 82 Q80 88 52 82 Z" fill="'+lt+'" opacity="0.25"/>'+
+    // Sleeves
+    '<path d="M50 72 L38 70 Q32 72 30 80 L32 106 Q34 112 38 110 L42 104 Q48 86 50 78" fill="'+c+'"/>'+
+    '<path d="M110 72 L122 70 Q128 72 130 80 L128 106 Q126 112 122 110 L118 104 Q112 86 110 78" fill="'+c+'"/>'+
+    '<path d="M38 72 L50 74 L50 80 L38 78 Z" fill="'+lt+'" opacity="0.18"/>'+
+    // Waist seam
+    '<path d="M62 115 Q80 118 98 115" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>'+
+    // Side seams
+    '<path d="M54 80 Q54 95 56 110 Q58 115 62 118" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.1"/>'+
+    '<path d="M106 80 Q106 95 104 110 Q102 115 98 118" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.1"/>'+
+    // Center fold
+    '<path d="M80 82 Q80 110 80 158" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>'+
+    // Neckline
+    '<path d="M56 66 Q80 72 104 66" stroke="'+vdk+'" stroke-width="0.8" fill="none" opacity="0.1"/>';},
 
-  // ── BOTTOMS ──
-  bottom_skirt: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,15);return '<path d="M54 155 L44 238 Q44 244 58 244 L102 244 Q116 244 116 238 L106 155 Z" fill="'+c+'"/>'+
-    '<path d="M54 155 Q80 160 106 155 L108 165 Q80 170 52 165 Z" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M62 160 Q60 200 56 240" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.15"/>'+
-    '<path d="M80 158 Q80 200 80 242" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.1"/>'+
-    '<path d="M98 160 Q100 200 104 240" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.15"/>'+
-    '<path d="M70 162 Q68 200 64 240" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>';},
-  bottom_mini: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,15);return '<path d="M56 155 L48 204 Q48 208 60 208 L100 208 Q112 208 112 204 L104 155 Z" fill="'+c+'"/>'+
-    '<path d="M56 155 Q80 160 104 155 L106 163 Q80 167 54 163 Z" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M66 158 Q64 182 60 205" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M94 158 Q96 182 100 205" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M48 204 Q80 210 112 204" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>';},
-  bottom_pants: function(c){var dk=dtiShade(c,-28),lt=dtiShade(c,12);return '<path d="M56 155 L54 250 Q54 254 60 254 L76 254 Q78 254 78 250 L80 168 L82 250 Q82 254 84 254 L100 254 Q106 254 106 250 L104 155 Z" fill="'+c+'"/>'+
-    '<path d="M56 155 Q80 162 104 155 L104 165 Q80 170 56 165 Z" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M66 165 Q66 200 64 248" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M94 165 Q94 200 96 248" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
-    '<path d="M72 170 Q72 210 74 250" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>'+
-    '<path d="M78 168 L82 168" stroke="'+dk+'" stroke-width="0.8" opacity="0.2"/>';},
-  bottom_wide: function(c){var dk=dtiShade(c,-28),lt=dtiShade(c,12);return '<path d="M56 155 L42 252 Q42 258 56 258 L76 258 Q78 258 78 254 L80 168 L82 254 Q82 258 84 258 L106 258 Q118 258 118 252 L104 155 Z" fill="'+c+'"/>'+
-    '<path d="M56 155 Q80 162 104 155 L104 165 Q80 170 56 165 Z" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M60 165 Q56 210 48 255" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.14"/>'+
-    '<path d="M100 165 Q104 210 112 255" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.14"/>'+
-    '<path d="M68 170 Q64 210 58 255" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>';},
+  top_crop: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,22),vdk=dtiShade(c,-50);
+    return '<path d="M50 72 Q48 68 56 66 L104 66 Q112 68 110 72 L108 100 Q106 110 100 112 L62 112 Q56 110 52 100 Z" fill="'+c+'"/>'+
+    '<path d="M50 72 Q48 68 56 66 L104 66 Q112 68 110 72 L108 82 Q80 88 52 82 Z" fill="'+lt+'" opacity="0.25"/>'+
+    '<path d="M50 72 L36 70 Q30 72 28 82 L30 100 Q32 106 36 104 L40 96 Q46 82 50 76" fill="'+c+'"/>'+
+    '<path d="M110 72 L124 70 Q130 72 132 82 L130 100 Q128 106 124 104 L120 96 Q114 82 110 76" fill="'+c+'"/>'+
+    // Hem
+    '<path d="M62 112 Q80 116 100 112" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.18"/>'+
+    '<path d="M36 72 L50 74 L50 80 L36 78 Z" fill="'+lt+'" opacity="0.18"/>'+
+    '<path d="M80 82 Q80 95 80 110" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>';},
 
-  // ── SHOES ──
-  shoes_boots: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,20);return '<path d="M56 240 L54 262 Q54 268 58 268 L80 268 Q82 268 82 264 L82 240 Z" fill="'+c+'"/>'+
-    '<path d="M82 240 L80 262 Q80 268 84 268 L106 268 Q110 268 110 264 L110 240 Z" fill="'+c+'"/>'+
-    '<rect x="54" y="242" width="28" height="3" rx="1" fill="'+lt+'" opacity="0.2"/>'+
-    '<rect x="80" y="242" width="30" height="3" rx="1" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M54 262 Q68 265 82 262" stroke="'+dk+'" stroke-width="1.5" fill="none" opacity="0.2"/>'+
-    '<path d="M80 262 Q95 265 110 262" stroke="'+dk+'" stroke-width="1.5" fill="none" opacity="0.2"/>'+
-    '<rect x="54" y="264" width="28" height="4" rx="2" fill="'+dk+'" opacity="0.35"/>'+
-    '<rect x="80" y="264" width="30" height="4" rx="2" fill="'+dk+'" opacity="0.35"/>';},
-  shoes_heels: function(c){var dk=dtiShade(c,-35);return '<path d="M58 252 Q58 248 62 248 L76 248 Q78 250 76 256 L56 268 L52 268 Q50 266 52 262 Z" fill="'+c+'"/>'+
-    '<path d="M86 252 Q86 248 90 248 L104 248 Q106 250 104 256 L84 268 L80 268 Q78 266 80 262 Z" fill="'+c+'"/>'+
-    '<rect x="50" y="264" width="4" height="10" rx="1" fill="'+dk+'" transform="rotate(-6 52 264)"/>'+
-    '<rect x="78" y="264" width="4" height="10" rx="1" fill="'+dk+'" transform="rotate(-6 80 264)"/>'+
-    '<path d="M62 250 Q68 249 76 250" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.2"/>'+
-    '<path d="M90 250 Q96 249 104 250" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.2"/>';},
-  shoes_sneakers: function(c){var dk=dtiShade(c,-25);return '<path d="M52 250 Q52 246 58 246 L78 246 Q82 246 82 250 L82 260 Q82 264 78 264 L52 264 Q48 264 48 260 Z" fill="'+c+'"/>'+
-    '<path d="M80 250 Q80 246 86 246 L106 246 Q110 246 110 250 L110 260 Q110 264 106 264 L80 264 Q76 264 76 260 Z" fill="'+c+'"/>'+
-    '<rect x="48" y="258" width="34" height="5" rx="2.5" fill="white" opacity="0.7"/>'+
-    '<rect x="76" y="258" width="34" height="5" rx="2.5" fill="white" opacity="0.7"/>'+
-    '<path d="M60 248 L62 254 L66 248 L70 254 L74 248" stroke="white" stroke-width="0.8" fill="none" opacity="0.35"/>'+
-    '<path d="M88 248 L90 254 L94 248 L98 254 L102 248" stroke="white" stroke-width="0.8" fill="none" opacity="0.35"/>'+
-    '<circle cx="56" cy="252" r="2" fill="'+dk+'" opacity="0.15"/><circle cx="84" cy="252" r="2" fill="'+dk+'" opacity="0.15"/>';},
-  shoes_flats: function(c){var dk=dtiShade(c,-30);return '<ellipse cx="66" cy="258" rx="18" ry="7" fill="'+c+'"/><ellipse cx="98" cy="258" rx="18" ry="7" fill="'+c+'"/>'+
-    '<ellipse cx="66" cy="256" rx="14" ry="4" fill="'+dtiShade(c,15)+'" opacity="0.3"/>'+
-    '<ellipse cx="98" cy="256" rx="14" ry="4" fill="'+dtiShade(c,15)+'" opacity="0.3"/>'+
-    '<path d="M58 255 Q66 250 74 255" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.2"/>'+
-    '<path d="M90 255 Q98 250 106 255" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.2"/>';},
+  top_oversized: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,18);
+    return '<path d="M42 72 Q40 66 52 64 L108 64 Q120 66 118 72 L116 155 Q116 162 108 162 L52 162 Q44 162 44 155 Z" fill="'+c+'"/>'+
+    '<path d="M42 72 Q40 66 52 64 L108 64 Q120 66 118 72 L116 85 Q80 92 44 85 Z" fill="'+lt+'" opacity="0.2"/>'+
+    '<path d="M42 72 L26 70 Q20 74 18 86 L22 118 Q24 124 28 122 L34 112 Q40 90 42 80" fill="'+c+'"/>'+
+    '<path d="M118 72 L134 70 Q140 74 142 86 L138 118 Q136 124 132 122 L126 112 Q120 90 118 80" fill="'+c+'"/>'+
+    // Drape folds
+    '<path d="M60 90 Q62 120 60 155" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.1"/>'+
+    '<path d="M100 90 Q98 120 100 155" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.1"/>'+
+    '<path d="M74 88 Q74 120 74 158" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>'+
+    '<path d="M52 162 Q80 168 108 162" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>';},
 
-  // ── ACCESSORIES ──
-  acc_necklace: function(c){var dk=dtiShade(c,-30);return '<path d="M66 76 Q72 84 80 88 Q88 84 94 76" fill="none" stroke="'+c+'" stroke-width="1.5"/>'+
-    '<circle cx="80" cy="88" r="5" fill="'+c+'"/><circle cx="80" cy="88" r="3" fill="'+dtiShade(c,30)+'" opacity="0.4"/>'+
-    '<circle cx="74" cy="83" r="1.5" fill="'+c+'" opacity="0.5"/><circle cx="86" cy="83" r="1.5" fill="'+c+'" opacity="0.5"/>';},
-  acc_bag: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);return '<rect x="114" y="118" width="26" height="30" rx="5" fill="'+c+'"/>'+
-    '<rect x="116" y="120" width="22" height="14" rx="3" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M120 118 Q127 108 134 118" fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round"/>'+
-    '<rect x="124" y="132" width="8" height="4" rx="2" fill="'+dk+'" opacity="0.3"/>'+
-    '<line x1="114" y1="134" x2="140" y2="134" stroke="'+dk+'" stroke-width="0.5" opacity="0.15"/>';},
-  acc_hat: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,18);return '<ellipse cx="80" cy="10" rx="34" ry="9" fill="'+c+'"/>'+
-    '<ellipse cx="80" cy="10" rx="30" ry="6" fill="'+lt+'" opacity="0.2"/>'+
-    '<path d="M60 10 Q60 -4 80 -6 Q100 -4 100 10" fill="'+c+'"/>'+
-    '<path d="M65 8 Q70 -2 80 -3 Q90 -2 95 8" fill="'+lt+'" opacity="0.15"/>'+
-    '<ellipse cx="80" cy="10" rx="34" ry="3" fill="'+dk+'" opacity="0.1"/>';},
-  acc_earrings: function(c){var lt=dtiShade(c,30);return '<circle cx="55" cy="50" r="5" fill="'+c+'"/><circle cx="105" cy="50" r="5" fill="'+c+'"/>'+
-    '<circle cx="54" cy="49" r="2" fill="'+lt+'" opacity="0.3"/><circle cx="104" cy="49" r="2" fill="'+lt+'" opacity="0.3"/>'+
-    '<line x1="55" y1="44" x2="55" y2="46" stroke="'+c+'" stroke-width="1"/><line x1="105" y1="44" x2="105" y2="46" stroke="'+c+'" stroke-width="1"/>';},
-  acc_belt: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);return '<rect x="50" y="152" width="60" height="7" rx="2" fill="'+c+'"/>'+
-    '<rect x="50" y="152" width="60" height="2" rx="1" fill="'+lt+'" opacity="0.15"/>'+
-    '<rect x="76" y="150" width="10" height="11" rx="2" fill="'+dk+'"/>'+
-    '<rect x="78" y="152" width="6" height="7" rx="1" fill="'+lt+'" opacity="0.2"/>'+
-    '<circle cx="81" cy="155.5" r="1.5" fill="'+lt+'" opacity="0.3"/>';},
+  top_offsh: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,22);
+    return '<path d="M52 82 Q52 78 58 76 L102 76 Q108 78 108 82 L108 100 Q104 112 98 115 L98 158 Q98 162 92 162 L68 162 Q62 162 62 158 L62 115 Q56 112 52 100 Z" fill="'+c+'"/>'+
+    // Off-shoulder neckline
+    '<path d="M44 76 Q58 68 80 66 Q102 68 116 76" stroke="'+c+'" stroke-width="4" fill="none" stroke-linecap="round"/>'+
+    '<path d="M44 76 Q58 68 80 66 Q102 68 116 76" stroke="'+lt+'" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.4"/>'+
+    // Ruffle detail
+    '<path d="M48 78 Q54 74 60 78 Q66 74 72 78 Q78 74 84 78 Q90 74 96 78 Q102 74 108 78 Q114 74 118 78" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>'+
+    '<path d="M66 90 Q68 110 66 155" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>'+
+    '<path d="M94 90 Q92 110 94 155" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>';},
+
+  // ── BOTTOMS (waist~155-162, legs end~318) ──
+  bottom_skirt: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,15);
+    return '<path d="M60 162 L42 305 Q42 312 58 312 L102 312 Q118 312 118 305 L100 162 Z" fill="'+c+'"/>'+
+    '<path d="M60 162 Q80 167 100 162 L102 175 Q80 180 58 175 Z" fill="'+lt+'" opacity="0.2"/>'+
+    // Pleat folds
+    '<path d="M66 170 Q62 230 54 308" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.12"/>'+
+    '<path d="M80 166 Q80 240 80 310" stroke="'+dk+'" stroke-width="0.4" fill="none" opacity="0.08"/>'+
+    '<path d="M94 170 Q98 230 106 308" stroke="'+dk+'" stroke-width="0.7" fill="none" opacity="0.12"/>'+
+    '<path d="M72 168 Q70 235 64 310" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>'+
+    '<path d="M88 168 Q90 235 96 310" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>'+
+    '<path d="M42 305 Q80 314 118 305" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.1"/>';},
+
+  bottom_mini: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,15);
+    return '<path d="M58 162 L48 232 Q48 238 60 238 L100 238 Q112 238 112 232 L102 162 Z" fill="'+c+'"/>'+
+    '<path d="M58 162 Q80 167 102 162 L104 172 Q80 176 56 172 Z" fill="'+lt+'" opacity="0.2"/>'+
+    '<path d="M68 166 Q66 200 62 234" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>'+
+    '<path d="M92 166 Q94 200 98 234" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>'+
+    '<path d="M48 232 Q80 240 112 232" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>';},
+
+  bottom_pants: function(c){var dk=dtiShade(c,-28),lt=dtiShade(c,12);
+    return '<path d="M58 162 L56 312 Q56 318 62 318 L76 318 Q78 318 78 314 L80 178 L82 314 Q82 318 84 318 L100 318 Q106 318 106 312 L102 162 Z" fill="'+c+'"/>'+
+    '<path d="M58 162 Q80 169 102 162 L102 174 Q80 179 58 174 Z" fill="'+lt+'" opacity="0.18"/>'+
+    // Seams
+    '<path d="M68 175 Q68 240 66 314" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>'+
+    '<path d="M94 175 Q94 240 96 314" stroke="'+dk+'" stroke-width="0.5" fill="none" opacity="0.12"/>'+
+    '<path d="M74 178 Q74 245 76 316" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>'+
+    '<path d="M78 178 L82 178" stroke="'+dk+'" stroke-width="0.6" opacity="0.15"/>';},
+
+  bottom_wide: function(c){var dk=dtiShade(c,-28),lt=dtiShade(c,12);
+    return '<path d="M58 162 L38 314 Q38 322 54 322 L76 322 Q78 322 78 316 L80 178 L82 316 Q82 322 84 322 L108 322 Q122 322 122 314 L102 162 Z" fill="'+c+'"/>'+
+    '<path d="M58 162 Q80 169 102 162 L102 174 Q80 179 58 174 Z" fill="'+lt+'" opacity="0.18"/>'+
+    '<path d="M62 175 Q54 245 44 318" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>'+
+    '<path d="M98 175 Q106 245 116 318" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.12"/>'+
+    '<path d="M70 178 Q64 245 56 320" stroke="'+dk+'" stroke-width="0.3" fill="none" opacity="0.06"/>';},
+
+  // ── SHOES (feet at ~310-340) ──
+  shoes_boots: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,20);
+    return '<path d="M56 300 L54 332 Q54 340 60 340 L78 340 Q82 340 82 334 L82 300 Z" fill="'+c+'"/>'+
+    '<path d="M82 300 L80 332 Q80 340 86 340 L104 340 Q110 340 110 334 L110 300 Z" fill="'+c+'"/>'+
+    '<rect x="54" y="302" width="28" height="3" rx="1" fill="'+lt+'" opacity="0.18"/>'+
+    '<rect x="80" y="302" width="30" height="3" rx="1" fill="'+lt+'" opacity="0.18"/>'+
+    '<path d="M54 330 Q68 334 82 330" stroke="'+dk+'" stroke-width="1.2" fill="none" opacity="0.15"/>'+
+    '<path d="M80 330 Q96 334 110 330" stroke="'+dk+'" stroke-width="1.2" fill="none" opacity="0.15"/>'+
+    '<rect x="54" y="334" width="28" height="6" rx="2" fill="'+dk+'" opacity="0.3"/>'+
+    '<rect x="80" y="334" width="30" height="6" rx="2" fill="'+dk+'" opacity="0.3"/>';},
+
+  shoes_heels: function(c){var dk=dtiShade(c,-35),lt=dtiShade(c,15);
+    return '<path d="M58 314 Q58 310 62 310 L76 310 Q80 312 78 318 L56 334 L52 334 Q50 332 52 328 Z" fill="'+c+'"/>'+
+    '<path d="M86 314 Q86 310 90 310 L104 310 Q108 312 106 318 L84 334 L80 334 Q78 332 80 328 Z" fill="'+c+'"/>'+
+    '<rect x="50" y="330" width="4" height="12" rx="1.5" fill="'+dk+'" transform="rotate(-8 52 330)"/>'+
+    '<rect x="78" y="330" width="4" height="12" rx="1.5" fill="'+dk+'" transform="rotate(-8 80 330)"/>'+
+    '<path d="M62 312 Q70 310 76 312" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
+    '<path d="M90 312 Q98 310 104 312" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
+    '<path d="M60 312 L76 312" stroke="'+lt+'" stroke-width="0.8" fill="none" opacity="0.12"/>'+
+    '<path d="M88 312 L104 312" stroke="'+lt+'" stroke-width="0.8" fill="none" opacity="0.12"/>';},
+
+  shoes_sneakers: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,15);
+    return '<path d="M52 312 Q52 308 58 308 L78 308 Q82 308 82 312 L82 324 Q82 330 78 330 L50 330 Q46 330 46 326 Z" fill="'+c+'"/>'+
+    '<path d="M78 312 Q78 308 84 308 L106 308 Q110 308 110 312 L110 324 Q110 330 106 330 L76 330 Q74 330 74 326 Z" fill="'+c+'"/>'+
+    '<rect x="46" y="324" width="36" height="5" rx="2.5" fill="white" opacity="0.65"/>'+
+    '<rect x="74" y="324" width="36" height="5" rx="2.5" fill="white" opacity="0.65"/>'+
+    '<path d="M60 310 L62 316 L66 310 L70 316 L74 310" stroke="white" stroke-width="0.7" fill="none" opacity="0.3"/>'+
+    '<path d="M88 310 L90 316 L94 310 L98 316 L102 310" stroke="white" stroke-width="0.7" fill="none" opacity="0.3"/>'+
+    '<circle cx="56" cy="314" r="1.5" fill="'+dk+'" opacity="0.12"/><circle cx="84" cy="314" r="1.5" fill="'+dk+'" opacity="0.12"/>';},
+
+  shoes_flats: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,18);
+    return '<ellipse cx="66" cy="322" rx="18" ry="8" fill="'+c+'"/><ellipse cx="98" cy="322" rx="18" ry="8" fill="'+c+'"/>'+
+    '<ellipse cx="66" cy="320" rx="14" ry="4.5" fill="'+lt+'" opacity="0.25"/>'+
+    '<ellipse cx="98" cy="320" rx="14" ry="4.5" fill="'+lt+'" opacity="0.25"/>'+
+    '<path d="M56 319 Q66 314 76 319" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
+    '<path d="M88 319 Q98 314 108 319" stroke="'+dk+'" stroke-width="0.6" fill="none" opacity="0.15"/>'+
+    // Bow detail
+    '<path d="M62 317 Q66 315 70 317" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.1"/>'+
+    '<path d="M94 317 Q98 315 102 317" stroke="'+dk+'" stroke-width="0.8" fill="none" opacity="0.1"/>';},
+
+  // ── ACCESSORIES (adjusted to new proportions) ──
+  acc_necklace: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,30);
+    return '<path d="M68 66 Q74 76 80 80 Q86 76 92 66" fill="none" stroke="'+c+'" stroke-width="1.2"/>'+
+    '<circle cx="80" cy="80" r="4.5" fill="'+c+'"/><circle cx="80" cy="80" r="2.5" fill="'+lt+'" opacity="0.35"/>'+
+    '<circle cx="75" cy="75" r="1.2" fill="'+c+'" opacity="0.45"/><circle cx="85" cy="75" r="1.2" fill="'+c+'" opacity="0.45"/>';},
+
+  acc_bag: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);
+    return '<rect x="118" y="115" width="24" height="28" rx="5" fill="'+c+'"/>'+
+    '<rect x="120" y="117" width="20" height="13" rx="3" fill="'+lt+'" opacity="0.18"/>'+
+    '<path d="M123 115 Q130 106 137 115" fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round"/>'+
+    '<rect x="127" y="128" width="7" height="3.5" rx="1.5" fill="'+dk+'" opacity="0.25"/>'+
+    '<line x1="118" y1="130" x2="142" y2="130" stroke="'+dk+'" stroke-width="0.4" opacity="0.12"/>';},
+
+  acc_hat: function(c){var dk=dtiShade(c,-25),lt=dtiShade(c,18);
+    return '<ellipse cx="80" cy="6" rx="30" ry="8" fill="'+c+'"/>'+
+    '<ellipse cx="80" cy="6" rx="26" ry="5" fill="'+lt+'" opacity="0.18"/>'+
+    '<path d="M62 6 Q62 -6 80 -8 Q98 -6 98 6" fill="'+c+'"/>'+
+    '<path d="M66 4 Q70 -4 80 -5 Q90 -4 94 4" fill="'+lt+'" opacity="0.12"/>'+
+    '<ellipse cx="80" cy="6" rx="30" ry="2.5" fill="'+dk+'" opacity="0.08"/>';},
+
+  acc_earrings: function(c){var lt=dtiShade(c,30);
+    return '<circle cx="58" cy="42" r="4.5" fill="'+c+'"/><circle cx="102" cy="42" r="4.5" fill="'+c+'"/>'+
+    '<circle cx="57" cy="41" r="1.8" fill="'+lt+'" opacity="0.28"/><circle cx="101" cy="41" r="1.8" fill="'+lt+'" opacity="0.28"/>'+
+    '<line x1="58" y1="36" x2="58" y2="38" stroke="'+c+'" stroke-width="0.8"/><line x1="102" y1="36" x2="102" y2="38" stroke="'+c+'" stroke-width="0.8"/>';},
+
+  acc_belt: function(c){var dk=dtiShade(c,-30),lt=dtiShade(c,20);
+    return '<path d="M58 159 Q80 163 102 159 L102 166 Q80 170 58 166 Z" fill="'+c+'"/>'+
+    '<path d="M58 159 Q80 163 102 159 L102 162 Q80 165 58 162 Z" fill="'+lt+'" opacity="0.15"/>'+
+    '<rect x="76" y="157" width="10" height="12" rx="2" fill="'+dk+'"/>'+
+    '<rect x="78" y="159" width="6" height="8" rx="1" fill="'+lt+'" opacity="0.18"/>'+
+    '<circle cx="81" cy="163" r="1.5" fill="'+lt+'" opacity="0.25"/>';},
 };
 
 var DTI_WARDROBES = {
