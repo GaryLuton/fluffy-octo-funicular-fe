@@ -101,7 +101,13 @@ app.delete('/api/auth/account', auth, (req, res) => {
 // ─── Data Routes (CRUD for user data) ───
 
 // Valid keys that map to the frontend's localStorage keys
-const VALID_KEYS = ['profile', 'wishlist', 'catalog', 'approved', 'contacts', 'convos', 'vids'];
+const VALID_KEYS = ['profile', 'wishlist', 'catalog', 'approved', 'contacts', 'convos', 'vids', 'vid_liked', 'vid_disliked'];
+// Dynamic key prefixes (chat history per section, etc.)
+const VALID_KEY_PREFIXES = ['chat_'];
+function isValidKey(key) {
+  if (VALID_KEYS.includes(key)) return true;
+  return VALID_KEY_PREFIXES.some(p => key.startsWith(p));
+}
 
 app.get('/api/data', auth, (req, res) => {
   const rows = stmts.getAllData.all(req.user.id);
@@ -114,8 +120,8 @@ app.get('/api/data', auth, (req, res) => {
 
 app.get('/api/data/:key', auth, (req, res) => {
   const { key } = req.params;
-  if (!VALID_KEYS.includes(key)) {
-    return res.status(400).json({ error: `Invalid key. Valid keys: ${VALID_KEYS.join(', ')}` });
+  if (!isValidKey(key)) {
+    return res.status(400).json({ error: 'Invalid key' });
   }
   const row = stmts.getData.get(req.user.id, key);
   if (!row) return res.json({ data: null });
@@ -124,8 +130,8 @@ app.get('/api/data/:key', auth, (req, res) => {
 
 app.put('/api/data/:key', auth, (req, res) => {
   const { key } = req.params;
-  if (!VALID_KEYS.includes(key)) {
-    return res.status(400).json({ error: `Invalid key. Valid keys: ${VALID_KEYS.join(', ')}` });
+  if (!isValidKey(key)) {
+    return res.status(400).json({ error: 'Invalid key' });
   }
   const value = JSON.stringify(req.body.value);
   stmts.setData.run(req.user.id, key, value);
@@ -134,8 +140,8 @@ app.put('/api/data/:key', auth, (req, res) => {
 
 app.delete('/api/data/:key', auth, (req, res) => {
   const { key } = req.params;
-  if (!VALID_KEYS.includes(key)) {
-    return res.status(400).json({ error: `Invalid key. Valid keys: ${VALID_KEYS.join(', ')}` });
+  if (!isValidKey(key)) {
+    return res.status(400).json({ error: 'Invalid key' });
   }
   stmts.deleteData.run(req.user.id, key);
   res.json({ ok: true });
@@ -148,7 +154,7 @@ app.post('/api/data/sync', auth, (req, res) => {
     return res.status(400).json({ error: 'data object required' });
   }
   for (const [key, value] of Object.entries(data)) {
-    if (VALID_KEYS.includes(key)) {
+    if (isValidKey(key)) {
       stmts.setData.run(req.user.id, key, JSON.stringify(value));
     }
   }
