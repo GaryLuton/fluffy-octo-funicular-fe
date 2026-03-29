@@ -733,6 +733,52 @@
       </div>
       <div class="hub-grid" id="hubGrid"></div>
     </div>
+
+    <!-- MyProfile custom view -->
+    <div id="profileView">
+      <!-- Profile Card Preview -->
+      <div class="profile-card" id="profileCard">
+        <div class="profile-card-bg" id="profileCardBg"></div>
+        <span class="profile-sparkle" style="top:12%;left:10%;animation-delay:0s;"></span>
+        <span class="profile-sparkle" style="top:8%;left:75%;animation-delay:0.4s;"></span>
+        <span class="profile-sparkle" style="top:60%;left:5%;animation-delay:0.8s;"></span>
+        <span class="profile-sparkle" style="top:70%;left:88%;animation-delay:1.2s;"></span>
+        <span class="profile-sparkle" style="top:30%;left:92%;animation-delay:0.2s;"></span>
+        <span class="profile-sparkle" style="top:85%;left:40%;animation-delay:1.6s;"></span>
+        <span class="profile-sparkle" style="top:15%;left:50%;animation-delay:0.6s;"></span>
+        <span class="profile-sparkle" style="top:50%;left:20%;animation-delay:1.0s;"></span>
+        <div class="profile-avatar-circle" id="profileAvatar"></div>
+        <div class="profile-username" id="profileUsername"></div>
+        <div class="profile-bio-display" id="profileBioDisplay"></div>
+        <div class="profile-meta-row">
+          <div class="profile-meta-item"><span id="profileAesthetic"></span></div>
+          <div class="profile-meta-item"><div class="profile-colour-dot" id="profileColourDot"></div><span id="profileColourName"></span></div>
+        </div>
+        <div class="profile-join-date" id="profileJoinDate"></div>
+      </div>
+
+      <!-- Bio Editor -->
+      <div class="profile-section">
+        <div class="profile-section-title">Your Bio</div>
+        <textarea class="profile-bio-textarea" id="profileBioInput" placeholder="write something about you..." rows="3" maxlength="150" oninput="onProfileBioInput()"></textarea>
+        <div class="profile-bio-row">
+          <span class="profile-bio-count" id="profileBioCount">0 / 150</span>
+          <button class="profile-bio-save bc" id="profileBioSaveBtn" onclick="saveProfileBio()">Save Bio</button>
+        </div>
+      </div>
+
+      <!-- Profile Theme Picker -->
+      <div class="profile-section">
+        <div class="profile-section-title">Profile Theme</div>
+        <div class="profile-theme-grid" id="profileThemeGrid"></div>
+      </div>
+
+      <!-- Profile Decorations -->
+      <div class="profile-section">
+        <div class="profile-section-title">Decorations</div>
+        <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3206,6 +3252,7 @@ ROUTINE BUILDING RULES:
 
 Remember what they tell you about their routine and refine it over time. Save their routine preferences.
 Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
+  {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
   {id:'contentwithit',name:'ContentWithIt',sub:'watch · read · listen',  col:2, prompt:'You are in the ContentWithIt section. You know their music ({MUSIC}), interests ({INTERESTS}), aesthetic ({AE}). Give specific recs — actual show names, books, channels, playlists. Tell them WHY it fits them. No generic lists.',                                                             opener:'tell me what you have been into lately and i will find your next thing'},
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'fomo fighter',         col:4, prompt:'You are in StufloverDaily — FOMO fighter. You know their taste: aesthetic {AE}, music {MUSIC}, interests {INTERESTS}, shop {SHOP}. Tell them what is happening in their world — new drops, things to follow, content to know about. Specific to them.',                                         opener:'ok what do you need to know about right now — fashion, music, things to follow, or just your world?'},
