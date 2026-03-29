@@ -468,28 +468,35 @@
       var likedTitles = liked.map(function(v){ return v.title || titleCache[v.id] || v.id; });
       var dislikedTitles = disliked.map(function(v){ return v.title || v.id; });
 
-      // 2. Build the prompt — video content is primary signal
+      // 2. Extract keywords from titles for the AI to match on
       var profileStr = buildProfileSummary();
 
       var promptParts = [];
-      promptParts.push('MY CURRENT VIDEOS (find more like these):');
+      promptParts.push('STEP 1: Extract keywords from my video titles below. Look for:');
+      promptParts.push('- Content type keywords: GRWM, haul, routine, vlog, day in my life, aesthetic, room tour, mukbang, storytime, outfit check, skincare, makeup, study with me, cooking, workout, challenge, reaction, tier list, ranking, review, unboxing, transformation, edit, compilation, tutorial, lookbook, what I eat, clean with me, apartment tour, night routine, morning routine, get ready, pack with me, decorate with me');
+      promptParts.push('- Topic keywords: any subject matter, franchise, show, game, fandom, hobby, place, trend');
+      promptParts.push('- Creator names: identify who made the video from the title');
+      promptParts.push('- Vibe/aesthetic keywords: cozy, dark, soft, chill, chaotic, cottagecore, Y2K, minimalist, etc.');
+      promptParts.push('');
+
+      promptParts.push('MY CURRENT VIDEOS:');
       currentTitles.forEach(function(t){ promptParts.push('- ' + t); });
 
       if(likedTitles.length){
-        promptParts.push('\nVIDEOS I LIKED (I want MORE content like these — same creators, same topics, same vibe):');
+        promptParts.push('\nVIDEOS I LIKED (find MORE matching these keywords, creators, and content types):');
         likedTitles.forEach(function(t){ promptParts.push('- ' + t); });
       }
 
       if(dislikedTitles.length){
-        promptParts.push('\nVIDEOS I DISLIKED (NEVER suggest anything like these — not the creator, not the topic, not the vibe):');
+        promptParts.push('\nVIDEOS I DISLIKED (AVOID these keywords, creators, and content types entirely):');
         dislikedTitles.forEach(function(t){ promptParts.push('- ' + t); });
       }
 
       if(profileStr){
-        promptParts.push('\nMy general vibe profile (secondary signal): ' + profileStr);
+        promptParts.push('\nVibe profile (use as tie-breaker only): ' + profileStr);
       }
 
-      promptParts.push('\nSuggest 14 YouTube videos. Return a JSON array of {id, why}.');
+      promptParts.push('\nSTEP 2: Based on the extracted keywords, suggest 14 YouTube videos. Return a JSON array of {id, why}.');
 
       btn.innerHTML = '<span class="spinner"></span>Finding your vibe...';
 
@@ -499,7 +506,7 @@
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 1400,
-          system: 'You are a YouTube recommendation engine. You find videos that match what a user actually watches and likes.\n\nPRIORITY ORDER:\n1. LIKED videos are your #1 signal. For EACH liked video, suggest at least 1-2 videos from THE SAME CREATOR and 1-2 from very similar creators who make the same type of content. If they liked a Salih\'s Matter video, give them more Salih\'s Matter. If they liked a Harry Potter edit, give them more Harry Potter edits.\n2. Current videos are your #2 signal. Find content from the same creators and same topics.\n3. Their vibe profile is a background signal for tie-breaking.\n\nCRITICAL RULES:\n- LIKED = "I love this, give me MORE of exactly this." Same creator first, then same topic/style.\n- DISLIKED = "I hate this, NEVER show me this creator, topic, or style again."\n- Identify the creator from the video title and suggest other popular videos by that same person/channel\n- Identify the topic/subject and suggest more content about that exact thing\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise videos with high view counts that are very likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions to allow for validation failures',
+          system: 'You are a YouTube recommendation engine. You extract keywords from video titles and find similar content.\n\nHOW TO RECOMMEND:\n1. Parse each video title for keywords: content type (GRWM, haul, vlog, routine, edit, mukbang, storytime, tier list, room tour, study with me, cooking, workout, etc.), topic (Harry Potter, Minecraft, Taylor Swift, skincare, fashion, anime, etc.), creator name, and aesthetic vibe.\n2. For LIKED videos, those keywords get the highest weight. Find more videos matching those exact keywords — same content format AND same topic. If they liked a "GRWM for school" find more GRWM videos. If they liked a "Harry Potter room makeover" find more Harry Potter content AND more room makeover content.\n3. For current videos, extract keywords and find content with overlapping keywords.\n4. For DISLIKED videos, blacklist those keywords entirely.\n\nCONTENT VARIETY IS KEY:\n- Do NOT only suggest music videos. Match the actual content TYPE from their titles.\n- If they watch GRWMs, suggest GRWMs. If they watch vlogs, suggest vlogs. If they watch edits, suggest edits. If they watch hauls, suggest hauls.\n- Mix content from the same creators AND from similar creators who make the same type of content\n- A good feed has variety in creators but consistency in content types and topics\n\nRULES:\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise popular videos (high view count) likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions for validation backup\n- The "why" field should mention which keyword(s) from their titles matched',
           messages: [{role: 'user', content: promptParts.join('\n')}]
         })
       });
