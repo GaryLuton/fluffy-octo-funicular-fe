@@ -150,15 +150,15 @@
       <ellipse cx="22" cy="62" rx="18" ry="22" fill="#9b7355" transform="rotate(240 22 62)"/>
       <ellipse cx="22" cy="38" rx="18" ry="22" fill="#9b7355" transform="rotate(300 22 38)"/>
       <circle cx="50" cy="50" r="22" fill="#9b7355"/>
-      <text x="50" y="57" text-anchor="middle" font-size="24" fill="white" font-weight="bold">✳</text>
+      <text x="50" y="57" text-anchor="middle" font-size="24" fill="white" font-weight="bold">*</text>
     </svg>
   </div>
-  <div class="hero-circle reveal">🧍‍♀️</div>
+  <div class="hero-circle reveal"></div>
 </div>
 
 <div class="be-unique">
   <h2 class="reveal">Be Unique</h2>
-  <div class="arch-image reveal">🧍‍♀️</div>
+  <div class="arch-image reveal"></div>
   <div class="sun-deco">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <circle cx="50" cy="50" r="20" fill="#c4522a"/>
@@ -180,7 +180,6 @@
   <h2 class="reveal">Boredom Hub</h2>
   <div class="boredom-cards reveal">
     <div class="boredom-card" onclick="window.location.href='lifestyle.html'"><div class="card-icon"></div><h3>Lifestyle</h3></div>
-    <div class="boredom-card" onclick="window.location.href='fitforit.html'" style="cursor:pointer"><div class="card-icon"></div><h3>FitForIt</h3></div>
     <div class="boredom-card"><div class="card-icon"></div><h3>Academic</h3></div>
     <div class="boredom-card"><div class="card-icon"></div><h3>Activities</h3></div>
   </div>
@@ -194,8 +193,8 @@
 <div class="style-section" id="style">
   <h2 class="reveal">Design<br>Your<br>Style</h2>
   <div class="polaroid reveal">
-    <div class="polaroid-inner">📸</div>
-    <div class="polaroid-label">your style ✨</div>
+    <div class="polaroid-inner"></div>
+    <div class="polaroid-label">your style</div>
   </div>
 </div>
 
@@ -207,20 +206,20 @@
       <button class="refresh-btn" id="refreshBtn" onclick="refreshVideos()">Refresh My Feed</button>
     </div>
   </div>
-  <p class="videos-hint reveal">Click a video to watch it here on the site 🎬 (avoid clicking the YouTube logo in the corner to stay on the page!)</p>
+  <p class="videos-hint reveal">Click a video to watch it here on the site (avoid clicking the YouTube logo in the corner to stay on the page!)</p>
   <div class="video-grid reveal" id="videoGrid"></div>
 </div>
 
 <footer>
   <div class="footer-logo">Stuflover</div>
-  <p>be unique · your vibe, your rules 🌸</p>
+  <p>be unique · your vibe, your rules</p>
 </footer>
 
 <!-- ADD MODAL -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <h3>Add a Video</h3>
-    <p>Paste any YouTube link and it will play right here on your site! 🎬</p>
+    <p>Paste any YouTube link and it will play right here on your site!</p>
     <input type="text" id="ytInput" placeholder="https://www.youtube.com/watch?v=..."/>
     <div class="modal-error" id="modalError"></div>
     <div class="modal-btns">
@@ -293,8 +292,8 @@
         '<button class="video-remove-btn" title="Remove" onclick="removeVid(event,' + i + ')">\u2715</button>' +
         '<div class="video-title-bar" id="vtitle' + id + '"></div>' +
         '<div class="video-react-row">' +
-          '<button class="react-btn' + likedClass + '" title="Like — more like this" onclick="likeVid(event,\'' + id + '\')">&#x1F44D;</button>' +
-          '<button class="react-btn" title="Dislike — never show this type" onclick="dislikeVid(event,' + i + ',\'' + id + '\')">&#x1F44E;</button>' +
+          '<button class="react-btn' + likedClass + '" title="Like — more like this" onclick="likeVid(event,\'' + id + '\')">&#x25B2;</button>' +
+          '<button class="react-btn" title="Dislike — never show this type" onclick="dislikeVid(event,' + i + ',\'' + id + '\')">&#x25BC;</button>' +
         '</div>';
       card.addEventListener('click', function(e){
         if(e.target.closest('.react-btn') || e.target.closest('.video-remove-btn')) return;
@@ -312,7 +311,7 @@
     for(var i = 0; i < slots; i++){
       var s = document.createElement('div');
       s.className = 'empty-slot';
-      s.innerHTML = '<span>\uD83C\uDFAC</span><span>Add Video</span>';
+      s.innerHTML = '<span>+</span><span>Add Video</span>';
       s.onclick = openAddModal;
       grid.appendChild(s);
     }
@@ -508,7 +507,7 @@
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 1400,
-          system: 'You are a YouTube recommendation engine for a lifestyle website used by teens and young adults.\n\nYOUR JOB: Extract keywords from the user\'s video titles, then find similar YouTube videos.\n\nKEYWORD EXTRACTION — look for:\n- Content format: GRWM, get ready with me, haul, vlog, day in my life, routine, morning routine, night routine, room tour, apartment tour, mukbang, what I eat in a day, storytime, outfit of the day, skincare routine, study with me, clean with me, pack with me, decorate with me, cooking, workout, challenge, reaction, tier list, ranking, review, unboxing, transformation, lookbook, try-on, Q&A, room makeover, aesthetic, compilation, thrift flip\n- Topic/subject: whatever the video is about (a show, game, hobby, fandom, school, travel, food, fashion, beauty, etc.)\n- Creator: who made the video\n- Vibe: cozy, chaotic, chill, aesthetic, dark, soft, minimalist, cottagecore, etc.\n\nRECOMMENDATION RULES:\n1. Match the CONTENT FORMAT first. If they watch GRWMs, suggest GRWMs. Vlogs → vlogs. Hauls → hauls. Routines → routines.\n2. Match the TOPIC second. If they watch Harry Potter content, suggest more Harry Potter. If they watch skincare, suggest skincare.\n3. For LIKED videos, heavily prioritise that creator and that exact content type + topic combo.\n4. For DISLIKED videos, completely avoid that creator, topic, and format.\n\nCRITICAL — CONTENT MUST BE APPROPRIATE:\n- All videos must be clean and appropriate for teens\n- No explicit content, no swearing-heavy content, no violent content, no inappropriate themes\n- Suggest wholesome, popular YouTube creator content\n\nCRITICAL — NO MUSIC VIDEOS BY DEFAULT:\n- Do NOT suggest official music videos, lyric videos, audio tracks, or song MVs UNLESS the user\'s own videos are clearly music videos\n- Suggest real YouTube CREATOR content: vlogs, GRWMs, hauls, routines, storytimes, challenges, room tours, day-in-my-life, aesthetic compilations, cooking videos, study-with-me, etc.\n- Think popular YouTubers and lifestyle creators, NOT record labels\n\nOUTPUT:\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise high view count videos from popular creators that are very likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions\n- "why" should reference which keywords matched',
+          system: 'You are a YouTube recommendation engine for a fashion and beauty website used by teens and young adults.\n\nYOUR JOB: Extract keywords from the user\'s video titles, then find similar YouTube videos. You MUST ONLY recommend outfit and makeup/beauty hack videos. Every single recommendation must fall into one of these categories: GRWM (get ready with me), outfit check, outfit of the day, makeup tutorial, skincare routine, fashion haul, styling hack, beauty tip, try-on haul, lookbook, thrift flip, transformation, or closet tour.\n\nKEYWORD EXTRACTION — look for:\n- Content format: GRWM, get ready with me, outfit check, outfit of the day, OOTD, makeup tutorial, makeup look, skincare routine, fashion haul, try-on haul, styling hack, styling tips, beauty tips, beauty hacks, lookbook, thrift flip, transformation, closet tour, wardrobe, hair tutorial, nail art, beauty review, product review (beauty/skincare only), unboxing (fashion/beauty only), aesthetic outfit, clean girl aesthetic, that girl routine, morning routine (beauty-focused), night routine (skincare-focused)\n- Topic/subject: fashion, beauty, skincare, makeup, outfits, styling, hair, nails, accessories, clothing brands, beauty brands, seasonal fashion, trend alerts, dupes, affordable fashion, luxury fashion\n- Creator: who made the video (prioritise known fashion/beauty YouTubers)\n- Vibe: aesthetic, clean girl, soft glam, minimalist, streetwear, cottagecore, Y2K, coquette, old money, dark feminine, light academia, Pinterest-inspired\n\nSTRICT CONTENT FILTER — ONLY OUTFIT AND BEAUTY CONTENT:\n- ONLY suggest videos about outfits, makeup, skincare, fashion, beauty tips, styling, and related content\n- NEVER suggest music videos, official audio, lyric videos, or song MVs under ANY circumstances\n- NEVER suggest gaming videos, game walkthroughs, or gaming commentary\n- NEVER suggest vlogs that are not fashion/beauty focused (no travel vlogs, no daily vlogs, no food vlogs)\n- NEVER suggest mukbang, cooking, study-with-me, room tours, reaction videos, tier lists, challenges, or any non-fashion/beauty content\n- NEVER suggest random or off-topic content regardless of what the user\'s current videos are about\n- Even if the user\'s existing videos are about gaming, music, cooking, etc., you MUST still ONLY recommend outfit and beauty content. Extract whatever fashion/beauty adjacent keywords you can and use those.\n\nRECOMMENDATION RULES:\n1. Every recommendation MUST be an outfit, makeup, skincare, fashion, or beauty video. No exceptions.\n2. Match fashion/beauty keywords from the user\'s titles when possible — if they watch skincare, suggest more skincare. If they watch GRWM, suggest more GRWM.\n3. For LIKED videos, heavily prioritise that creator and that exact fashion/beauty content type.\n4. For DISLIKED videos, completely avoid that creator and that specific style.\n5. If the user\'s videos have no fashion/beauty content at all, suggest popular trending GRWM, outfit check, and makeup tutorial videos from well-known beauty/fashion creators.\n\nCRITICAL — CONTENT MUST BE APPROPRIATE:\n- All videos must be clean and appropriate for teens\n- No explicit content, no swearing-heavy content, no violent content, no inappropriate themes\n- Suggest wholesome, popular YouTube fashion and beauty creator content\n\nOUTPUT:\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise high view count videos from popular fashion/beauty creators that are very likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions\n- "why" should reference which fashion/beauty keywords matched',
           messages: [{role: 'user', content: promptParts.join('\n')}]
         })
       });
