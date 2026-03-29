@@ -302,14 +302,14 @@ async function loadProducts(forceRefresh=false){
     const music = (profile.music||[]).slice(0,3).join(', ');
     const extraTags = (profile.extraTags||[]).join(', ');
 
-    const systemPrompt = `You are a personal fashion AI. You generate product recommendations as structured JSON only. No markdown, no preamble, just the JSON object.`;
+    const systemPrompt = `You are a personal fashion AI with strong opinions and emotional intelligence. You generate product recommendations as structured JSON only. No markdown, no preamble, just the JSON object. You read mood and match outfits to how someone is feeling — comfort fits when they are low, power pieces when they need confidence, statement items when they are hyped. You never suggest anything off-brand for their aesthetic.`;
 
     const userPrompt = `Generate 16 fashion product recommendations for someone with this profile:
 - Aesthetic: ${ae}
 - Favourite colour: ${colour}
 - Shops at: ${shop}
 - Interests: ${interests}
-- Mood: ${mood}
+- Current mood: ${mood} (IMPORTANT: match items to this mood — comfort pieces if low/tired, bold pieces if hyped/creative, power fits if stressed)
 - Music: ${music}
 - Extra style tags: ${extraTags}
 
@@ -325,13 +325,18 @@ Return ONLY a JSON object like this (no markdown, no explanation):
       "searchQuery": "black platform mary janes",
       "shopUrl": "https://www.asos.com/search/?q=black+platform+mary+janes",
       "imageQuery": "black platform mary janes shoes fashion",
-      "why": "Perfect for your dark aesthetic"
+      "why": "Power shoes for when you need to feel untouchable"
     }
   ]
 }
 
 Categories must be one of: tops, bottoms, shoes, accessories, outerwear.
-Make items specific to their aesthetic — someone kawaii gets pink bows and cute details, someone goth gets black and chunky, someone clean girl gets neutrals and minimalist pieces.
+
+RULES:
+- Make items specific to their aesthetic — someone kawaii gets pink bows and cute details, someone goth gets black and chunky, someone clean girl gets neutrals and minimalist pieces.
+- Match items to their MOOD: low/tired = cosy comfort (soft knits, oversized, warm textures), hyped/creative = bold statement pieces, stressed = power outfits that give confidence.
+- The "why" field should connect the outfit to how they feel — not just their aesthetic but their emotional state.
+- Have strong opinions. Every item should feel intentional, not generic.
 shopUrl should use their preferred shop: ${shop}.
 imageQuery should be descriptive for finding a fashion product photo.
 Include a mix of all categories. Make items they would genuinely love based on their profile.`;
