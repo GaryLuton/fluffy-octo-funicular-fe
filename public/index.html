@@ -59,7 +59,7 @@
     .refresh-btn .spinner{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(196,82,42,0.3);border-top-color:var(--terracotta);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
     .refresh-btn:hover .spinner{border-color:rgba(255,255,255,0.3);border-top-color:white;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    .video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+    .video-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
     .video-card{border-radius:16px;overflow:hidden;position:relative;cursor:pointer;aspect-ratio:16/9;background:#111;box-shadow:0 4px 20px rgba(30,12,6,0.12);}
     .video-thumb{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s,opacity 0.3s;}
     .video-card:hover .video-thumb{transform:scale(1.05);opacity:0.8;}
@@ -119,7 +119,7 @@
       .flower{display:none;}
       .be-unique,.style-section{flex-direction:column;padding:60px 28px;}
       .arch-image{max-width:260px;}
-      .boredom-cards{grid-template-columns:1fr;}.video-grid{grid-template-columns:1fr;}
+      .boredom-cards{grid-template-columns:1fr;}.video-grid{grid-template-columns:repeat(2,1fr);}
       .viral,.boredom-hub,.videos,.style-section{padding:60px 28px;}
       .videos-header{flex-direction:column;align-items:flex-start;}
     }
@@ -308,7 +308,7 @@
         if(el && title) el.textContent = title;
       });
     });
-    var slots = Math.min(3, 6 - videos.length);
+    var slots = Math.max(0, 8 - videos.length);
     for(var i = 0; i < slots; i++){
       var s = document.createElement('div');
       s.className = 'empty-slot';
@@ -394,7 +394,7 @@
     var id = getId(val);
     if(!id){ err.textContent = 'Not a valid YouTube link — try again!'; return; }
     if(videos.includes(id)){ err.textContent = 'Already added this one!'; return; }
-    if(videos.length >= 6){ err.textContent = 'Max 6 videos — remove one first!'; return; }
+    if(videos.length >= 8){ err.textContent = 'Max 8 videos — remove one first!'; return; }
     videos.push(id); save(); render(); closeAddModal();
   }
 
@@ -489,7 +489,7 @@
         promptParts.push('\nMy general vibe profile (secondary signal): ' + profileStr);
       }
 
-      promptParts.push('\nSuggest 10 YouTube videos. Return a JSON array of {id, why}.');
+      promptParts.push('\nSuggest 14 YouTube videos. Return a JSON array of {id, why}.');
 
       btn.innerHTML = '<span class="spinner"></span>Finding your vibe...';
 
@@ -498,8 +498,8 @@
         headers: {},
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: 'You are a YouTube recommendation engine that finds videos matching a user\'s taste.\n\nYour PRIMARY signal is the videos the user has added and liked. Analyze:\n- The specific creators/channels (e.g. if they watch Salih\'s Matter, find other Salih\'s Matter videos or similar creators)\n- The specific topics (e.g. if they watch Harry Potter content, find more Harry Potter content)\n- The content type (vlogs, edits, music videos, commentary, aesthetic compilations, etc.)\n- The energy and vibe of the content\n\nYour SECONDARY signal is their aesthetic/music/interest profile.\n\nCRITICAL RULES:\n- If the user watches a specific creator, suggest MORE videos from that same creator and very similar creators\n- If the user watches content about a specific topic (Harry Potter, a specific game, a show), suggest MORE of that exact topic\n- The liked videos list means "give me MORE exactly like this" — same creator, same topic, same style\n- The disliked videos list means "NEVER suggest anything resembling this" — avoid the creator, the topic, and the style entirely\n- Only suggest real, popular YouTube videos with valid 11-character video IDs that are very likely to still be available\n- Suggest well-known, high-view-count videos that actually exist\n- Return EXACTLY a JSON array of {id, why} — no markdown, no code fences, no text outside the array\n- Return 10 suggestions so we have backups if some IDs are invalid',
+          max_tokens: 1400,
+          system: 'You are a YouTube recommendation engine. You find videos that match what a user actually watches and likes.\n\nPRIORITY ORDER:\n1. LIKED videos are your #1 signal. For EACH liked video, suggest at least 1-2 videos from THE SAME CREATOR and 1-2 from very similar creators who make the same type of content. If they liked a Salih\'s Matter video, give them more Salih\'s Matter. If they liked a Harry Potter edit, give them more Harry Potter edits.\n2. Current videos are your #2 signal. Find content from the same creators and same topics.\n3. Their vibe profile is a background signal for tie-breaking.\n\nCRITICAL RULES:\n- LIKED = "I love this, give me MORE of exactly this." Same creator first, then same topic/style.\n- DISLIKED = "I hate this, NEVER show me this creator, topic, or style again."\n- Identify the creator from the video title and suggest other popular videos by that same person/channel\n- Identify the topic/subject and suggest more content about that exact thing\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise videos with high view counts that are very likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions to allow for validation failures',
           messages: [{role: 'user', content: promptParts.join('\n')}]
         })
       });
@@ -518,7 +518,7 @@
       var dislikedIds = disliked.map(function(v){ return v.id; });
       var validIds = [];
 
-      for(var i = 0; i < suggestions.length && validIds.length < 6; i++){
+      for(var i = 0; i < suggestions.length && validIds.length < 8; i++){
         var s = suggestions[i];
         if(!s.id || s.id.length !== 11) continue;
         if(videos.indexOf(s.id) !== -1) continue;
