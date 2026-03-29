@@ -261,6 +261,8 @@ const P = {
   music: [],
   interests: [],
   social: null,
+  age: null,              // age range
+  gender: null,           // gender identity
   // Rich contextual data from specific questions
   faveColour: null,       // {hex, name, dark}
   faveShop: null,
@@ -371,12 +373,33 @@ const RECS = {
 // Every question is designed to reveal something specific
 // ae scores are SMALL — no single question decides the result
 const CORE_IDS = [
-  "q_mood","q_saturday","q_music","q_interests","q_fave_colour",
+  "q_age","q_gender","q_mood","q_saturday","q_music","q_interests","q_fave_colour",
   "q_phone_screen","q_coffee","q_room","q_friday","q_notes_app",
   "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_energy_word"
 ];
 
 const QS = [
+  {id:"q_age", cat:"ABOUT YOU", multi:false,
+   text:"How old are you?",
+   opts:[
+     {t:"Under 18",     ae:{}, ag:"under-18"},
+     {t:"18–25",        ae:{}, ag:"18-25"},
+     {t:"26–35",        ae:{}, ag:"26-35"},
+     {t:"36–50",        ae:{}, ag:"36-50"},
+     {t:"50+",          ae:{}, ag:"50+"},
+   ]
+  },
+
+  {id:"q_gender", cat:"ABOUT YOU", multi:false,
+   text:"What style do you shop for?",
+   hint:"This helps us personalise your recommendations.",
+   opts:[
+     {t:"Women's",       ae:{}, gn:"womens"},
+     {t:"Men's",         ae:{}, gn:"mens"},
+     {t:"Unisex / All",  ae:{}, gn:"unisex"},
+   ]
+  },
+
   {id:"q_mood", cat:"RIGHT NOW", multi:false,
    text:"How are you actually feeling today?",
    opts:[
@@ -683,6 +706,7 @@ function startQuiz(){
   qCount=0;
   Object.keys(AE).forEach(k=>P.aesthetics[k]=0);
   P.music=[]; P.interests=[]; P.social=null;
+  P.age=null; P.gender=null;
   P.faveColour=null; P.faveShop=null; P.friendGroup=null;
   P.energyWord=null; P.moodToday=null; P.phoneScreen=null;
   P.saturdayMorning=null; P.coffeeOrder=null; P.notesApp=null;
@@ -751,6 +775,8 @@ function applyOpt(opt){
   if(opt.in&&!P.interests.includes(opt.in)) P.interests.push(opt.in);
   if(opt.so&&!P.social) P.social=opt.so;
   if(opt.et) opt.et.forEach(t=>{if(!P.extraTags.includes(t)) P.extraTags.push(t);});
+  if(opt.ag) P.age=opt.ag;
+  if(opt.gn) P.gender=opt.gn;
   if(opt.md) P.moodToday=opt.md;
   if(opt.col) P.faveColour=COLOURS[opt.col]||null;
   if(opt.shop) P.faveShop=opt.shop;
@@ -907,7 +933,8 @@ function buildPage(){
   try{
     localStorage.setItem('stuflover_profile', JSON.stringify({
       aesthetics:P.aesthetics,music:P.music,interests:P.interests,
-      social:P.social,faveColour:P.faveColour,faveShop:P.faveShop,
+      social:P.social,age:P.age,gender:P.gender,
+      faveColour:P.faveColour,faveShop:P.faveShop,
       friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
       phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
       coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
@@ -1466,6 +1493,8 @@ function showShopMenu(e, item, pal){
   P.music = saved.music||[];
   P.interests = saved.interests||[];
   P.social = saved.social||null;
+  P.age = saved.age||null;
+  P.gender = saved.gender||null;
   P.faveColour = saved.faveColour||null;
   P.faveShop = saved.faveShop||null;
   P.friendGroup = saved.friendGroup||null;
