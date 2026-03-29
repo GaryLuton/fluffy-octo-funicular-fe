@@ -622,16 +622,16 @@ function updateFloveePanel(contact){
     <div class="flovee-section">
       <div class="flovee-section-label bc" style="color:${PAL.tx}">Vibe mode</div>
       <div class="vibe-chips" id="vibeChips">
-        ${['Keep it cool','Be direct','Stay warm','Set a boundary','Be low-key','No drama'].map(v=>`<button class="vibe-chip bc" onclick="setVibe('${v}')" style="color:${PAL.tx};border-color:${PAL.tx}18">${v}</button>`).join('')}
+        ${['Keep it cool','Be direct','Stay warm','Set a boundary','Be low-key','No drama'].map(v=>`<button class="vibe-chip bc" onclick="setVibe('${v}',this)" style="color:${PAL.tx};border-color:${PAL.tx}18">${v}</button>`).join('')}
       </div>
     </div>`;
 }
 
 let activeVibe='Keep it cool';
-function setVibe(v){
+function setVibe(v,el){
   activeVibe=v;
   document.querySelectorAll('.vibe-chip').forEach(c=>{ c.classList.remove('on'); c.style.borderColor=PAL.tx+'18'; c.style.background='transparent'; });
-  event.target.classList.add('on'); event.target.style.borderColor=PAL.ac; event.target.style.background=PAL.ac+'14';
+  if(el){ el.classList.add('on'); el.style.borderColor=PAL.ac; el.style.background=PAL.ac+'14'; }
 }
 
 // ─── ADD CONTACT ──────────────────────────────────────────
