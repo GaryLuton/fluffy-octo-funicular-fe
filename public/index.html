@@ -468,35 +468,37 @@
       var likedTitles = liked.map(function(v){ return v.title || titleCache[v.id] || v.id; });
       var dislikedTitles = disliked.map(function(v){ return v.title || v.id; });
 
-      // 2. Extract keywords from titles for the AI to match on
+      // 2. Check if user actually watches music videos
       var profileStr = buildProfileSummary();
+      var allTitles = currentTitles.concat(likedTitles);
+      var musicWords = /\b(official\s*(music\s*)?video|lyrics?\s*video|audio|official\s*audio|music\s*video|mv\b|feat\.|ft\.)/i;
+      var hasMusicVids = allTitles.some(function(t){ return musicWords.test(t); });
 
       var promptParts = [];
-      promptParts.push('STEP 1: Extract keywords from my video titles below. Look for:');
-      promptParts.push('- Content type keywords: GRWM, haul, routine, vlog, day in my life, aesthetic, room tour, mukbang, storytime, outfit check, skincare, makeup, study with me, cooking, workout, challenge, reaction, tier list, ranking, review, unboxing, transformation, edit, compilation, tutorial, lookbook, what I eat, clean with me, apartment tour, night routine, morning routine, get ready, pack with me, decorate with me');
-      promptParts.push('- Topic keywords: any subject matter, franchise, show, game, fandom, hobby, place, trend');
-      promptParts.push('- Creator names: identify who made the video from the title');
-      promptParts.push('- Vibe/aesthetic keywords: cozy, dark, soft, chill, chaotic, cottagecore, Y2K, minimalist, etc.');
+      promptParts.push('Extract keywords from my video titles and find similar YouTube content.');
       promptParts.push('');
-
       promptParts.push('MY CURRENT VIDEOS:');
       currentTitles.forEach(function(t){ promptParts.push('- ' + t); });
 
       if(likedTitles.length){
-        promptParts.push('\nVIDEOS I LIKED (find MORE matching these keywords, creators, and content types):');
+        promptParts.push('\nVIDEOS I LIKED (highest priority — find MORE like these):');
         likedTitles.forEach(function(t){ promptParts.push('- ' + t); });
       }
 
       if(dislikedTitles.length){
-        promptParts.push('\nVIDEOS I DISLIKED (AVOID these keywords, creators, and content types entirely):');
+        promptParts.push('\nVIDEOS I DISLIKED (NEVER suggest anything like these):');
         dislikedTitles.forEach(function(t){ promptParts.push('- ' + t); });
       }
 
       if(profileStr){
-        promptParts.push('\nVibe profile (use as tie-breaker only): ' + profileStr);
+        promptParts.push('\nVibe profile (background context): ' + profileStr);
       }
 
-      promptParts.push('\nSTEP 2: Based on the extracted keywords, suggest 14 YouTube videos. Return a JSON array of {id, why}.');
+      if(!hasMusicVids){
+        promptParts.push('\nIMPORTANT: None of my videos are music videos. Do NOT suggest any music videos, official audio, lyric videos, or song MVs. I want real YouTube creator content only.');
+      }
+
+      promptParts.push('\nSuggest 14 YouTube videos. Return a JSON array of {id, why}.');
 
       btn.innerHTML = '<span class="spinner"></span>Finding your vibe...';
 
@@ -506,7 +508,7 @@
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 1400,
-          system: 'You are a YouTube recommendation engine. You extract keywords from video titles and find similar content.\n\nHOW TO RECOMMEND:\n1. Parse each video title for keywords: content type (GRWM, haul, vlog, routine, edit, mukbang, storytime, tier list, room tour, study with me, cooking, workout, etc.), topic (Harry Potter, Minecraft, Taylor Swift, skincare, fashion, anime, etc.), creator name, and aesthetic vibe.\n2. For LIKED videos, those keywords get the highest weight. Find more videos matching those exact keywords — same content format AND same topic. If they liked a "GRWM for school" find more GRWM videos. If they liked a "Harry Potter room makeover" find more Harry Potter content AND more room makeover content.\n3. For current videos, extract keywords and find content with overlapping keywords.\n4. For DISLIKED videos, blacklist those keywords entirely.\n\nCONTENT VARIETY IS KEY:\n- Do NOT only suggest music videos. Match the actual content TYPE from their titles.\n- If they watch GRWMs, suggest GRWMs. If they watch vlogs, suggest vlogs. If they watch edits, suggest edits. If they watch hauls, suggest hauls.\n- Mix content from the same creators AND from similar creators who make the same type of content\n- A good feed has variety in creators but consistency in content types and topics\n\nRULES:\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise popular videos (high view count) likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions for validation backup\n- The "why" field should mention which keyword(s) from their titles matched',
+          system: 'You are a YouTube recommendation engine for a lifestyle website used by teens and young adults.\n\nYOUR JOB: Extract keywords from the user\'s video titles, then find similar YouTube videos.\n\nKEYWORD EXTRACTION — look for:\n- Content format: GRWM, get ready with me, haul, vlog, day in my life, routine, morning routine, night routine, room tour, apartment tour, mukbang, what I eat in a day, storytime, outfit of the day, skincare routine, study with me, clean with me, pack with me, decorate with me, cooking, workout, challenge, reaction, tier list, ranking, review, unboxing, transformation, lookbook, try-on, Q&A, room makeover, aesthetic, compilation, thrift flip\n- Topic/subject: whatever the video is about (a show, game, hobby, fandom, school, travel, food, fashion, beauty, etc.)\n- Creator: who made the video\n- Vibe: cozy, chaotic, chill, aesthetic, dark, soft, minimalist, cottagecore, etc.\n\nRECOMMENDATION RULES:\n1. Match the CONTENT FORMAT first. If they watch GRWMs, suggest GRWMs. Vlogs → vlogs. Hauls → hauls. Routines → routines.\n2. Match the TOPIC second. If they watch Harry Potter content, suggest more Harry Potter. If they watch skincare, suggest skincare.\n3. For LIKED videos, heavily prioritise that creator and that exact content type + topic combo.\n4. For DISLIKED videos, completely avoid that creator, topic, and format.\n\nCRITICAL — CONTENT MUST BE APPROPRIATE:\n- All videos must be clean and appropriate for teens\n- No explicit content, no swearing-heavy content, no violent content, no inappropriate themes\n- Suggest wholesome, popular YouTube creator content\n\nCRITICAL — NO MUSIC VIDEOS BY DEFAULT:\n- Do NOT suggest official music videos, lyric videos, audio tracks, or song MVs UNLESS the user\'s own videos are clearly music videos\n- Suggest real YouTube CREATOR content: vlogs, GRWMs, hauls, routines, storytimes, challenges, room tours, day-in-my-life, aesthetic compilations, cooking videos, study-with-me, etc.\n- Think popular YouTubers and lifestyle creators, NOT record labels\n\nOUTPUT:\n- Only suggest real, well-known YouTube videos with valid 11-character video IDs\n- Prioritise high view count videos from popular creators that are very likely still available\n- Return ONLY a JSON array of {id, why} — no markdown, no code fences, no other text\n- Return 14 suggestions\n- "why" should reference which keywords matched',
           messages: [{role: 'user', content: promptParts.join('\n')}]
         })
       });
