@@ -8,6 +8,7 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:background 1.2s,color 1.2s;display:flex;flex-direction:column;}
+    .view.scrollable{overflow-y:auto;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.06);transition:opacity 0.8s;}
@@ -60,7 +61,7 @@
     .journal-textarea::placeholder{opacity:0.3;}
     .mood-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
     .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
-    .mood-chip.on{opacity:1;}
+    .mood-chip.on{opacity:1;border-color:currentColor;}
     .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
     .journal-save:hover{opacity:1;transform:scale(1.02);}
     .journal-entries{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:8px;}
@@ -142,7 +143,7 @@
 </div>
 
 <!-- JOURNAL -->
-<div class="view" id="journalView">
+<div class="view scrollable" id="journalView">
   <div class="journal-container">
     <div class="journal-title bc">My Journal</div>
     <textarea class="journal-textarea" id="journalText" placeholder="Write what's on your mind..."></textarea>
@@ -160,7 +161,7 @@
 </div>
 
 <!-- REGULATE -->
-<div class="view" id="regulateView">
+<div class="view scrollable" id="regulateView">
   <div class="regulate-container">
     <div class="regulate-title bc">5-4-3-2-1 Grounding</div>
     <div class="regulate-desc">Tap each step as you complete it. Take your time.</div>
@@ -475,15 +476,116 @@ function switchMode(mode){
 
   document.getElementById('pillBreathe').classList.toggle('on', mode==='breathe');
   document.getElementById('pillReflect').classList.toggle('on', mode==='reflect');
+  document.getElementById('pillJournal').classList.toggle('on', mode==='journal');
+  document.getElementById('pillRegulate').classList.toggle('on', mode==='regulate');
 
   if(mode==='breathe'){
     resetBreathe();
-  } else {
+  } else if(mode==='reflect'){
     showView('reflectView');
+  } else if(mode==='journal'){
+    renderJournalEntries();
+    showView('journalView');
+  } else if(mode==='regulate'){
+    showView('regulateView');
   }
 
   document.getElementById('modeBar').classList.remove('hidden');
   document.getElementById('mainNav').classList.remove('hidden');
+}
+
+// ─── JOURNAL ────────────────────────────────────────────
+var selectedMood = '';
+
+function selectMood(el){
+  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
+  if(selectedMood === el.dataset.mood){
+    selectedMood = '';
+  } else {
+    el.classList.add('on');
+    selectedMood = el.dataset.mood;
+  }
+}
+
+function getJournalEntries(){
+  try{ return JSON.parse(localStorage.getItem('stuflover_journal')||'[]'); }catch(e){return [];}
+}
+
+function saveJournalEntry(){
+  var text = document.getElementById('journalText').value.trim();
+  if(!text) return;
+  var entries = getJournalEntries();
+  entries.push({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    text: text,
+    mood: selectedMood || ''
+  });
+  localStorage.setItem('stuflover_journal', JSON.stringify(entries));
+  document.getElementById('journalText').value = '';
+  selectedMood = '';
+  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
+  renderJournalEntries();
+}
+
+function renderJournalEntries(){
+  var container = document.getElementById('journalEntries');
+  var entries = getJournalEntries().slice().reverse();
+  if(entries.length === 0){
+    container.innerHTML = '<div style="text-align:center;opacity:0.25;font-size:0.82rem;padding:20px 0;">No entries yet — start writing above</div>';
+    return;
+  }
+  var html = '';
+  entries.forEach(function(e){
+    var d = new Date(e.date);
+    var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var moodHtml = e.mood ? '<span class="journal-entry-mood" style="background:'+PAL.ac+'20;color:'+PAL.tx+'">'+e.mood+'</span>' : '';
+    html += '<div class="journal-entry" style="background:'+PAL.tx+'06;">';
+    html += '<div class="journal-entry-head"><span class="journal-entry-date">'+dateStr+'</span>'+moodHtml+'</div>';
+    html += '<div class="journal-entry-text">'+escHtml(e.text)+'</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── REGULATE (5-4-3-2-1 GROUNDING) ─────────────────────
+var groundState = [false,false,false,false,false];
+
+function toggleGroundStep(el,idx){
+  groundState[idx] = !groundState[idx];
+  el.classList.toggle('done', groundState[idx]);
+  applyGroundStepStyles();
+  // Check if all done
+  if(groundState.every(function(v){return v;})){
+    setTimeout(function(){
+      document.getElementById('regulateDone').classList.add('show');
+    }, 400);
+  } else {
+    document.getElementById('regulateDone').classList.remove('show');
+  }
+}
+
+function resetGrounding(){
+  groundState = [false,false,false,false,false];
+  document.querySelectorAll('.ground-step').forEach(function(el){el.classList.remove('done');});
+  document.getElementById('regulateDone').classList.remove('show');
+  applyGroundStepStyles();
+}
+
+function applyGroundStepStyles(){
+  document.querySelectorAll('.ground-step-num').forEach(function(el,i){
+    if(groundState[i]){
+      el.style.background = PAL.ac;
+      el.style.color = PAL.bg;
+    } else {
+      el.style.background = PAL.ac + '20';
+      el.style.color = PAL.tx;
+    }
+  });
 }
 
 // ─── APPLY STYLES ────────────────────────────────────────
@@ -516,6 +618,30 @@ function applyStyles(){
   document.getElementById('reflectOrb').style.background = PAL.ac;
   document.getElementById('reflectNextBtn').style.background = PAL.ac + '25';
   document.getElementById('reflectNextBtn').style.color = PAL.tx;
+
+  // Journal
+  document.getElementById('journalSaveBtn').style.background = PAL.ac;
+  document.getElementById('journalSaveBtn').style.color = PAL.bg;
+  document.getElementById('journalText').style.borderColor = PAL.tx + '18';
+  document.getElementById('journalText').style.color = PAL.tx;
+  document.querySelectorAll('.mood-chip').forEach(function(c){
+    c.style.borderColor = PAL.tx + '18';
+    c.style.color = PAL.tx;
+  });
+
+  // Regulate
+  document.querySelectorAll('.ground-step').forEach(function(s){
+    s.style.borderColor = PAL.tx + '15';
+    s.style.color = PAL.tx;
+  });
+  document.querySelectorAll('.ground-step-num').forEach(function(n){
+    n.style.background = PAL.ac + '20';
+    n.style.color = PAL.tx;
+  });
+  document.getElementById('regulateDone').style.background = PAL.ac + '15';
+  document.getElementById('regulateDone').style.color = PAL.tx;
+  var regResetBtn = document.querySelector('.regulate-reset');
+  if(regResetBtn){ regResetBtn.style.background = PAL.ac + '25'; regResetBtn.style.color = PAL.tx; }
 }
 
 // ─── INIT ────────────────────────────────────────────────
@@ -523,6 +649,7 @@ applyStyles();
 createPetals();
 setPetalState('contract');
 initReflect();
+applyGroundStepStyles();
 
 </script>
 
