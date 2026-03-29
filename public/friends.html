@@ -209,8 +209,9 @@
 
 // ─── PROFILE + PALETTE ────────────────────────────────────
 const profile=(()=>{try{return JSON.parse(localStorage.getItem('stuflover_profile')||'null');}catch(e){return null;}})();
-function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
-function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a);}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a));}catch(e){return hex;}}
 function resolvePalette(){
   const fc=profile?.faveColour;const ae=profile?.aesthetics||{};
   const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';

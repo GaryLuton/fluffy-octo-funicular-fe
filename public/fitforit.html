@@ -58,7 +58,7 @@
     .product-img-wrap:hover .product-img{transform:scale(1.04);}
     .product-img.shimmer{background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.16) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .product-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background 0.2s;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+    .product-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:background 0.2s,opacity 0.2s;}
     .product-img-wrap:hover .product-img-overlay{opacity:1;background:rgba(0,0,0,0.12);}
     .product-shop-btn{padding:10px 20px;border-radius:4px;font-size:0.75rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;backdrop-filter:blur(8px);background:rgba(255,255,255,0.9);color:#111;transition:transform 0.15s;}
     .product-shop-btn:hover{transform:scale(1.04);}
@@ -177,8 +177,9 @@ function resolvePalette(){
   return map[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
 }
 
-function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
-function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
+function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
+function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a);}catch(e){return hex;}}
+function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a));}catch(e){return hex;}}
 
 const PAL = resolvePalette();
 
