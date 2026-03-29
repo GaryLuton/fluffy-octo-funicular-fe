@@ -68,6 +68,14 @@
     .video-card:hover .play-circle{transform:scale(1.15);}
     .video-remove-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;background:rgba(30,12,6,0.8);color:white;border:none;border-radius:50%;cursor:pointer;font-size:0.78rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:5;}
     .video-card:hover .video-remove-btn{opacity:1;}
+    .video-react-row{position:absolute;bottom:8px;left:8px;display:flex;gap:6px;opacity:0;transition:opacity 0.2s;z-index:5;}
+    .video-card:hover .video-react-row{opacity:1;}
+    .react-btn{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:transform 0.15s,background 0.15s;background:rgba(30,12,6,0.75);color:white;}
+    .react-btn:hover{transform:scale(1.15);}
+    .react-btn.liked{background:var(--terracotta);transform:scale(1.1);}
+    .react-btn.disliked{background:#444;transform:scale(1.1);}
+    .video-title-bar{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-size:0.72rem;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity 0.2s;pointer-events:none;font-weight:600;letter-spacing:0.3px;}
+    .video-card:hover .video-title-bar{opacity:1;}
     .empty-slot{aspect-ratio:16/9;border-radius:16px;background:var(--pink-light);border:3px dashed rgba(196,82,42,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background 0.2s,border-color 0.2s;}
     .empty-slot:hover{background:var(--peach);border-color:var(--terracotta);}
     .empty-slot span:first-child{font-size:2rem;}
@@ -236,48 +244,125 @@
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
-  let videos = JSON.parse(localStorage.getItem('stuflover_vids') || '[]');
+  // ─── DATA ──────────────────────────────────────────────────
+  var videos = JSON.parse(localStorage.getItem('stuflover_vids') || '[]');
+  var liked = JSON.parse(localStorage.getItem('stuflover_vid_liked') || '[]');       // [{id, title}]
+  var disliked = JSON.parse(localStorage.getItem('stuflover_vid_disliked') || '[]'); // [{id, title}]
+  var titleCache = {};  // id -> title
+
   function save(){ localStorage.setItem('stuflover_vids', JSON.stringify(videos)); }
+  function saveLiked(){ localStorage.setItem('stuflover_vid_liked', JSON.stringify(liked)); }
+  function saveDisliked(){ localStorage.setItem('stuflover_vid_disliked', JSON.stringify(disliked)); }
+
+  function isLiked(id){ return liked.some(function(v){return v.id===id;}); }
+  function isDisliked(id){ return disliked.some(function(v){return v.id===id;}); }
 
   function getId(url){
-    const m = url.trim().match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    var m = url.trim().match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
     return m ? m[1] : null;
   }
 
+  // ─── FETCH TITLES ──────────────────────────────────────────
+  function fetchTitle(id){
+    if(titleCache[id]) return Promise.resolve(titleCache[id]);
+    return fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.title){ titleCache[id] = d.title; return d.title; }
+        return null;
+      })
+      .catch(function(){ return null; });
+  }
+
+  function fetchAllTitles(ids){
+    return Promise.all(ids.map(function(id){ return fetchTitle(id); }));
+  }
+
+  // ─── RENDER ────────────────────────────────────────────────
   function render(){
-    const grid = document.getElementById('videoGrid');
+    var grid = document.getElementById('videoGrid');
     grid.innerHTML = '';
-    videos.forEach((id, i) => {
-      const card = document.createElement('div');
+    videos.forEach(function(id, i){
+      var card = document.createElement('div');
       card.className = 'video-card';
-      // Use maxresdefault for better quality thumbnail
-      card.innerHTML = `
-        <img class="video-thumb"
-          src="https://img.youtube.com/vi/${id}/maxresdefault.jpg"
-          onerror="this.src='https://img.youtube.com/vi/${id}/hqdefault.jpg'"
-          alt="video"/>
-        <div class="play-overlay"><div class="play-circle">▶</div></div>
-        <button class="video-remove-btn" title="Remove" onclick="removeVid(event,${i})">✕</button>
-      `;
-      card.addEventListener('click', () => openLightbox(id));
+      var likedClass = isLiked(id) ? ' liked' : '';
+      card.innerHTML =
+        '<img class="video-thumb" src="https://img.youtube.com/vi/' + id + '/maxresdefault.jpg"' +
+        ' onerror="this.src=\'https://img.youtube.com/vi/' + id + '/hqdefault.jpg\'" alt="video"/>' +
+        '<div class="play-overlay"><div class="play-circle">\u25B6</div></div>' +
+        '<button class="video-remove-btn" title="Remove" onclick="removeVid(event,' + i + ')">\u2715</button>' +
+        '<div class="video-title-bar" id="vtitle' + id + '"></div>' +
+        '<div class="video-react-row">' +
+          '<button class="react-btn' + likedClass + '" title="Like — more like this" onclick="likeVid(event,\'' + id + '\')">&#x1F44D;</button>' +
+          '<button class="react-btn" title="Dislike — never show this type" onclick="dislikeVid(event,' + i + ',\'' + id + '\')">&#x1F44E;</button>' +
+        '</div>';
+      card.addEventListener('click', function(e){
+        if(e.target.closest('.react-btn') || e.target.closest('.video-remove-btn')) return;
+        openLightbox(id);
+      });
       grid.appendChild(card);
+
+      // Load title for tooltip
+      fetchTitle(id).then(function(title){
+        var el = document.getElementById('vtitle' + id);
+        if(el && title) el.textContent = title;
+      });
     });
-    const slots = Math.min(3, 6 - videos.length);
-    for(let i = 0; i < slots; i++){
-      const s = document.createElement('div');
+    var slots = Math.min(3, 6 - videos.length);
+    for(var i = 0; i < slots; i++){
+      var s = document.createElement('div');
       s.className = 'empty-slot';
-      s.innerHTML = '<span>🎬</span><span>Add Video</span>';
+      s.innerHTML = '<span>\uD83C\uDFAC</span><span>Add Video</span>';
       s.onclick = openAddModal;
       grid.appendChild(s);
     }
   }
 
+  // ─── LIKE / DISLIKE ────────────────────────────────────────
+  function likeVid(e, id){
+    e.stopPropagation();
+    if(isLiked(id)){
+      // Unlike — remove from liked
+      liked = liked.filter(function(v){ return v.id !== id; });
+      saveLiked();
+      render();
+      return;
+    }
+    var title = titleCache[id] || '';
+    fetchTitle(id).then(function(t){
+      title = t || title;
+      liked.push({id: id, title: title});
+      saveLiked();
+      render();
+    });
+  }
+
+  function dislikeVid(e, idx, id){
+    e.stopPropagation();
+    var title = titleCache[id] || '';
+    fetchTitle(id).then(function(t){
+      title = t || title;
+      // Add to disliked
+      if(!isDisliked(id)){
+        disliked.push({id: id, title: title});
+        saveDisliked();
+      }
+      // Remove from liked if it was there
+      liked = liked.filter(function(v){ return v.id !== id; });
+      saveLiked();
+      // Remove from videos
+      videos.splice(idx, 1);
+      save();
+      render();
+    });
+  }
+
   function removeVid(e, i){ e.stopPropagation(); videos.splice(i,1); save(); render(); }
 
+  // ─── LIGHTBOX ──────────────────────────────────────────────
   function openLightbox(id){
-    // autoplay=1, rel=0 hides related videos, modestbranding=1 reduces YT logo
     document.getElementById('lbFrame').src =
-      `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+      'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1';
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -288,44 +373,45 @@
     document.body.style.overflow = '';
   }
 
-  // Close on background click or ESC
   document.getElementById('lightbox').addEventListener('click', function(e){
     if(e.target === this) closeLightbox();
   });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
 
+  // ─── ADD MODAL ─────────────────────────────────────────────
   function openAddModal(){
     document.getElementById('ytInput').value = '';
     document.getElementById('modalError').textContent = '';
     document.getElementById('addModal').classList.add('open');
-    setTimeout(()=>document.getElementById('ytInput').focus(), 100);
+    setTimeout(function(){ document.getElementById('ytInput').focus(); }, 100);
   }
   function closeAddModal(){ document.getElementById('addModal').classList.remove('open'); }
 
   function addVideo(){
-    const val = document.getElementById('ytInput').value;
-    const err = document.getElementById('modalError');
-    if(!val.trim()){ err.textContent = '⚠️ Paste a YouTube link first!'; return; }
-    const id = getId(val);
-    if(!id){ err.textContent = "⚠️ Not a valid YouTube link — try again!"; return; }
-    if(videos.includes(id)){ err.textContent = '⚠️ Already added this one!'; return; }
-    if(videos.length >= 6){ err.textContent = '⚠️ Max 6 videos — remove one first!'; return; }
+    var val = document.getElementById('ytInput').value;
+    var err = document.getElementById('modalError');
+    if(!val.trim()){ err.textContent = 'Paste a YouTube link first!'; return; }
+    var id = getId(val);
+    if(!id){ err.textContent = 'Not a valid YouTube link — try again!'; return; }
+    if(videos.includes(id)){ err.textContent = 'Already added this one!'; return; }
+    if(videos.length >= 6){ err.textContent = 'Max 6 videos — remove one first!'; return; }
     videos.push(id); save(); render(); closeAddModal();
   }
 
-  document.getElementById('ytInput').addEventListener('keydown', e => { if(e.key==='Enter') addVideo(); });
-  document.getElementById('addModal').addEventListener('click', e => {
+  document.getElementById('ytInput').addEventListener('keydown', function(e){ if(e.key==='Enter') addVideo(); });
+  document.getElementById('addModal').addEventListener('click', function(e){
     if(e.target===document.getElementById('addModal')) closeAddModal();
   });
 
-  const obs = new IntersectionObserver(entries=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+  // ─── SCROLL REVEAL ─────────────────────────────────────────
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('visible'); });
   },{threshold:0.1});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-  document.querySelectorAll('a[href^="#"]').forEach(a=>{
-    a.addEventListener('click',e=>{
+  document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click',function(e){
       e.preventDefault();
-      document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth'});
+      document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'});
     });
   });
 
@@ -335,102 +421,115 @@
   var profile = (function(){ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
 
   function buildProfileSummary(){
-    if(!profile) return 'No profile set yet.';
+    if(!profile) return '';
     var ae = profile.aesthetics||{};
     var topAe = Object.entries(ae).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
     var parts = [];
     if(topAe.length) parts.push('Aesthetic: ' + topAe.join(', '));
     if(profile.music && profile.music.length) parts.push('Music: ' + profile.music.join(', '));
     if(profile.interests && profile.interests.length) parts.push('Interests: ' + profile.interests.join(', '));
-    if(profile.moodToday) parts.push('Current mood: ' + profile.moodToday);
-    if(profile.age) parts.push('Age range: ' + profile.age);
-    if(profile.gender) parts.push('Style pref: ' + profile.gender);
-    if(profile.social) parts.push('Social energy: ' + profile.social);
+    if(profile.moodToday) parts.push('Mood: ' + profile.moodToday);
+    if(profile.age) parts.push('Age: ' + profile.age);
+    if(profile.gender) parts.push('Style: ' + profile.gender);
+    if(profile.social) parts.push('Social: ' + profile.social);
     if(profile.energyWord) parts.push('Energy: ' + profile.energyWord);
-    if(profile.coffeeOrder) parts.push('Drink: ' + profile.coffeeOrder);
-    if(profile.saturdayMorning) parts.push('Saturday morning: ' + profile.saturdayMorning);
     if(profile.extraTags && profile.extraTags.length) parts.push('Tags: ' + profile.extraTags.join(', '));
     return parts.join('. ');
   }
 
-  async function fetchVideoTitles(ids){
-    var titles = [];
-    var fetches = ids.map(function(id){
-      return fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + id)
-        .then(function(r){ return r.json(); })
-        .then(function(d){ if(d.title) titles.push({id:id, title:d.title}); })
-        .catch(function(){ /* skip */ });
-    });
-    await Promise.all(fetches);
-    return titles;
-  }
-
   function validateVideoId(id){
     return new Promise(function(resolve){
+      var done = false;
       var img = new Image();
-      img.onload = function(){ resolve(img.width > 120); };
-      img.onerror = function(){ resolve(false); };
+      img.onload = function(){ if(!done){done=true; resolve(img.width > 120);} };
+      img.onerror = function(){ if(!done){done=true; resolve(false);} };
       img.src = 'https://img.youtube.com/vi/' + id + '/mqdefault.jpg';
-      setTimeout(function(){ resolve(false); }, 4000);
+      setTimeout(function(){ if(!done){done=true; resolve(false);} }, 4000);
     });
   }
 
   async function refreshVideos(){
-    if(videos.length === 0){
+    if(videos.length === 0 && liked.length === 0){
       alert('Add at least one video first so we can find more like it!');
       return;
     }
 
     var btn = document.getElementById('refreshBtn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Finding your vibe...';
+    btn.innerHTML = '<span class="spinner"></span>Analysing your videos...';
 
     try{
-      // 1. Get titles of current videos
-      var videoInfo = await fetchVideoTitles(videos);
-      var titleList = videoInfo.map(function(v){ return v.title; }).join('\n- ');
+      // 1. Get titles of current + liked videos
+      var allIds = videos.slice();
+      liked.forEach(function(v){ if(allIds.indexOf(v.id)===-1) allIds.push(v.id); });
+      await fetchAllTitles(allIds);
 
-      // 2. Build prompt
+      var currentTitles = videos.map(function(id){ return titleCache[id] || id; });
+      var likedTitles = liked.map(function(v){ return v.title || titleCache[v.id] || v.id; });
+      var dislikedTitles = disliked.map(function(v){ return v.title || v.id; });
+
+      // 2. Build the prompt — video content is primary signal
       var profileStr = buildProfileSummary();
+
+      var promptParts = [];
+      promptParts.push('MY CURRENT VIDEOS (find more like these):');
+      currentTitles.forEach(function(t){ promptParts.push('- ' + t); });
+
+      if(likedTitles.length){
+        promptParts.push('\nVIDEOS I LIKED (I want MORE content like these — same creators, same topics, same vibe):');
+        likedTitles.forEach(function(t){ promptParts.push('- ' + t); });
+      }
+
+      if(dislikedTitles.length){
+        promptParts.push('\nVIDEOS I DISLIKED (NEVER suggest anything like these — not the creator, not the topic, not the vibe):');
+        dislikedTitles.forEach(function(t){ promptParts.push('- ' + t); });
+      }
+
+      if(profileStr){
+        promptParts.push('\nMy general vibe profile (secondary signal): ' + profileStr);
+      }
+
+      promptParts.push('\nSuggest 10 YouTube videos. Return a JSON array of {id, why}.');
+
+      btn.innerHTML = '<span class="spinner"></span>Finding your vibe...';
 
       var res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {},
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 800,
-          system: 'You are a YouTube video recommendation engine. You suggest real, existing YouTube videos that match a user\'s personal vibe profile and viewing history.\n\nRules:\n- Only suggest videos that actually exist on YouTube with real, valid 11-character video IDs\n- Match the user\'s aesthetic, mood, music taste, and interests\n- Suggest content that feels authentically "them" — not just topic matches but vibe matches\n- Mix of music videos, vlogs, aesthetic compilations, lifestyle content, tutorials, etc. depending on their profile\n- Prioritise popular, well-known videos that are likely still available\n- Return EXACTLY 6 video suggestions\n- Return ONLY a JSON array of objects with "id" (YouTube video ID) and "why" (1 sentence explaining the vibe match)\n- No markdown, no code fences, no explanation outside the JSON array',
-          messages: [{
-            role: 'user',
-            content: 'Here is my vibe profile:\n' + profileStr + '\n\nHere are the YouTube videos I currently have:\n- ' + titleList + '\n\nSuggest 6 new YouTube videos that match my vibe. Different videos from what I already have. Return a JSON array of {id, why}.'
-          }]
+          max_tokens: 1000,
+          system: 'You are a YouTube recommendation engine that finds videos matching a user\'s taste.\n\nYour PRIMARY signal is the videos the user has added and liked. Analyze:\n- The specific creators/channels (e.g. if they watch Salih\'s Matter, find other Salih\'s Matter videos or similar creators)\n- The specific topics (e.g. if they watch Harry Potter content, find more Harry Potter content)\n- The content type (vlogs, edits, music videos, commentary, aesthetic compilations, etc.)\n- The energy and vibe of the content\n\nYour SECONDARY signal is their aesthetic/music/interest profile.\n\nCRITICAL RULES:\n- If the user watches a specific creator, suggest MORE videos from that same creator and very similar creators\n- If the user watches content about a specific topic (Harry Potter, a specific game, a show), suggest MORE of that exact topic\n- The liked videos list means "give me MORE exactly like this" — same creator, same topic, same style\n- The disliked videos list means "NEVER suggest anything resembling this" — avoid the creator, the topic, and the style entirely\n- Only suggest real, popular YouTube videos with valid 11-character video IDs that are very likely to still be available\n- Suggest well-known, high-view-count videos that actually exist\n- Return EXACTLY a JSON array of {id, why} — no markdown, no code fences, no text outside the array\n- Return 10 suggestions so we have backups if some IDs are invalid',
+          messages: [{role: 'user', content: promptParts.join('\n')}]
         })
       });
 
       var data = await res.json();
       var text = (data.content && data.content[0] && data.content[0].text) || '';
 
-      // Parse JSON from response
       var match = text.match(/\[[\s\S]*\]/);
       if(!match) throw new Error('No suggestions returned');
 
       var suggestions = JSON.parse(match[0]);
       if(!Array.isArray(suggestions) || suggestions.length === 0) throw new Error('Empty suggestions');
 
-      // 3. Validate video IDs by checking thumbnails load
+      // 3. Filter out disliked IDs and current videos, then validate
       btn.innerHTML = '<span class="spinner"></span>Checking videos...';
+      var dislikedIds = disliked.map(function(v){ return v.id; });
       var validIds = [];
+
       for(var i = 0; i < suggestions.length && validIds.length < 6; i++){
         var s = suggestions[i];
-        if(s.id && s.id.length === 11){
-          var valid = await validateVideoId(s.id);
-          if(valid) validIds.push(s.id);
-        }
+        if(!s.id || s.id.length !== 11) continue;
+        if(videos.indexOf(s.id) !== -1) continue;
+        if(dislikedIds.indexOf(s.id) !== -1) continue;
+        var valid = await validateVideoId(s.id);
+        if(valid) validIds.push(s.id);
       }
 
       if(validIds.length === 0) throw new Error('No valid videos found');
 
-      // 4. Replace videos
+      // 4. Replace videos (keep liked ones that are still in the grid)
       videos = validIds;
       save();
       render();
@@ -444,7 +543,7 @@
     btn.innerHTML = 'Refresh My Feed';
   }
 
-  // Welcome message
+  // ─── WELCOME ───────────────────────────────────────────────
   var user = window.stufloverUser ? window.stufloverUser() : null;
   if(user && user.username){
     var wel = document.getElementById('navWelcome');
