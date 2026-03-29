@@ -221,11 +221,21 @@ async function syncFromServer(token) {
       approved: 'stuflover_approved',
       contacts: 'stuflover_contacts',
       convos: 'stuflover_convos',
-      vids: 'stuflover_vids'
+      vids: 'stuflover_vids',
+      vid_liked: 'stuflover_vid_liked',
+      vid_disliked: 'stuflover_vid_disliked'
     };
-    for (const [key, lsKey] of Object.entries(keyMap)) {
-      if (data[key] != null) {
-        localStorage.setItem(lsKey, typeof data[key] === 'string' ? data[key] : JSON.stringify(data[key]));
+    for (const [key, val] of Object.entries(data)) {
+      var lsKey;
+      if (keyMap[key]) {
+        lsKey = keyMap[key];
+      } else if (key.indexOf('chat_') === 0) {
+        lsKey = 'stuflover_' + key;
+      } else {
+        continue;
+      }
+      if (val != null) {
+        localStorage.setItem(lsKey, typeof val === 'string' ? val : JSON.stringify(val));
       }
     }
   } catch {}

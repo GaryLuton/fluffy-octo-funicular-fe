@@ -85,9 +85,9 @@
     <div class="breathe-instruction" id="breatheInstruction">Take a moment for yourself</div>
     <div class="breathe-timer" id="breatheTimer"></div>
     <div class="duration-row" id="durationRow">
-      <button class="dur-btn bc" data-dur="60" onclick="setDuration(60,this)">1 min</button>
-      <button class="dur-btn bc on" data-dur="180" onclick="setDuration(180,this)">3 min</button>
-      <button class="dur-btn bc" data-dur="300" onclick="setDuration(300,this)">5 min</button>
+      <button class="dur-btn bc" data-dur="64" onclick="setDuration(64,this)">1 min</button>
+      <button class="dur-btn bc on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
+      <button class="dur-btn bc" data-dur="304" onclick="setDuration(304,this)">5 min</button>
     </div>
     <button class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
   </div>
@@ -136,8 +136,9 @@ function resolvePalette(){
   var m={kawaii:{bg:'#fdf0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
   return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
 }
-function lightenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'rgb('+Math.round(c[0]+(255-c[0])*a)+','+Math.round(c[1]+(255-c[1])*a)+','+Math.round(c[2]+(255-c[2])*a)+')';}catch(e){return hex;}}
-function darkenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'rgb('+Math.round(c[0]*(1-a))+','+Math.round(c[1]*(1-a))+','+Math.round(c[2]*(1-a))+')';}catch(e){return hex;}}
+function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
+function lightenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]+(255-c[0])*a)+toHex(c[1]+(255-c[1])*a)+toHex(c[2]+(255-c[2])*a);}catch(e){return hex;}}
+function darkenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]*(1-a))+toHex(c[1]*(1-a))+toHex(c[2]*(1-a));}catch(e){return hex;}}
 
 function resolveAeName(){
   if(!profile) return 'You';
@@ -202,7 +203,7 @@ function setPetalState(state){
 }
 
 // ─── BREATHING SESSION ───────────────────────────────────
-var breatheDuration = 180; // seconds
+var breatheDuration = 176; // seconds (11 cycles of 16s)
 var breatheRunning = false;
 var breatheTimeout = null;
 var breatheElapsed = 0;
@@ -328,7 +329,7 @@ var REFLECT_AE = {
   cottage: ['What is a simple pleasure you enjoyed today?','Think of a natural thing — a tree, the sky, rain — that grounded you.','What does your most peaceful, slow life look like?'],
   hippie: ['What is something you believe in deeply?','Think of a time you felt truly connected to the world around you.','What does inner peace mean to you today?'],
   oldmoney: ['What is a tradition or habit that brings you comfort?','Think of something timeless that you value about yourself.','What does elegance in rest look like for you?'],
-  preppy: ['What is something you accomplished that you haven not celebrated yet?','Think of a goal you are quietly working toward.','What does success feel like beyond achievement?'],
+  preppy: ['What is something you accomplished that you have not celebrated yet?','Think of a goal you are quietly working toward.','What does success feel like beyond achievement?'],
   tomato: ['What is something warm and vibrant about your life right now?','Think of a moment you felt truly alive today.','What does joy without effort look like for you?'],
   indie: ['What is something only you would notice or appreciate?','Think of an artist, song, or film that feels like your inner world.','When do you feel most creatively alive?'],
   emo: ['What is a feeling you have been sitting with lately?','Think of something that hurt but also taught you something real.','What does emotional honesty look like for you right now?'],

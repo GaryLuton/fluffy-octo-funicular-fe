@@ -25,9 +25,18 @@
     contacts: 'stuflover_contacts',
     convos: 'stuflover_convos',
     vids: 'stuflover_vids',
+    vid_liked: 'stuflover_vid_liked',
+    vid_disliked: 'stuflover_vid_disliked',
   };
   var LS_TO_SERVER = {};
   for (var k in KEY_MAP) LS_TO_SERVER[KEY_MAP[k]] = k;
+
+  // Dynamic key prefix: stuflover_chat_* -> chat_*
+  function lsKeyToServer(lsKey) {
+    if (LS_TO_SERVER[lsKey]) return LS_TO_SERVER[lsKey];
+    if (lsKey.indexOf('stuflover_chat_') === 0) return lsKey.replace('stuflover_', '');
+    return null;
+  }
 
   function getToken() {
     return localStorage.getItem(TOKEN_KEY) || '';
@@ -63,7 +72,7 @@
   var _origSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function (key, value) {
     _origSetItem.call(this, key, value);
-    var serverKey = LS_TO_SERVER[key];
+    var serverKey = lsKeyToServer(key);
     if (serverKey && getToken()) {
       var parsed;
       try { parsed = JSON.parse(value); } catch (e) { parsed = value; }
