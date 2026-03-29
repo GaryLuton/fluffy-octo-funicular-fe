@@ -382,25 +382,21 @@ const QS = [
   {id:"q_age", cat:"ABOUT YOU", multi:false,
    text:"How old are you?",
    opts:[
-     {t:"12 or under",  ae:{}, ag:"12-"},
-     {t:"13",            ae:{}, ag:"13"},
-     {t:"14",            ae:{}, ag:"14"},
-     {t:"15",            ae:{}, ag:"15"},
-     {t:"16",            ae:{}, ag:"16"},
-     {t:"17",            ae:{}, ag:"17"},
-     {t:"18",            ae:{}, ag:"18"},
-     {t:"19+",           ae:{}, ag:"19+"},
+     {t:"Under 18",     ae:{}, ag:"under-18"},
+     {t:"18–25",        ae:{}, ag:"18-25"},
+     {t:"26–35",        ae:{}, ag:"26-35"},
+     {t:"36–50",        ae:{}, ag:"36-50"},
+     {t:"50+",          ae:{}, ag:"50+"},
    ]
   },
 
   {id:"q_gender", cat:"ABOUT YOU", multi:false,
-   text:"How do you identify?",
-   hint:"This helps personalise your experience. Pick whatever feels right.",
+   text:"What style do you shop for?",
+   hint:"This helps us personalise your recommendations.",
    opts:[
-     {t:"Girl",          ae:{}, gn:"girl"},
-     {t:"Boy",           ae:{}, gn:"boy"},
-     {t:"Non-binary",    ae:{}, gn:"nonbinary"},
-     {t:"Prefer not to say", ae:{}, gn:"unspecified"},
+     {t:"Women's",       ae:{}, gn:"womens"},
+     {t:"Men's",         ae:{}, gn:"mens"},
+     {t:"Unisex / All",  ae:{}, gn:"unisex"},
    ]
   },
 
