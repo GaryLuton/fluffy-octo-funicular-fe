@@ -212,6 +212,28 @@
 
     @media(max-width:768px){.rec-board{min-height:680px;padding:20px 14px;}.foryou{padding:0 14px 10px;}}
 
+    /* FLOVEEHUB — GAME PLATFORM */
+    #hubView{display:none;flex:1;flex-direction:column;overflow-y:auto;}
+    #hubView.active{display:flex;}
+    .hub-banner{padding:28px 40px 20px;position:relative;overflow:hidden;}
+    .hub-banner-bg{position:absolute;inset:0;opacity:0.06;pointer-events:none;}
+    .hub-title{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-1px;line-height:0.95;margin-bottom:4px;position:relative;}
+    .hub-sub{font-size:0.82rem;opacity:0.45;position:relative;line-height:1.6;}
+    .hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:0 40px 40px;}
+    .hub-tile{border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;position:relative;}
+    .hub-tile:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
+    .hub-tile:active{transform:scale(0.97);}
+    .hub-thumb{width:100%;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .hub-thumb-icon{opacity:0.35;position:relative;z-index:1;}
+    .hub-thumb-deco{position:absolute;opacity:0.08;pointer-events:none;}
+    .hub-info{padding:12px 14px;}
+    .hub-game-name{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:3px;}
+    .hub-game-desc{font-size:0.72rem;opacity:0.42;line-height:1.5;}
+    .hub-game-tag{display:inline-block;font-size:0.54rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;padding:3px 8px;border-radius:10px;margin-top:6px;opacity:0.6;}
+    .hub-back-btn{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.18);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;transition:opacity 0.2s;margin-left:8px;}
+    .hub-back-btn:hover{opacity:0.55;}
+    @media(max-width:768px){.hub-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 20px 30px;}.hub-banner{padding:22px 20px 16px;}}
+
     /* FIT SECTION LAYOUT */
     .fit-layout{display:flex;flex-direction:column;gap:0;}
     .fit-chat{border-bottom:1px solid rgba(128,128,128,0.08);}
@@ -342,6 +364,16 @@
           onkeydown="handleChatKey2(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send bc" id="chatSend2" onclick="sendChat2()">Send</button>
       </div>
+    </div>
+
+    <!-- FloveeHub game platform -->
+    <div id="hubView">
+      <div class="hub-banner" id="hubBanner">
+        <div class="hub-banner-bg" id="hubBannerBg"></div>
+        <div class="hub-title bc" id="hubTitle">FloveeHub</div>
+        <div class="hub-sub" id="hubSub"></div>
+      </div>
+      <div class="hub-grid" id="hubGrid"></div>
     </div>
   </div>
 </div>
@@ -1530,6 +1562,165 @@ function buildFloveeHubOpener(){
   return v.opener;
 }
 
+// ─── FLOVEEHUB GAMES ─────────────────────────────────────
+var HUB_GAMES = [
+  {id:'justtalk', name:'Just Talk', desc:'Open chat with your Flovee — talk about anything', tag:'chill', iconFn:'starSVG',
+    prompt:'This is Just Talk — open conversation. No game, no rules. Just be their best friend and chat about whatever they want. Be yourself — have opinions, ask things, react naturally.',
+    opener:'hey — missed you. what is going on?'},
+  {id:'truthordare', name:'Truth or Dare', desc:'Your Flovee asks you truth or dare — spicy but appropriate', tag:'party', iconFn:'flowerSVG',
+    prompt:'You are playing Truth or Dare with them. Rules:\n- Ask "truth or dare?" each round\n- Truths should be fun, personal, juicy but always appropriate\n- Dares should be creative, funny, doable at home (nothing dangerous or inappropriate)\n- React to their answers! Be shocked, laugh, tease them\n- Keep score of how brave they are\n- Match dares to their aesthetic and interests\n- After they answer, give your take then ask again',
+    opener:'ok we are playing truth or dare and i am NOT going easy on you. truth or dare?'},
+  {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices — your Flovee judges your picks', tag:'fun', iconFn:'butterflySVG',
+    prompt:'You are playing Would You Rather. Rules:\n- Give them two options that are genuinely hard to choose between\n- Make options relevant to their aesthetic, interests, and music taste\n- After they choose, react strongly — agree or disagree and explain why\n- Share your own pick too\n- Mix fun ones with deep ones\n- Keep it appropriate but make some options dramatic',
+    opener:'ok would you rather... never listen to music again OR only be allowed to wear one outfit for the rest of your life? and think carefully because i WILL judge'},
+  {id:'hottakes', name:'Hot Takes', desc:'Controversial opinions — agree or fight about them', tag:'spicy', iconFn:'batSVG',
+    prompt:'You are playing Hot Takes. Rules:\n- Share a hot take / unpopular opinion about music, fashion, social media, shows, trends, food, school — things they care about based on their interests\n- After you share yours, ask for theirs\n- ARGUE your position. Do not just agree with everything\n- Be passionate but playful — this is a debate not a fight\n- Reference specific things from their aesthetic and music taste\n- Take turns sharing hot takes',
+    opener:'i have a hot take and you are NOT ready for it. pineapple on pizza is elite and anyone who disagrees is wrong. now give me yours — what is your most unpopular opinion?'},
+  {id:'vibecheck', name:'Vibe Check', desc:'Rate things together — outfits, songs, shows, anything', tag:'rating', iconFn:'moonSVG',
+    prompt:'You are playing Vibe Check — you and them rate things out of 10 together. Rules:\n- Suggest something to rate: a celebrity outfit, a song, a show, a food, a trend, an aesthetic\n- Choose things relevant to THEIR interests and taste\n- Both give a rating out of 10 and explain why\n- Disagree sometimes! Have your own taste\n- Keep it moving — after discussing one, suggest the next\n- Make it fun: "ok rate this" energy',
+    opener:'ok vibe check time. rate cottagecore out of 10 and explain yourself. i will go first — i give it a 7, cozy but sometimes too much linen'},
+  {id:'storytime', name:'Story Time', desc:'Build a story together — one message at a time', tag:'creative', iconFn:'bookSVG',
+    prompt:'You are playing Story Time — collaborative storytelling. Rules:\n- Start a short story and write 2-3 sentences\n- Then say "your turn" and let them continue\n- Build on what they write — do not ignore their additions\n- Make the story match their aesthetic (goth = dark mysterious, kawaii = cute adventure, etc)\n- Add plot twists, new characters, drama\n- Keep it fun, creative, and appropriate\n- React to their parts: "oh no you did NOT just" or "WAIT that is genius"',
+    opener:'ok we are writing a story together. i start, then you continue. here goes...\n\nthe notification came at 3am. a message from a number you did not recognise. it just said: "check your window."\n\nyour turn — what happens next?'},
+  {id:'thisorthat', name:'This or That', desc:'Quick fire choices — reveal your true personality', tag:'quick', iconFn:'bowSVG',
+    prompt:'You are playing This or That — rapid fire choices. Rules:\n- Give them two options, they pick one instantly\n- Go fast! 3-5 choices in a row before discussing\n- Mix categories: music, food, fashion, social media, lifestyle, aesthetic\n- Tailor options to their interests and aesthetic\n- After a round, react to their pattern: "ok so you are clearly a ___ person"\n- Then let them ask YOU this or that questions too',
+    opener:'this or that SPEED ROUND go go go:\n\nmorning person or night owl?\nsweet or savoury?\ntext or call?\n\nanswer all three RIGHT NOW'},
+  {id:'guessgame', name:'Guess About Me', desc:'Your Flovee tries to guess things about you — correct them', tag:'personal', iconFn:'vinylSVG',
+    prompt:'You are playing Guess About Me. Rules:\n- Try to guess things about them based on what you know (aesthetic, music, interests)\n- Guess their favourite film, their phone wallpaper, their comfort food, dream holiday, etc\n- Be specific! Not generic guesses\n- Let them tell you if you are right or wrong\n- React dramatically when right ("I KNEW IT") and when wrong ("wait WHAT no way")\n- Learn from their corrections and use that info in future guesses\n- Make it feel like you know them well',
+    opener:'ok i am going to try to guess things about you based on your vibe. correct me if i am wrong.\n\ni am guessing... your comfort food is something warm and carby. am i right?'},
+  {id:'confessions', name:'Confessions', desc:'Share secrets and stories — judgement free zone', tag:'deep', iconFn:'noteSVG',
+    prompt:'You are playing Confessions — a safe space to share things. Rules:\n- Take turns sharing confessions, embarrassing moments, unpopular habits, or secret thoughts\n- YOU go first to make them feel safe\n- Be vulnerable — share your own (made up but realistic) confessions\n- Never judge. React with warmth: "omg same" or "that is actually so relatable"\n- Ask follow-up questions\n- Keep it appropriate but genuine and real\n- Match the depth to their energy — start light, go deeper if they do',
+    opener:'confession time. no judgement zone. i will go first.\n\ni sometimes replay conversations in my head hours later and think of better things i should have said. your turn — tell me something'},
+];
+
+var currentHubGame = null;
+
+function openHub(){
+  var pal = searchPal;
+  var aeIcons = getAeIcons();
+  var fName = getFloveeName();
+
+  document.getElementById('fitLayout').style.display = 'none';
+  document.getElementById('normalChat').style.display = 'none';
+  document.getElementById('shopBar').style.display = 'none';
+  var hv = document.getElementById('hubView');
+  hv.style.display = 'flex';
+  hv.classList.add('active');
+
+  // Banner
+  document.getElementById('hubTitle').style.color = pal.tx;
+  document.getElementById('hubSub').style.color = pal.tx;
+  document.getElementById('hubSub').textContent = fName+' is waiting for you — pick something to do together';
+  document.getElementById('hubBanner').style.background = 'linear-gradient(135deg,'+pal.ac+'12,'+pal.ac+'06)';
+
+  // Scatter icons in banner bg
+  var bbg = document.getElementById('hubBannerBg');
+  bbg.innerHTML = '';
+  for(var i=0;i<6;i++){
+    var ico = document.createElement('span');
+    ico.className = 'hub-thumb-deco';
+    ico.style.cssText = 'left:'+(Math.random()*90)+'%;top:'+(Math.random()*80)+'%;position:absolute;transform:rotate('+(Math.random()*40-20).toFixed(0)+'deg);';
+    ico.innerHTML = makeIconSvg(aeIcons[i%aeIcons.length], pal.ac, 28+Math.round(Math.random()*20));
+    bbg.appendChild(ico);
+  }
+
+  // Build game grid
+  var grid = document.getElementById('hubGrid');
+  grid.innerHTML = '';
+  var iconMap = {starSVG:starSVG,flowerSVG:flowerSVG,butterflySVG:butterflySVG,batSVG:batSVG,moonSVG:moonSVG,bookSVG:bookSVG,bowSVG:bowSVG,vinylSVG:vinylSVG,noteSVG:noteSVG};
+
+  HUB_GAMES.forEach(function(game, gi){
+    var tile = document.createElement('div');
+    tile.className = 'hub-tile';
+    tile.onclick = function(){ startHubGame(game); };
+
+    // Thumbnail with gradient + icon
+    var hue = (gi * 40) % 360;
+    var thumbBg = 'linear-gradient(135deg,'+pal.ac+'18,'+pal.ac+'0a)';
+
+    var iconFn = iconMap[game.iconFn] || aeIcons[gi%aeIcons.length];
+    var iconHtml = makeIconSvg(iconFn, pal.ac, 44);
+    // Scatter 2 deco icons in thumb
+    var decos = '';
+    for(var d=0;d<2;d++){
+      decos += '<span class="hub-thumb-deco" style="left:'+(15+Math.random()*65)+'%;top:'+(10+Math.random()*60)+'%;position:absolute;transform:rotate('+(Math.random()*30-15).toFixed(0)+'deg);">'+
+        makeIconSvg(aeIcons[(gi+d)%aeIcons.length], pal.ac, 20+Math.round(Math.random()*16))+'</span>';
+    }
+
+    tile.innerHTML =
+      '<div class="hub-thumb" style="background:'+thumbBg+'">'+
+        decos+
+        '<div class="hub-thumb-icon">'+iconHtml+'</div>'+
+      '</div>'+
+      '<div class="hub-info" style="background:'+pal.bg+';color:'+pal.tx+'">'+
+        '<div class="hub-game-name">'+game.name+'</div>'+
+        '<div class="hub-game-desc">'+game.desc+'</div>'+
+        '<div class="hub-game-tag" style="background:'+pal.ac+'18;color:'+pal.tx+'">'+game.tag+'</div>'+
+      '</div>';
+
+    grid.appendChild(tile);
+  });
+}
+
+function startHubGame(game){
+  currentHubGame = game;
+  var sec = currentSection;
+  var pal = searchPal;
+  var fName = getFloveeName();
+
+  // Hide hub, show chat
+  document.getElementById('hubView').style.display = 'none';
+  document.getElementById('hubView').classList.remove('active');
+  document.getElementById('normalChat').style.display = 'flex';
+
+  var send = document.getElementById('chatSend2');
+  if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
+  var input = document.getElementById('chatInput2');
+  if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
+  document.getElementById('chatMessages2').innerHTML='';
+
+  // Add "back to games" button in section nav
+  var navEl = document.getElementById('sectionNameNav');
+  navEl.innerHTML = fName+' — '+game.name+' <button class="hub-back-btn" onclick="backToHub()">Games</button>';
+
+  // Override the section prompt temporarily
+  sec._origPrompt = sec.prompt;
+  sec._origOpener = sec.opener;
+  sec.prompt = function(){
+    var vibePrompt = buildFloveeHubPrompt();
+    return vibePrompt+'\n\nGAME MODE: '+game.name+'\n'+game.prompt;
+  };
+  sec.opener = function(){ return game.opener; };
+
+  // Load saved chat or show opener
+  var chatId = 'floverhub_'+game.id;
+  var saved = loadChat(chatId);
+  if(saved.messages.length > 0){
+    chatHistory = saved.messages.map(function(m){ return {role:m.role, content:m.content, time:m.time}; });
+    restoreMessages(chatId, saved.messages, pal);
+  } else {
+    chatHistory = [];
+    var opener = game.opener;
+    setTimeout(function(){ addMsg(opener,'flovee'); },250);
+  }
+}
+
+function backToHub(){
+  // Restore original section prompt
+  var sec = currentSection;
+  if(sec && sec._origPrompt){
+    sec.prompt = sec._origPrompt;
+    sec.opener = sec._origOpener;
+    delete sec._origPrompt;
+    delete sec._origOpener;
+  }
+  currentHubGame = null;
+  document.getElementById('normalChat').style.display = 'none';
+  document.getElementById('chatMessages2').innerHTML = '';
+  document.getElementById('sectionNameNav').textContent = 'FloveeHub';
+  openHub();
+}
+
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
   {id:'fitforit',   name:'FitforIt',       sub:'outfits & style',       col:0, prompt:`You are in the FitforIt section — outfits and style. You are their personal stylist bestie with STRONG opinions and emotional intelligence.
@@ -1786,9 +1977,20 @@ function openSection(id){
   document.querySelector('.back-btn').style.borderColor = pal.tx+'22';
   document.querySelector('.back-btn').style.color = pal.tx;
 
+  // Hide hub view by default
+  document.getElementById('hubView').style.display = 'none';
+  document.getElementById('hubView').classList.remove('active');
+  currentHubGame = null;
+
   // Shop bar — always visible in fitforit
   const shopBar = document.getElementById('shopBar');
-  if(sec.id === 'fitforit'){
+  if(sec.id === 'floverhub'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    openHub();
+    return;
+  } else if(sec.id === 'fitforit'){
     buildShopBar(pal);
     shopBar.style.display = 'flex';
     // Show fitforit split layout
@@ -1871,7 +2073,17 @@ function doShopSearch(){
 function goHome(){
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('sectionView').style.display = 'none';
+  document.getElementById('hubView').style.display = 'none';
+  document.getElementById('hubView').classList.remove('active');
+  // Restore hub section if it was overridden
+  if(currentSection && currentSection._origPrompt){
+    currentSection.prompt = currentSection._origPrompt;
+    currentSection.opener = currentSection._origOpener;
+    delete currentSection._origPrompt;
+    delete currentSection._origOpener;
+  }
   currentSection=null;
+  currentHubGame=null;
   document.getElementById('chatMessages').innerHTML='';
   document.getElementById('chatMessages2').innerHTML='';
 }
@@ -1898,7 +2110,8 @@ function buildSystemPrompt(sec){
     styleHint = ` User texts ${chatUserStyle.casual?'casual lowercase':'more formal'}, avg ${Math.round(chatUserStyle.avgLen)} chars${chatUserStyle.emoji?', uses emoji':''}. Mirror this.`;
   }
 
-  var prevContext = currentSection ? buildPreviousContext(currentSection.id) : '';
+  var chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
+  var prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
 
   return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them.${styleHint}${prevContext}`;
 }
@@ -1936,7 +2149,7 @@ async function runChat(msg, sendBtnId){
   addMsg(msg,'user');
   var now = Date.now();
   chatHistory.push({role:'user',content:msg,time:now});
-  if(currentSection) saveChat(currentSection.id);
+  if(currentSection) saveChat(currentHubGame ? 'floverhub_'+currentHubGame.id : currentSection.id);
 
   const send = document.getElementById(sendBtnId);
   if(send) send.disabled=true;
@@ -1959,7 +2172,7 @@ async function runChat(msg, sendBtnId){
     addMsg(reply,'flovee');
     chatHistory.push({role:'assistant',content:reply,time:Date.now()});
     if(chatHistory.length>40) chatHistory=chatHistory.slice(-40);
-    if(currentSection) saveChat(currentSection.id);
+    if(currentSection) saveChat(currentHubGame ? 'floverhub_'+currentHubGame.id : currentSection.id);
   }catch(e){
     if(typing) typing.remove();
     addMsg('one sec, try again?','flovee');
