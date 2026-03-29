@@ -130,6 +130,24 @@
     .product-shop{font-size:0.7rem;opacity:0.45;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .product-badge{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:20px;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;}
 
+    /* FOR YOU RECS */
+    .foryou{position:relative;z-index:2;padding:0 40px 20px;}
+    .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .foryou-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .foryou-refresh{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.15);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;opacity:0.4;transition:opacity 0.2s;}
+    .foryou-refresh:hover{opacity:0.8;}
+    .foryou-refresh:disabled{opacity:0.2;cursor:not-allowed;}
+    .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
+    .rec-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+    .rec-card{border-radius:12px;padding:18px 16px;border:1.5px solid rgba(128,128,128,0.08);transition:transform 0.15s,border-color 0.15s;cursor:default;display:flex;flex-direction:column;gap:8px;min-height:140px;}
+    .rec-card:hover{transform:translateY(-2px);border-color:rgba(128,128,128,0.2);}
+    .rec-cat{font-size:0.56rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.35;}
+    .rec-emoji{font-size:1.4rem;}
+    .rec-title{font-size:0.88rem;font-weight:600;line-height:1.4;}
+    .rec-desc{font-size:0.78rem;opacity:0.5;line-height:1.6;flex:1;}
+    .rec-loading{grid-column:1/-1;text-align:center;padding:40px;opacity:0.3;font-style:italic;}
+    @media(max-width:768px){.rec-grid{grid-template-columns:repeat(2,1fr);}.foryou{padding:0 20px 16px;}}
+
     /* FIT SECTION LAYOUT */
     .fit-layout{display:flex;flex-direction:column;gap:0;}
     .fit-chat{border-bottom:1px solid rgba(128,128,128,0.08);}
@@ -207,6 +225,17 @@
         </div>
         <button class="search-go bc" id="searchGo" onclick="goSearch()">Go</button>
         <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+    </div>
+
+    <!-- FOR YOU -->
+    <div class="foryou" id="foryouSection">
+      <div class="foryou-header">
+        <div class="foryou-title bc">For You</div>
+        <button class="foryou-refresh bc" id="foryouRefresh" onclick="loadForYou()">Refresh</button>
+      </div>
+      <div class="rec-grid" id="recGrid">
+        <div class="rec-loading">Loading your recommendations...</div>
       </div>
     </div>
 
@@ -956,7 +985,112 @@ function buildPage(){
     var wel = document.getElementById('navWelcome');
     if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
   }
+
+  // Style the For You section
+  var fyTitle = document.querySelector('.foryou-title');
+  if(fyTitle) fyTitle.style.color = searchPal.tx;
+  var fyBtn = document.getElementById('foryouRefresh');
+  if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
+
+  // Load For You recommendations
+  setTimeout(loadForYou, 400);
 }
+
+// ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
+var forYouCache = null;
+
+function buildRecProfile(){
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
+  var music = (P.music||[]).slice(0,4).join(', ');
+  var interests = (P.interests||[]).slice(0,5).join(', ');
+  var parts = [];
+  parts.push('Aesthetic: ' + (topAe.join(', ')||'not set'));
+  parts.push('Favourite colour: ' + (P.faveColour?P.faveColour.name:'not set'));
+  parts.push('Current mood: ' + (P.moodToday||'okay'));
+  parts.push('Music taste: ' + (music||'not set'));
+  parts.push('Shopping: ' + (P.faveShop||'not set'));
+  parts.push('Interests: ' + (interests||'not set'));
+  parts.push('Social energy: ' + (P.social||'ambivert'));
+  parts.push('Energy: ' + (P.energyWord||'chill'));
+  parts.push('Age: ' + (P.age||'not set'));
+  parts.push('Saturday morning: ' + (P.saturdayMorning||'not set'));
+  parts.push('Coffee order: ' + (P.coffeeOrder||'not set'));
+  return parts.join('\n');
+}
+
+async function loadForYou(){
+  var grid = document.getElementById('recGrid');
+  var btn = document.getElementById('foryouRefresh');
+  if(!grid) return;
+
+  // If called from button click, clear cache to force regeneration
+  if(forYouCache && !btn.disabled){
+    forYouCache = null;
+  }
+  // Show cached results on page load
+  if(forYouCache){
+    renderRecs(forYouCache);
+    return;
+  }
+
+  grid.innerHTML = '<div class="rec-loading"><span class="spinner" style="display:inline-block;width:12px;height:12px;border:2px solid rgba(128,128,128,0.15);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;"></span>Personalising...</div>';
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Loading'; }
+
+  try{
+    var profileStr = buildRecProfile();
+
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1200,
+        system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Return ONLY a JSON array of 5 objects: {cat, emoji, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - emoji: one relevant emoji\n  - title: short catchy title\n  - desc: brief specific description\n- No markdown, no code fences, no text outside the JSON array.',
+        messages:[{role:'user',content:'My profile:\n'+profileStr+'\n\nGenerate 5 personalised recommendations for me right now.'}]
+      })
+    });
+
+    var data = await res.json();
+    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    var match = text.match(/\[[\s\S]*\]/);
+    if(!match) throw new Error('No recs');
+
+    var recs = JSON.parse(match[0]);
+    if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty');
+
+    forYouCache = recs;
+    renderRecs(recs);
+
+  }catch(e){
+    console.error('For You failed:', e);
+    grid.innerHTML = '<div class="rec-loading">Could not load — tap refresh to try again</div>';
+  }
+
+  if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
+}
+
+function renderRecs(recs){
+  var grid = document.getElementById('recGrid');
+  if(!grid) return;
+  var pal = searchPal;
+  var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self-Care'};
+
+  grid.innerHTML = '';
+  recs.forEach(function(rec){
+    var card = document.createElement('div');
+    card.className = 'rec-card';
+    card.style.background = pal.ac+'0c';
+    card.style.borderColor = pal.tx+'0a';
+    card.innerHTML =
+      '<div class="rec-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||rec.cat)+'</div>'+
+      '<div class="rec-emoji">'+(rec.emoji||'')+'</div>'+
+      '<div class="rec-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+      '<div class="rec-desc" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+    grid.appendChild(card);
+  });
+}
+
+function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
