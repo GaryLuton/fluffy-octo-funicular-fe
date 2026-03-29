@@ -100,6 +100,10 @@
     .cmsg{max-width:72%;padding:14px 18px;border-radius:18px;font-size:0.95rem;line-height:1.72;word-break:break-word;}
     .cmsg.flovee{align-self:flex-start;border-bottom-left-radius:4px;}
     .cmsg.user{align-self:flex-end;border-bottom-right-radius:4px;opacity:0.86;}
+    .cmsg-time{font-size:0.62rem;opacity:0.3;margin-top:4px;letter-spacing:0.5px;}
+    .chat-date-sep{text-align:center;font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;padding:14px 0 6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .clear-chat-btn{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1px solid rgba(128,128,128,0.15);border-radius:4px;padding:5px 12px;cursor:pointer;opacity:0.3;transition:opacity 0.2s;color:inherit;}
+    .clear-chat-btn:hover{opacity:0.7;}
     .cmsg.typing{opacity:0.38;font-style:italic;}
     .chat-input-row{display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(128,128,128,0.08);}
     .chat-input{flex:1;padding:14px 18px;font-size:0.95rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:12px;background:rgba(128,128,128,0.03);color:inherit;outline:none;resize:none;min-height:50px;max-height:120px;transition:border-color 0.2s;line-height:1.55;}
@@ -1084,11 +1088,119 @@ let chatHistory = [];
 let currentSection = null;
 let chatUserStyle = {count:0,avgLen:0,emoji:false,casual:true};
 
+// ─── CHAT PERSISTENCE ─────────────────────────────────────
+function chatKey(secId){ return 'stuflover_chat_'+secId; }
+
+function loadChat(secId){
+  try{ return JSON.parse(localStorage.getItem(chatKey(secId))||'null')||{messages:[],lastActive:0}; }
+  catch(e){ return {messages:[],lastActive:0}; }
+}
+
+function saveChat(secId){
+  var data = {messages: chatHistory.map(function(m){
+    return {role:m.role, content:m.content, time:m.time||Date.now()};
+  }), lastActive: Date.now()};
+  localStorage.setItem(chatKey(secId), JSON.stringify(data));
+}
+
+function clearChatHistory(){
+  if(!currentSection) return;
+  chatHistory = [];
+  localStorage.removeItem(chatKey(currentSection.id));
+  var msgsId = currentSection.id==='fitforit' ? 'chatMessages' : 'chatMessages2';
+  document.getElementById(msgsId).innerHTML='';
+  var opener = buildOpener(currentSection);
+  addMsg(opener,'flovee');
+}
+
+function formatMsgTime(ts){
+  var d = new Date(ts);
+  var h = d.getHours(); var m = d.getMinutes();
+  return (h%12||12)+':'+(m<10?'0':'')+m+(h<12?' am':' pm');
+}
+
+function formatDateSep(ts){
+  var d = new Date(ts); var now = new Date();
+  var today = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  var msgDay = new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+  if(msgDay===today) return 'Today';
+  if(msgDay===today-86400000) return 'Yesterday';
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(today-msgDay<604800000) return days[d.getDay()];
+  return months[d.getMonth()]+' '+d.getDate();
+}
+
+function buildPreviousContext(secId){
+  var saved = loadChat(secId);
+  if(!saved.messages.length) return '';
+  var recent = saved.messages.slice(-20);
+  var lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
+  return '\n\nPREVIOUS CONVERSATION (you already had this chat with them — remember it and reference things they told you naturally. Do not repeat yourself or re-introduce yourself):\n'+lines.join('\n');
+}
+
+function restoreMessages(secId, messages, pal){
+  var msgsId = secId==='fitforit' ? 'chatMessages' : 'chatMessages2';
+  var container = document.getElementById(msgsId);
+  if(!container) return;
+
+  var lastDateStr = '';
+  messages.forEach(function(m){
+    var dateStr = formatDateSep(m.time);
+    if(dateStr !== lastDateStr){
+      var sep = document.createElement('div');
+      sep.className = 'chat-date-sep';
+      sep.textContent = dateStr;
+      sep.style.color = pal.tx;
+      container.appendChild(sep);
+      lastDateStr = dateStr;
+    }
+
+    var role = m.role==='user' ? 'user' : 'flovee';
+    var div = document.createElement('div');
+    div.className = 'cmsg '+role;
+    div.style.background = role==='user' ? pal.tx+'12' : pal.ac+'1a';
+    div.style.color = pal.tx;
+
+    if(role==='flovee' && secId==='fitforit' && m.content.includes('[[')){
+      var parts = m.content.split(/(\[\[[^\]]+\]\])/g);
+      parts.forEach(function(part){
+        var match = part.match(/^\[\[(.+)\]\]$/);
+        if(match){
+          var bold = document.createElement('strong');
+          bold.textContent = match[1];
+          div.appendChild(bold);
+        } else if(part){
+          div.appendChild(document.createTextNode(part));
+        }
+      });
+    } else {
+      div.textContent = m.content;
+    }
+
+    if(m.time){
+      var timeEl = document.createElement('div');
+      timeEl.className = 'cmsg-time';
+      timeEl.textContent = formatMsgTime(m.time);
+      timeEl.style.color = pal.tx;
+      div.appendChild(timeEl);
+    }
+
+    container.appendChild(div);
+  });
+
+  var clearRow = document.createElement('div');
+  clearRow.style.cssText = 'text-align:center;padding:8px 0 4px;';
+  clearRow.innerHTML = '<button class="clear-chat-btn" onclick="clearChatHistory()">Clear chat</button>';
+  container.appendChild(clearRow);
+
+  container.scrollTop = container.scrollHeight;
+}
+
 function openSection(id){
   const sec = SECTIONS.find(s=>s.id===id);
   if(!sec) return;
   currentSection = sec;
-  chatHistory = [];
   chatUserStyle = {count:0,avgLen:0,emoji:false,casual:true};
 
   const pal = searchPal;
@@ -1129,8 +1241,16 @@ function openSection(id){
     document.getElementById('chatMessages2').innerHTML='';
   }
 
-  const opener = buildOpener(sec);
-  setTimeout(()=>addMsg(opener,'flovee'), 250);
+  // Load saved messages or show opener
+  var saved = loadChat(sec.id);
+  if(saved.messages.length > 0){
+    chatHistory = saved.messages.map(function(m){ return {role:m.role, content:m.content, time:m.time}; });
+    restoreMessages(sec.id, saved.messages, searchPal);
+  } else {
+    chatHistory = [];
+    const opener = buildOpener(sec);
+    setTimeout(function(){ addMsg(opener,'flovee'); },250);
+  }
 }
 
 function buildShopBar(pal){
@@ -1179,7 +1299,6 @@ function doShopSearch(){
 function goHome(){
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('sectionView').style.display = 'none';
-  chatHistory=[];
   currentSection=null;
   document.getElementById('chatMessages').innerHTML='';
   document.getElementById('chatMessages2').innerHTML='';
@@ -1206,7 +1325,9 @@ function buildSystemPrompt(sec){
     styleHint = ` User texts ${chatUserStyle.casual?'casual lowercase':'more formal'}, avg ${Math.round(chatUserStyle.avgLen)} chars${chatUserStyle.emoji?', uses emoji':''}. Mirror this.`;
   }
 
-  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real.${styleHint}`;
+  var prevContext = currentSection ? buildPreviousContext(currentSection.id) : '';
+
+  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them.${styleHint}${prevContext}`;
 }
 
 function buildOpener(sec){
@@ -1239,7 +1360,9 @@ async function runChat(msg, sendBtnId){
   if(msg===msg.toLowerCase()&&msg.length>3) chatUserStyle.casual=true;
 
   addMsg(msg,'user');
-  chatHistory.push({role:'user',content:msg});
+  var now = Date.now();
+  chatHistory.push({role:'user',content:msg,time:now});
+  if(currentSection) saveChat(currentSection.id);
 
   const send = document.getElementById(sendBtnId);
   if(send) send.disabled=true;
@@ -1253,15 +1376,16 @@ async function runChat(msg, sendBtnId){
         model:'claude-sonnet-4-20250514',
         max_tokens:350,
         system:buildSystemPrompt(currentSection),
-        messages:chatHistory.slice(-16)
+        messages:chatHistory.slice(-20).map(function(m){return{role:m.role,content:m.content};})
       })
     });
     const data = await res.json();
     const reply = data.content?.[0]?.text||'...';
     if(typing) typing.remove();
     addMsg(reply,'flovee');
-    chatHistory.push({role:'assistant',content:reply});
-    if(chatHistory.length>24) chatHistory=chatHistory.slice(-24);
+    chatHistory.push({role:'assistant',content:reply,time:Date.now()});
+    if(chatHistory.length>40) chatHistory=chatHistory.slice(-40);
+    if(currentSection) saveChat(currentSection.id);
   }catch(e){
     if(typing) typing.remove();
     addMsg('one sec, try again?','flovee');
@@ -1279,6 +1403,7 @@ function addMsg(text, roleClass){
   const div = document.createElement('div');
   div.className = 'cmsg '+roleClass;
   const isUser = roleClass.includes('user');
+  const isTyping = roleClass.includes('typing');
   div.style.background = isUser ? pal.tx+'12' : pal.ac+'1a';
   div.style.color = pal.tx;
 
@@ -1297,10 +1422,18 @@ function addMsg(text, roleClass){
         div.appendChild(document.createTextNode(part));
       }
     });
-    // Render product cards for found items
     if(items.length > 0) setTimeout(()=>renderProductCards(items), 400);
   } else {
     div.textContent = text;
+  }
+
+  // Add timestamp (not on typing indicators)
+  if(!isTyping){
+    var timeEl = document.createElement('div');
+    timeEl.className = 'cmsg-time';
+    timeEl.textContent = formatMsgTime(Date.now());
+    timeEl.style.color = pal.tx;
+    div.appendChild(timeEl);
   }
 
   msgs.appendChild(div);
