@@ -460,64 +460,83 @@
               </defs>
 
 
+
               <!-- Floor shadow -->
-              <ellipse cx="80" cy="372" rx="24" ry="4" fill="#000" opacity="0.08"/>
+              <ellipse cx="80" cy="374" rx="20" ry="3" fill="#000" opacity="0.06"/>
+              <ellipse cx="80" cy="374" rx="12" ry="2" fill="#000" opacity="0.04"/>
 
-              <!-- BODY SKIN (drawn first so clothes render on top) -->
-              <!-- Left leg -->
-              <path d="M66 192 L64 345 Q64 354 69 354 L76 354 Q79 354 79 346 L80 200" fill="url(#skinGrad)"/>
+              <!-- === BODY === -->
+              <!-- Left leg — smooth taper to ankle -->
+              <path d="M67 190 Q66 220 65 260 Q64 300 63 330 Q63 345 64 350 Q64 356 70 356 L76 356 Q79 356 79 350 Q79 340 80 300 L80 198" fill="url(#skinGrad)"/>
               <!-- Right leg -->
-              <path d="M80 200 L81 346 Q81 354 84 354 L91 354 Q96 354 96 345 L94 192" fill="url(#skinGrad)"/>
-              <!-- Leg shading -->
-              <path d="M66 195 L64 345" stroke="#786858" stroke-width="1" fill="none" opacity="0.1"/>
-              <path d="M94 195 L96 345" stroke="#786858" stroke-width="1" fill="none" opacity="0.1"/>
-              <path d="M72 198 L71 342" stroke="#b0a090" stroke-width="2" fill="none" opacity="0.07"/>
-              <path d="M88 198 L89 342" stroke="#b0a090" stroke-width="2" fill="none" opacity="0.07"/>
+              <path d="M80 198 Q81 260 81 300 Q81 340 81 350 Q81 356 84 356 L90 356 Q96 356 97 350 Q97 345 96 330 Q95 300 94 260 Q94 220 93 190" fill="url(#skinGrad)"/>
+              <!-- Thigh inner shadow -->
+              <path d="M76 195 Q78 220 79 260" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
+              <path d="M84 195 Q82 220 81 260" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
+              <!-- Knee soft curve -->
+              <path d="M68 265 Q72 268 76 265" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.04"/>
+              <path d="M84 265 Q88 268 92 265" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.04"/>
+              <!-- Shin highlight -->
+              <path d="M71 270 L70 340" stroke="#b8a898" stroke-width="1.5" fill="none" opacity="0.05"/>
+              <path d="M89 270 L90 340" stroke="#b8a898" stroke-width="1.5" fill="none" opacity="0.05"/>
 
-              <!-- Torso - hourglass with 3D shading -->
-              <path d="M52 80 Q50 76 55 74 L105 74 Q110 76 108 80 L105 102 Q100 116 94 120 L92 168 Q92 180 100 192 L60 192 Q68 180 68 168 L66 120 Q60 116 55 102 Z" fill="url(#skinGrad)"/>
-              <!-- Torso center highlight -->
-              <path d="M74 80 Q80 82 86 80 L84 102 Q82 114 80 120 L80 172 Q80 182 84 192 L76 192 Q80 182 80 172 L80 120 Q78 114 76 102 Z" fill="#b0a090" opacity="0.1"/>
-              <!-- Side shadows -->
-              <path d="M52 80 L55 102 Q60 116 66 120 L68 168" stroke="#786858" stroke-width="1.2" fill="none" opacity="0.08"/>
-              <path d="M108 80 L105 102 Q100 116 94 120 L92 168" stroke="#786858" stroke-width="1.2" fill="none" opacity="0.08"/>
-              <!-- Navel -->
-              <ellipse cx="80" cy="150" rx="1.5" ry="2" fill="#807060" opacity="0.08"/>
+              <!-- Torso — soft hourglass, cute proportions -->
+              <path d="M54 78 Q52 74 56 72 L104 72 Q108 74 106 78 L104 98 Q100 112 95 116 Q92 120 90 140 Q88 160 88 170 Q90 182 98 190 L62 190 Q70 182 72 170 Q72 160 70 140 Q68 120 65 116 Q60 112 56 98 Z" fill="url(#skinGrad)"/>
+              <!-- Center highlight — gives 3D roundness -->
+              <path d="M76 78 Q80 80 84 78 L82 98 Q81 112 80 118 Q80 140 80 170 Q80 182 82 190 L78 190 Q80 182 80 170 Q80 140 80 118 Q79 112 78 98 Z" fill="#c0b0a0" opacity="0.08"/>
+              <!-- Waist curve accents -->
+              <path d="M54 78 L56 98 Q60 112 65 116" stroke="#887868" stroke-width="0.8" fill="none" opacity="0.06"/>
+              <path d="M106 78 L104 98 Q100 112 95 116" stroke="#887868" stroke-width="0.8" fill="none" opacity="0.06"/>
+              <!-- Collarbone -->
+              <path d="M58 74 Q70 78 80 76 Q90 78 102 74" stroke="#988878" stroke-width="0.5" fill="none" opacity="0.06"/>
 
-              <!-- Arms -->
-              <path d="M52 78 Q44 76 40 80 Q35 88 35 102 L37 158 Q37 164 41 162 L44 155 Q47 132 51 98" fill="url(#skinGradV)"/>
-              <path d="M108 78 Q116 76 120 80 Q125 88 125 102 L123 158 Q123 164 119 162 L116 155 Q113 132 109 98" fill="url(#skinGradV)"/>
-              <path d="M40 80 Q35 88 35 102 L37 158" stroke="#786858" stroke-width="0.8" fill="none" opacity="0.08"/>
-              <path d="M120 80 Q125 88 125 102 L123 158" stroke="#786858" stroke-width="0.8" fill="none" opacity="0.08"/>
-              <!-- Hands -->
-              <ellipse cx="40" cy="163" rx="5" ry="6" fill="url(#skinGradV)"/>
-              <ellipse cx="120" cy="163" rx="5" ry="6" fill="url(#skinGradV)"/>
+              <!-- Arms — slim, slightly curved, relaxed -->
+              <path d="M54 76 Q46 74 42 78 Q36 86 36 100 Q36 120 37 140 L38 158 Q38 166 42 164 L44 157 Q46 136 48 110 Q50 90 54 82" fill="url(#skinGradV)"/>
+              <path d="M106 76 Q114 74 118 78 Q124 86 124 100 Q124 120 123 140 L122 158 Q122 166 118 164 L116 157 Q114 136 112 110 Q110 90 106 82" fill="url(#skinGradV)"/>
+              <!-- Arm inner shadow -->
+              <path d="M42 78 Q36 86 36 100 Q36 120 37 140" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
+              <path d="M118 78 Q124 86 124 100 Q124 120 123 140" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
+              <!-- Hands — small, dainty -->
+              <ellipse cx="41" cy="165" rx="4.5" ry="5.5" fill="url(#skinGradV)"/>
+              <ellipse cx="119" cy="165" rx="4.5" ry="5.5" fill="url(#skinGradV)"/>
 
-              <!-- Neck thin -->
-              <rect x="75" y="54" width="10" height="22" rx="4" fill="url(#skinGradV)"/>
+              <!-- Neck — thin, elegant -->
+              <path d="M76 54 Q76 50 77 48 L83 48 Q84 50 84 54 L84 72 L76 72 Z" fill="url(#skinGradV)"/>
+              <!-- Neck shadow at base -->
+              <path d="M76 70 Q80 72 84 70" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.05"/>
 
-              <!-- DEFAULT UNDERWEAR black sports bra + shorts -->
-              <path d="M56 80 Q56 76 62 74 L98 74 Q104 76 104 80 L104 100 Q104 104 98 104 L62 104 Q56 104 56 100 Z" fill="#2a2a2a"/>
-              <path d="M56 80 L104 80" stroke="#1a1a1a" stroke-width="0.5" opacity="0.25"/>
-              <path d="M67 74 L68 58" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M93 74 L92 58" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M64 168 L61 200 Q61 204 67 204 L78 204 Q80 204 80 200 L80 178" fill="#2a2a2a"/>
-              <path d="M80 178 L80 200 Q80 204 82 204 L93 204 Q99 204 99 200 L96 168" fill="#2a2a2a"/>
-              <path d="M64 168 Q80 173 96 168" stroke="#1a1a1a" stroke-width="0.5" opacity="0.25"/>
+              <!-- DEFAULT UNDERWEAR -->
+              <!-- Sports bra -->
+              <path d="M58 78 Q56 76 60 74 L100 74 Q104 76 102 78 L102 98 Q102 102 98 102 L62 102 Q58 102 58 98 Z" fill="#2a2a2a"/>
+              <path d="M58 80 L102 80" stroke="#3a3a3a" stroke-width="0.4" opacity="0.3"/>
+              <path d="M80 74 L80 102" stroke="#3a3a3a" stroke-width="0.3" opacity="0.1"/>
+              <!-- Straps -->
+              <path d="M66 74 Q67 64 68 56" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round"/>
+              <path d="M94 74 Q93 64 92 56" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round"/>
+              <!-- Shorts -->
+              <path d="M66 168 Q64 180 63 196 Q63 200 68 200 L78 200 Q80 200 80 196 L80 176" fill="#2a2a2a"/>
+              <path d="M80 176 Q80 190 80 196 Q80 200 82 200 L92 200 Q97 200 97 196 Q96 180 94 168" fill="#2a2a2a"/>
+              <path d="M66 168 Q80 172 94 168" stroke="#1a1a1a" stroke-width="0.4" opacity="0.2"/>
 
-              <!-- Clothing layers ON TOP of body -->
+              <!-- Clothing layers (render ON TOP of body) -->
               <g id="dtiLayerBottom"></g>
               <g id="dtiLayerShoes"></g>
               <g id="dtiLayerTop"></g>
               <g id="dtiLayerAcc"></g>
               <g id="dtiLayerHairBack"></g>
 
-              <!-- HEAD - DTI cylindrical block -->
-              <rect x="60" y="8" width="40" height="48" rx="12" fill="url(#skinGradV)"/>
-              <rect x="60" y="8" width="7" height="48" rx="4" fill="#807060" opacity="0.08"/>
-              <rect x="93" y="8" width="7" height="48" rx="4" fill="#807060" opacity="0.08"/>
-              <rect x="68" y="8" width="24" height="6" rx="5" fill="#b8a898" opacity="0.06"/>
-              <rect x="66" y="48" width="28" height="6" rx="3" fill="#807060" opacity="0.05"/>
+              <!-- HEAD — cute rounded block -->
+              <path d="M62 10 Q62 4 68 4 L92 4 Q98 4 98 10 L98 50 Q98 58 92 58 L68 58 Q62 58 62 50 Z" fill="url(#skinGradV)"/>
+              <!-- 3D side shading -->
+              <path d="M62 10 Q62 4 68 4 L72 4 L72 58 L68 58 Q62 58 62 50 Z" fill="#887868" opacity="0.06"/>
+              <path d="M88 4 L92 4 Q98 4 98 10 L98 50 Q98 58 92 58 L88 58 Z" fill="#887868" opacity="0.06"/>
+              <!-- Top highlight -->
+              <path d="M70 4 Q80 2 90 4 L90 8 Q80 6 70 8 Z" fill="#c0b0a0" opacity="0.06"/>
+              <!-- Chin roundness -->
+              <path d="M68 54 Q80 60 92 54" stroke="#988878" stroke-width="0.5" fill="none" opacity="0.04"/>
+              <!-- Subtle cheek blush -->
+              <ellipse cx="67" cy="38" rx="4" ry="3" fill="#c8a090" opacity="0.04"/>
+              <ellipse cx="93" cy="38" rx="4" ry="3" fill="#c8a090" opacity="0.04"/>
 
               <!-- Hair front layer -->
               <g id="dtiLayerHair"></g>
