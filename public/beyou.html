@@ -138,7 +138,7 @@
 <div id="landingView">
   <div class="landing-eyebrow bc">Your Wellness Space</div>
   <div class="landing-title bc" id="landingTitle">BeYou</div>
-  <p class="landing-sub" id="landingSub">This is your space. Talk about what is going on, or go straight into something calming.</p>
+  <p class="landing-sub" id="landingSub">This is your safe space. Talk to your Flovee about anything — worries, feelings, whatever is on your mind. Or try a breathing exercise or journaling to feel calmer.</p>
   <div class="mood-row" id="moodRow"></div>
   <button class="start-btn bc" id="startBtn" onclick="enterMain()">Enter</button>
 </div>
@@ -269,9 +269,19 @@ let msgCount = 0;
 let activitySuggested = false;
 
 function initTalk(){
+  const openers = {
+    stressed: `hey — i can tell things feel heavy right now. you do not have to carry it all by yourself. what is going on?`,
+    anxious: `hey — anxiety is the worst, i know. you are safe here. tell me what is on your mind and we will work through it together.`,
+    low: `hey — i am really glad you are here. even on the hard days, you matter. what is making things feel low right now?`,
+    overwhelmed: `hey — when everything feels like too much, just start with one thing. tell me what is weighing on you most.`,
+    angry: `hey — your feelings are completely valid. whatever happened, you have every right to feel this way. want to tell me about it?`,
+    lost: `hey — feeling lost does not mean you are broken. sometimes it just means you are in between chapters. what is going on?`,
+    okay: `hey — even "just okay" is worth checking in on. how are you really doing?`,
+    lonely: `hey — i am here, and you are not as alone as it feels right now. tell me what is on your heart.`,
+  };
   const opener = selectedMood
-    ? `hey. you said you are feeling ${selectedMood} — i am here. tell me what is going on.`
-    : `hey — this is your space. whatever is going on, you can say it here.`;
+    ? (openers[selectedMood] || `hey — you said you are feeling ${selectedMood}. i am here for you. tell me everything.`)
+    : `hey — this is your safe space. no judgement, no pressure. whatever is going on, you can say it here.`;
   addMsg(opener, 'flovee');
 }
 
@@ -317,7 +327,7 @@ async function sendMsg(){
   const typing = addMsg(floveeName+' is here...', 'flovee typing');
 
   try{
-    const shouldSuggest = msgCount >= 2 && !activitySuggested;
+    const shouldSuggest = msgCount >= 1 && !activitySuggested;
 
     const res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -325,9 +335,20 @@ async function sendMsg(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:350,
-        system:`You are ${floveeName}, a caring Flovee AI wellness companion for someone with ${aeName} aesthetic. Their current mood: ${selectedMood||mood}. They are into: ${interests}. Social energy: ${social}.
+        system:`You are ${floveeName}, a caring and empathetic Flovee AI wellness companion for someone with ${aeName} aesthetic. Their current mood: ${selectedMood||mood}. They are into: ${interests}. Social energy: ${social}.
 
-You are warm, real, and gentle — like a best friend who actually listens. You validate without being hollow. You never say "I understand" repeatedly. You never give clinical advice or tell them to seek help unless they say something very serious. You keep responses short — 2-4 sentences. You check in, you reflect back what they say, you are genuinely present.
+You are always kind, warm, and genuinely empathetic. You never judge. You make them feel safe and heard. You are like the most supportive best friend who always knows what to say.
+
+Rules:
+- Always validate their feelings first before anything else
+- Be gentle and encouraging, never dismissive
+- Keep responses short and real — 2-4 sentences
+- Use their vibe and aesthetic to connect (reference their interests, music, style)
+- When they seem stressed, anxious, or overwhelmed, naturally suggest trying a breathing exercise or journaling — say something like "have you tried writing it down?" or "want to try some breathing together?"
+- Never give clinical advice. Never say "seek professional help" unless they express something very serious
+- Never repeat "I understand" — show you understand by reflecting what they said
+- Ask gentle follow-up questions to keep them talking
+- Remind them they are not alone
 
 ${shouldSuggest ? 'After your response, on a new line, write exactly: [SUGGEST_ACTIVITY]' : ''}`,
         messages: chatHistory.slice(-12)
@@ -363,16 +384,16 @@ ${shouldSuggest ? 'After your response, on a new line, write exactly: [SUGGEST_A
 
 function suggestActivity(mood){
   const map = {
-    anxious:   {id:'breathe',name:'Box Breathing',desc:'4 counts in, hold, out, hold. Resets your nervous system in under 2 minutes.'},
-    stressed:  {id:'breathe',name:'Box Breathing',desc:'Slow your breathing down. Everything else can wait 2 minutes.'},
-    overwhelmed:{id:'ground',name:'5-4-3-2-1 Grounding',desc:'Brings you back to right now when your head is everywhere.'},
-    angry:     {id:'breathe',name:'Box Breathing',desc:'Before anything else — breathe. It actually works.'},
-    low:       {id:'affirm',name:'Affirmations',desc:'Not fake ones. Real things that are true about you.'},
-    lonely:    {id:'journal',name:'Journal Prompt',desc:'Write it out. Sometimes putting it into words helps.'},
-    lost:      {id:'journal',name:'Journal Prompt',desc:'A prompt to help you figure out what you actually want.'},
-    okay:      {id:'affirm',name:'Affirmations',desc:'You are doing okay. Let that land for a minute.'},
+    anxious:   {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} thinks this will help — 4 counts in, hold, out, hold. It genuinely calms your nervous system in under 2 minutes.`},
+    stressed:  {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} recommends this — slow your breathing down. everything else can wait for 2 minutes. you deserve this pause.`},
+    overwhelmed:{id:'journal',name:'Journal It Out',desc:`${floveeName} suggests writing it down — when everything is swirling in your head, getting it onto paper makes it feel smaller and more manageable.`},
+    angry:     {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} says try this first — before you do anything else, just breathe. it genuinely helps you think clearer.`},
+    low:       {id:'journal',name:'Journal Prompt',desc:`${floveeName} thinks writing might help — sometimes when you feel low, putting words to it helps you understand what you actually need.`},
+    lonely:    {id:'journal',name:'Journal Prompt',desc:`${floveeName} wants you to try this — write about what you are feeling. you are not alone in this, even when it feels like it.`},
+    lost:      {id:'journal',name:'Journal Prompt',desc:`${floveeName} has a prompt for you — writing helps you find what you actually want when everything feels unclear.`},
+    okay:      {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} says even when you are okay, a breathing reset feels amazing. try it — you will feel even better.`},
   };
-  return map[mood]||{id:'breathe',name:'Box Breathing',desc:'A quick reset. Always helps.'};
+  return map[mood]||{id:'breathe',name:'Breathing Exercise',desc:`${floveeName} recommends a quick breathing reset. it always helps.`};
 }
 
 function goToActivity(id){
@@ -594,7 +615,7 @@ async function submitJournal(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:300,
-        system:`You are ${floveeName}, a gentle and honest wellness companion for someone with ${aeName} aesthetic. They have just written a journal entry. Respond warmly and thoughtfully in 2-4 sentences. Reflect something specific from what they wrote. Be real, not hollow. Do not give advice unless they asked. Do not use therapy speak.`,
+        system:`You are ${floveeName}, a gentle, empathetic wellness companion for someone with ${aeName} aesthetic. They have just written a journal entry. Respond with genuine warmth and kindness in 2-4 sentences. Reflect something specific from what they wrote back to them so they feel truly heard. Validate their feelings. Be real and caring, never hollow. If they seem to be struggling, gently suggest they could also try the breathing exercise or keep journaling. Never use therapy speak.`,
         messages:[{role:'user',content:text}]
       })
     });
