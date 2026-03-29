@@ -130,7 +130,7 @@
     .product-shop{font-size:0.7rem;opacity:0.45;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .product-badge{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:20px;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;}
 
-    /* FOR YOU — SCRAPBOOK PAGE */
+    /* FOR YOU — CUTE SCRAPBOOK */
     .foryou{position:relative;z-index:2;padding:0 30px 10px;overflow:visible;}
     .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
     .foryou-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
@@ -139,65 +139,78 @@
     .foryou-refresh:disabled{opacity:0.2;cursor:not-allowed;}
     .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
 
-    .rec-board{position:relative;min-height:420px;margin:0 auto;max-width:960px;
-      background:repeating-linear-gradient(transparent,transparent 27px,rgba(128,128,128,0.04) 27px,rgba(128,128,128,0.04) 28px);
-      border:1px solid rgba(128,128,128,0.06);border-radius:6px;padding:24px 20px;}
+    .rec-board{position:relative;min-height:460px;margin:0 auto;max-width:960px;
+      border-radius:16px;padding:32px 24px;
+      background-image:radial-gradient(circle,rgba(128,128,128,0.04) 1px,transparent 1px);background-size:18px 18px;}
 
-    .sb-piece{position:absolute;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;cursor:default;}
-    .sb-piece:hover{z-index:20 !important;}
+    .sb-piece{position:absolute;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.35s;cursor:default;}
+    .sb-piece:hover{z-index:20 !important;animation:cutewobble 0.5s ease;}
+    @keyframes cutewobble{0%{transform:rotate(var(--rot)) scale(1)}25%{transform:rotate(calc(var(--rot) + 2deg)) scale(1.04)}50%{transform:rotate(calc(var(--rot) - 1.5deg)) scale(1.05)}75%{transform:rotate(calc(var(--rot) + 0.5deg)) scale(1.03)}100%{transform:rotate(var(--rot)) scale(1.02)}}
+
+    /* Sparkle that appears on hover */
+    .sb-sparkle{position:absolute;pointer-events:none;z-index:50;opacity:0;transition:opacity 0.3s;}
+    .sb-piece:hover .sb-sparkle{opacity:1;animation:sparklepop 0.6s ease both;}
+    @keyframes sparklepop{0%{transform:scale(0) rotate(0deg);opacity:0}50%{opacity:1}100%{transform:scale(1) rotate(20deg);opacity:0.7}}
 
     /* Polaroid */
-    .sb-polaroid{background:#fff;padding:8px 8px 30px;box-shadow:2px 3px 14px rgba(0,0,0,0.1);}
-    .sb-polaroid:hover{box-shadow:3px 6px 24px rgba(0,0,0,0.15) !important;}
-    .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-    .sb-polaroid .sb-label{position:absolute;bottom:6px;left:10px;right:10px;font-size:0.7rem;font-weight:600;line-height:1.35;color:#333;}
-    .sb-polaroid .sb-label-sub{font-size:0.58rem;opacity:0.4;font-weight:400;margin-top:1px;}
-    /* Photo corners */
-    .sb-corner{position:absolute;width:16px;height:16px;opacity:0.25;pointer-events:none;}
+    .sb-polaroid{background:#fff;padding:8px 8px 34px;box-shadow:2px 3px 14px rgba(0,0,0,0.08);border-radius:3px;}
+    .sb-polaroid:hover{box-shadow:3px 8px 28px rgba(0,0,0,0.12) !important;}
+    .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;border-radius:2px;}
+    .sb-polaroid .sb-label{position:absolute;bottom:7px;left:12px;right:12px;font-size:0.72rem;font-weight:600;line-height:1.35;color:#333;}
+    .sb-polaroid .sb-label-sub{font-size:0.58rem;opacity:0.4;font-weight:400;margin-top:2px;}
+    .sb-corner{position:absolute;width:16px;height:16px;opacity:0.2;pointer-events:none;}
     .sb-corner svg{width:100%;height:100%;}
 
     /* Notebook page */
-    .sb-notebook{padding:18px 16px 16px 28px;box-shadow:1px 2px 10px rgba(0,0,0,0.06);border-left:3px solid;position:relative;
-      background:repeating-linear-gradient(transparent,transparent 23px,rgba(128,128,128,0.06) 23px,rgba(128,128,128,0.06) 24px);}
-    .sb-notebook::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;opacity:0.15;}
+    .sb-notebook{padding:20px 18px 18px 30px;box-shadow:1px 2px 10px rgba(0,0,0,0.05);border-left:3px solid;border-radius:2px 8px 8px 2px;position:relative;
+      background-image:repeating-linear-gradient(transparent,transparent 23px,rgba(128,128,128,0.05) 23px,rgba(128,128,128,0.05) 24px);}
     .sb-notebook .sb-nb-cat{font-size:0.5rem;letter-spacing:3.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;}
     .sb-notebook .sb-nb-title{font-size:0.92rem;font-weight:700;line-height:1.35;margin-bottom:4px;}
     .sb-notebook .sb-nb-body{font-size:0.74rem;opacity:0.48;line-height:1.65;}
 
-    /* Washi tape */
-    .sb-tape{position:absolute;height:18px;border-radius:1px;pointer-events:none;z-index:30;
-      background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.2) 3px,rgba(255,255,255,0.2) 6px);}
+    /* Washi tape — translucent with cute patterns */
+    .sb-tape{position:absolute;height:20px;border-radius:1px;pointer-events:none;z-index:30;opacity:0.55;}
+    .sb-tape.dotty{background-image:radial-gradient(circle,rgba(255,255,255,0.45) 1.5px,transparent 1.5px);background-size:6px 6px;}
+    .sb-tape.stripy{background-image:repeating-linear-gradient(45deg,transparent,transparent 2.5px,rgba(255,255,255,0.25) 2.5px,rgba(255,255,255,0.25) 5px);}
+    .sb-tape.hearty{background-image:radial-gradient(circle,rgba(255,255,255,0.4) 2px,transparent 2px);background-size:8px 8px;}
 
-    /* Kraft tag */
-    .sb-tag{border-radius:4px 12px 12px 4px;padding:14px 16px 14px 20px;box-shadow:1px 2px 8px rgba(0,0,0,0.06);position:relative;}
-    .sb-tag::before{content:'';position:absolute;left:8px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;border:1.5px solid rgba(128,128,128,0.2);background:transparent;}
-    .sb-tag .sb-tag-title{font-size:0.82rem;font-weight:700;line-height:1.35;margin-bottom:3px;}
-    .sb-tag .sb-tag-body{font-size:0.68rem;opacity:0.45;line-height:1.6;}
+    /* Heart sticker */
+    .sb-heart{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;box-shadow:1px 2px 8px rgba(0,0,0,0.05);}
+    .sb-heart .sb-heart-title{font-size:0.68rem;font-weight:700;line-height:1.3;margin-top:4px;}
 
-    /* Stamp sticker */
-    .sb-stamp{border-radius:4px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;
-      border:2.5px dashed;box-shadow:1px 2px 6px rgba(0,0,0,0.04);}
-    .sb-stamp .sb-stamp-title{font-size:0.78rem;font-weight:700;line-height:1.3;}
-    .sb-stamp .sb-stamp-sub{font-size:0.62rem;opacity:0.4;line-height:1.5;}
+    /* Bubbly note */
+    .sb-bubble{border-radius:20px;padding:18px 16px;box-shadow:1px 3px 12px rgba(0,0,0,0.05);position:relative;}
+    .sb-bubble::after{content:'';position:absolute;bottom:-8px;left:20px;width:16px;height:16px;border-radius:50%;background:inherit;}
+    .sb-bubble::before{content:'';position:absolute;bottom:-4px;left:40px;width:9px;height:9px;border-radius:50%;background:inherit;}
+    .sb-bubble .sb-bubble-title{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
+    .sb-bubble .sb-bubble-body{font-size:0.72rem;opacity:0.45;line-height:1.6;}
 
     /* Torn paper */
-    .sb-torn{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.05);}
+    .sb-torn{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.04);border-radius:3px;}
     .sb-torn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:8px;background:inherit;
       clip-path:polygon(0% 40%,3% 80%,6% 30%,9% 70%,12% 20%,15% 65%,18% 35%,21% 75%,24% 25%,27% 60%,30% 40%,33% 80%,36% 20%,39% 70%,42% 30%,45% 65%,48% 45%,51% 80%,54% 25%,57% 70%,60% 35%,63% 75%,66% 20%,69% 60%,72% 40%,75% 80%,78% 30%,81% 65%,84% 25%,87% 75%,90% 40%,93% 70%,96% 30%,100% 60%,100% 100%,0% 100%);}
     .sb-torn .sb-torn-title{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
     .sb-torn .sb-torn-body{font-size:0.72rem;opacity:0.45;line-height:1.6;}
 
+    /* Doodle border */
+    .sb-doodle-border{border:2.5px dashed;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 2px 6px rgba(0,0,0,0.03);}
+    .sb-doodle-border .sb-db-cat{font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;}
+    .sb-doodle-border .sb-db-title{font-size:0.85rem;font-weight:700;line-height:1.3;}
+    .sb-doodle-border .sb-db-body{font-size:0.7rem;opacity:0.42;line-height:1.6;}
+
     /* Paper clip */
     .sb-clip{position:absolute;z-index:25;pointer-events:none;opacity:0.3;}
     .sb-clip svg{display:block;}
 
-    /* SVG icon */
+    /* Floating sparkle decorations */
+    .sb-float-sparkle{position:absolute;pointer-events:none;z-index:1;animation:floatsparkle 4s ease-in-out infinite alternate;}
+    @keyframes floatsparkle{0%{transform:translateY(0) scale(1);opacity:0.12}50%{opacity:0.2}100%{transform:translateY(-8px) scale(1.1);opacity:0.12}}
+
     .sb-icon{pointer-events:none;}
     .sb-icon svg{display:block;}
-
     .rec-loading{width:100%;text-align:center;padding:60px;opacity:0.3;font-style:italic;position:relative;}
 
-    @media(max-width:768px){.rec-board{min-height:620px;padding:16px 12px;}.foryou{padding:0 14px 10px;}}
+    @media(max-width:768px){.rec-board{min-height:680px;padding:20px 14px;}.foryou{padding:0 14px 10px;}}
 
     /* FIT SECTION LAYOUT */
     .fit-layout{display:flex;flex-direction:column;gap:0;}
@@ -1148,23 +1161,32 @@ function makeIconSvg(fn,c,size){
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
 }
 
+var tapeStyles = ['dotty','stripy','hearty'];
+
 function addTape(parent, pal, x, rot, w){
   var t = document.createElement('div');
-  t.className = 'sb-tape';
-  t.style.cssText = 'width:'+(w||55)+'px;top:-8px;left:'+x+'%;background:'+pal.ac+'45;transform:rotate('+rot+'deg);';
+  t.className = 'sb-tape '+tapeStyles[Math.floor(Math.random()*3)];
+  t.style.cssText = 'width:'+(w||55)+'px;top:-9px;left:'+x+'%;background-color:'+pal.ac+'40;transform:rotate('+rot+'deg);';
   parent.appendChild(t);
+}
+
+function addSparkle(parent, pal, x, y){
+  var s = document.createElement('div');
+  s.className = 'sb-sparkle';
+  s.style.cssText = 'right:'+x+'px;top:'+y+'px;';
+  s.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18"><path d="M9 0 L10.5 7 L18 9 L10.5 11 L9 18 L7.5 11 L0 9 L7.5 7 Z" fill="'+pal.ac+'" opacity="0.7"/></svg>';
+  parent.appendChild(s);
 }
 
 function addClip(parent, pal, side){
   var cl = document.createElement('div');
   cl.className = 'sb-clip';
   cl.style[side]='-6px'; cl.style.top='-4px';
-  cl.innerHTML = '<svg width="18" height="40" viewBox="0 0 18 40"><path d="M9 0 V12 C9 16 2 16 2 20 C2 24 9 24 9 28 V40" fill="none" stroke="'+pal.tx+'" stroke-width="2" opacity="0.5"/></svg>';
+  cl.innerHTML = '<svg width="18" height="40" viewBox="0 0 18 40"><path d="M9 0 V12 C9 16 2 16 2 20 C2 24 9 24 9 28 V40" fill="none" stroke="'+pal.ac+'" stroke-width="2" opacity="0.5"/></svg>';
   parent.appendChild(cl);
 }
 
 function addCorners(parent){
-  var positions = [{t:'0',l:'0',r:'rotate(0)'},{t:'0',r:'rotate(90)',right:'0'},{b:'0',l:'0',rot:'rotate(-90)'},{b:'0',right:'0',rot:'rotate(180)'}];
   [[0,0,0],[1,0,'auto'],[2,'auto',0],[3,'auto','auto']].forEach(function(p){
     var c = document.createElement('div');
     c.className = 'sb-corner';
@@ -1174,6 +1196,14 @@ function addCorners(parent){
     c.innerHTML = '<svg viewBox="0 0 16 16"><path d="M0 0 L16 0 L16 4 L4 4 L4 16 L0 16 Z" fill="currentColor"/></svg>';
     parent.appendChild(c);
   });
+}
+
+function makeHeartSvg(c, size){
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+c+'" opacity="0.6"/></svg>';
+}
+
+function makeStarBurstSvg(c, size){
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24"><path d="M12 0 L13.5 9 L24 12 L13.5 15 L12 24 L10.5 15 L0 12 L10.5 9 Z" fill="'+c+'" opacity="0.5"/></svg>';
 }
 
 function renderRecs(recs){
@@ -1186,43 +1216,71 @@ function renderRecs(recs){
 
   board.innerHTML = '';
 
-  // Layouts: x%, y px, w (px desktop / % mobile), rotation, type
+  // Layouts: x%, y, w, rot, type
   var layouts = mob ? [
-    {x:3, y:8,   w:54, rot:-2.5, type:'polaroid'},
-    {x:50,y:16,  w:48, rot:2.5,  type:'notebook'},
-    {x:2, y:200, w:52, rot:1.5,  type:'torn'},
-    {x:48,y:210, w:46, rot:-2,   type:'tag'},
-    {x:8, y:370, w:60, rot:1,    type:'stamp'},
+    {x:3,  y:12,  w:54, rot:-2.5, type:'polaroid'},
+    {x:50, y:18,  w:47, rot:3,    type:'bubble'},
+    {x:2,  y:210, w:50, rot:1.5,  type:'notebook'},
+    {x:48, y:220, w:48, rot:-2,   type:'torn'},
+    {x:6,  y:400, w:56, rot:1,    type:'doodle'},
   ] : [
-    {x:1,  y:8,   w:195, rot:-3,   type:'polaroid'},
-    {x:25, y:5,   w:240, rot:1.8,  type:'notebook'},
-    {x:55, y:0,   w:195, rot:-1.5, type:'torn'},
-    {x:75, y:30,  w:165, rot:3.5,  type:'tag'},
-    {x:18, y:210, w:280, rot:1,    type:'stamp'},
+    {x:1,  y:10,  w:190, rot:-3,   type:'polaroid'},
+    {x:23, y:8,   w:200, rot:2,    type:'bubble'},
+    {x:50, y:5,   w:210, rot:-1.5, type:'notebook'},
+    {x:74, y:15,  w:170, rot:3,    type:'torn'},
+    {x:20, y:220, w:260, rot:0.8,  type:'doodle'},
   ];
 
-  // Scattered decorative icons
-  var decoCount = mob ? 5 : 9;
+  // --- Floating sparkles ---
+  var sparkleCount = mob ? 6 : 12;
+  for(var sp=0;sp<sparkleCount;sp++){
+    var spk = document.createElement('div');
+    spk.className = 'sb-float-sparkle';
+    spk.style.left = (Math.random()*92+2)+'%';
+    spk.style.top = (Math.random()*(mob?600:380)+10)+'px';
+    spk.style.animationDelay = (Math.random()*4).toFixed(1)+'s';
+    spk.style.animationDuration = (3+Math.random()*3).toFixed(1)+'s';
+    spk.innerHTML = (sp%3===0) ? makeHeartSvg(pal.ac, 12+Math.round(Math.random()*8)) :
+                    (sp%3===1) ? makeStarBurstSvg(pal.ac, 10+Math.round(Math.random()*10)) :
+                    makeIconSvg(aeIcons[sp%aeIcons.length], pal.ac, 16+Math.round(Math.random()*14));
+    board.appendChild(spk);
+  }
+
+  // --- Scattered aesthetic icons ---
+  var decoCount = mob ? 4 : 7;
   for(var d=0;d<decoCount;d++){
     var deco = document.createElement('div');
     deco.className = 'sb-icon';
-    deco.style.cssText = 'position:absolute;z-index:0;opacity:0.07;pointer-events:none;';
+    deco.style.cssText = 'position:absolute;z-index:0;opacity:0.08;pointer-events:none;';
     deco.style.left = (Math.random()*88+4)+'%';
-    deco.style.top = (Math.random()*(mob?550:350)+5)+'px';
+    deco.style.top = (Math.random()*(mob?550:360)+5)+'px';
     deco.style.transform = 'rotate('+(Math.random()*50-25).toFixed(0)+'deg)';
-    deco.innerHTML = makeIconSvg(aeIcons[d%aeIcons.length], pal.ac, 24+Math.round(Math.random()*28));
+    deco.innerHTML = makeIconSvg(aeIcons[d%aeIcons.length], pal.ac, 28+Math.round(Math.random()*24));
     board.appendChild(deco);
   }
 
-  // Decorative washi tape strips across the board
-  var tapeCount = mob ? 2 : 3;
+  // --- Loose washi tape strips ---
+  var tapeCount = mob ? 2 : 4;
   for(var t=0;t<tapeCount;t++){
     var strip = document.createElement('div');
-    strip.className = 'sb-tape';
-    strip.style.cssText = 'width:'+(80+Math.round(Math.random()*60))+'px;height:20px;position:absolute;z-index:0;background:'+pal.ac+'20;top:'+(Math.random()*(mob?500:320)+20)+'px;left:'+(Math.random()*70+5)+'%;transform:rotate('+(Math.random()*25-12).toFixed(0)+'deg);';
+    strip.className = 'sb-tape '+tapeStyles[t%3];
+    strip.style.cssText = 'width:'+(60+Math.round(Math.random()*70))+'px;position:absolute;z-index:1;background-color:'+pal.ac+'28;top:'+(Math.random()*(mob?530:340)+20)+'px;left:'+(Math.random()*75+5)+'%;transform:rotate('+(Math.random()*30-15).toFixed(0)+'deg);';
     board.appendChild(strip);
   }
 
+  // --- Scattered hearts ---
+  var heartCount = mob ? 3 : 5;
+  for(var h=0;h<heartCount;h++){
+    var hrt = document.createElement('div');
+    hrt.style.cssText = 'position:absolute;z-index:0;pointer-events:none;opacity:0.1;';
+    hrt.style.left = (Math.random()*90+3)+'%';
+    hrt.style.top = (Math.random()*(mob?580:370))+'px';
+    hrt.style.transform = 'rotate('+(Math.random()*40-20).toFixed(0)+'deg)';
+    hrt.innerHTML = makeHeartSvg(pal.ac, 14+Math.round(Math.random()*12));
+    board.appendChild(hrt);
+  }
+
+  // --- Render cards ---
   recs.forEach(function(rec, i){
     if(i >= layouts.length) return;
     var L = layouts[i];
@@ -1235,30 +1293,48 @@ function renderRecs(recs){
       el.className = 'sb-piece sb-polaroid';
       el.style.width = wStr;
       el.innerHTML =
-        '<div class="sb-inner" style="background:'+pal.ac+'0e">'+
-          '<div class="sb-icon" style="opacity:0.6">'+makeIconSvg(iconFn, pal.ac, mob?56:72)+'</div>'+
+        '<div class="sb-inner" style="background:linear-gradient(135deg,'+pal.ac+'12,'+pal.ac+'08)">'+
+          '<div class="sb-icon" style="opacity:0.55">'+makeIconSvg(iconFn, pal.ac, mob?52:68)+'</div>'+
         '</div>'+
         '<div class="sb-label" style="color:#333">'+escHtml(rec.title||'')+
           '<div class="sb-label-sub">'+escHtml(rec.desc||'')+'</div>'+
         '</div>';
       addCorners(el);
-      addTape(el, pal, 25+(Math.random()*30), (Math.random()*14-7).toFixed(1), 50+Math.round(Math.random()*20));
+      addTape(el, pal, 20+Math.round(Math.random()*35), (Math.random()*14-7).toFixed(1), 48+Math.round(Math.random()*22));
+      addSparkle(el, pal, -6, -6);
+
+    } else if(L.type === 'bubble'){
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-bubble';
+      el.style.width = wStr;
+      el.style.background = pal.ac+'10';
+      el.style.color = pal.tx;
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
+          '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
+          makeHeartSvg(pal.ac, 14)+
+        '</div>'+
+        '<div class="sb-bubble-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-bubble-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+      addSparkle(el, pal, 8, -8);
 
     } else if(L.type === 'notebook'){
       el = document.createElement('div');
       el.className = 'sb-piece sb-notebook';
       el.style.width = wStr;
-      el.style.background = pal.bg;
+      el.style.backgroundColor = pal.bg;
       el.style.borderLeftColor = pal.ac+'50';
       el.style.color = pal.tx;
-      el.querySelector || null; // noop
       el.innerHTML =
-        '<div style="position:absolute;left:20px;top:0;bottom:0;width:1px;background:'+pal.ac+'20;"></div>'+
-        '<div class="sb-icon" style="margin-bottom:8px;opacity:0.4">'+makeIconSvg(iconFn, pal.ac, 26)+'</div>'+
-        '<div class="sb-nb-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
+        '<div style="position:absolute;left:22px;top:0;bottom:0;width:1px;background:'+pal.ac+'18;"></div>'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+          '<div class="sb-icon" style="opacity:0.4">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
+          '<div class="sb-nb-cat" style="color:'+pal.tx+';margin:0">'+(catLabels[rec.cat]||'')+'</div>'+
+        '</div>'+
         '<div class="sb-nb-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
         '<div class="sb-nb-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
       addClip(el, pal, 'right');
+      addSparkle(el, pal, -4, 10);
 
     } else if(L.type === 'torn'){
       el = document.createElement('div');
@@ -1268,53 +1344,47 @@ function renderRecs(recs){
       el.style.color = pal.tx;
       el.innerHTML =
         '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-          '<div class="sb-icon" style="opacity:0.45">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
-          '<div style="font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
+          '<div class="sb-icon" style="opacity:0.45">'+makeIconSvg(iconFn, pal.ac, 22)+'</div>'+
+          makeHeartSvg(pal.ac, 12)+
         '</div>'+
         '<div class="sb-torn-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
         '<div class="sb-torn-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
-      addTape(el, pal, 40+(Math.random()*20), (Math.random()*10-5).toFixed(1));
-
-    } else if(L.type === 'tag'){
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-tag';
-      el.style.width = wStr;
-      el.style.background = pal.ac+'14';
-      el.style.color = pal.tx;
-      el.innerHTML =
-        '<div class="sb-icon" style="opacity:0.4;margin-bottom:4px">'+makeIconSvg(iconFn, pal.ac, 22)+'</div>'+
-        '<div class="sb-tag-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-tag-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+      addTape(el, pal, 30+Math.round(Math.random()*25), (Math.random()*10-5).toFixed(1));
 
     } else {
-      // stamp
+      // doodle border card
       el = document.createElement('div');
-      el.className = 'sb-piece sb-stamp';
+      el.className = 'sb-piece sb-doodle-border';
       el.style.width = wStr;
-      el.style.borderColor = pal.ac+'35';
-      el.style.background = pal.ac+'08';
+      el.style.borderColor = pal.ac+'30';
+      el.style.background = pal.ac+'06';
       el.style.color = pal.tx;
       el.innerHTML =
-        '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 32)+'</div>'+
-        '<div class="sb-stamp-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-stamp-sub" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 26)+'</div>'+
+          '<div class="sb-db-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
+          makeStarBurstSvg(pal.ac, 14)+
+        '</div>'+
+        '<div class="sb-db-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-db-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+      addSparkle(el, pal, -4, -4);
     }
 
     el.style.left = L.x+'%';
     el.style.top = L.y+'px';
-    el.style.zIndex = (i+2).toString();
+    el.style.zIndex = (i+3).toString();
+    el.style.setProperty('--rot', L.rot+'deg');
     el.style.transform = 'rotate('+L.rot+'deg)';
     board.appendChild(el);
   });
 
-  // Auto-set board height
   setTimeout(function(){
     var maxB = 0;
-    board.querySelectorAll('.sb-piece').forEach(function(p){
+    board.querySelectorAll('.sb-piece,.sb-float-sparkle').forEach(function(p){
       var b = p.offsetTop + p.offsetHeight;
       if(b>maxB) maxB = b;
     });
-    board.style.minHeight = (maxB+40)+'px';
+    board.style.minHeight = (maxB+50)+'px';
   }, 50);
 }
 
