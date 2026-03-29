@@ -2984,6 +2984,27 @@ MOOD MATCHING:
 
 Keep messages short. Text like a real person. Remember everything they tell you about their wardrobe.`,        opener:'hey! tell me about your wardrobe — what are your go-to pieces? tops, bottoms, shoes, anything. the more you tell me the better outfits i can put together for you'},
   {id:'beyou',      name:'BeYou',           sub:'confidence & you',      col:1, prompt:'You are in the BeYou section — confidence and self. You know they are feeling {MOOD} today. Their aesthetic is {AE}. Be encouraging without being hollow. You are honest. You are on their side. This is their safe space.',                                                                      opener:'this is your space. what is going on today?'},
+  {id:'myroutine',  name:'MyRoutine',       sub:'morning & night',       col:8, prompt:`You are the MyRoutine Flovee — you help build personalized morning and night routines.
+
+You know: aesthetic ({AE}), age ({AGE} — use this to make routines age-appropriate), mood ({MOOD}), interests ({INTERESTS}).
+
+HOW IT WORKS:
+1. First ask: "morning routine or night routine?"
+2. Then ask about their goals (better skin, more energy, less stress, be more productive, feel confident, etc.)
+3. Ask about their schedule — what time they wake up/go to bed, how much time they have
+4. Build a step-by-step routine personalized to them
+
+ROUTINE BUILDING RULES:
+- Make routines realistic for their age — a 14 year old has different needs than a 20 year old
+- Include: skincare steps, outfit prep, mindset/affirmation, breakfast/snack ideas, exercise/stretch suggestions, wind-down activities
+- Match their aesthetic — cottagecore morning routine looks different from streetwear morning routine
+- Be specific with timing: "5 min — wash face with gentle cleanser"
+- Keep it achievable — do not overwhelm them with 20 steps
+- Suggest products/activities they would actually enjoy based on their interests
+- For night routines: include phone-down time, journaling, skincare, relaxation
+
+Remember what they tell you about their routine and refine it over time. Save their routine preferences.
+Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
   {id:'contentwithit',name:'ContentWithIt',sub:'watch · read · listen',  col:2, prompt:'You are in the ContentWithIt section. You know their music ({MUSIC}), interests ({INTERESTS}), aesthetic ({AE}). Give specific recs — actual show names, books, channels, playlists. Tell them WHY it fits them. No generic lists.',                                                             opener:'tell me what you have been into lately and i will find your next thing'},
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'fomo fighter',         col:4, prompt:'You are in StufloverDaily — FOMO fighter. You know their taste: aesthetic {AE}, music {MUSIC}, interests {INTERESTS}, shop {SHOP}. Tell them what is happening in their world — new drops, things to follow, content to know about. Specific to them.',                                         opener:'ok what do you need to know about right now — fashion, music, things to follow, or just your world?'},
@@ -2994,7 +3015,7 @@ Keep messages short. Text like a real person. Remember everything they tell you 
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
-  const hues = [0,45,90,135,180,220,270,315];
+  const hues = [0,40,80,120,160,200,240,280,320];
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
   grid.innerHTML = SECTIONS.map((s, i) => {
@@ -3322,11 +3343,13 @@ function buildSystemPrompt(sec){
   const mood = {good:'in a good place',creative:'in a creative mood',low:'having a low day',hyped:'hyped',cosy:'cosy',tired:'tired'}[P.moodToday]||'okay';
   const fg = {fandom:'fandom girls',creative:'creative types',sporty:'sporty',aesthetic:'aesthetic girlies',chaotic:'chaotic group',close:'small close group',online:'mainly online',mixed:'mixed'}[P.friendGroup]||'their group';
 
+  const age = {'under-18':'under 18','18-25':'18-25','26-35':'26-35','36-50':'36-50','50+':'50+'}[P.age]||'unknown';
+
   const rawPrompt = typeof sec.prompt === 'function' ? sec.prompt() : sec.prompt;
   const filled = rawPrompt
     .replace('{AE}',aeName).replace('{MUSIC}',music).replace('{INTERESTS}',interests)
     .replace('{COL}',colour).replace('{SHOP}',shop).replace('{SOCIAL}',social)
-    .replace('{MOOD}',mood).replace('{FG}',fg);
+    .replace('{MOOD}',mood).replace('{FG}',fg).replace('{AGE}',age);
 
   let styleHint = '';
   if(chatUserStyle.count>1){
