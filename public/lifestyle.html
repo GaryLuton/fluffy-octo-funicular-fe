@@ -2539,6 +2539,7 @@ var DTI_SVG = {
     '<rect x="76" y="164" width="10" height="12" rx="2" fill="'+dk+'"/>'+
     '<rect x="78" y="166" width="6" height="8" rx="1" fill="'+lt+'" opacity="0.15"/>'+
     '<circle cx="81" cy="170" r="1.5" fill="'+lt+'" opacity="0.2"/>';},
+};
 
 var DTI_WARDROBES = {
   hair:[
@@ -2684,7 +2685,7 @@ function dtiInit(){
   dtiSetSkin(dtiState.skinIdx);
 
   // Clear clothing layers
-  ['dtiLayerHair','dtiLayerTop','dtiLayerBottom','dtiLayerShoes','dtiLayerAcc'].forEach(function(id){
+  ['dtiLayerHair','dtiLayerHairBack','dtiLayerTop','dtiLayerBottom','dtiLayerShoes','dtiLayerAcc'].forEach(function(id){
     document.getElementById(id).innerHTML = '';
   });
 
@@ -2803,7 +2804,7 @@ function dtiRenderItems(cat){
 }
 
 function dtiUpdateFigure(){
-  var layerMap = {hair:'dtiLayerHair',tops:'dtiLayerTop',bottoms:'dtiLayerBottom',shoes:'dtiLayerShoes',accessories:'dtiLayerAcc'};
+  var layerMap = {tops:'dtiLayerTop',bottoms:'dtiLayerBottom',shoes:'dtiLayerShoes',accessories:'dtiLayerAcc'};
   for(var cat in layerMap){
     var layer = document.getElementById(layerMap[cat]);
     var pick = dtiState.picks[cat];
@@ -2812,6 +2813,18 @@ function dtiUpdateFigure(){
     } else {
       layer.innerHTML = '';
     }
+  }
+  // Hair in both layers: back (behind head for flowing hair) + front (bangs over face)
+  var hp = dtiState.picks.hair;
+  var bk = document.getElementById('dtiLayerHairBack');
+  var fr = document.getElementById('dtiLayerHair');
+  if(hp && DTI_SVG[hp.svg]){
+    var svg = DTI_SVG[hp.svg](hp.color);
+    bk.innerHTML = svg;
+    fr.innerHTML = svg;
+  } else {
+    bk.innerHTML = '';
+    fr.innerHTML = '';
   }
 }
 
