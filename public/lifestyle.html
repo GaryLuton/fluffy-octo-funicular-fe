@@ -2946,27 +2946,29 @@ function dtiNextRound(){
 
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
-  {id:'fitforit',   name:'FitforIt',       sub:'outfits & style',       col:0, prompt:`You are in the FitforIt section — outfits and style. You are their personal stylist bestie with STRONG opinions and emotional intelligence.
+  {id:'fitforit',   name:'FitforIt',       sub:'my wardrobe',       col:0, prompt:`You are in the FitforIt section — the user's personal wardrobe stylist. You help them style outfits from clothes they ALREADY OWN.
 
-You know: aesthetic ({AE}), favourite colour ({COL}), where they shop ({SHOP}), mood ({MOOD}), music ({MUSIC}).
+You know: aesthetic ({AE}), favourite colour ({COL}), mood ({MOOD}), music ({MUSIC}).
 
-MOOD DETECTION — read between the lines:
-- If they mention sad songs, low energy, or feeling down → suggest comfort fits (cosy knits, soft textures, their favourite colour) + gentle encouragement like "wrap yourself in something that feels like a hug"
-- If they are excited about plans, events, going out → suggest statement pieces and power outfits that match their energy + hype them up
-- If they seem stressed or nervous → suggest a power outfit that gives confidence + "you got this" vibes
-- If they are bored or restless → suggest something bold or new they have not tried, push their style forward
+HOW IT WORKS:
+- Ask the user what clothes they have. Ask about specific items: tops, bottoms, shoes, jackets, accessories
+- As they tell you about items, remember them and help create outfit combinations
+- Suggest creative pairings from THEIR wardrobe — do not suggest things to buy
+- If they describe an event or occasion, build an outfit from what they already have
+- If they do not have something that works, say so honestly and suggest what type of item would help
 
-STRONG OPINIONS — be honest:
-- If something does not match their aesthetic, say so directly: "that is not it for you" or "no — here is what you actually need"
-- No fake enthusiasm. If an outfit idea is mid, say it and pivot to something better
-- Have actual taste. Recommend specific combinations, not generic suggestions
+STRONG OPINIONS:
+- Be honest about what works together and what does not
+- If a combo is not it, say so: "no that does not go" and suggest a better pairing
+- Have actual taste. Name specific items they told you about
+- Push them to try combinations they would not think of
 
-EMOTIONAL INTELLIGENCE:
-- Give confidence boosts naturally alongside outfit advice
-- Notice when they need a pick-me-up vs when they want to experiment
-- Connect what they wear to how they feel — "this outfit is going to make you feel untouchable"
+MOOD MATCHING:
+- If they are feeling low → suggest a comfort outfit from their wardrobe
+- If they are hyped → suggest their boldest pieces
+- If they are stressed → suggest something that makes them feel confident
 
-When suggesting items to buy, ALWAYS format specific shoppable items like this: [[item name]] — for example [[black mary janes]] or [[oversized cream knit]]. Be specific, be real, keep messages short.`,        opener:'ok {AE} girlie — what are we putting together? tell me what is going on today and i will dress you for it'},
+Keep messages short. Text like a real person. Remember everything they tell you about their wardrobe.`,        opener:'hey! tell me about your wardrobe — what are your go-to pieces? tops, bottoms, shoes, anything. the more you tell me the better outfits i can put together for you'},
   {id:'beyou',      name:'BeYou',           sub:'confidence & you',      col:1, prompt:'You are in the BeYou section — confidence and self. You know they are feeling {MOOD} today. Their aesthetic is {AE}. Be encouraging without being hollow. You are honest. You are on their side. This is their safe space.',                                                                      opener:'this is your space. what is going on today?'},
   {id:'contentwithit',name:'ContentWithIt',sub:'watch · read · listen',  col:2, prompt:'You are in the ContentWithIt section. You know their music ({MUSIC}), interests ({INTERESTS}), aesthetic ({AE}). Give specific recs — actual show names, books, channels, playlists. Tell them WHY it fits them. No generic lists.',                                                             opener:'tell me what you have been into lately and i will find your next thing'},
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
@@ -3093,7 +3095,7 @@ function clearChatHistory(){
   if(!currentSection) return;
   chatHistory = [];
   localStorage.removeItem(chatKey(currentSection.id));
-  var msgsId = currentSection.id==='fitforit' ? 'chatMessages' : 'chatMessages2';
+  var msgsId = 'chatMessages2';
   document.getElementById(msgsId).innerHTML='';
   var opener = buildOpener(currentSection);
   addMsg(opener,'flovee');
@@ -3126,7 +3128,7 @@ function buildPreviousContext(secId){
 }
 
 function restoreMessages(secId, messages, pal){
-  var msgsId = secId==='fitforit' ? 'chatMessages' : 'chatMessages2';
+  var msgsId = 'chatMessages2';
   var container = document.getElementById(msgsId);
   if(!container) return;
 
@@ -3148,21 +3150,7 @@ function restoreMessages(secId, messages, pal){
     div.style.background = role==='user' ? pal.tx+'12' : pal.ac+'1a';
     div.style.color = pal.tx;
 
-    if(role==='flovee' && secId==='fitforit' && m.content.includes('[[')){
-      var parts = m.content.split(/(\[\[[^\]]+\]\])/g);
-      parts.forEach(function(part){
-        var match = part.match(/^\[\[(.+)\]\]$/);
-        if(match){
-          var bold = document.createElement('strong');
-          bold.textContent = match[1];
-          div.appendChild(bold);
-        } else if(part){
-          div.appendChild(document.createTextNode(part));
-        }
-      });
-    } else {
-      div.textContent = m.content;
-    }
+    div.textContent = m.content;
 
     if(m.time){
       var timeEl = document.createElement('div');
@@ -3214,19 +3202,14 @@ function openSection(id){
     openHub();
     return;
   } else if(sec.id === 'fitforit'){
-    buildShopBar(pal);
-    shopBar.style.display = 'flex';
-    // Show fitforit split layout
-    document.getElementById('fitLayout').style.display = 'flex';
-    document.getElementById('normalChat').style.display = 'none';
-    const send = document.getElementById('chatSend');
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'flex';
+    const send = document.getElementById('chatSend2');
     if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
-    const input = document.getElementById('chatInput');
+    const input = document.getElementById('chatInput2');
     if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
-    document.getElementById('chatMessages').innerHTML='';
-    document.getElementById('productGrid').style.display = 'none';
-    document.getElementById('productEmpty').style.display = 'block';
-    document.getElementById('productGrid').innerHTML = '';
+    document.getElementById('chatMessages2').innerHTML='';
   } else {
     shopBar.style.display = 'none';
     document.getElementById('fitLayout').style.display = 'none';
@@ -3408,8 +3391,7 @@ async function runChat(msg, sendBtnId){
 }
 
 function addMsg(text, roleClass){
-  const isFitForIt = currentSection?.id === 'fitforit';
-  const msgsId = isFitForIt ? 'chatMessages' : 'chatMessages2';
+  const msgsId = 'chatMessages2';
   const msgs = document.getElementById(msgsId);
   if(!msgs) return null;
   const pal = searchPal;
@@ -3419,26 +3401,7 @@ function addMsg(text, roleClass){
   const isTyping = roleClass.includes('typing');
   div.style.background = isUser ? pal.tx+'12' : pal.ac+'1a';
   div.style.color = pal.tx;
-
-  // In FitforIt: parse [[item]] into product cards
-  if(!isUser && isFitForIt && text.includes('[[')) {
-    const parts = text.split(/(\[\[[^\]]+\]\])/g);
-    const items = [];
-    parts.forEach(part => {
-      const match = part.match(/^\[\[(.+)\]\]$/);
-      if(match){
-        items.push(match[1]);
-        const bold = document.createElement('strong');
-        bold.textContent = match[1];
-        div.appendChild(bold);
-      } else if(part){
-        div.appendChild(document.createTextNode(part));
-      }
-    });
-    if(items.length > 0) setTimeout(()=>renderProductCards(items), 400);
-  } else {
-    div.textContent = text;
-  }
+  div.textContent = text;
 
   // Add timestamp (not on typing indicators)
   if(!isTyping){
