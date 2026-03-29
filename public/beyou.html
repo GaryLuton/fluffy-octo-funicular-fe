@@ -7,177 +7,117 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.8s,color 0.8s;}
+    body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:background 1.2s,color 1.2s;display:flex;flex-direction:column;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
-    nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.08);}
+    nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.06);transition:opacity 0.8s;}
+    nav.hidden{opacity:0;pointer-events:none;}
     .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
     .nav-links{display:flex;gap:8px;}
     .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
     .nav-btn:hover{opacity:0.6;}
 
-    /* ── LANDING ── */
-    #landingView{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 40px 60px;text-align:center;}
-    .landing-eyebrow{font-size:0.64rem;letter-spacing:6px;text-transform:uppercase;opacity:0.3;margin-bottom:14px;}
-    .landing-title{font-size:clamp(4rem,12vw,10rem);line-height:0.82;letter-spacing:-3px;margin-bottom:24px;}
-    .landing-sub{font-size:1rem;opacity:0.5;max-width:440px;line-height:1.9;margin-bottom:44px;}
-    .mood-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:40px;}
-    .mood-chip{padding:12px 24px;border-radius:30px;font-size:0.85rem;letter-spacing:0.5px;cursor:pointer;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-weight:500;transition:all 0.15s;}
-    .mood-chip:hover,.mood-chip.on{background:rgba(128,128,128,0.1);border-color:rgba(128,128,128,0.4);}
-    .start-btn{padding:16px 52px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
-    .start-btn:hover{opacity:0.8;}
+    /* ── MODE SELECTOR ── */
+    .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:4px;border-radius:30px;backdrop-filter:blur(20px);transition:opacity 0.8s;}
+    .mode-bar.hidden{opacity:0;pointer-events:none;}
+    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.3s;opacity:0.5;}
+    .mode-pill.on{opacity:1;}
 
-    /* ── MAIN VIEW ── */
-    #mainView{display:none;padding-top:72px;min-height:100vh;flex-direction:column;}
-    #mainView.active{display:flex;}
+    /* ── FULL SCREEN VIEWS ── */
+    .view{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.8s;}
+    .view.active{opacity:1;pointer-events:auto;}
 
-    /* MODE TABS */
-    .mode-tabs{display:flex;border-bottom:1px solid rgba(128,128,128,0.08);padding:0 40px;}
-    .mode-tab{padding:16px 24px;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border-bottom:2px solid transparent;opacity:0.3;transition:all 0.2s;background:transparent;border-top:none;border-left:none;border-right:none;color:inherit;}
-    .mode-tab.on{opacity:1;border-bottom-color:currentColor;}
+    /* ── BREATHE VIEW ── */
+    .breathe-container{display:flex;flex-direction:column;align-items:center;gap:40px;}
+    .petal-wrap{position:relative;width:220px;height:220px;}
+    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease;}
+    .petal-wrap.inhale .petal{opacity:0.7;}
+    .petal-wrap.exhale .petal{opacity:0.4;}
+    .breathe-label{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
+    .breathe-instruction{font-size:1.3rem;font-weight:300;text-align:center;min-height:40px;letter-spacing:0.5px;transition:opacity 0.6s;}
+    .breathe-timer{font-size:0.78rem;opacity:0.3;letter-spacing:2px;text-align:center;}
+    .breathe-start{padding:14px 44px;border:none;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.9;}
+    .breathe-start:hover{opacity:1;transform:scale(1.03);}
+    .duration-row{display:flex;gap:8px;align-items:center;}
+    .dur-btn{padding:8px 16px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.4;}
+    .dur-btn.on{opacity:1;}
 
-    /* ── TALK VIEW ── */
-    #talkView{flex:1;display:flex;flex-direction:column;max-width:720px;margin:0 auto;width:100%;padding:0 40px 40px;}
-    .talk-header{padding:32px 0 24px;}
-    .talk-title{font-size:clamp(1.8rem,4vw,3rem);letter-spacing:-0.5px;line-height:1.05;margin-bottom:8px;}
-    .talk-sub{font-size:0.88rem;opacity:0.45;line-height:1.8;}
-    .chat-msgs{flex:1;display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding:8px 0 20px;min-height:200px;}
-    .cmsg{padding:14px 18px;border-radius:16px;font-size:0.95rem;line-height:1.72;max-width:85%;word-break:break-word;}
-    .cmsg.flovee{align-self:flex-start;border-bottom-left-radius:4px;}
-    .cmsg.user{align-self:flex-end;border-bottom-right-radius:4px;opacity:0.85;}
-    .cmsg.typing{opacity:0.35;font-style:italic;align-self:flex-start;}
-    .chat-input-row{display:flex;gap:10px;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(128,128,128,0.08);}
-    .chat-input{flex:1;padding:14px 18px;font-size:0.95rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:14px;background:rgba(128,128,128,0.03);color:inherit;outline:none;resize:none;min-height:50px;max-height:120px;transition:border-color 0.2s;line-height:1.55;}
-    .chat-input:focus{border-color:rgba(128,128,128,0.32);}
-    .chat-send{padding:14px 22px;border:none;border-radius:12px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;transition:opacity 0.2s;flex-shrink:0;}
-    .chat-send:hover{opacity:0.72;}
-    .chat-send:disabled{opacity:0.25;cursor:not-allowed;}
+    /* ── REFLECT VIEW ── */
+    .reflect-container{display:flex;flex-direction:column;align-items:center;gap:36px;padding:0 40px;max-width:520px;}
+    .reflect-orb{width:120px;height:120px;border-radius:50%;opacity:0.25;animation:orbPulse 6s ease-in-out infinite;}
+    @keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.15);opacity:0.35;}}
+    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.3px;transition:opacity 0.6s;}
+    .reflect-prompt.fade{opacity:0;}
+    .reflect-sub{font-size:0.78rem;opacity:0.3;text-align:center;letter-spacing:1px;line-height:1.8;}
+    .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
+    .reflect-next:hover{opacity:1;}
 
-    /* Activity prompt that appears mid-chat */
-    .activity-prompt{border-radius:12px;padding:18px 20px;margin:6px 0;border:1.5px solid rgba(128,128,128,0.12);}
-    .activity-prompt-label{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.32;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .activity-prompt-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
-    .activity-prompt-desc{font-size:0.85rem;opacity:0.6;line-height:1.65;margin-bottom:14px;}
-    .activity-btn{padding:10px 22px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
-    .activity-btn:hover{opacity:0.75;}
-
-    /* ── ACTIVITY VIEW ── */
-    #activityView{display:none;flex:1;flex-direction:column;}
-    #activityView.active{display:flex;}
-
-    .activity-header{padding:32px 40px 24px;border-bottom:1px solid rgba(128,128,128,0.08);}
-    .activity-nav{display:flex;gap:10px;flex-wrap:wrap;padding:20px 40px;border-bottom:1px solid rgba(128,128,128,0.06);}
-    .act-tab{padding:10px 20px;border-radius:20px;font-size:0.76rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;transition:all 0.15s;}
-    .act-tab:hover,.act-tab.on{background:rgba(128,128,128,0.1);border-color:rgba(128,128,128,0.35);}
-
-    .activity-body{flex:1;padding:32px 40px;max-width:680px;margin:0 auto;width:100%;}
-
-    /* BREATHING */
-    .breathe-wrap{display:flex;flex-direction:column;align-items:center;gap:32px;padding:20px 0;}
-    .breathe-circle{width:200px;height:200px;border-radius:50%;border:3px solid rgba(128,128,128,0.2);display:flex;align-items:center;justify-content:center;position:relative;transition:transform 4s ease-in-out;}
-    .breathe-inner{width:120px;height:120px;border-radius:50%;transition:transform 4s ease-in-out,opacity 4s ease-in-out;}
-    .breathe-text{font-size:0.8rem;letter-spacing:4px;text-transform:uppercase;opacity:0.5;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-align:center;}
-    .breathe-phase{font-size:1.4rem;font-weight:700;text-align:center;min-height:36px;transition:opacity 0.5s;}
-    .breathe-count{font-size:3rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-align:center;min-width:60px;}
-    .breathe-controls{display:flex;gap:12px;}
-    .ctrl-btn{padding:11px 28px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;transition:all 0.15s;}
-    .ctrl-btn.primary{border:none;}
-    .ctrl-btn:hover{opacity:0.7;}
-
-    /* JOURNALLING */
-    .journal-wrap{display:flex;flex-direction:column;gap:16px;}
-    .journal-prompt{font-size:1.1rem;font-weight:600;line-height:1.6;padding:20px;border-radius:10px;border-left:3px solid rgba(128,128,128,0.2);}
-    .journal-area{width:100%;min-height:200px;padding:18px;font-size:0.95rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:10px;background:rgba(128,128,128,0.03);color:inherit;outline:none;resize:vertical;line-height:1.75;}
-    .journal-area:focus{border-color:rgba(128,128,128,0.32);}
-    .journal-actions{display:flex;gap:10px;}
-    .journal-btn{padding:11px 24px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
-    .journal-btn:hover{opacity:0.75;}
-    .journal-response{padding:18px 20px;border-radius:10px;font-size:0.92rem;line-height:1.75;margin-top:4px;display:none;}
-    .journal-response.visible{display:block;}
-
-    /* GROUNDING */
-    .ground-wrap{display:flex;flex-direction:column;gap:20px;}
-    .ground-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .ground-steps{display:flex;flex-direction:column;gap:12px;}
-    .ground-step{padding:18px 20px;border-radius:8px;border:1.5px solid rgba(128,128,128,0.1);display:flex;align-items:flex-start;gap:16px;cursor:pointer;transition:all 0.15s;}
-    .ground-step:hover{border-color:rgba(128,128,128,0.28);}
-    .ground-step.done{opacity:0.5;}
-    .step-num{font-size:1.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;flex-shrink:0;width:32px;}
-    .step-num.done{opacity:1;}
-    .step-text{font-size:0.92rem;line-height:1.65;}
-    .step-input{width:100%;padding:10px 14px;margin-top:10px;font-size:0.9rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:6px;background:transparent;color:inherit;outline:none;}
-    .step-input::placeholder{opacity:0.35;}
-
-    /* AFFIRMATIONS */
-    .affirm-wrap{display:flex;flex-direction:column;align-items:center;gap:28px;padding:20px 0;}
-    .affirm-card{width:100%;padding:40px 36px;border-radius:12px;text-align:center;border:1.5px solid rgba(128,128,128,0.1);}
-    .affirm-text{font-size:clamp(1.3rem,3vw,2rem);line-height:1.35;letter-spacing:-0.3px;font-weight:600;}
-    .affirm-sub{font-size:0.82rem;opacity:0.4;margin-top:14px;line-height:1.6;}
-    .affirm-controls{display:flex;gap:12px;}
+    /* ── COMPLETE VIEW (after breathing session) ── */
+    .complete-container{display:flex;flex-direction:column;align-items:center;gap:24px;padding:0 40px;text-align:center;}
+    .complete-check{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:0.6;}
+    .complete-title{font-size:1.6rem;font-weight:300;letter-spacing:0.5px;}
+    .complete-stat{font-size:0.82rem;opacity:0.35;letter-spacing:1px;}
+    .complete-btn{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;opacity:0.7;margin-top:10px;}
+    .complete-btn:hover{opacity:1;}
 
     @media(max-width:680px){
       nav{padding:13px 20px;}
-      .mode-tabs,.activity-nav,.activity-header,.activity-body,.#talkView{padding-left:20px;padding-right:20px;}
-      #talkView{padding:0 20px 30px;}
-      .breathe-circle{width:160px;height:160px;}
-      .breathe-inner{width:90px;height:90px;}
+      .petal-wrap{width:180px;height:180px;}
+      .petal{width:56px;height:56px;}
     }
   </style>
 </head>
 <body>
 
 <nav id="mainNav">
-  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
   <div class="nav-links">
     <a class="nav-btn bc" href="lifestyle.html">My Page</a>
     <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
   </div>
 </nav>
 
-<!-- LANDING -->
-<div id="landingView">
-  <div class="landing-eyebrow bc">Your Wellness Space</div>
-  <div class="landing-title bc" id="landingTitle">BeYou</div>
-  <p class="landing-sub" id="landingSub">This is your safe space. Talk to your Flovee about anything — worries, feelings, whatever is on your mind. Or try a breathing exercise or journaling to feel calmer.</p>
-  <div class="mood-row" id="moodRow"></div>
-  <button class="start-btn bc" id="startBtn" onclick="enterMain()">Enter</button>
+<!-- BREATHE -->
+<div class="view active" id="breatheView">
+  <div class="breathe-container">
+    <div class="breathe-label bc" id="breatheLabel">Breathe</div>
+    <div class="petal-wrap" id="petalWrap"></div>
+    <div class="breathe-instruction" id="breatheInstruction">Take a moment for yourself</div>
+    <div class="breathe-timer" id="breatheTimer"></div>
+    <div class="duration-row" id="durationRow">
+      <button class="dur-btn bc" data-dur="60" onclick="setDuration(60,this)">1 min</button>
+      <button class="dur-btn bc on" data-dur="180" onclick="setDuration(180,this)">3 min</button>
+      <button class="dur-btn bc" data-dur="300" onclick="setDuration(300,this)">5 min</button>
+    </div>
+    <button class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
+  </div>
 </div>
 
-<!-- MAIN -->
-<div id="mainView">
-  <div class="mode-tabs">
-    <button class="mode-tab bc on" id="tabTalk" onclick="switchTab('talk')">Talk it out</button>
-    <button class="mode-tab bc" id="tabActivity" onclick="switchTab('activity')">Calm down</button>
+<!-- REFLECT -->
+<div class="view" id="reflectView">
+  <div class="reflect-container">
+    <div class="reflect-orb" id="reflectOrb"></div>
+    <div class="reflect-prompt" id="reflectPrompt"></div>
+    <div class="reflect-sub">sit with this for a moment</div>
+    <button class="reflect-next bc" id="reflectNextBtn" onclick="nextReflect()">Next</button>
   </div>
+</div>
 
-  <!-- TALK VIEW -->
-  <div id="talkView">
-    <div class="talk-header">
-      <div class="talk-title" id="talkTitle">What is going on?</div>
-      <p class="talk-sub">Say whatever you need to. Your Flovee is here.</p>
-    </div>
-    <div class="chat-msgs" id="chatMsgs"></div>
-    <div class="chat-input-row">
-      <textarea class="chat-input" id="chatInput" placeholder="What is on your mind..." rows="1"
-        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button class="chat-send bc" id="chatSend" onclick="sendMsg()">Send</button>
-    </div>
+<!-- COMPLETE -->
+<div class="view" id="completeView">
+  <div class="complete-container">
+    <div class="complete-check" id="completeCheck"></div>
+    <div class="complete-title" id="completeTitle">Well done</div>
+    <div class="complete-stat" id="completeStat"></div>
+    <button class="complete-btn bc" onclick="resetBreathe()">Again</button>
+    <button class="complete-btn bc" onclick="switchMode('reflect')" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Reflect</button>
   </div>
+</div>
 
-  <!-- ACTIVITY VIEW -->
-  <div id="activityView">
-    <div class="activity-header">
-      <div class="landing-eyebrow bc" style="margin-bottom:6px">Calm Down</div>
-      <div class="talk-title" id="activityTitle">Pick something to try</div>
-    </div>
-    <div class="activity-nav">
-      <button class="act-tab bc on" onclick="showActivity('breathe')">Box Breathing</button>
-      <button class="act-tab bc" onclick="showActivity('ground')">5-4-3-2-1</button>
-      <button class="act-tab bc" onclick="showActivity('journal')">Journal</button>
-      <button class="act-tab bc" onclick="showActivity('affirm')">Affirmations</button>
-    </div>
-    <div class="activity-body" id="activityBody"></div>
-  </div>
+<!-- MODE BAR -->
+<div class="mode-bar" id="modeBar">
+  <button class="mode-pill bc on" id="pillBreathe" onclick="switchMode('breathe')">Breathe</button>
+  <button class="mode-pill bc" id="pillReflect" onclick="switchMode('reflect')">Reflect</button>
 </div>
 
 <script src="/stuflover-config.js"></script>
@@ -185,541 +125,309 @@
 <script>
 
 // ─── PROFILE ─────────────────────────────────────────────
-const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
+var profile = (function(){ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
 
 function resolvePalette(){
-  const fc=profile?.faveColour; const ae=profile?.aesthetics||{};
-  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-  if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.88),tx:darkenH(fc.hex,0.55),ac:fc.hex};
-  if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.35),tx:lightenH(fc.hex,0.75),ac:fc.hex};
-  const m={kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
+  var fc=profile&&profile.faveColour; var ae=(profile&&profile.aesthetics)||{};
+  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
+  top=top?top[0]:'softgirl';
+  if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.92),tx:darkenH(fc.hex,0.6),ac:fc.hex};
+  if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.45),tx:lightenH(fc.hex,0.8),ac:fc.hex};
+  var m={kawaii:{bg:'#fdf0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
   return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
 }
-function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const l=v=>Math.round(v+(255-v)*a);return`rgb(${l(r)},${l(g)},${l(b)})`;}catch(e){return hex;}}
-function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));const d=v=>Math.round(v*(1-a));return`rgb(${d(r)},${d(g)},${d(b)})`;}catch(e){return hex;}}
-
-const PAL = resolvePalette();
+function lightenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'rgb('+Math.round(c[0]+(255-c[0])*a)+','+Math.round(c[1]+(255-c[1])*a)+','+Math.round(c[2]+(255-c[2])*a)+')';}catch(e){return hex;}}
+function darkenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'rgb('+Math.round(c[0]*(1-a))+','+Math.round(c[1]*(1-a))+','+Math.round(c[2]*(1-a))+')';}catch(e){return hex;}}
 
 function resolveAeName(){
   if(!profile) return 'You';
-  const ae=profile.aesthetics||{}; const et=profile.extraTags||[];
-  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
-  const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
-  const specials={'pastel_goth':'Pastel Goth','that_girl':'That Girl','full_grunge':'Grunge','kawaii_full':'Kawaii'};
-  for(const[tag,name] of Object.entries(specials)) if(et.includes(tag)) return name;
+  var ae=profile.aesthetics||{};
+  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
+  top=top?top[0]:'';
+  var m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
   return m[top]||'You';
 }
 
-const FLOVEE_NAMES={kawaii:'Luna',softgirl:'Rosie',cleangirl:'Nora',coquette:'Coco',goth:'Raven',darkacad:'Lyra',grunge:'Sid',y2k:'Stacy',street:'Ace',cottage:'Wren',hippie:'Sage',oldmoney:'Eloise',preppy:'Blair',tomato:'Bea',indie:'Wren',emo:'Ember'};
-function getFloveeName(){ const top=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl'; return FLOVEE_NAMES[top]||'Flo'; }
+var PAL = resolvePalette();
+var aeName = resolveAeName();
 
-const floveeName = getFloveeName();
-const aeName = resolveAeName();
-const mood = profile?.moodToday||'okay';
-const interests = (profile?.interests||[]).slice(0,3).join(', ')||'various things';
-const music = (profile?.music||[]).slice(0,2).map(k=>({katseye:'Katseye',newjeans:'NewJeans',sabrina:'Sabrina Carpenter',olivia:'Olivia Rodrigo',lana:'Lana Del Rey',mcr:'MCR',phoebe:'Phoebe Bridgers',mitski:'Mitski',arctic:'Arctic Monkeys',nirvana:'Nirvana',taylor:'Taylor Swift',billie:'Billie Eilish',chappell:'Chappell Roan',charli:'Charli XCX',beabadoobee:'Beabadoobee',paramore:'Paramore',grunge:'Nirvana'})[k]||k).join(' and ')||'music';
-const social = profile?.social||'ambivert';
+// ─── PETALS ──────────────────────────────────────────────
+var PETAL_COUNT = 7;
+var petalEls = [];
 
-// ─── APPLY STYLES ─────────────────────────────────────────
-function applyStyles(){
-  document.body.style.background=PAL.bg; document.body.style.color=PAL.tx;
-  const nav=document.getElementById('mainNav'); nav.style.background=PAL.bg+'f0'; nav.style.borderColor=PAL.tx+'10';
-  document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{el.style.color=PAL.tx;el.style.borderColor=PAL.tx+'22';});
-  document.getElementById('landingTitle').style.color=PAL.tx;
-  document.getElementById('startBtn').style.background=PAL.ac; document.getElementById('startBtn').style.color=PAL.bg;
-  document.getElementById('chatSend').style.background=PAL.ac; document.getElementById('chatSend').style.color=PAL.bg;
-
-  // Mood chips
-  const moods=[
-    {val:'stressed',label:'stressed'},
-    {val:'anxious',label:'anxious'},
-    {val:'low',label:'feeling low'},
-    {val:'overwhelmed',label:'overwhelmed'},
-    {val:'angry',label:'angry'},
-    {val:'lost',label:'a bit lost'},
-    {val:'okay',label:'just okay'},
-    {val:'lonely',label:'lonely'},
-  ];
-  document.getElementById('moodRow').innerHTML = moods.map(m=>`
-    <button class="mood-chip" data-mood="${m.val}" onclick="pickMood(this)"
-      style="border-color:${PAL.tx}1a;color:${PAL.tx}">${m.label}</button>`).join('');
-}
-
-// ─── MOOD PICK ────────────────────────────────────────────
-let selectedMood = profile?.moodToday||'';
-function pickMood(el){
-  document.querySelectorAll('.mood-chip').forEach(c=>{ c.classList.remove('on'); c.style.background='transparent'; });
-  el.classList.add('on'); el.style.background=PAL.ac+'28'; el.style.borderColor=PAL.ac;
-  selectedMood = el.dataset.mood;
-}
-
-// ─── ENTER MAIN ───────────────────────────────────────────
-function enterMain(){
-  document.getElementById('landingView').style.display='none';
-  document.getElementById('mainView').classList.add('active');
-  document.querySelectorAll('.mode-tab').forEach(t=>{ t.style.color=PAL.tx; });
-  document.getElementById('tabTalk').style.borderBottomColor=PAL.ac;
-  initTalk();
-  showActivity('breathe');
-}
-
-// ─── CHAT ─────────────────────────────────────────────────
-let chatHistory = [];
-let msgCount = 0;
-let activitySuggested = false;
-
-function initTalk(){
-  const openers = {
-    stressed: `hey — i can tell things feel heavy right now. you do not have to carry it all by yourself. what is going on?`,
-    anxious: `hey — anxiety is the worst, i know. you are safe here. tell me what is on your mind and we will work through it together.`,
-    low: `hey — i am really glad you are here. even on the hard days, you matter. what is making things feel low right now?`,
-    overwhelmed: `hey — when everything feels like too much, just start with one thing. tell me what is weighing on you most.`,
-    angry: `hey — your feelings are completely valid. whatever happened, you have every right to feel this way. want to tell me about it?`,
-    lost: `hey — feeling lost does not mean you are broken. sometimes it just means you are in between chapters. what is going on?`,
-    okay: `hey — even "just okay" is worth checking in on. how are you really doing?`,
-    lonely: `hey — i am here, and you are not as alone as it feels right now. tell me what is on your heart.`,
-  };
-  const opener = selectedMood
-    ? (openers[selectedMood] || `hey — you said you are feeling ${selectedMood}. i am here for you. tell me everything.`)
-    : `hey — this is your safe space. no judgement, no pressure. whatever is going on, you can say it here.`;
-  addMsg(opener, 'flovee');
-}
-
-function addMsg(text, role){
-  const msgs = document.getElementById('chatMsgs');
-  const div = document.createElement('div');
-  div.className = 'cmsg ' + role;
-  div.textContent = text;
-  div.style.background = role==='user' ? PAL.tx+'12' : PAL.ac+'1c';
-  div.style.color = PAL.tx;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  return div;
-}
-
-function addActivityPrompt(activity){
-  const msgs = document.getElementById('chatMsgs');
-  const div = document.createElement('div');
-  div.className = 'activity-prompt';
-  div.style.background = PAL.ac+'0e';
-  div.style.borderColor = PAL.tx+'14';
-  div.innerHTML = `<div class="activity-prompt-label bc" style="color:${PAL.tx}">Try This</div>
-    <div class="activity-prompt-title" style="color:${PAL.tx}">${activity.name}</div>
-    <div class="activity-prompt-desc" style="color:${PAL.tx}">${activity.desc}</div>
-    <button class="activity-btn bc" onclick="goToActivity('${activity.id}')"
-      style="background:${PAL.ac};color:${PAL.bg}">Start Now</button>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-async function sendMsg(){
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if(!msg) return;
-  input.value=''; input.style.height='auto';
-
-  addMsg(msg, 'user');
-  chatHistory.push({role:'user', content:msg});
-  msgCount++;
-
-  const send = document.getElementById('chatSend');
-  send.disabled=true;
-  const typing = addMsg(floveeName+' is here...', 'flovee typing');
-
-  try{
-    const shouldSuggest = msgCount >= 1 && !activitySuggested;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:350,
-        system:`You are ${floveeName}, a caring and empathetic Flovee AI wellness companion for someone with ${aeName} aesthetic. Their current mood: ${selectedMood||mood}. They are into: ${interests}. Social energy: ${social}.
-
-You are always kind, warm, and genuinely empathetic. You never judge. You make them feel safe and heard. You are like the most supportive best friend who always knows what to say.
-
-Rules:
-- Always validate their feelings first before anything else
-- Be gentle and encouraging, never dismissive
-- Keep responses short and real — 2-4 sentences
-- Use their vibe and aesthetic to connect (reference their interests, music, style)
-- When they seem stressed, anxious, or overwhelmed, naturally suggest trying a breathing exercise or journaling — say something like "have you tried writing it down?" or "want to try some breathing together?"
-- Never give clinical advice. Never say "seek professional help" unless they express something very serious
-- Never repeat "I understand" — show you understand by reflecting what they said
-- Ask gentle follow-up questions to keep them talking
-- Remind them they are not alone
-
-${shouldSuggest ? 'After your response, on a new line, write exactly: [SUGGEST_ACTIVITY]' : ''}`,
-        messages: chatHistory.slice(-12)
-      })
-    });
-
-    const data = await res.json();
-    let reply = data.content?.[0]?.text || 'i am here.';
-
-    const shouldSuggestActivity = reply.includes('[SUGGEST_ACTIVITY]');
-    reply = reply.replace('[SUGGEST_ACTIVITY]','').trim();
-
-    if(typing) typing.remove();
-    addMsg(reply, 'flovee');
-    chatHistory.push({role:'assistant', content:reply});
-    if(chatHistory.length>20) chatHistory=chatHistory.slice(-20);
-
-    // Suggest a calming activity after a couple messages
-    if(shouldSuggestActivity && !activitySuggested){
-      activitySuggested = true;
-      setTimeout(()=>{
-        const activity = suggestActivity(selectedMood||mood);
-        addActivityPrompt(activity);
-      }, 800);
-    }
-
-  }catch(e){
-    if(typing) typing.remove();
-    addMsg('i am here — try again in a sec.', 'flovee');
+function createPetals(){
+  var wrap = document.getElementById('petalWrap');
+  var cx = wrap.offsetWidth/2;
+  var cy = wrap.offsetHeight/2;
+  var petalW = wrap.offsetWidth < 200 ? 56 : 70;
+  for(var i=0; i<PETAL_COUNT; i++){
+    var el = document.createElement('div');
+    el.className = 'petal';
+    el.style.width = petalW+'px';
+    el.style.height = petalW+'px';
+    el.style.background = PAL.ac;
+    el.style.left = (cx - petalW/2) + 'px';
+    el.style.top = (cy - petalW/2) + 'px';
+    el.style.transform = 'translate(0,0) scale(0.6)';
+    wrap.appendChild(el);
+    petalEls.push(el);
   }
-  send.disabled=false;
+  // Add center circle
+  var center = document.createElement('div');
+  center.style.cssText = 'position:absolute;width:'+Math.round(petalW*0.7)+'px;height:'+Math.round(petalW*0.7)+'px;border-radius:50%;background:'+PAL.ac+';opacity:0.5;left:'+(cx-petalW*0.35)+'px;top:'+(cy-petalW*0.35)+'px;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease;z-index:2;';
+  center.id = 'petalCenter';
+  wrap.appendChild(center);
+  petalEls.push(center);
 }
 
-function suggestActivity(mood){
-  const map = {
-    anxious:   {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} thinks this will help — 4 counts in, hold, out, hold. It genuinely calms your nervous system in under 2 minutes.`},
-    stressed:  {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} recommends this — slow your breathing down. everything else can wait for 2 minutes. you deserve this pause.`},
-    overwhelmed:{id:'journal',name:'Journal It Out',desc:`${floveeName} suggests writing it down — when everything is swirling in your head, getting it onto paper makes it feel smaller and more manageable.`},
-    angry:     {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} says try this first — before you do anything else, just breathe. it genuinely helps you think clearer.`},
-    low:       {id:'journal',name:'Journal Prompt',desc:`${floveeName} thinks writing might help — sometimes when you feel low, putting words to it helps you understand what you actually need.`},
-    lonely:    {id:'journal',name:'Journal Prompt',desc:`${floveeName} wants you to try this — write about what you are feeling. you are not alone in this, even when it feels like it.`},
-    lost:      {id:'journal',name:'Journal Prompt',desc:`${floveeName} has a prompt for you — writing helps you find what you actually want when everything feels unclear.`},
-    okay:      {id:'breathe',name:'Breathing Exercise',desc:`${floveeName} says even when you are okay, a breathing reset feels amazing. try it — you will feel even better.`},
-  };
-  return map[mood]||{id:'breathe',name:'Breathing Exercise',desc:`${floveeName} recommends a quick breathing reset. it always helps.`};
+function setPetalState(state){
+  var wrap = document.getElementById('petalWrap');
+  var cx = wrap.offsetWidth/2;
+  var cy = wrap.offsetHeight/2;
+  var radius = state==='expand' ? (wrap.offsetWidth*0.34) : 0;
+  var scale = state==='expand' ? 1 : 0.6;
+  var centerScale = state==='expand' ? 1.15 : 0.8;
+
+  wrap.className = 'petal-wrap ' + (state==='expand'?'inhale':'exhale');
+
+  for(var i=0; i<PETAL_COUNT; i++){
+    var angle = (i / PETAL_COUNT) * Math.PI * 2 - Math.PI/2;
+    var tx = Math.cos(angle) * radius;
+    var ty = Math.sin(angle) * radius;
+    petalEls[i].style.transform = 'translate('+tx+'px,'+ty+'px) scale('+scale+')';
+  }
+  // Center circle
+  var center = document.getElementById('petalCenter');
+  if(center) center.style.transform = 'scale('+centerScale+')';
 }
 
-function goToActivity(id){
-  switchTab('activity');
-  showActivity(id);
+// ─── BREATHING SESSION ───────────────────────────────────
+var breatheDuration = 180; // seconds
+var breatheRunning = false;
+var breatheTimeout = null;
+var breatheElapsed = 0;
+
+function setDuration(sec, el){
+  breatheDuration = sec;
+  document.querySelectorAll('.dur-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
 }
 
-// ─── TABS ─────────────────────────────────────────────────
-function switchTab(tab){
-  const isTalk = tab==='talk';
-  document.getElementById('talkView').style.display = isTalk ? 'flex' : 'none';
-  document.getElementById('activityView').classList.toggle('active', !isTalk);
-  document.getElementById('tabTalk').classList.toggle('on', isTalk);
-  document.getElementById('tabActivity').classList.toggle('on', !isTalk);
-  document.getElementById('tabTalk').style.borderBottomColor = isTalk ? PAL.ac : 'transparent';
-  document.getElementById('tabActivity').style.borderBottomColor = !isTalk ? PAL.ac : 'transparent';
+function startBreathe(){
+  breatheRunning = true;
+  breatheElapsed = 0;
+  document.getElementById('breatheStartBtn').style.display = 'none';
+  document.getElementById('durationRow').style.display = 'none';
+  document.getElementById('breatheTimer').textContent = formatTime(breatheDuration);
+  document.getElementById('modeBar').classList.add('hidden');
+  document.getElementById('mainNav').classList.add('hidden');
+  breatheCycle();
 }
 
-// ─── ACTIVITIES ───────────────────────────────────────────
-function showActivity(id){
-  // Update tab buttons
-  document.querySelectorAll('.act-tab').forEach(t=>t.classList.remove('on'));
-  const actTabMap={breathe:0,ground:1,journal:2,affirm:3};
-  const tabs=document.querySelectorAll('.act-tab');
-  if(tabs[actTabMap[id]]) tabs[actTabMap[id]].classList.add('on');
-
-  const body = document.getElementById('activityBody');
-  if(id==='breathe') body.innerHTML = buildBreathe();
-  else if(id==='ground') body.innerHTML = buildGround();
-  else if(id==='journal') body.innerHTML = buildJournal();
-  else if(id==='affirm') body.innerHTML = buildAffirm();
-
-  // Apply colours to dynamic elements
-  body.querySelectorAll('.ctrl-btn.primary,.activity-btn,.journal-btn,.affirm-btn-primary').forEach(el=>{
-    el.style.background=PAL.ac; el.style.color=PAL.bg;
-  });
-  body.querySelectorAll('.ctrl-btn:not(.primary),.affirm-btn-sec').forEach(el=>{
-    el.style.borderColor=PAL.tx+'22'; el.style.color=PAL.tx;
-  });
-  body.querySelectorAll('.breathe-inner').forEach(el=>el.style.background=PAL.ac+'40');
-  body.querySelectorAll('.breathe-circle').forEach(el=>el.style.borderColor=PAL.ac+'50');
-  body.querySelectorAll('.journal-prompt').forEach(el=>{ el.style.borderLeftColor=PAL.ac; el.style.background=PAL.ac+'0c'; });
-  body.querySelectorAll('.affirm-card').forEach(el=>{ el.style.background=PAL.ac+'0e'; el.style.borderColor=PAL.ac+'30'; });
-  body.querySelectorAll('.ground-step').forEach(el=>el.style.borderColor=PAL.tx+'12');
-}
-
-// ── BOX BREATHING ──────────────────────────────────────────
-let breatheInterval=null, breatheRunning=false, breathePhase=0, breatheCount=0;
-const breathePhases=['Breathe in','Hold','Breathe out','Hold'];
-const breatheDurations=[4,4,4,4];
-
-function buildBreathe(){
-  return `<div class="breathe-wrap">
-    <p style="text-align:center;opacity:0.5;font-size:0.88rem;line-height:1.7;max-width:380px">Box breathing: 4 counts in, hold 4, out 4, hold 4. Repeat for as long as you need.</p>
-    <div class="breathe-circle" id="breatheCircle">
-      <div class="breathe-inner" id="breatheInner"></div>
-    </div>
-    <div class="breathe-phase" id="breathePhase" style="color:${PAL.tx}">Ready when you are</div>
-    <div class="breathe-count" id="breatheCount" style="color:${PAL.ac}">4</div>
-    <div class="breathe-controls">
-      <button class="ctrl-btn primary bc" onclick="toggleBreathe()">Start</button>
-      <button class="ctrl-btn bc" onclick="resetBreathe()">Reset</button>
-    </div>
-    <div class="breathe-text" style="color:${PAL.tx}">tap start when you are ready</div>
-  </div>`;
-}
-
-function toggleBreathe(){
-  if(breatheRunning){ pauseBreathe(); return; }
-  breatheRunning=true;
-  document.querySelector('.ctrl-btn.primary').textContent='Pause';
-  runBreathePhase();
-}
-
-function runBreathePhase(){
+function breatheCycle(){
   if(!breatheRunning) return;
-  const phaseEl=document.getElementById('breathePhase');
-  const countEl=document.getElementById('breatheCount');
-  const inner=document.getElementById('breatheInner');
-  const circle=document.getElementById('breatheCircle');
-  if(!phaseEl) return;
+  if(breatheElapsed >= breatheDuration){ finishBreathe(); return; }
 
-  phaseEl.textContent = breathePhases[breathePhase];
-  let count = breatheDurations[breathePhase];
-  countEl.textContent = count;
+  // Inhale (4s)
+  var inst = document.getElementById('breatheInstruction');
+  inst.textContent = 'Breathe In';
+  setPetalState('expand');
 
-  // Scale animation
-  const isIn = breathePhase===0;
-  const isOut = breathePhase===2;
-  if(isIn){ inner.style.transform='scale(1.5)'; circle.style.transform='scale(1.08)'; }
-  else if(isOut){ inner.style.transform='scale(0.7)'; circle.style.transform='scale(0.95)'; }
-
-  breatheInterval = setInterval(()=>{
-    count--;
-    if(countEl) countEl.textContent=Math.max(count,0);
-    if(count<=0){
-      clearInterval(breatheInterval);
-      breathePhase=(breathePhase+1)%4;
-      breatheCount++;
-      if(breatheRunning) setTimeout(runBreathePhase, 200);
-    }
-  },1000);
+  breatheTimeout = setTimeout(function(){
+    if(!breatheRunning) return;
+    // Hold (4s at top)
+    inst.textContent = 'Hold';
+    breatheTimeout = setTimeout(function(){
+      if(!breatheRunning) return;
+      // Exhale (4s)
+      inst.textContent = 'Breathe Out';
+      setPetalState('contract');
+      breatheTimeout = setTimeout(function(){
+        if(!breatheRunning) return;
+        // Hold (4s at bottom)
+        inst.textContent = 'Hold';
+        breatheTimeout = setTimeout(function(){
+          breatheElapsed += 16;
+          var remaining = Math.max(0, breatheDuration - breatheElapsed);
+          var timerEl = document.getElementById('breatheTimer');
+          if(timerEl) timerEl.textContent = formatTime(remaining);
+          breatheCycle();
+        }, 4000);
+      }, 4000);
+    }, 4000);
+  }, 4000);
 }
 
-function pauseBreathe(){
-  breatheRunning=false;
-  clearInterval(breatheInterval);
-  const btn=document.querySelector('.ctrl-btn.primary');
-  if(btn) btn.textContent='Resume';
+function finishBreathe(){
+  breatheRunning = false;
+  var mins = Math.round(breatheDuration/60);
+  document.getElementById('completeTitle').textContent = 'Well done';
+  document.getElementById('completeStat').textContent = mins + ' minute' + (mins>1?'s':'') + ' of mindful breathing';
+  document.getElementById('completeCheck').textContent = '\u2713';
+  document.getElementById('completeCheck').style.background = PAL.ac + '30';
+  document.getElementById('completeCheck').style.color = PAL.ac;
+  var btns = document.querySelectorAll('.complete-btn');
+  btns[0].style.background = PAL.ac;
+  btns[0].style.color = PAL.bg;
+  btns[1].style.color = PAL.tx;
+
+  showView('completeView');
+  document.getElementById('modeBar').classList.remove('hidden');
+  document.getElementById('mainNav').classList.remove('hidden');
 }
 
 function resetBreathe(){
-  breatheRunning=false;
-  clearInterval(breatheInterval);
-  breathePhase=0; breatheCount=0;
-  const phaseEl=document.getElementById('breathePhase');
-  const countEl=document.getElementById('breatheCount');
-  const inner=document.getElementById('breatheInner');
-  const circle=document.getElementById('breatheCircle');
-  if(phaseEl) phaseEl.textContent='Ready when you are';
-  if(countEl) countEl.textContent='4';
-  if(inner){ inner.style.transform='scale(1)'; }
-  if(circle){ circle.style.transform='scale(1)'; }
-  const btn=document.querySelector('.ctrl-btn.primary');
-  if(btn) btn.textContent='Start';
+  breatheRunning = false;
+  clearTimeout(breatheTimeout);
+  breatheElapsed = 0;
+  setPetalState('contract');
+  document.getElementById('breatheInstruction').textContent = 'Take a moment for yourself';
+  document.getElementById('breatheTimer').textContent = '';
+  document.getElementById('breatheStartBtn').style.display = '';
+  document.getElementById('durationRow').style.display = '';
+  document.getElementById('modeBar').classList.remove('hidden');
+  document.getElementById('mainNav').classList.remove('hidden');
+  showView('breatheView');
 }
 
-// ── 5-4-3-2-1 GROUNDING ────────────────────────────────────
-function buildGround(){
-  const steps=[
-    {n:5,sense:'See',prompt:'Name 5 things you can see right now'},
-    {n:4,sense:'Touch',prompt:'Name 4 things you can physically feel'},
-    {n:3,sense:'Hear',prompt:'Name 3 things you can hear right now'},
-    {n:2,sense:'Smell',prompt:'Name 2 things you can smell, or think of 2 smells you like'},
-    {n:1,sense:'Taste',prompt:'Name 1 thing you can taste, or something you like the taste of'},
-  ];
-  return `<div class="ground-wrap">
-    <div class="ground-title bc" style="color:${PAL.tx}">5-4-3-2-1 Grounding — brings you back to right now</div>
-    <div class="ground-steps" id="groundSteps">
-      ${steps.map((s,i)=>`
-        <div class="ground-step" id="gstep${i}" style="border-color:${PAL.tx}12">
-          <div class="step-num" id="gnum${i}" style="color:${PAL.tx}">${s.n}</div>
-          <div style="flex:1">
-            <div style="font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;margin-bottom:4px;font-family:Barlow Condensed,sans-serif;font-weight:900">${s.sense}</div>
-            <div class="step-text" style="color:${PAL.tx}">${s.prompt}</div>
-            <input class="step-input" id="ginput${i}" placeholder="write yours here..." style="color:${PAL.tx};border-color:${PAL.tx}14;display:none"
-              oninput="checkGroundStep(${i})"/>
-          </div>
-        </div>`).join('')}
-    </div>
-    <p style="font-size:0.82rem;opacity:0.38;text-align:center;margin-top:8px">Tap each step to expand it</p>
-  </div>`;
+function formatTime(s){
+  var m = Math.floor(s/60);
+  var sec = s%60;
+  return m + ':' + (sec<10?'0':'') + sec;
 }
 
-// Make ground steps interactive
-setTimeout(()=>{
-  document.querySelectorAll('.ground-step').forEach((step,i)=>{
-    step.addEventListener('click',()=>{
-      const input=document.getElementById('ginput'+i);
-      if(input){
-        input.style.display=input.style.display==='none'?'block':'none';
-        if(input.style.display==='block') input.focus();
-      }
-    });
-  });
-},100);
-
-function checkGroundStep(i){
-  const input=document.getElementById('ginput'+i);
-  const num=document.getElementById('gnum'+i);
-  const step=document.getElementById('gstep'+i);
-  if(input&&input.value.trim().length>0){
-    step.classList.add('done');
-    if(num){ num.textContent='ok'; num.classList.add('done'); num.style.color=PAL.ac; }
-  }
-}
-
-// ── JOURNAL ────────────────────────────────────────────────
-const JOURNAL_PROMPTS = {
-  anxious: 'What is the specific thing making you feel anxious right now? Write it out without editing yourself.',
-  stressed: 'What would actually help right now — even if it feels impossible? What is the smallest version of that?',
-  overwhelmed: 'Write down everything that is in your head right now. All of it. Get it out of your head and onto the page.',
-  angry: 'What happened? What do you wish you could say or do? This is just for you.',
-  low: 'What is one small thing that felt even slightly okay today, or recently?',
-  lonely: 'Who do you miss or wish you could talk to right now? What would you say to them?',
-  lost: 'If nothing was stopping you, what would you actually want your life to look like right now?',
-  okay: 'What is something you are quietly proud of, even if no one else would notice it?',
-};
-
-function buildJournal(){
-  const moodKey=selectedMood||mood||'okay';
-  const prompt=JOURNAL_PROMPTS[moodKey]||JOURNAL_PROMPTS.okay;
-  return `<div class="journal-wrap">
-    <div class="journal-prompt" style="border-left-color:${PAL.ac};background:${PAL.ac}0c;color:${PAL.tx}">${prompt}</div>
-    <textarea class="journal-area" id="journalText" placeholder="Write here — this is only for you..." style="color:${PAL.tx};border-color:${PAL.tx}14;"></textarea>
-    <div class="journal-actions">
-      <button class="journal-btn bc" onclick="submitJournal()" style="background:${PAL.ac};color:${PAL.bg};border:none">Get a Response</button>
-      <button class="journal-btn bc" onclick="newJournalPrompt()" style="background:transparent;border:1.5px solid ${PAL.tx}22;color:${PAL.tx}">New Prompt</button>
-    </div>
-    <div class="journal-response" id="journalResponse" style="background:${PAL.ac}14;color:${PAL.tx}"></div>
-  </div>`;
-}
-
-async function submitJournal(){
-  const text=document.getElementById('journalText')?.value.trim();
-  if(!text||text.length<10) return;
-  const resp=document.getElementById('journalResponse');
-  if(!resp) return;
-  resp.className='journal-response visible';
-  resp.textContent='reading this...';
-  resp.style.display='block';
-  resp.style.background=PAL.ac+'14';
-  resp.style.color=PAL.tx;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:300,
-        system:`You are ${floveeName}, a gentle, empathetic wellness companion for someone with ${aeName} aesthetic. They have just written a journal entry. Respond with genuine warmth and kindness in 2-4 sentences. Reflect something specific from what they wrote back to them so they feel truly heard. Validate their feelings. Be real and caring, never hollow. If they seem to be struggling, gently suggest they could also try the breathing exercise or keep journaling. Never use therapy speak.`,
-        messages:[{role:'user',content:text}]
-      })
-    });
-    const data=await res.json();
-    resp.textContent=data.content?.[0]?.text||'thank you for writing that.';
-  }catch(e){ resp.textContent='that took courage to write down.'; }
-}
-
-let promptIdx=0;
-const allPrompts=Object.values(JOURNAL_PROMPTS);
-function newJournalPrompt(){
-  promptIdx=(promptIdx+1)%allPrompts.length;
-  const p=document.querySelector('.journal-prompt');
-  if(p) p.textContent=allPrompts[promptIdx];
-}
-
-// ── AFFIRMATIONS ────────────────────────────────────────────
-const BASE_AFFIRMATIONS = [
-  'You are allowed to take up space.',
-  'Your feelings are real and they matter.',
-  'You do not have to have everything figured out right now.',
-  'Being sensitive is not a weakness.',
-  'You are doing better than you think.',
-  'It is okay to rest without earning it.',
-  'Your worth is not measured by productivity.',
-  'You are allowed to change your mind.',
-  'Struggling does not mean failing.',
-  'You are enough exactly as you are today.',
-  'You are not a burden for having needs.',
-  'Small progress is still progress.',
-  'You deserve the same kindness you give to others.',
-  'Uncertainty is not the same as failure.',
-  'You have got through hard days before.',
+// ─── REFLECT ─────────────────────────────────────────────
+var REFLECT_BASE = [
+  'What is one thing you are grateful for right now?',
+  'Think of someone who made you smile recently.',
+  'What is something about yourself that you appreciate?',
+  'Recall a moment today when you felt at peace.',
+  'What is one kind thing you did for yourself recently?',
+  'Think of a place where you feel completely safe.',
+  'What is a quality in yourself that you are proud of?',
+  'Remember a time you overcame something difficult.',
+  'What is one thing you are looking forward to?',
+  'Think about what makes you feel most like yourself.',
+  'What would you tell your younger self right now?',
+  'What does rest look like for you?',
+  'Name something beautiful you noticed today.',
+  'What is a boundary you are glad you set?',
+  'Think of a song that makes you feel understood.',
 ];
 
-const AE_AFFIRMATIONS = {
-  goth: ['Your darkness is part of your depth.','Feeling things intensely means you are alive.','Not everyone will understand you and that is fine.'],
-  kawaii: ['Your softness is strength.','Being gentle with the world takes courage.','You make things more beautiful by existing in them.'],
-  darkacad: ['Your mind is one of your best qualities.','Curiosity and depth are rare things. You have both.','Intelligence and vulnerability can coexist.'],
-  indie: ['Being yourself in a world that wants you to be someone else takes real bravery.','Your specific taste is not pretension — it is identity.','Quiet people notice everything.'],
-  cleangirl: ['You are allowed to want more than you currently have.','Standards are not the same as unrealistic expectations.','Taking care of yourself is an act of respect, not vanity.'],
+var REFLECT_AE = {
+  kawaii: ['What small, cute thing brought you joy today?','Think about what makes you feel soft and safe.','What is something sweet you could do for yourself right now?'],
+  softgirl: ['What makes you feel gentle and at ease?','Think of a colour or texture that calms you.','What does your softest, most peaceful day look like?'],
+  cleangirl: ['What does your ideal morning feel like?','Think of a routine that makes you feel grounded.','What is one thing you did today that was just for you?'],
+  coquette: ['What makes you feel beautiful without trying?','Think of a moment you felt effortlessly confident.','What is something romantic about your everyday life?'],
+  goth: ['What is something dark or intense that actually brings you comfort?','Think about the beauty in something others might overlook.','What does your inner world look like right now?'],
+  darkacad: ['What is something you learned recently that changed how you think?','Think of a book, idea, or conversation that moved you.','What does intellectual peace feel like to you?'],
+  grunge: ['What is something raw and honest you have been avoiding?','Think of a song that captures exactly how you feel.','When do you feel most authentically yourself?'],
+  y2k: ['What is something playful or fun you did recently?','Think of a memory that makes you feel nostalgic in a good way.','What does your most vibrant, alive self look like?'],
+  street: ['What gives you confidence without you having to try?','Think of a time you trusted your instincts and it paid off.','What does freedom feel like to you?'],
+  cottage: ['What is a simple pleasure you enjoyed today?','Think of a natural thing — a tree, the sky, rain — that grounded you.','What does your most peaceful, slow life look like?'],
+  hippie: ['What is something you believe in deeply?','Think of a time you felt truly connected to the world around you.','What does inner peace mean to you today?'],
+  oldmoney: ['What is a tradition or habit that brings you comfort?','Think of something timeless that you value about yourself.','What does elegance in rest look like for you?'],
+  preppy: ['What is something you accomplished that you haven not celebrated yet?','Think of a goal you are quietly working toward.','What does success feel like beyond achievement?'],
+  tomato: ['What is something warm and vibrant about your life right now?','Think of a moment you felt truly alive today.','What does joy without effort look like for you?'],
+  indie: ['What is something only you would notice or appreciate?','Think of an artist, song, or film that feels like your inner world.','When do you feel most creatively alive?'],
+  emo: ['What is a feeling you have been sitting with lately?','Think of something that hurt but also taught you something real.','What does emotional honesty look like for you right now?'],
 };
 
-let affirmIdx = 0;
-let personalAffirms = [];
+var reflectPrompts = [];
+var reflectIdx = 0;
 
-function buildAffirm(){
-  const topAe=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0];
-  personalAffirms = [...BASE_AFFIRMATIONS, ...(AE_AFFIRMATIONS[topAe]||[])];
-  affirmIdx = Math.floor(Math.random()*personalAffirms.length);
-  return renderAffirmCard();
-}
-
-function renderAffirmCard(){
-  const text=personalAffirms[affirmIdx%personalAffirms.length];
-  return `<div class="affirm-wrap">
-    <p style="font-size:0.82rem;opacity:0.4;text-align:center;line-height:1.7;max-width:380px">These are not hollow — they are things that are actually true. Read them slowly.</p>
-    <div class="affirm-card" style="background:${PAL.ac}0e;border-color:${PAL.ac}30">
-      <div class="affirm-text" style="color:${PAL.tx}">${text}</div>
-      <div class="affirm-sub" style="color:${PAL.tx}">read it again if you need to</div>
-    </div>
-    <div class="affirm-controls">
-      <button class="ctrl-btn primary bc" onclick="nextAffirm()" style="background:${PAL.ac};color:${PAL.bg};border:none">Next</button>
-      <button class="ctrl-btn bc" onclick="getPersonalAffirm()" style="border-color:${PAL.tx}22;color:${PAL.tx}">Make it personal</button>
-    </div>
-  </div>`;
-}
-
-function nextAffirm(){
-  affirmIdx++;
-  const body=document.getElementById('activityBody');
-  if(body) body.innerHTML=renderAffirmCard();
-}
-
-async function getPersonalAffirm(){
-  const body=document.getElementById('activityBody');
-  if(!body) return;
-  body.innerHTML=`<div class="affirm-wrap"><p style="opacity:0.4;font-style:italic">writing one for you...</p></div>`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:120,
-        system:`Write one short, specific, honest affirmation for someone with ${aeName} aesthetic who is feeling ${selectedMood||mood||'low'}. Not generic. Reference something specific to their vibe or aesthetic. 1-2 sentences. No quotation marks. No preamble.`,
-        messages:[{role:'user',content:'write me a personal affirmation'}]
-      })
-    });
-    const data=await res.json();
-    const text=data.content?.[0]?.text||personalAffirms[0];
-    personalAffirms.unshift(text);
-    affirmIdx=0;
-    body.innerHTML=renderAffirmCard();
-  }catch(e){
-    body.innerHTML=renderAffirmCard();
+function initReflect(){
+  var topAe = Object.entries((profile&&profile.aesthetics)||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topAe = topAe ? topAe[0] : '';
+  var aePrompts = REFLECT_AE[topAe] || [];
+  reflectPrompts = aePrompts.concat(REFLECT_BASE);
+  // Shuffle
+  for(var i=reflectPrompts.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=reflectPrompts[i]; reflectPrompts[i]=reflectPrompts[j]; reflectPrompts[j]=tmp;
   }
+  reflectIdx = 0;
+  showReflectPrompt();
 }
 
-function handleKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } }
-function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+function showReflectPrompt(){
+  var el = document.getElementById('reflectPrompt');
+  el.classList.add('fade');
+  setTimeout(function(){
+    el.textContent = reflectPrompts[reflectIdx % reflectPrompts.length];
+    el.classList.remove('fade');
+  }, 300);
+}
 
-// ─── INIT ─────────────────────────────────────────────────
+function nextReflect(){
+  reflectIdx++;
+  showReflectPrompt();
+}
+
+// ─── VIEW SWITCHING ──────────────────────────────────────
+function showView(id){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function switchMode(mode){
+  // Stop any running breathing
+  if(mode !== 'breathe' && breatheRunning){
+    breatheRunning = false;
+    clearTimeout(breatheTimeout);
+  }
+
+  document.getElementById('pillBreathe').classList.toggle('on', mode==='breathe');
+  document.getElementById('pillReflect').classList.toggle('on', mode==='reflect');
+
+  if(mode==='breathe'){
+    resetBreathe();
+  } else {
+    showView('reflectView');
+  }
+
+  document.getElementById('modeBar').classList.remove('hidden');
+  document.getElementById('mainNav').classList.remove('hidden');
+}
+
+// ─── APPLY STYLES ────────────────────────────────────────
+function applyStyles(){
+  document.body.style.background = PAL.bg;
+  document.body.style.color = PAL.tx;
+
+  var nav = document.getElementById('mainNav');
+  nav.style.background = PAL.bg + 'f0';
+  nav.style.borderColor = PAL.tx + '08';
+  document.querySelectorAll('.nav-logo,.nav-btn').forEach(function(el){
+    el.style.color = PAL.tx;
+    el.style.borderColor = PAL.tx + '18';
+  });
+
+  // Breathe
+  document.getElementById('breatheStartBtn').style.background = PAL.ac;
+  document.getElementById('breatheStartBtn').style.color = PAL.bg;
+  document.querySelectorAll('.dur-btn').forEach(function(b){
+    b.style.borderColor = PAL.tx + '18';
+    b.style.color = PAL.tx;
+  });
+
+  // Mode bar
+  var modeBar = document.getElementById('modeBar');
+  modeBar.style.background = PAL.tx + '10';
+  document.querySelectorAll('.mode-pill').forEach(function(p){ p.style.color = PAL.tx; });
+
+  // Reflect
+  document.getElementById('reflectOrb').style.background = PAL.ac;
+  document.getElementById('reflectNextBtn').style.background = PAL.ac + '25';
+  document.getElementById('reflectNextBtn').style.color = PAL.tx;
+}
+
+// ─── INIT ────────────────────────────────────────────────
 applyStyles();
+createPetals();
+setPetalState('contract');
+initReflect();
 
 </script>
 
