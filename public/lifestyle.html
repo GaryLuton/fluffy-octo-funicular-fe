@@ -130,31 +130,57 @@
     .product-shop{font-size:0.7rem;opacity:0.45;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .product-badge{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:20px;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;}
 
-    /* FOR YOU — SCRAPBOOK */
-    .foryou{position:relative;z-index:2;padding:0 40px 28px;}
-    .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    /* FOR YOU — SCRAPBOOK COLLAGE */
+    .foryou{position:relative;z-index:2;padding:0 40px 10px;overflow:visible;}
+    .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
     .foryou-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .foryou-refresh{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.15);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;opacity:0.4;transition:opacity 0.2s;}
     .foryou-refresh:hover{opacity:0.8;}
     .foryou-refresh:disabled{opacity:0.2;cursor:not-allowed;}
     .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
-    .rec-grid{display:flex;flex-wrap:wrap;gap:16px 20px;justify-content:center;padding:10px 0;position:relative;}
-    .rec-sticker{position:relative;padding:22px 20px 18px;border-radius:4px;display:flex;flex-direction:column;gap:6px;width:195px;cursor:default;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);box-shadow:1px 2px 8px rgba(0,0,0,0.06);}
-    .rec-sticker:hover{transform:scale(1.06) !important;z-index:5;}
-    .rec-sticker::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%) rotate(1deg);width:44px;height:14px;border-radius:1px;opacity:0.4;}
-    .rec-sticker.tape-left::before{left:25%;transform:translateX(-50%) rotate(-8deg);}
-    .rec-sticker.tape-right::before{left:70%;transform:translateX(-50%) rotate(6deg);}
-    .rec-sticker.pin::before{content:'';width:12px;height:12px;border-radius:50%;top:-5px;left:50%;transform:translateX(-50%);opacity:0.6;}
-    .rec-sticker.torn{border-radius:3px 3px 1px 8px;border-bottom:2px dashed rgba(128,128,128,0.12);}
-    .rec-sticker.round{border-radius:20px;padding:24px 22px 20px;}
-    .rec-sticker.tilted{border-radius:6px 2px 6px 2px;}
-    .rec-emoji{font-size:1.6rem;line-height:1;}
-    .rec-cat{font-size:0.52rem;letter-spacing:3.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;}
-    .rec-title{font-size:0.92rem;font-weight:700;line-height:1.35;letter-spacing:-0.2px;}
-    .rec-desc{font-size:0.75rem;opacity:0.48;line-height:1.65;}
-    .rec-doodle{position:absolute;font-size:0.9rem;opacity:0.15;pointer-events:none;}
-    .rec-loading{width:100%;text-align:center;padding:40px;opacity:0.3;font-style:italic;}
-    @media(max-width:768px){.rec-sticker{width:calc(50% - 12px);}.foryou{padding:0 20px 20px;}}
+
+    /* Collage board */
+    .rec-board{position:relative;min-height:340px;margin:0 auto;max-width:900px;}
+
+    /* Individual scrapbook pieces */
+    .sb-piece{position:absolute;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;cursor:default;}
+    .sb-piece:hover{z-index:10 !important;box-shadow:0 8px 28px rgba(0,0,0,0.12) !important;}
+
+    /* Polaroid card */
+    .sb-polaroid{background:#fff;padding:10px 10px 32px;box-shadow:1px 3px 12px rgba(0,0,0,0.08);}
+    .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .sb-polaroid .sb-label{position:absolute;bottom:8px;left:12px;right:12px;font-size:0.72rem;font-weight:600;line-height:1.4;color:#333;}
+
+    /* Torn note */
+    .sb-note{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.05);border-top:3px solid transparent;}
+    .sb-note::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:6px;background:inherit;mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6'%3E%3Cpath d='M0,3 Q5,0 10,3 T20,3 T30,3 T40,3 T50,3 T60,3 T70,3 T80,3 T90,3 T100,3 V6 H0Z' fill='black'/%3E%3C/svg%3E");-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6'%3E%3Cpath d='M0,3 Q5,0 10,3 T20,3 T30,3 T40,3 T50,3 T60,3 T70,3 T80,3 T90,3 T100,3 V6 H0Z' fill='black'/%3E%3C/svg%3E");mask-size:100% 100%;-webkit-mask-size:100% 100%;}
+    .sb-note .sb-note-title{font-size:0.9rem;font-weight:700;margin-bottom:4px;line-height:1.3;}
+    .sb-note .sb-note-body{font-size:0.74rem;opacity:0.5;line-height:1.6;}
+
+    /* Washi tape strip */
+    .sb-tape{position:absolute;height:16px;border-radius:1px;opacity:0.35;pointer-events:none;z-index:20;}
+
+    /* Sticker (circle/blob) */
+    .sb-sticker{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;box-shadow:1px 2px 6px rgba(0,0,0,0.06);}
+    .sb-sticker .sb-sticker-title{font-size:0.72rem;font-weight:700;line-height:1.3;margin-top:6px;}
+    .sb-sticker .sb-sticker-sub{font-size:0.6rem;opacity:0.4;line-height:1.5;margin-top:2px;}
+
+    /* Postcard */
+    .sb-postcard{border-radius:3px;box-shadow:2px 3px 10px rgba(0,0,0,0.07);padding:18px 16px;display:flex;flex-direction:column;gap:4px;border:1.5px solid rgba(128,128,128,0.06);}
+    .sb-postcard::before{content:'';position:absolute;top:8px;right:8px;width:28px;height:32px;border:2px solid rgba(128,128,128,0.12);border-radius:2px;}
+    .sb-postcard .sb-pc-cat{font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;}
+    .sb-postcard .sb-pc-title{font-size:0.88rem;font-weight:700;line-height:1.3;}
+    .sb-postcard .sb-pc-desc{font-size:0.72rem;opacity:0.45;line-height:1.6;}
+    .sb-postcard .sb-pc-line{height:1px;opacity:0.08;margin:4px 0;}
+
+    /* SVG icon container */
+    .sb-icon{pointer-events:none;}
+    .sb-icon svg{display:block;}
+
+    /* Loading */
+    .rec-loading{width:100%;text-align:center;padding:60px;opacity:0.3;font-style:italic;position:relative;}
+
+    @media(max-width:768px){.rec-board{min-height:520px;}.foryou{padding:0 16px 10px;}}
 
     /* FIT SECTION LAYOUT */
     .fit-layout{display:flex;flex-direction:column;gap:0;}
@@ -236,14 +262,14 @@
       </div>
     </div>
 
-    <!-- FOR YOU -->
+    <!-- FOR YOU — SCRAPBOOK -->
     <div class="foryou" id="foryouSection">
       <div class="foryou-header">
         <div class="foryou-title bc">For You</div>
         <button class="foryou-refresh bc" id="foryouRefresh" onclick="loadForYou()">Refresh</button>
       </div>
-      <div class="rec-grid" id="recGrid">
-        <div class="rec-loading">Loading your recommendations...</div>
+      <div class="rec-board" id="recBoard">
+        <div class="rec-loading">Putting together your scrapbook...</div>
       </div>
     </div>
 
@@ -1027,7 +1053,7 @@ function buildRecProfile(){
 }
 
 async function loadForYou(){
-  var grid = document.getElementById('recGrid');
+  var grid = document.getElementById('recBoard');
   var btn = document.getElementById('foryouRefresh');
   if(!grid) return;
 
@@ -1053,7 +1079,7 @@ async function loadForYou(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1200,
-        system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Return ONLY a JSON array of 5 objects: {cat, emoji, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - emoji: one relevant emoji\n  - title: short catchy title\n  - desc: brief specific description\n- No markdown, no code fences, no text outside the JSON array.',
+        system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Do NOT use any emojis anywhere in your response.\n- Return ONLY a JSON array of 5 objects: {cat, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - title: short catchy title (no emojis)\n  - desc: brief specific description (no emojis)\n- No markdown, no code fences, no text outside the JSON array.',
         messages:[{role:'user',content:'My profile:\n'+profileStr+'\n\nGenerate 5 personalised recommendations for me right now.'}]
       })
     });
@@ -1077,61 +1103,159 @@ async function loadForYou(){
   if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
 }
 
+function getAeIcons(){
+  // Return SVG icon generators based on user aesthetic
+  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topK = topK?topK[0]:'softgirl';
+  var c = searchPal.ac;
+  var icons = [];
+  // Primary icons per aesthetic
+  var m = {
+    kawaii:[bowSVG,flowerSVG,starSVG],softgirl:[flowerSVG,bowSVG,starSVG],
+    cleangirl:[starSVG,moonSVG,flowerSVG],coquette:[bowSVG,butterflySVG,flowerSVG],
+    goth:[batSVG,moonSVG,starSVG],darkacad:[bookSVG,moonSVG,starSVG],
+    grunge:[starSVG,batSVG,moonSVG],y2k:[butterflySVG,starSVG,flowerSVG],
+    street:[starSVG,vinylSVG,noteSVG],cottage:[flowerSVG,butterflySVG,starSVG],
+    hippie:[flowerSVG,moonSVG,starSVG],oldmoney:[bookSVG,starSVG,moonSVG],
+    preppy:[bowSVG,starSVG,bookSVG],tomato:[flowerSVG,starSVG,butterflySVG],
+    indie:[moonSVG,vinylSVG,starSVG],emo:[batSVG,moonSVG,starSVG],
+    ballet:[bowSVG,flowerSVG,starSVG]
+  };
+  return m[topK]||[starSVG,flowerSVG,moonSVG];
+}
+
+function makeIconSvg(fn,c,size){
+  var raw = fn(0,0,c,0.55,0);
+  // Strip the outer <g> transform to get clean SVG
+  var inner = raw.replace(/<g[^>]*>/,'').replace(/<\/g>/,'');
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
+}
+
 function renderRecs(recs){
-  var grid = document.getElementById('recGrid');
-  if(!grid) return;
+  var board = document.getElementById('recBoard');
+  if(!board) return;
   var pal = searchPal;
   var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self-Care'};
-  var shapes = ['tape-left','tape-right','pin','torn','round','tilted'];
-  var doodles = ['\u2605','\u2661','\u273F','\u2726','\u2606','\u25CB','\u2727','\u2740','\u2736','\u00B7\u00B7\u00B7'];
-  var bgAlphas = ['14','18','10','1a','12'];
+  var aeIcons = getAeIcons();
+  var isMobile = window.innerWidth < 768;
+  var bw = Math.min(board.offsetWidth, 900);
 
-  grid.innerHTML = '';
+  board.innerHTML = '';
+
+  // --- Scrapbook layout positions (x%, y, w, rotation) ---
+  var layouts = isMobile ? [
+    {x:2, y:0,   w:52, rot:-2, type:'polaroid'},
+    {x:48,y:10,  w:48, rot:3,  type:'postcard'},
+    {x:5, y:170, w:45, rot:1,  type:'note'},
+    {x:46,y:180, w:50, rot:-3, type:'sticker'},
+    {x:10,y:320, w:55, rot:2,  type:'postcard'},
+  ] : [
+    {x:0,  y:0,   w:200, rot:-3,  type:'polaroid'},
+    {x:23, y:10,  w:220, rot:2,   type:'postcard'},
+    {x:50, y:0,   w:180, rot:-1,  type:'note'},
+    {x:72, y:20,  w:140, rot:4,   type:'sticker'},
+    {x:12, y:180, w:210, rot:1.5, type:'postcard'},
+  ];
+
+  // Scatter some decorative icons behind
+  for(var d=0;d<6;d++){
+    var deco = document.createElement('div');
+    deco.className = 'sb-icon sb-piece';
+    deco.style.zIndex = '0';
+    deco.style.opacity = '0.1';
+    var dx = isMobile ? Math.random()*80+5 : Math.random()*85+3;
+    var dy = Math.random()*(isMobile?450:280)+10;
+    deco.style.left = dx+'%';
+    deco.style.top = dy+'px';
+    deco.style.transform = 'rotate('+(Math.random()*40-20).toFixed(0)+'deg)';
+    var fn = aeIcons[d%aeIcons.length];
+    deco.innerHTML = makeIconSvg(fn, pal.ac, 32+Math.round(Math.random()*20));
+    board.appendChild(deco);
+  }
+
   recs.forEach(function(rec, i){
-    var rot = (Math.random()*8-4).toFixed(1);
-    var shape = shapes[i % shapes.length];
-    var yOff = Math.round(Math.random()*12 - 6);
+    if(i >= layouts.length) return;
+    var L = layouts[i];
+    var iconFn = aeIcons[i % aeIcons.length];
+    var el;
 
-    var sticker = document.createElement('div');
-    sticker.className = 'rec-sticker ' + shape;
-    sticker.style.background = pal.ac + bgAlphas[i % bgAlphas.length];
-    sticker.style.color = pal.tx;
-    sticker.style.transform = 'rotate('+rot+'deg) translateY('+yOff+'px)';
+    if(L.type === 'polaroid'){
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-polaroid';
+      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
+      var iconHtml = makeIconSvg(iconFn, pal.ac, isMobile?60:80);
+      el.innerHTML =
+        '<div class="sb-inner" style="background:'+pal.ac+'12">'+
+          '<div class="sb-icon">'+iconHtml+'</div>'+
+        '</div>'+
+        '<div class="sb-label">'+escHtml(rec.title||'')+
+          '<div style="font-size:0.6rem;opacity:0.4;margin-top:2px;font-weight:400">'+escHtml(rec.desc||'')+'</div>'+
+        '</div>';
 
-    // Tape/pin colour
-    sticker.style.setProperty('--tape', pal.ac+'40');
-    var before = pal.ac+'40';
-    // Using inline pseudo-element workaround via box-shadow on a child
-    var tapeEl = document.createElement('div');
-    tapeEl.style.cssText = 'position:absolute;top:-7px;left:50%;transform:translateX(-50%) rotate('+(Math.random()*10-5).toFixed(0)+'deg);width:44px;height:13px;border-radius:1px;background:'+pal.ac+'30;pointer-events:none;';
-    if(shape==='tape-left') tapeEl.style.left='25%';
-    if(shape==='tape-right') tapeEl.style.left='70%';
-    if(shape==='pin'){
-      tapeEl.style.width='11px';tapeEl.style.height='11px';tapeEl.style.borderRadius='50%';
-      tapeEl.style.background=pal.ac+'55';tapeEl.style.top='-5px';
-      tapeEl.style.boxShadow='0 1px 3px rgba(0,0,0,0.15)';
+      // Add washi tape
+      var tape = document.createElement('div');
+      tape.className = 'sb-tape';
+      tape.style.cssText = 'width:60px;top:-6px;left:30%;background:'+pal.ac+'30;transform:rotate('+(Math.random()*12-6).toFixed(0)+'deg);';
+      el.appendChild(tape);
+
+    } else if(L.type === 'note'){
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-note';
+      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
+      el.style.background = pal.ac+'10';
+      el.style.borderTopColor = pal.ac+'40';
+      el.style.color = pal.tx;
+      el.innerHTML =
+        '<div class="sb-icon" style="margin-bottom:6px">'+makeIconSvg(iconFn, pal.ac, 28)+'</div>'+
+        '<div class="sb-note-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-note-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+
+    } else if(L.type === 'sticker'){
+      var sz = isMobile ? 110 : 140;
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-sticker';
+      el.style.width = sz+'px';
+      el.style.height = sz+'px';
+      el.style.background = pal.ac+'18';
+      el.style.color = pal.tx;
+      el.innerHTML =
+        '<div class="sb-icon">'+makeIconSvg(iconFn, pal.ac, 36)+'</div>'+
+        '<div class="sb-sticker-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>';
+
+    } else {
+      // postcard
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-postcard';
+      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
+      el.style.background = pal.bg;
+      el.style.color = pal.tx;
+      var lines = '';
+      for(var ln=0;ln<3;ln++) lines += '<div class="sb-pc-line" style="background:'+pal.tx+'"></div>';
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div class="sb-icon">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
+          '<div class="sb-pc-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||rec.cat)+'</div>'+
+        '</div>'+
+        '<div class="sb-pc-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        lines+
+        '<div class="sb-pc-desc" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
     }
-    sticker.appendChild(tapeEl);
 
-    sticker.innerHTML +=
-      '<div class="rec-emoji">'+(rec.emoji||'')+'</div>'+
-      '<div class="rec-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||rec.cat)+'</div>'+
-      '<div class="rec-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-      '<div class="rec-desc" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+    el.style.left = L.x + (isMobile?'%':'%');
+    el.style.top = L.y + 'px';
+    el.style.zIndex = (i+1).toString();
+    el.style.transform = 'rotate('+L.rot+'deg)';
 
-    // Random corner doodle
-    var doodle = document.createElement('div');
-    doodle.className = 'rec-doodle';
-    doodle.textContent = doodles[Math.floor(Math.random()*doodles.length)];
-    doodle.style.color = pal.ac;
-    doodle.style.bottom = '8px';
-    doodle.style.right = '10px';
-    doodle.style.fontSize = (0.7 + Math.random()*0.5).toFixed(1)+'rem';
-    doodle.style.transform = 'rotate('+(Math.random()*30-15).toFixed(0)+'deg)';
-    sticker.appendChild(doodle);
-
-    grid.appendChild(sticker);
+    board.appendChild(el);
   });
+
+  // Set board height
+  var maxBottom = 0;
+  board.querySelectorAll('.sb-piece').forEach(function(p){
+    var b = p.offsetTop + p.offsetHeight;
+    if(b > maxBottom) maxBottom = b;
+  });
+  board.style.minHeight = (maxBottom + 30) + 'px';
 }
 
 function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
