@@ -212,6 +212,67 @@
 
     @media(max-width:768px){.rec-board{min-height:680px;padding:20px 14px;}.foryou{padding:0 14px 10px;}}
 
+    /* ── DTI GAME ── */
+    #dtiView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #dtiView.active{display:flex;}
+    .dti-top{display:flex;flex:1;overflow:hidden;}
+    .dti-avatar-panel{flex:0 0 280px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;}
+    .dti-mannequin{width:140px;height:320px;position:relative;display:flex;flex-direction:column;align-items:center;}
+    .dti-head{width:48px;height:52px;border-radius:50%;border:2px solid;margin-bottom:2px;}
+    .dti-body{width:70px;height:90px;border-radius:8px 8px 4px 4px;border:2px solid;position:relative;}
+    .dti-legs{display:flex;gap:8px;margin-top:2px;}
+    .dti-leg{width:28px;height:80px;border-radius:4px 4px 6px 6px;border:2px solid;}
+    .dti-slot{position:absolute;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.6;border:1.5px dashed;transition:all 0.2s;}
+    .dti-slot.filled{border-style:solid;opacity:1;}
+    .dti-slot-top{left:50%;transform:translateX(-50%);top:62px;width:80px;height:36px;}
+    .dti-slot-bottom{left:50%;transform:translateX(-50%);top:155px;width:74px;height:34px;}
+    .dti-slot-shoes{left:50%;transform:translateX(-50%);top:240px;width:80px;height:28px;}
+    .dti-slot-acc{right:-40px;top:80px;width:36px;height:36px;border-radius:50%;}
+    .dti-slot-hair{left:50%;transform:translateX(-50%);top:0;width:56px;height:30px;border-radius:14px 14px 4px 4px;}
+    .dti-outfit-summary{margin-top:16px;text-align:center;width:100%;}
+    .dti-outfit-item{font-size:0.68rem;opacity:0.5;line-height:1.6;}
+
+    .dti-wardrobe{flex:1;display:flex;flex-direction:column;border-left:1px solid rgba(128,128,128,0.08);overflow:hidden;}
+    .dti-theme-bar{padding:14px 24px;text-align:center;border-bottom:1px solid rgba(128,128,128,0.08);}
+    .dti-theme-label{font-size:0.56rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;margin-bottom:4px;}
+    .dti-theme-name{font-size:1.3rem;font-weight:700;letter-spacing:-0.3px;}
+    .dti-timer{font-size:0.72rem;opacity:0.4;margin-top:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;}
+    .dti-cats{display:flex;border-bottom:1px solid rgba(128,128,128,0.06);padding:0 16px;overflow-x:auto;}
+    .dti-cat{padding:10px 16px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border-bottom:2px solid transparent;opacity:0.35;transition:all 0.15s;white-space:nowrap;background:transparent;border-top:none;border-left:none;border-right:none;color:inherit;}
+    .dti-cat.on{opacity:1;}
+    .dti-items{flex:1;overflow-y:auto;padding:14px 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start;}
+    .dti-item{padding:12px 10px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .dti-item:hover{transform:translateY(-2px);}
+    .dti-item.picked{border-style:solid;}
+    .dti-item-swatch{width:28px;height:28px;border-radius:50%;border:2px solid rgba(128,128,128,0.1);}
+    .dti-item-name{font-size:0.72rem;font-weight:600;line-height:1.3;}
+    .dti-item-style{font-size:0.56rem;opacity:0.35;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+
+    .dti-bottom{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-top:1px solid rgba(128,128,128,0.08);}
+    .dti-score{font-size:0.72rem;opacity:0.45;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;}
+    .dti-submit{padding:12px 36px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .dti-submit:hover{transform:translateY(-2px);opacity:0.9;}
+    .dti-submit:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
+    .dti-skip{padding:10px 20px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:1.5px solid rgba(128,128,128,0.15);color:inherit;transition:opacity 0.2s;}
+    .dti-skip:hover{opacity:0.7;}
+
+    .dti-result{display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;gap:16px;flex:1;}
+    .dti-result.active{display:flex;}
+    .dti-stars{font-size:2rem;letter-spacing:6px;}
+    .dti-result-title{font-size:1.6rem;font-weight:700;}
+    .dti-result-msg{font-size:0.88rem;opacity:0.5;max-width:400px;line-height:1.7;}
+    .dti-result-outfit{font-size:0.75rem;opacity:0.35;margin-top:4px;line-height:1.6;}
+    .dti-next{padding:14px 40px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:opacity 0.2s;}
+    .dti-next:hover{opacity:0.85;}
+
+    @media(max-width:768px){
+      .dti-top{flex-direction:column;}
+      .dti-avatar-panel{flex:0 0 auto;padding:12px;flex-direction:row;gap:16px;}
+      .dti-mannequin{width:80px;height:180px;transform:scale(0.6);transform-origin:top left;}
+      .dti-outfit-summary{text-align:left;}
+      .dti-items{grid-template-columns:repeat(2,1fr);}
+    }
+
     /* FLOVEEHUB — GAME PLATFORM */
     #hubView{display:none;flex:1;flex-direction:column;overflow-y:auto;}
     #hubView.active{display:flex;}
@@ -363,6 +424,49 @@
         <textarea class="chat-input" id="chatInput2" placeholder="say something..." rows="1"
           onkeydown="handleChatKey2(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send bc" id="chatSend2" onclick="sendChat2()">Send</button>
+      </div>
+    </div>
+
+    <!-- DTI Fashion Game -->
+    <div id="dtiView">
+      <div class="dti-top" id="dtiGame">
+        <div class="dti-avatar-panel" id="dtiAvatarPanel">
+          <div class="dti-mannequin" id="dtiMannequin">
+            <div class="dti-slot dti-slot-hair" id="dtiSlotHair">hair</div>
+            <div class="dti-head" id="dtiHead"></div>
+            <div class="dti-body" id="dtiBody">
+              <div class="dti-slot dti-slot-top" id="dtiSlotTop">top</div>
+            </div>
+            <div class="dti-slot dti-slot-bottom" id="dtiSlotBottom">bottom</div>
+            <div class="dti-legs"><div class="dti-leg" id="dtiLeg1"></div><div class="dti-leg" id="dtiLeg2"></div></div>
+            <div class="dti-slot dti-slot-shoes" id="dtiSlotShoes">shoes</div>
+            <div class="dti-slot dti-slot-acc" id="dtiSlotAcc">acc</div>
+          </div>
+          <div class="dti-outfit-summary" id="dtiOutfitSummary"></div>
+        </div>
+        <div class="dti-wardrobe">
+          <div class="dti-theme-bar">
+            <div class="dti-theme-label bc">Theme</div>
+            <div class="dti-theme-name" id="dtiThemeName"></div>
+            <div class="dti-timer" id="dtiTimer"></div>
+          </div>
+          <div class="dti-cats" id="dtiCats"></div>
+          <div class="dti-items" id="dtiItemsGrid"></div>
+        </div>
+      </div>
+      <div class="dti-result" id="dtiResult">
+        <div class="dti-stars" id="dtiStars"></div>
+        <div class="dti-result-title" id="dtiResultTitle"></div>
+        <div class="dti-result-msg" id="dtiResultMsg"></div>
+        <div class="dti-result-outfit" id="dtiResultOutfit"></div>
+        <button class="dti-next bc" id="dtiNextBtn" onclick="dtiNextRound()">Next Round</button>
+      </div>
+      <div class="dti-bottom" id="dtiBottomBar">
+        <div class="dti-score" id="dtiScore">Round 1 — 0 pts</div>
+        <div style="display:flex;gap:8px;">
+          <button class="dti-skip bc" onclick="dtiSkipTheme()">Skip Theme</button>
+          <button class="dti-submit bc" id="dtiSubmitBtn" onclick="dtiSubmit()">Walk the Runway</button>
+        </div>
       </div>
     </div>
 
@@ -1564,6 +1668,10 @@ function buildFloveeHubOpener(){
 
 // ─── FLOVEEHUB GAMES ─────────────────────────────────────
 var HUB_GAMES = [
+  // ── FEATURED ──
+  {id:'dti', name:'Dress To Impress', desc:'Get a theme, build an outfit, walk the runway — your Flovee rates you', tag:'fashion game', iconFn:'bowSVG',
+    isDtiGame:true, prompt:'', opener:''},
+
   // ── SOCIAL ──
   {id:'justtalk', name:'Just Talk', desc:'Chat with your Flovee about anything', tag:'chill', iconFn:'starSVG',
     prompt:'This is Just Talk — open conversation. No game, no rules. Just be their best friend and chat about whatever they want. Have opinions, ask things, react naturally.',
@@ -1707,9 +1815,23 @@ function startHubGame(game){
   var pal = searchPal;
   var fName = getFloveeName();
 
-  // Hide hub, show chat
+  // Hide hub
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
+
+  // DTI is a visual game, not a chat
+  if(game.isDtiGame){
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'flex';
+    document.getElementById('dtiView').classList.add('active');
+    var navEl = document.getElementById('sectionNameNav');
+    navEl.innerHTML = 'Dress To Impress <button class="hub-back-btn" onclick="backToHub()">Games</button>';
+    dtiInit();
+    return;
+  }
+
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
   document.getElementById('normalChat').style.display = 'flex';
 
   var send = document.getElementById('chatSend2');
@@ -1755,9 +1877,334 @@ function backToHub(){
   }
   currentHubGame = null;
   document.getElementById('normalChat').style.display = 'none';
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
+  if(dtiTimerInterval) clearInterval(dtiTimerInterval);
   document.getElementById('chatMessages2').innerHTML = '';
   document.getElementById('sectionNameNav').textContent = 'FloveeHub';
   openHub();
+}
+
+// ─── DTI GAME ENGINE ─────────────────────────────────────
+var DTI_THEMES = [
+  'Fairy Tale','Villain Era','Main Character','Cozy Sunday','Prom Night','Album Cover',
+  'Y2K Party','First Date','Runway Model','Festival','Beach Day','Winter Wonderland',
+  'Old Money Brunch','Dark Romance','Space Explorer','Under the Sea','Retro Diner',
+  'Celebrity Airport','Art Gallery Opening','Masquerade Ball','Dream Wedding Guest',
+  'Midnight Garden','Cottagecore Picnic','Street Style Tokyo','Hollywood Glam',
+  'Enchanted Forest','Rainy Day Aesthetic','Neon Lights','Royal Court','Skater Girl'
+];
+
+var DTI_WARDROBES = {
+  hair:[
+    {name:'Sleek Straight',color:'#2a1a0a',style:'clean'},
+    {name:'Messy Bun',color:'#4a2a10',style:'casual'},
+    {name:'Loose Waves',color:'#3a2010',style:'soft'},
+    {name:'High Ponytail',color:'#1a0a00',style:'sporty'},
+    {name:'Space Buns',color:'#6a3a20',style:'cute'},
+    {name:'Braided Crown',color:'#5a3018',style:'cottage'},
+    {name:'Curtain Bangs',color:'#2a1a08',style:'trendy'},
+    {name:'Pixie Cut',color:'#1a1a1a',style:'bold'},
+    {name:'Long Curls',color:'#8a5a30',style:'glam'},
+    {name:'Wolf Cut',color:'#3a1a0a',style:'edgy'},
+    {name:'Ribbon Bow Hair',color:'#e8829a',style:'coquette'},
+    {name:'Bubble Braids',color:'#4a2818',style:'y2k'},
+  ],
+  tops:[
+    {name:'Cropped Cardigan',color:'#e8d0c0',style:'soft'},
+    {name:'Oversized Band Tee',color:'#1a1a1a',style:'grunge'},
+    {name:'Corset Top',color:'#8a2040',style:'glam'},
+    {name:'Lace Cami',color:'#f0e0e8',style:'coquette'},
+    {name:'Blazer',color:'#2a2820',style:'clean'},
+    {name:'Puff Sleeve Blouse',color:'#f8f0f0',style:'cottage'},
+    {name:'Tube Top',color:'#e050a0',style:'y2k'},
+    {name:'Mesh Long Sleeve',color:'#0a0a0a',style:'goth'},
+    {name:'Polo Shirt',color:'#2040a0',style:'preppy'},
+    {name:'Crop Hoodie',color:'#d8c8b8',style:'casual'},
+    {name:'Velvet Bustier',color:'#401828',style:'dark'},
+    {name:'Knit Sweater Vest',color:'#c8a878',style:'academia'},
+    {name:'Graphic Baby Tee',color:'#f8c8d8',style:'cute'},
+    {name:'Silk Button Up',color:'#f0e8d8',style:'old money'},
+    {name:'Off Shoulder Ruffle',color:'#f8d8c8',style:'tomato'},
+  ],
+  bottoms:[
+    {name:'Pleated Mini Skirt',color:'#2a2828',style:'school'},
+    {name:'Wide Leg Jeans',color:'#5878a8',style:'casual'},
+    {name:'Cargo Pants',color:'#686050',style:'street'},
+    {name:'Satin Midi Skirt',color:'#c8a888',style:'glam'},
+    {name:'Flared Leggings',color:'#0a0a0a',style:'y2k'},
+    {name:'Linen Trousers',color:'#e8dcc8',style:'clean'},
+    {name:'Layered Tulle Skirt',color:'#f0d0e0',style:'fairy'},
+    {name:'Leather Pants',color:'#1a1010',style:'edgy'},
+    {name:'Tennis Skirt',color:'#f0f0f0',style:'preppy'},
+    {name:'Maxi Floral Skirt',color:'#c8d8a8',style:'cottage'},
+    {name:'Low Rise Shorts',color:'#a8c8e0',style:'summer'},
+    {name:'Corduroy Trousers',color:'#8a6840',style:'academia'},
+    {name:'Bow Detail Shorts',color:'#f0c8d0',style:'coquette'},
+  ],
+  shoes:[
+    {name:'Platform Boots',color:'#0a0a0a',style:'goth'},
+    {name:'Mary Janes',color:'#1a0808',style:'cute'},
+    {name:'Chunky Sneakers',color:'#f0f0f0',style:'street'},
+    {name:'Strappy Heels',color:'#c8a888',style:'glam'},
+    {name:'Cowboy Boots',color:'#8a6838',style:'western'},
+    {name:'Ballet Flats',color:'#f0d8d0',style:'clean'},
+    {name:'Doc Martens',color:'#0a0808',style:'grunge'},
+    {name:'Loafers',color:'#3a2818',style:'academia'},
+    {name:'Knee High Boots',color:'#2a1810',style:'autumn'},
+    {name:'Converse High Tops',color:'#c82020',style:'casual'},
+    {name:'Jelly Sandals',color:'#d090c0',style:'y2k'},
+    {name:'Satin Slippers',color:'#f0e0e8',style:'coquette'},
+  ],
+  accessories:[
+    {name:'Layered Necklaces',color:'#d4aa70',style:'boho'},
+    {name:'Hair Ribbon',color:'#e8829a',style:'coquette'},
+    {name:'Beret',color:'#2a1818',style:'french'},
+    {name:'Mini Backpack',color:'#f0d8e0',style:'cute'},
+    {name:'Chain Belt',color:'#c0c0c0',style:'edgy'},
+    {name:'Pearl Earrings',color:'#f0ece8',style:'old money'},
+    {name:'Bucket Hat',color:'#c8d8a8',style:'casual'},
+    {name:'Fingerless Gloves',color:'#0a0a0a',style:'goth'},
+    {name:'Tote Bag',color:'#e8d8c0',style:'clean'},
+    {name:'Chunky Rings',color:'#c0c0c0',style:'grunge'},
+    {name:'Butterfly Clips',color:'#d090e0',style:'y2k'},
+    {name:'Silk Scarf',color:'#c84040',style:'glam'},
+    {name:'Cross Body Bag',color:'#886840',style:'street'},
+    {name:'Flower Crown',color:'#e8c8a0',style:'fairy'},
+  ]
+};
+
+var dtiState = {round:1, totalScore:0, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:90};
+var dtiTimerInterval = null;
+var dtiActiveCat = 'tops';
+
+function dtiInit(){
+  var pal = searchPal;
+  dtiState = {round: dtiState.round||1, totalScore:dtiState.totalScore||0, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:90};
+
+  // Style the mannequin
+  var txC = pal.tx; var acC = pal.ac;
+  document.getElementById('dtiHead').style.borderColor = txC+'30';
+  document.getElementById('dtiHead').style.background = txC+'08';
+  document.getElementById('dtiBody').style.borderColor = txC+'30';
+  document.getElementById('dtiBody').style.background = txC+'06';
+  document.querySelectorAll('.dti-leg').forEach(function(l){ l.style.borderColor=txC+'30'; l.style.background=txC+'06'; });
+  document.querySelectorAll('.dti-slot').forEach(function(s){ s.style.borderColor=txC+'20'; s.style.color=txC; s.style.background='transparent'; s.classList.remove('filled'); });
+  ['dtiSlotHair','dtiSlotTop','dtiSlotBottom','dtiSlotShoes','dtiSlotAcc'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = id.replace('dtiSlot','').toLowerCase();
+  });
+
+  // Style wardrobe
+  document.getElementById('dtiAvatarPanel').style.background = pal.bg;
+  document.getElementById('dtiAvatarPanel').style.color = pal.tx;
+  document.querySelector('.dti-wardrobe').style.background = pal.bg;
+  document.querySelector('.dti-wardrobe').style.color = pal.tx;
+  document.getElementById('dtiSubmitBtn').style.background = acC;
+  document.getElementById('dtiSubmitBtn').style.color = pal.bg;
+  document.getElementById('dtiNextBtn').style.background = acC;
+  document.getElementById('dtiNextBtn').style.color = pal.bg;
+  document.getElementById('dtiBottomBar').style.color = pal.tx;
+  document.getElementById('dtiScore').textContent = 'Round '+dtiState.round+' — '+dtiState.totalScore+' pts';
+
+  // Show game, hide result
+  document.getElementById('dtiGame').style.display = 'flex';
+  document.getElementById('dtiResult').style.display = 'none';
+  document.getElementById('dtiResult').classList.remove('active');
+  document.getElementById('dtiBottomBar').style.display = 'flex';
+
+  document.getElementById('dtiOutfitSummary').innerHTML = '';
+  dtiPickTheme();
+  dtiRenderCats();
+  dtiRenderItems('tops');
+  dtiStartTimer();
+}
+
+function dtiPickTheme(){
+  var t = DTI_THEMES[Math.floor(Math.random()*DTI_THEMES.length)];
+  dtiState.theme = t;
+  document.getElementById('dtiThemeName').textContent = t;
+  document.getElementById('dtiThemeName').style.color = searchPal.tx;
+}
+
+function dtiStartTimer(){
+  if(dtiTimerInterval) clearInterval(dtiTimerInterval);
+  dtiState.timeLeft = 90;
+  var el = document.getElementById('dtiTimer');
+  el.textContent = '1:30';
+  el.style.color = searchPal.tx;
+  dtiTimerInterval = setInterval(function(){
+    dtiState.timeLeft--;
+    if(dtiState.timeLeft <= 0){
+      clearInterval(dtiTimerInterval);
+      dtiSubmit();
+      return;
+    }
+    var m = Math.floor(dtiState.timeLeft/60);
+    var s = dtiState.timeLeft%60;
+    el.textContent = m+':'+(s<10?'0':'')+s;
+    if(dtiState.timeLeft <= 15) el.style.color = '#e04040';
+  },1000);
+}
+
+function dtiRenderCats(){
+  var cats = ['hair','tops','bottoms','shoes','accessories'];
+  var labels = {hair:'Hair',tops:'Tops',bottoms:'Bottoms',shoes:'Shoes',accessories:'Acc'};
+  var pal = searchPal;
+  var html = '';
+  cats.forEach(function(c){
+    var picked = dtiState.picks[c];
+    var on = c===dtiActiveCat ? ' on' : '';
+    var dot = picked ? ' *' : '';
+    html += '<button class="dti-cat'+on+'" style="color:'+pal.tx+';'+(on?'border-bottom-color:'+pal.ac:'border-bottom-color:transparent')+'" onclick="dtiRenderItems(\''+c+'\')">'+labels[c]+dot+'</button>';
+  });
+  document.getElementById('dtiCats').innerHTML = html;
+}
+
+function dtiRenderItems(cat){
+  dtiActiveCat = cat;
+  dtiRenderCats();
+  var pal = searchPal;
+  var grid = document.getElementById('dtiItemsGrid');
+  var items = DTI_WARDROBES[cat]||[];
+  grid.innerHTML = '';
+  items.forEach(function(item, idx){
+    var isPicked = dtiState.picks[cat] && dtiState.picks[cat].name === item.name;
+    var div = document.createElement('div');
+    div.className = 'dti-item'+(isPicked?' picked':'');
+    div.style.background = isPicked ? pal.ac+'14' : pal.tx+'06';
+    div.style.borderColor = isPicked ? pal.ac : 'transparent';
+    div.style.color = pal.tx;
+    div.innerHTML =
+      '<div class="dti-item-swatch" style="background:'+item.color+';border-color:'+pal.tx+'10"></div>'+
+      '<div class="dti-item-name">'+item.name+'</div>'+
+      '<div class="dti-item-style">'+item.style+'</div>';
+    div.onclick = function(){ dtiPickItem(cat, item); };
+    grid.appendChild(div);
+  });
+}
+
+function dtiPickItem(cat, item){
+  dtiState.picks[cat] = item;
+  dtiRenderItems(cat);
+  dtiUpdateMannequin();
+  dtiUpdateSummary();
+}
+
+function dtiUpdateMannequin(){
+  var pal = searchPal;
+  var slotMap = {hair:'dtiSlotHair',tops:'dtiSlotTop',bottoms:'dtiSlotBottom',shoes:'dtiSlotShoes',accessories:'dtiSlotAcc'};
+  for(var cat in slotMap){
+    var el = document.getElementById(slotMap[cat]);
+    var pick = dtiState.picks[cat];
+    if(pick){
+      el.style.background = pick.color;
+      el.style.borderColor = pick.color;
+      el.style.color = '#fff';
+      el.textContent = '';
+      el.classList.add('filled');
+    } else {
+      el.style.background = 'transparent';
+      el.style.borderColor = pal.tx+'20';
+      el.style.color = pal.tx;
+      el.textContent = cat==='accessories'?'acc':cat;
+      el.classList.remove('filled');
+    }
+  }
+}
+
+function dtiUpdateSummary(){
+  var pal = searchPal;
+  var summary = document.getElementById('dtiOutfitSummary');
+  var items = [];
+  for(var cat in dtiState.picks){
+    if(dtiState.picks[cat]) items.push(dtiState.picks[cat].name);
+  }
+  summary.innerHTML = items.length>0 ? items.map(function(n){ return '<div class="dti-outfit-item" style="color:'+pal.tx+'">'+n+'</div>'; }).join('') : '';
+}
+
+function dtiSkipTheme(){
+  dtiPickTheme();
+}
+
+async function dtiSubmit(){
+  if(dtiTimerInterval) clearInterval(dtiTimerInterval);
+  var picks = dtiState.picks;
+  var itemList = [];
+  for(var cat in picks){
+    if(picks[cat]) itemList.push(cat+': '+picks[cat].name+' ('+picks[cat].style+')');
+  }
+  if(itemList.length === 0){
+    dtiShowResult(0, 'You walked out in nothing!', 'Maybe pick some clothes next time...', '');
+    return;
+  }
+
+  var pal = searchPal;
+  document.getElementById('dtiSubmitBtn').disabled = true;
+  document.getElementById('dtiSubmitBtn').textContent = 'Judging...';
+
+  var fName = getFloveeName();
+  var aeName = resolveAeName();
+  var outfitStr = itemList.join('\n');
+
+  try{
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        system:'You are '+fName+', a fashion judge in a Dress To Impress game. You judge outfits based on how well they match the theme. The player has a '+aeName+' aesthetic.\n\nRules:\n- Give a score from 1 to 5 stars (be fair but fun)\n- 5 stars = perfect theme match with great styling\n- 3 stars = decent effort but missing something\n- 1 star = completely off theme\n- Give a short, fun 1-2 sentence reaction in your personality\n- Be specific about what worked and what did not\n- Keep it kid-friendly and encouraging even for low scores\n- Return ONLY a JSON object: {stars: number, title: "short title", message: "your reaction"}\n- No markdown, no code fences',
+        messages:[{role:'user',content:'Theme: '+dtiState.theme+'\n\nMy outfit:\n'+outfitStr+'\n\nJudge my outfit!'}]
+      })
+    });
+    var data = await res.json();
+    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    var match = text.match(/\{[\s\S]*\}/);
+    if(match){
+      var result = JSON.parse(match[0]);
+      var stars = Math.max(1,Math.min(5,Math.round(result.stars||3)));
+      var pts = stars * 20;
+      dtiState.totalScore += pts;
+      dtiShowResult(stars, result.title||'Not bad!', result.message||'', outfitStr);
+    } else {
+      dtiShowResult(3, 'Hmm let me think...', 'I could not quite judge this one. Let us say 3 stars!', outfitStr);
+      dtiState.totalScore += 60;
+    }
+  }catch(e){
+    dtiShowResult(3, 'Runway technical difficulties', 'Something went wrong but you looked great. 3 stars!', outfitStr);
+    dtiState.totalScore += 60;
+  }
+
+  document.getElementById('dtiSubmitBtn').disabled = false;
+  document.getElementById('dtiSubmitBtn').textContent = 'Walk the Runway';
+}
+
+function dtiShowResult(stars, title, msg, outfit){
+  var pal = searchPal;
+  document.getElementById('dtiGame').style.display = 'none';
+  document.getElementById('dtiBottomBar').style.display = 'none';
+  var res = document.getElementById('dtiResult');
+  res.style.display = 'flex';
+  res.classList.add('active');
+  res.style.background = pal.bg;
+  res.style.color = pal.tx;
+
+  var starStr = '';
+  for(var i=0;i<5;i++) starStr += i<stars?'\u2605':'\u2606';
+  document.getElementById('dtiStars').textContent = starStr;
+  document.getElementById('dtiStars').style.color = pal.ac;
+  document.getElementById('dtiResultTitle').textContent = title;
+  document.getElementById('dtiResultTitle').style.color = pal.tx;
+  document.getElementById('dtiResultMsg').textContent = msg;
+  document.getElementById('dtiResultMsg').style.color = pal.tx;
+  document.getElementById('dtiResultOutfit').textContent = 'Theme: '+dtiState.theme+' — '+dtiState.totalScore+' total pts';
+  document.getElementById('dtiResultOutfit').style.color = pal.tx;
+}
+
+function dtiNextRound(){
+  dtiState.round++;
+  dtiState.picks = {hair:null,tops:null,bottoms:null,shoes:null,accessories:null};
+  dtiInit();
 }
 
 // ─── SECTIONS DATA ────────────────────────────────────────
@@ -2114,6 +2561,9 @@ function goHome(){
   document.getElementById('sectionView').style.display = 'none';
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
+  if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval) clearInterval(dtiTimerInterval);
   // Restore hub section if it was overridden
   if(currentSection && currentSection._origPrompt){
     currentSection.prompt = currentSection._origPrompt;
