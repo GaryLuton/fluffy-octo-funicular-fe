@@ -130,57 +130,74 @@
     .product-shop{font-size:0.7rem;opacity:0.45;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .product-badge{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:20px;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;}
 
-    /* FOR YOU — SCRAPBOOK COLLAGE */
-    .foryou{position:relative;z-index:2;padding:0 40px 10px;overflow:visible;}
-    .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    /* FOR YOU — SCRAPBOOK PAGE */
+    .foryou{position:relative;z-index:2;padding:0 30px 10px;overflow:visible;}
+    .foryou-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
     .foryou-title{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .foryou-refresh{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.15);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;opacity:0.4;transition:opacity 0.2s;}
     .foryou-refresh:hover{opacity:0.8;}
     .foryou-refresh:disabled{opacity:0.2;cursor:not-allowed;}
     .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
 
-    /* Collage board */
-    .rec-board{position:relative;min-height:340px;margin:0 auto;max-width:900px;}
+    .rec-board{position:relative;min-height:420px;margin:0 auto;max-width:960px;
+      background:repeating-linear-gradient(transparent,transparent 27px,rgba(128,128,128,0.04) 27px,rgba(128,128,128,0.04) 28px);
+      border:1px solid rgba(128,128,128,0.06);border-radius:6px;padding:24px 20px;}
 
-    /* Individual scrapbook pieces */
     .sb-piece{position:absolute;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s;cursor:default;}
-    .sb-piece:hover{z-index:10 !important;box-shadow:0 8px 28px rgba(0,0,0,0.12) !important;}
+    .sb-piece:hover{z-index:20 !important;}
 
-    /* Polaroid card */
-    .sb-polaroid{background:#fff;padding:10px 10px 32px;box-shadow:1px 3px 12px rgba(0,0,0,0.08);}
-    .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .sb-polaroid .sb-label{position:absolute;bottom:8px;left:12px;right:12px;font-size:0.72rem;font-weight:600;line-height:1.4;color:#333;}
+    /* Polaroid */
+    .sb-polaroid{background:#fff;padding:8px 8px 30px;box-shadow:2px 3px 14px rgba(0,0,0,0.1);}
+    .sb-polaroid:hover{box-shadow:3px 6px 24px rgba(0,0,0,0.15) !important;}
+    .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+    .sb-polaroid .sb-label{position:absolute;bottom:6px;left:10px;right:10px;font-size:0.7rem;font-weight:600;line-height:1.35;color:#333;}
+    .sb-polaroid .sb-label-sub{font-size:0.58rem;opacity:0.4;font-weight:400;margin-top:1px;}
+    /* Photo corners */
+    .sb-corner{position:absolute;width:16px;height:16px;opacity:0.25;pointer-events:none;}
+    .sb-corner svg{width:100%;height:100%;}
 
-    /* Torn note */
-    .sb-note{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.05);border-top:3px solid transparent;}
-    .sb-note::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:6px;background:inherit;mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6'%3E%3Cpath d='M0,3 Q5,0 10,3 T20,3 T30,3 T40,3 T50,3 T60,3 T70,3 T80,3 T90,3 T100,3 V6 H0Z' fill='black'/%3E%3C/svg%3E");-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6'%3E%3Cpath d='M0,3 Q5,0 10,3 T20,3 T30,3 T40,3 T50,3 T60,3 T70,3 T80,3 T90,3 T100,3 V6 H0Z' fill='black'/%3E%3C/svg%3E");mask-size:100% 100%;-webkit-mask-size:100% 100%;}
-    .sb-note .sb-note-title{font-size:0.9rem;font-weight:700;margin-bottom:4px;line-height:1.3;}
-    .sb-note .sb-note-body{font-size:0.74rem;opacity:0.5;line-height:1.6;}
+    /* Notebook page */
+    .sb-notebook{padding:18px 16px 16px 28px;box-shadow:1px 2px 10px rgba(0,0,0,0.06);border-left:3px solid;position:relative;
+      background:repeating-linear-gradient(transparent,transparent 23px,rgba(128,128,128,0.06) 23px,rgba(128,128,128,0.06) 24px);}
+    .sb-notebook::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;opacity:0.15;}
+    .sb-notebook .sb-nb-cat{font-size:0.5rem;letter-spacing:3.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;}
+    .sb-notebook .sb-nb-title{font-size:0.92rem;font-weight:700;line-height:1.35;margin-bottom:4px;}
+    .sb-notebook .sb-nb-body{font-size:0.74rem;opacity:0.48;line-height:1.65;}
 
-    /* Washi tape strip */
-    .sb-tape{position:absolute;height:16px;border-radius:1px;opacity:0.35;pointer-events:none;z-index:20;}
+    /* Washi tape */
+    .sb-tape{position:absolute;height:18px;border-radius:1px;pointer-events:none;z-index:30;
+      background:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.2) 3px,rgba(255,255,255,0.2) 6px);}
 
-    /* Sticker (circle/blob) */
-    .sb-sticker{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;box-shadow:1px 2px 6px rgba(0,0,0,0.06);}
-    .sb-sticker .sb-sticker-title{font-size:0.72rem;font-weight:700;line-height:1.3;margin-top:6px;}
-    .sb-sticker .sb-sticker-sub{font-size:0.6rem;opacity:0.4;line-height:1.5;margin-top:2px;}
+    /* Kraft tag */
+    .sb-tag{border-radius:4px 12px 12px 4px;padding:14px 16px 14px 20px;box-shadow:1px 2px 8px rgba(0,0,0,0.06);position:relative;}
+    .sb-tag::before{content:'';position:absolute;left:8px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;border:1.5px solid rgba(128,128,128,0.2);background:transparent;}
+    .sb-tag .sb-tag-title{font-size:0.82rem;font-weight:700;line-height:1.35;margin-bottom:3px;}
+    .sb-tag .sb-tag-body{font-size:0.68rem;opacity:0.45;line-height:1.6;}
 
-    /* Postcard */
-    .sb-postcard{border-radius:3px;box-shadow:2px 3px 10px rgba(0,0,0,0.07);padding:18px 16px;display:flex;flex-direction:column;gap:4px;border:1.5px solid rgba(128,128,128,0.06);}
-    .sb-postcard::before{content:'';position:absolute;top:8px;right:8px;width:28px;height:32px;border:2px solid rgba(128,128,128,0.12);border-radius:2px;}
-    .sb-postcard .sb-pc-cat{font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;}
-    .sb-postcard .sb-pc-title{font-size:0.88rem;font-weight:700;line-height:1.3;}
-    .sb-postcard .sb-pc-desc{font-size:0.72rem;opacity:0.45;line-height:1.6;}
-    .sb-postcard .sb-pc-line{height:1px;opacity:0.08;margin:4px 0;}
+    /* Stamp sticker */
+    .sb-stamp{border-radius:4px;padding:16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;
+      border:2.5px dashed;box-shadow:1px 2px 6px rgba(0,0,0,0.04);}
+    .sb-stamp .sb-stamp-title{font-size:0.78rem;font-weight:700;line-height:1.3;}
+    .sb-stamp .sb-stamp-sub{font-size:0.62rem;opacity:0.4;line-height:1.5;}
 
-    /* SVG icon container */
+    /* Torn paper */
+    .sb-torn{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.05);}
+    .sb-torn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:8px;background:inherit;
+      clip-path:polygon(0% 40%,3% 80%,6% 30%,9% 70%,12% 20%,15% 65%,18% 35%,21% 75%,24% 25%,27% 60%,30% 40%,33% 80%,36% 20%,39% 70%,42% 30%,45% 65%,48% 45%,51% 80%,54% 25%,57% 70%,60% 35%,63% 75%,66% 20%,69% 60%,72% 40%,75% 80%,78% 30%,81% 65%,84% 25%,87% 75%,90% 40%,93% 70%,96% 30%,100% 60%,100% 100%,0% 100%);}
+    .sb-torn .sb-torn-title{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
+    .sb-torn .sb-torn-body{font-size:0.72rem;opacity:0.45;line-height:1.6;}
+
+    /* Paper clip */
+    .sb-clip{position:absolute;z-index:25;pointer-events:none;opacity:0.3;}
+    .sb-clip svg{display:block;}
+
+    /* SVG icon */
     .sb-icon{pointer-events:none;}
     .sb-icon svg{display:block;}
 
-    /* Loading */
     .rec-loading{width:100%;text-align:center;padding:60px;opacity:0.3;font-style:italic;position:relative;}
 
-    @media(max-width:768px){.rec-board{min-height:520px;}.foryou{padding:0 16px 10px;}}
+    @media(max-width:768px){.rec-board{min-height:620px;padding:16px 12px;}.foryou{padding:0 14px 10px;}}
 
     /* FIT SECTION LAYOUT */
     .fit-layout{display:flex;flex-direction:column;gap:0;}
@@ -1131,46 +1148,79 @@ function makeIconSvg(fn,c,size){
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
 }
 
+function addTape(parent, pal, x, rot, w){
+  var t = document.createElement('div');
+  t.className = 'sb-tape';
+  t.style.cssText = 'width:'+(w||55)+'px;top:-8px;left:'+x+'%;background:'+pal.ac+'45;transform:rotate('+rot+'deg);';
+  parent.appendChild(t);
+}
+
+function addClip(parent, pal, side){
+  var cl = document.createElement('div');
+  cl.className = 'sb-clip';
+  cl.style[side]='-6px'; cl.style.top='-4px';
+  cl.innerHTML = '<svg width="18" height="40" viewBox="0 0 18 40"><path d="M9 0 V12 C9 16 2 16 2 20 C2 24 9 24 9 28 V40" fill="none" stroke="'+pal.tx+'" stroke-width="2" opacity="0.5"/></svg>';
+  parent.appendChild(cl);
+}
+
+function addCorners(parent){
+  var positions = [{t:'0',l:'0',r:'rotate(0)'},{t:'0',r:'rotate(90)',right:'0'},{b:'0',l:'0',rot:'rotate(-90)'},{b:'0',right:'0',rot:'rotate(180)'}];
+  [[0,0,0],[1,0,'auto'],[2,'auto',0],[3,'auto','auto']].forEach(function(p){
+    var c = document.createElement('div');
+    c.className = 'sb-corner';
+    c.style.top = p[1]===0?'0':'auto'; c.style.bottom = p[1]==='auto'?'0':'auto';
+    c.style.left = p[2]===0?'0':'auto'; c.style.right = p[2]==='auto'?'0':'auto';
+    c.style.transform = 'rotate('+(p[0]*90)+'deg)';
+    c.innerHTML = '<svg viewBox="0 0 16 16"><path d="M0 0 L16 0 L16 4 L4 4 L4 16 L0 16 Z" fill="currentColor"/></svg>';
+    parent.appendChild(c);
+  });
+}
+
 function renderRecs(recs){
   var board = document.getElementById('recBoard');
   if(!board) return;
   var pal = searchPal;
-  var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self-Care'};
+  var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
   var aeIcons = getAeIcons();
-  var isMobile = window.innerWidth < 768;
-  var bw = Math.min(board.offsetWidth, 900);
+  var mob = window.innerWidth < 768;
 
   board.innerHTML = '';
 
-  // --- Scrapbook layout positions (x%, y, w, rotation) ---
-  var layouts = isMobile ? [
-    {x:2, y:0,   w:52, rot:-2, type:'polaroid'},
-    {x:48,y:10,  w:48, rot:3,  type:'postcard'},
-    {x:5, y:170, w:45, rot:1,  type:'note'},
-    {x:46,y:180, w:50, rot:-3, type:'sticker'},
-    {x:10,y:320, w:55, rot:2,  type:'postcard'},
+  // Layouts: x%, y px, w (px desktop / % mobile), rotation, type
+  var layouts = mob ? [
+    {x:3, y:8,   w:54, rot:-2.5, type:'polaroid'},
+    {x:50,y:16,  w:48, rot:2.5,  type:'notebook'},
+    {x:2, y:200, w:52, rot:1.5,  type:'torn'},
+    {x:48,y:210, w:46, rot:-2,   type:'tag'},
+    {x:8, y:370, w:60, rot:1,    type:'stamp'},
   ] : [
-    {x:0,  y:0,   w:200, rot:-3,  type:'polaroid'},
-    {x:23, y:10,  w:220, rot:2,   type:'postcard'},
-    {x:50, y:0,   w:180, rot:-1,  type:'note'},
-    {x:72, y:20,  w:140, rot:4,   type:'sticker'},
-    {x:12, y:180, w:210, rot:1.5, type:'postcard'},
+    {x:1,  y:8,   w:195, rot:-3,   type:'polaroid'},
+    {x:25, y:5,   w:240, rot:1.8,  type:'notebook'},
+    {x:55, y:0,   w:195, rot:-1.5, type:'torn'},
+    {x:75, y:30,  w:165, rot:3.5,  type:'tag'},
+    {x:18, y:210, w:280, rot:1,    type:'stamp'},
   ];
 
-  // Scatter some decorative icons behind
-  for(var d=0;d<6;d++){
+  // Scattered decorative icons
+  var decoCount = mob ? 5 : 9;
+  for(var d=0;d<decoCount;d++){
     var deco = document.createElement('div');
-    deco.className = 'sb-icon sb-piece';
-    deco.style.zIndex = '0';
-    deco.style.opacity = '0.1';
-    var dx = isMobile ? Math.random()*80+5 : Math.random()*85+3;
-    var dy = Math.random()*(isMobile?450:280)+10;
-    deco.style.left = dx+'%';
-    deco.style.top = dy+'px';
-    deco.style.transform = 'rotate('+(Math.random()*40-20).toFixed(0)+'deg)';
-    var fn = aeIcons[d%aeIcons.length];
-    deco.innerHTML = makeIconSvg(fn, pal.ac, 32+Math.round(Math.random()*20));
+    deco.className = 'sb-icon';
+    deco.style.cssText = 'position:absolute;z-index:0;opacity:0.07;pointer-events:none;';
+    deco.style.left = (Math.random()*88+4)+'%';
+    deco.style.top = (Math.random()*(mob?550:350)+5)+'px';
+    deco.style.transform = 'rotate('+(Math.random()*50-25).toFixed(0)+'deg)';
+    deco.innerHTML = makeIconSvg(aeIcons[d%aeIcons.length], pal.ac, 24+Math.round(Math.random()*28));
     board.appendChild(deco);
+  }
+
+  // Decorative washi tape strips across the board
+  var tapeCount = mob ? 2 : 3;
+  for(var t=0;t<tapeCount;t++){
+    var strip = document.createElement('div');
+    strip.className = 'sb-tape';
+    strip.style.cssText = 'width:'+(80+Math.round(Math.random()*60))+'px;height:20px;position:absolute;z-index:0;background:'+pal.ac+'20;top:'+(Math.random()*(mob?500:320)+20)+'px;left:'+(Math.random()*70+5)+'%;transform:rotate('+(Math.random()*25-12).toFixed(0)+'deg);';
+    board.appendChild(strip);
   }
 
   recs.forEach(function(rec, i){
@@ -1178,84 +1228,94 @@ function renderRecs(recs){
     var L = layouts[i];
     var iconFn = aeIcons[i % aeIcons.length];
     var el;
+    var wStr = mob ? L.w+'%' : L.w+'px';
 
     if(L.type === 'polaroid'){
       el = document.createElement('div');
       el.className = 'sb-piece sb-polaroid';
-      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
-      var iconHtml = makeIconSvg(iconFn, pal.ac, isMobile?60:80);
+      el.style.width = wStr;
       el.innerHTML =
-        '<div class="sb-inner" style="background:'+pal.ac+'12">'+
-          '<div class="sb-icon">'+iconHtml+'</div>'+
+        '<div class="sb-inner" style="background:'+pal.ac+'0e">'+
+          '<div class="sb-icon" style="opacity:0.6">'+makeIconSvg(iconFn, pal.ac, mob?56:72)+'</div>'+
         '</div>'+
-        '<div class="sb-label">'+escHtml(rec.title||'')+
-          '<div style="font-size:0.6rem;opacity:0.4;margin-top:2px;font-weight:400">'+escHtml(rec.desc||'')+'</div>'+
+        '<div class="sb-label" style="color:#333">'+escHtml(rec.title||'')+
+          '<div class="sb-label-sub">'+escHtml(rec.desc||'')+'</div>'+
         '</div>';
+      addCorners(el);
+      addTape(el, pal, 25+(Math.random()*30), (Math.random()*14-7).toFixed(1), 50+Math.round(Math.random()*20));
 
-      // Add washi tape
-      var tape = document.createElement('div');
-      tape.className = 'sb-tape';
-      tape.style.cssText = 'width:60px;top:-6px;left:30%;background:'+pal.ac+'30;transform:rotate('+(Math.random()*12-6).toFixed(0)+'deg);';
-      el.appendChild(tape);
-
-    } else if(L.type === 'note'){
+    } else if(L.type === 'notebook'){
       el = document.createElement('div');
-      el.className = 'sb-piece sb-note';
-      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
-      el.style.background = pal.ac+'10';
-      el.style.borderTopColor = pal.ac+'40';
+      el.className = 'sb-piece sb-notebook';
+      el.style.width = wStr;
+      el.style.background = pal.bg;
+      el.style.borderLeftColor = pal.ac+'50';
+      el.style.color = pal.tx;
+      el.querySelector || null; // noop
+      el.innerHTML =
+        '<div style="position:absolute;left:20px;top:0;bottom:0;width:1px;background:'+pal.ac+'20;"></div>'+
+        '<div class="sb-icon" style="margin-bottom:8px;opacity:0.4">'+makeIconSvg(iconFn, pal.ac, 26)+'</div>'+
+        '<div class="sb-nb-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
+        '<div class="sb-nb-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-nb-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+      addClip(el, pal, 'right');
+
+    } else if(L.type === 'torn'){
+      el = document.createElement('div');
+      el.className = 'sb-piece sb-torn';
+      el.style.width = wStr;
+      el.style.background = pal.ac+'0c';
       el.style.color = pal.tx;
       el.innerHTML =
-        '<div class="sb-icon" style="margin-bottom:6px">'+makeIconSvg(iconFn, pal.ac, 28)+'</div>'+
-        '<div class="sb-note-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-note-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+          '<div class="sb-icon" style="opacity:0.45">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
+          '<div style="font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
+        '</div>'+
+        '<div class="sb-torn-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-torn-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+      addTape(el, pal, 40+(Math.random()*20), (Math.random()*10-5).toFixed(1));
 
-    } else if(L.type === 'sticker'){
-      var sz = isMobile ? 110 : 140;
+    } else if(L.type === 'tag'){
       el = document.createElement('div');
-      el.className = 'sb-piece sb-sticker';
-      el.style.width = sz+'px';
-      el.style.height = sz+'px';
-      el.style.background = pal.ac+'18';
+      el.className = 'sb-piece sb-tag';
+      el.style.width = wStr;
+      el.style.background = pal.ac+'14';
       el.style.color = pal.tx;
       el.innerHTML =
-        '<div class="sb-icon">'+makeIconSvg(iconFn, pal.ac, 36)+'</div>'+
-        '<div class="sb-sticker-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>';
+        '<div class="sb-icon" style="opacity:0.4;margin-bottom:4px">'+makeIconSvg(iconFn, pal.ac, 22)+'</div>'+
+        '<div class="sb-tag-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-tag-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
 
     } else {
-      // postcard
+      // stamp
       el = document.createElement('div');
-      el.className = 'sb-piece sb-postcard';
-      el.style.width = (isMobile ? L.w+'%' : L.w+'px');
-      el.style.background = pal.bg;
+      el.className = 'sb-piece sb-stamp';
+      el.style.width = wStr;
+      el.style.borderColor = pal.ac+'35';
+      el.style.background = pal.ac+'08';
       el.style.color = pal.tx;
-      var lines = '';
-      for(var ln=0;ln<3;ln++) lines += '<div class="sb-pc-line" style="background:'+pal.tx+'"></div>';
       el.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px">'+
-          '<div class="sb-icon">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
-          '<div class="sb-pc-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||rec.cat)+'</div>'+
-        '</div>'+
-        '<div class="sb-pc-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        lines+
-        '<div class="sb-pc-desc" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
+        '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 32)+'</div>'+
+        '<div class="sb-stamp-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
+        '<div class="sb-stamp-sub" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
     }
 
-    el.style.left = L.x + (isMobile?'%':'%');
-    el.style.top = L.y + 'px';
-    el.style.zIndex = (i+1).toString();
+    el.style.left = L.x+'%';
+    el.style.top = L.y+'px';
+    el.style.zIndex = (i+2).toString();
     el.style.transform = 'rotate('+L.rot+'deg)';
-
     board.appendChild(el);
   });
 
-  // Set board height
-  var maxBottom = 0;
-  board.querySelectorAll('.sb-piece').forEach(function(p){
-    var b = p.offsetTop + p.offsetHeight;
-    if(b > maxBottom) maxBottom = b;
-  });
-  board.style.minHeight = (maxBottom + 30) + 'px';
+  // Auto-set board height
+  setTimeout(function(){
+    var maxB = 0;
+    board.querySelectorAll('.sb-piece').forEach(function(p){
+      var b = p.offsetTop + p.offsetHeight;
+      if(b>maxB) maxB = b;
+    });
+    board.style.minHeight = (maxB+40)+'px';
+  }, 50);
 }
 
 function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
