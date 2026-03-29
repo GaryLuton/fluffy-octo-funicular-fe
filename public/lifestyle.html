@@ -220,7 +220,7 @@
     /* Avatar panel — SVG figure */
     .dti-avatar-panel{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;padding:20px 16px;position:relative;overflow:hidden;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
-    .dti-figure-wrap{position:relative;width:160px;height:380px;margin:0 auto;}
+    .dti-figure-wrap{position:relative;width:160px;height:400px;margin:0 auto;}
     .dti-figure{width:100%;height:100%;}
     .dti-skin-row{display:flex;gap:6px;justify-content:center;margin-top:10px;}
     .dti-skin-btn{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.15s;padding:0;background:none;}
@@ -446,78 +446,81 @@
       <div class="dti-top" id="dtiGame">
         <div class="dti-avatar-panel" id="dtiAvatarPanel">
           <div class="dti-figure-wrap">
-            <svg class="dti-figure" id="dtiFigure" viewBox="0 0 160 380" xmlns="http://www.w3.org/2000/svg">
+            <svg class="dti-figure" id="dtiFigure" viewBox="0 0 160 400" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#f0d8b8" stop-opacity="1"/>
-                  <stop offset="100%" stop-color="#e8c8a8" stop-opacity="1"/>
+                <linearGradient id="skinGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#908070"/>
+                  <stop offset="45%" stop-color="#a89888"/>
+                  <stop offset="100%" stop-color="#887868"/>
                 </linearGradient>
-                <linearGradient id="skinGradArm" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#e8c8a8" stop-opacity="1"/>
-                  <stop offset="100%" stop-color="#f0d8b8" stop-opacity="1"/>
+                <linearGradient id="skinGradV" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a09080"/>
+                  <stop offset="100%" stop-color="#988878"/>
                 </linearGradient>
               </defs>
+
+
               <!-- Floor shadow -->
-              <ellipse cx="80" cy="348" rx="24" ry="4" fill="black" opacity="0.06"/>
-              <!-- Hair back layer -->
-              <g id="dtiLayerHair"></g>
-              <!-- Head — slightly smaller for fashion proportion -->
-              <ellipse cx="80" cy="32" rx="18" ry="22" fill="url(#skinGrad)"/>
-              <!-- Ears -->
-              <ellipse cx="61" cy="34" rx="3" ry="5" fill="url(#skinGrad)"/>
-              <ellipse cx="99" cy="34" rx="3" ry="5" fill="url(#skinGrad)"/>
-              <!-- Eyes — bigger, doll-like -->
-              <ellipse cx="73" cy="30" rx="4" ry="2.5" fill="#6a5a4a" opacity="0.22" class="dti-eye"/>
-              <ellipse cx="87" cy="30" rx="4" ry="2.5" fill="#6a5a4a" opacity="0.22" class="dti-eye"/>
-              <ellipse cx="73" cy="29.5" rx="2" ry="2" fill="#1a1a1a" opacity="0.18"/>
-              <ellipse cx="87" cy="29.5" rx="2" ry="2" fill="#1a1a1a" opacity="0.18"/>
-              <!-- Eye shine -->
-              <circle cx="74" cy="29" r="0.8" fill="white" opacity="0.15"/>
-              <circle cx="88" cy="29" r="0.8" fill="white" opacity="0.15"/>
-              <!-- Lashes -->
-              <path d="M68 28.5 Q73 27 78 28.5" stroke="#4a3a2a" stroke-width="0.6" fill="none" opacity="0.12"/>
-              <path d="M82 28.5 Q87 27 92 28.5" stroke="#4a3a2a" stroke-width="0.6" fill="none" opacity="0.12"/>
-              <!-- Eyebrows -->
-              <path d="M68 26 Q73 24 77 25.5" stroke="#5a4a3a" stroke-width="0.8" fill="none" opacity="0.12"/>
-              <path d="M83 25.5 Q87 24 92 26" stroke="#5a4a3a" stroke-width="0.8" fill="none" opacity="0.12"/>
-              <!-- Nose -->
-              <path d="M79 34 Q80 37 81 34" stroke="#c0a888" stroke-width="0.5" fill="none" opacity="0.12" class="dti-outline"/>
-              <!-- Lips — cupid's bow -->
-              <path d="M75 40 Q77 38.5 80 40 Q83 38.5 85 40" stroke="#c8908a" stroke-width="1" fill="none" opacity="0.22" class="dti-lip"/>
-              <path d="M76 40.5 Q80 43 84 40.5" stroke="#c8908a" stroke-width="0.7" fill="none" opacity="0.14" class="dti-lip"/>
-              <!-- Neck — long, elegant -->
-              <path d="M74 52 L74 48 Q74 44 76 44 L84 44 Q86 44 86 48 L86 52 L86 68 L74 68 Z" fill="url(#skinGrad)"/>
-              <!-- Shoulders & collarbones -->
-              <path d="M50 70 Q65 74 80 72 Q95 74 110 70" stroke="#c0a888" stroke-width="0.4" fill="none" opacity="0.08" class="dti-outline"/>
-              <!-- Top layer -->
-              <g id="dtiLayerTop"></g>
-              <!-- Body — DTI proportions: narrow waist, wider hips -->
-              <path d="M50 72 Q48 68 54 66 L106 66 Q112 68 110 72 L108 98 Q106 108 100 112 L100 150 Q100 158 106 162 L60 162 Q54 158 60 150 L60 112 Q54 108 52 98 Z" fill="url(#skinGrad)"/>
-              <!-- Arms — long, slender -->
-              <path d="M50 70 Q42 68 38 72 Q32 82 33 100 L35 148 Q36 155 40 153 L43 146 Q46 120 50 92" fill="url(#skinGrad)"/>
-              <path d="M110 70 Q118 68 122 72 Q128 82 127 100 L125 148 Q124 155 120 153 L117 146 Q114 120 110 92" fill="url(#skinGrad)"/>
-              <!-- Hands — delicate -->
-              <ellipse cx="38" cy="154" rx="5" ry="7" fill="url(#skinGrad)"/>
-              <ellipse cx="122" cy="154" rx="5" ry="7" fill="url(#skinGrad)"/>
-              <path d="M35 158 Q34 163 35 166" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
-              <path d="M38 160 Q37 164 38 167" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
-              <path d="M125 158 Q126 163 125 166" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
-              <path d="M122 160 Q123 164 122 167" stroke="url(#skinGrad)" stroke-width="2.5" fill="none" opacity="0.5"/>
-              <!-- Bottom layer -->
+              <ellipse cx="80" cy="372" rx="24" ry="4" fill="#000" opacity="0.08"/>
+
+              <!-- BODY SKIN (drawn first so clothes render on top) -->
+              <!-- Left leg -->
+              <path d="M66 192 L64 345 Q64 354 69 354 L76 354 Q79 354 79 346 L80 200" fill="url(#skinGrad)"/>
+              <!-- Right leg -->
+              <path d="M80 200 L81 346 Q81 354 84 354 L91 354 Q96 354 96 345 L94 192" fill="url(#skinGrad)"/>
+              <!-- Leg shading -->
+              <path d="M66 195 L64 345" stroke="#786858" stroke-width="1" fill="none" opacity="0.1"/>
+              <path d="M94 195 L96 345" stroke="#786858" stroke-width="1" fill="none" opacity="0.1"/>
+              <path d="M72 198 L71 342" stroke="#b0a090" stroke-width="2" fill="none" opacity="0.07"/>
+              <path d="M88 198 L89 342" stroke="#b0a090" stroke-width="2" fill="none" opacity="0.07"/>
+
+              <!-- Torso - hourglass with 3D shading -->
+              <path d="M52 80 Q50 76 55 74 L105 74 Q110 76 108 80 L105 102 Q100 116 94 120 L92 168 Q92 180 100 192 L60 192 Q68 180 68 168 L66 120 Q60 116 55 102 Z" fill="url(#skinGrad)"/>
+              <!-- Torso center highlight -->
+              <path d="M74 80 Q80 82 86 80 L84 102 Q82 114 80 120 L80 172 Q80 182 84 192 L76 192 Q80 182 80 172 L80 120 Q78 114 76 102 Z" fill="#b0a090" opacity="0.1"/>
+              <!-- Side shadows -->
+              <path d="M52 80 L55 102 Q60 116 66 120 L68 168" stroke="#786858" stroke-width="1.2" fill="none" opacity="0.08"/>
+              <path d="M108 80 L105 102 Q100 116 94 120 L92 168" stroke="#786858" stroke-width="1.2" fill="none" opacity="0.08"/>
+              <!-- Navel -->
+              <ellipse cx="80" cy="150" rx="1.5" ry="2" fill="#807060" opacity="0.08"/>
+
+              <!-- Arms -->
+              <path d="M52 78 Q44 76 40 80 Q35 88 35 102 L37 158 Q37 164 41 162 L44 155 Q47 132 51 98" fill="url(#skinGradV)"/>
+              <path d="M108 78 Q116 76 120 80 Q125 88 125 102 L123 158 Q123 164 119 162 L116 155 Q113 132 109 98" fill="url(#skinGradV)"/>
+              <path d="M40 80 Q35 88 35 102 L37 158" stroke="#786858" stroke-width="0.8" fill="none" opacity="0.08"/>
+              <path d="M120 80 Q125 88 125 102 L123 158" stroke="#786858" stroke-width="0.8" fill="none" opacity="0.08"/>
+              <!-- Hands -->
+              <ellipse cx="40" cy="163" rx="5" ry="6" fill="url(#skinGradV)"/>
+              <ellipse cx="120" cy="163" rx="5" ry="6" fill="url(#skinGradV)"/>
+
+              <!-- Neck thin -->
+              <rect x="75" y="54" width="10" height="22" rx="4" fill="url(#skinGradV)"/>
+
+              <!-- DEFAULT UNDERWEAR black sports bra + shorts -->
+              <path d="M56 80 Q56 76 62 74 L98 74 Q104 76 104 80 L104 100 Q104 104 98 104 L62 104 Q56 104 56 100 Z" fill="#2a2a2a"/>
+              <path d="M56 80 L104 80" stroke="#1a1a1a" stroke-width="0.5" opacity="0.25"/>
+              <path d="M67 74 L68 58" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M93 74 L92 58" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M64 168 L61 200 Q61 204 67 204 L78 204 Q80 204 80 200 L80 178" fill="#2a2a2a"/>
+              <path d="M80 178 L80 200 Q80 204 82 204 L93 204 Q99 204 99 200 L96 168" fill="#2a2a2a"/>
+              <path d="M64 168 Q80 173 96 168" stroke="#1a1a1a" stroke-width="0.5" opacity="0.25"/>
+
+              <!-- Clothing layers ON TOP of body -->
               <g id="dtiLayerBottom"></g>
-              <!-- Legs — long, slim (DTI style) -->
-              <path d="M60 162 L58 310 Q58 318 64 318 L74 318 Q78 318 78 312 L80 172" fill="url(#skinGrad)"/>
-              <path d="M80 172 L82 312 Q82 318 86 318 L96 318 Q102 318 102 310 L100 162" fill="url(#skinGrad)"/>
-              <!-- Knee hint -->
-              <path d="M64 240 Q68 243 74 240" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.06" class="dti-outline"/>
-              <path d="M86 240 Q92 243 96 240" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.06" class="dti-outline"/>
-              <!-- Ankle taper -->
-              <path d="M62 300 Q68 298 74 300" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.05" class="dti-outline"/>
-              <path d="M86 300 Q92 298 98 300" stroke="#c0a888" stroke-width="0.3" fill="none" opacity="0.05" class="dti-outline"/>
-              <!-- Shoes layer -->
               <g id="dtiLayerShoes"></g>
-              <!-- Accessory layer -->
+              <g id="dtiLayerTop"></g>
               <g id="dtiLayerAcc"></g>
+              <g id="dtiLayerHairBack"></g>
+
+              <!-- HEAD - DTI cylindrical block -->
+              <rect x="60" y="8" width="40" height="48" rx="12" fill="url(#skinGradV)"/>
+              <rect x="60" y="8" width="7" height="48" rx="4" fill="#807060" opacity="0.08"/>
+              <rect x="93" y="8" width="7" height="48" rx="4" fill="#807060" opacity="0.08"/>
+              <rect x="68" y="8" width="24" height="6" rx="5" fill="#b8a898" opacity="0.06"/>
+              <rect x="66" y="48" width="28" height="6" rx="3" fill="#807060" opacity="0.05"/>
+
+              <!-- Hair front layer -->
+              <g id="dtiLayerHair"></g>
             </svg>
           </div>
           <div class="dti-skin-row" id="dtiSkinRow"></div>
@@ -2312,16 +2315,17 @@ var DTI_WARDROBES = {
 };
 
 var DTI_SKIN_TONES = [
-  {name:'Fair',base:'#f5dcc8',hi:'#fce8d8',lo:'#e8c8a8',lip:'#d8908a',eye:'#5a4a3a'},
-  {name:'Light',base:'#e8c8a8',hi:'#f0d8b8',lo:'#d8b090',lip:'#c88878',eye:'#5a4a3a'},
-  {name:'Medium',base:'#c8a07a',hi:'#d8b090',lo:'#b88a68',lip:'#b07060',eye:'#3a2a1a'},
-  {name:'Tan',base:'#a87850',hi:'#b88a60',lo:'#986840',lip:'#985848',eye:'#2a1a0a'},
-  {name:'Brown',base:'#8a5a38',hi:'#9a6a48',lo:'#7a4a28',lip:'#884838',eye:'#1a0a00'},
-  {name:'Dark',base:'#5a3820',hi:'#6a4830',lo:'#4a2810',lip:'#6a3828',eye:'#0a0500'},
-  {name:'Deep',base:'#3a2010',hi:'#4a3020',lo:'#2a1408',lip:'#4a2818',eye:'#0a0400'},
+  {name:'Porcelain',base:'#f0d8c8',hi:'#f8e4d8',lo:'#e0c0a8'},
+  {name:'Fair',base:'#e8c8a8',hi:'#f0d8b8',lo:'#d8b090'},
+  {name:'Light',base:'#d0aa88',hi:'#dab898',lo:'#c09870'},
+  {name:'Medium',base:'#b88a60',hi:'#c89a70',lo:'#a87a50'},
+  {name:'Tan',base:'#a07040',hi:'#b08050',lo:'#906030'},
+  {name:'Brown',base:'#805030',hi:'#906040',lo:'#704020'},
+  {name:'Dark',base:'#603820',hi:'#704828',lo:'#502810'},
+  {name:'Deep',base:'#402010',hi:'#503018',lo:'#301808'},
 ];
 
-var dtiState = {round:1, totalScore:0, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:90, skinIdx:1};
+var dtiState = {round:1, totalScore:0, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:90, skinIdx:3};
 var dtiTimerInterval = null;
 var dtiActiveCat = 'tops';
 var DTI_TOTAL_TIME = 90;
@@ -2329,16 +2333,19 @@ var DTI_TOTAL_TIME = 90;
 function dtiSetSkin(idx){
   dtiState.skinIdx = idx;
   var s = DTI_SKIN_TONES[idx];
-  // Update SVG gradient
+  // Update horizontal body gradient (3 stops: dark-light-dark for 3D look)
   var stops = document.querySelectorAll('#skinGrad stop');
-  if(stops.length>=2){
-    stops[0].setAttribute('stop-color',s.hi); stops[0].setAttribute('stop-opacity','1');
-    stops[1].setAttribute('stop-color',s.base); stops[1].setAttribute('stop-opacity','1');
+  if(stops.length>=3){
+    stops[0].setAttribute('stop-color',s.lo);
+    stops[1].setAttribute('stop-color',s.hi);
+    stops[2].setAttribute('stop-color',s.lo);
   }
-  // Update face features
-  document.querySelectorAll('#dtiFigure .dti-eye').forEach(function(e){e.setAttribute('fill',s.eye);});
-  document.querySelectorAll('#dtiFigure .dti-lip').forEach(function(e){e.setAttribute('stroke',s.lip);});
-  document.querySelectorAll('#dtiFigure .dti-outline').forEach(function(e){e.setAttribute('stroke',s.lo);});
+  // Update vertical gradient (arms, neck, head)
+  var vstops = document.querySelectorAll('#skinGradV stop');
+  if(vstops.length>=2){
+    vstops[0].setAttribute('stop-color',s.hi);
+    vstops[1].setAttribute('stop-color',s.base);
+  }
   // Update skin row buttons
   document.querySelectorAll('.dti-skin-btn').forEach(function(b,i){
     b.classList.toggle('on',i===idx);
