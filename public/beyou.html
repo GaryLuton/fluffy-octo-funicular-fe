@@ -8,6 +8,7 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:background 1.2s,color 1.2s;display:flex;flex-direction:column;}
+    .view.scrollable{overflow-y:auto;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.06);transition:opacity 0.8s;}
@@ -51,6 +52,44 @@
     .reflect-sub{font-size:0.78rem;opacity:0.3;text-align:center;letter-spacing:1px;line-height:1.8;}
     .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
     .reflect-next:hover{opacity:1;}
+
+    /* ── JOURNAL VIEW ── */
+    .journal-container{display:flex;flex-direction:column;align-items:center;gap:20px;padding:80px 24px 120px;max-width:540px;width:100%;height:100vh;overflow-y:auto;}
+    .journal-title{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
+    .journal-textarea{width:100%;min-height:100px;padding:16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;line-height:1.6;resize:vertical;outline:none;transition:border-color 0.3s;}
+    .journal-textarea:focus{border-color:currentColor;}
+    .journal-textarea::placeholder{opacity:0.3;}
+    .mood-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+    .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
+    .mood-chip.on{opacity:1;border-color:currentColor;}
+    .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
+    .journal-save:hover{opacity:1;transform:scale(1.02);}
+    .journal-entries{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:8px;}
+    .journal-entry{width:100%;padding:16px 18px;border-radius:14px;border:1px solid rgba(128,128,128,0.08);text-align:left;}
+    .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .journal-entry-date{font-size:0.7rem;opacity:0.35;letter-spacing:1px;}
+    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:3px 10px;border-radius:12px;opacity:0.7;}
+    .journal-entry-text{font-size:0.88rem;line-height:1.65;opacity:0.75;white-space:pre-wrap;}
+
+    /* ── REGULATE VIEW ── */
+    .regulate-container{display:flex;flex-direction:column;align-items:center;gap:28px;padding:80px 24px 120px;max-width:540px;width:100%;}
+    .regulate-title{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
+    .regulate-desc{font-size:0.92rem;font-weight:300;text-align:center;line-height:1.6;opacity:0.55;max-width:400px;}
+    .ground-steps{width:100%;display:flex;flex-direction:column;gap:12px;}
+    .ground-step{width:100%;padding:18px 20px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.12);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.35s;opacity:0.55;}
+    .ground-step.done{opacity:1;}
+    .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
+    .ground-step-text{font-size:0.88rem;line-height:1.5;}
+    .ground-step .ground-check{display:none;font-size:1rem;}
+    .ground-step.done .ground-check{display:inline;}
+    .ground-step.done .ground-step-num-val{display:none;}
+    .regulate-done-msg{text-align:center;padding:24px;border-radius:16px;display:none;flex-direction:column;align-items:center;gap:10px;}
+    .regulate-done-msg.show{display:flex;}
+    .regulate-done-emoji{font-size:2rem;}
+    .regulate-done-title{font-size:1.2rem;font-weight:300;letter-spacing:0.5px;}
+    .regulate-done-sub{font-size:0.82rem;opacity:0.4;letter-spacing:0.5px;}
+    .regulate-reset{margin-top:4px;padding:10px 30px;border:none;border-radius:22px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;opacity:0.7;transition:opacity 0.3s;}
+    .regulate-reset:hover{opacity:1;}
 
     /* ── COMPLETE VIEW (after breathing session) ── */
     .complete-container{display:flex;flex-direction:column;align-items:center;gap:24px;padding:0 40px;text-align:center;}
@@ -103,6 +142,60 @@
   </div>
 </div>
 
+<!-- JOURNAL -->
+<div class="view scrollable" id="journalView">
+  <div class="journal-container">
+    <div class="journal-title bc">My Journal</div>
+    <textarea class="journal-textarea" id="journalText" placeholder="Write what's on your mind..."></textarea>
+    <div class="mood-row" id="moodRow">
+      <button class="mood-chip" data-mood="happy" onclick="selectMood(this)">happy</button>
+      <button class="mood-chip" data-mood="calm" onclick="selectMood(this)">calm</button>
+      <button class="mood-chip" data-mood="sad" onclick="selectMood(this)">sad</button>
+      <button class="mood-chip" data-mood="anxious" onclick="selectMood(this)">anxious</button>
+      <button class="mood-chip" data-mood="grateful" onclick="selectMood(this)">grateful</button>
+      <button class="mood-chip" data-mood="tired" onclick="selectMood(this)">tired</button>
+    </div>
+    <button class="journal-save bc" id="journalSaveBtn" onclick="saveJournalEntry()">Save Entry</button>
+    <div class="journal-entries" id="journalEntries"></div>
+  </div>
+</div>
+
+<!-- REGULATE -->
+<div class="view scrollable" id="regulateView">
+  <div class="regulate-container">
+    <div class="regulate-title bc">5-4-3-2-1 Grounding</div>
+    <div class="regulate-desc">Tap each step as you complete it. Take your time.</div>
+    <div class="ground-steps" id="groundSteps">
+      <div class="ground-step" onclick="toggleGroundStep(this,0)">
+        <div class="ground-step-num" id="gsNum0"><span class="ground-step-num-val">5</span><span class="ground-check">&#10003;</span></div>
+        <div class="ground-step-text">Name <strong>5 things</strong> you can <strong>see</strong></div>
+      </div>
+      <div class="ground-step" onclick="toggleGroundStep(this,1)">
+        <div class="ground-step-num" id="gsNum1"><span class="ground-step-num-val">4</span><span class="ground-check">&#10003;</span></div>
+        <div class="ground-step-text">Name <strong>4 things</strong> you can <strong>touch / feel</strong></div>
+      </div>
+      <div class="ground-step" onclick="toggleGroundStep(this,2)">
+        <div class="ground-step-num" id="gsNum2"><span class="ground-step-num-val">3</span><span class="ground-check">&#10003;</span></div>
+        <div class="ground-step-text">Name <strong>3 things</strong> you can <strong>hear</strong></div>
+      </div>
+      <div class="ground-step" onclick="toggleGroundStep(this,3)">
+        <div class="ground-step-num" id="gsNum3"><span class="ground-step-num-val">2</span><span class="ground-check">&#10003;</span></div>
+        <div class="ground-step-text">Name <strong>2 things</strong> you can <strong>smell</strong></div>
+      </div>
+      <div class="ground-step" onclick="toggleGroundStep(this,4)">
+        <div class="ground-step-num" id="gsNum4"><span class="ground-step-num-val">1</span><span class="ground-check">&#10003;</span></div>
+        <div class="ground-step-text">Name <strong>1 thing</strong> you can <strong>taste</strong></div>
+      </div>
+    </div>
+    <div class="regulate-done-msg" id="regulateDone">
+      <div class="regulate-done-emoji">&#10024;</div>
+      <div class="regulate-done-title">Well done — you are here, you are present</div>
+      <div class="regulate-done-sub">Your body and mind are connected again</div>
+      <button class="regulate-reset bc" onclick="resetGrounding()">Do it again</button>
+    </div>
+  </div>
+</div>
+
 <!-- COMPLETE -->
 <div class="view" id="completeView">
   <div class="complete-container">
@@ -118,6 +211,8 @@
 <div class="mode-bar" id="modeBar">
   <button class="mode-pill bc on" id="pillBreathe" onclick="switchMode('breathe')">Breathe</button>
   <button class="mode-pill bc" id="pillReflect" onclick="switchMode('reflect')">Reflect</button>
+  <button class="mode-pill bc" id="pillJournal" onclick="switchMode('journal')">Journal</button>
+  <button class="mode-pill bc" id="pillRegulate" onclick="switchMode('regulate')">Regulate</button>
 </div>
 
 <script src="/stuflover-config.js"></script>
@@ -381,15 +476,116 @@ function switchMode(mode){
 
   document.getElementById('pillBreathe').classList.toggle('on', mode==='breathe');
   document.getElementById('pillReflect').classList.toggle('on', mode==='reflect');
+  document.getElementById('pillJournal').classList.toggle('on', mode==='journal');
+  document.getElementById('pillRegulate').classList.toggle('on', mode==='regulate');
 
   if(mode==='breathe'){
     resetBreathe();
-  } else {
+  } else if(mode==='reflect'){
     showView('reflectView');
+  } else if(mode==='journal'){
+    renderJournalEntries();
+    showView('journalView');
+  } else if(mode==='regulate'){
+    showView('regulateView');
   }
 
   document.getElementById('modeBar').classList.remove('hidden');
   document.getElementById('mainNav').classList.remove('hidden');
+}
+
+// ─── JOURNAL ────────────────────────────────────────────
+var selectedMood = '';
+
+function selectMood(el){
+  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
+  if(selectedMood === el.dataset.mood){
+    selectedMood = '';
+  } else {
+    el.classList.add('on');
+    selectedMood = el.dataset.mood;
+  }
+}
+
+function getJournalEntries(){
+  try{ return JSON.parse(localStorage.getItem('stuflover_journal')||'[]'); }catch(e){return [];}
+}
+
+function saveJournalEntry(){
+  var text = document.getElementById('journalText').value.trim();
+  if(!text) return;
+  var entries = getJournalEntries();
+  entries.push({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    text: text,
+    mood: selectedMood || ''
+  });
+  localStorage.setItem('stuflover_journal', JSON.stringify(entries));
+  document.getElementById('journalText').value = '';
+  selectedMood = '';
+  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
+  renderJournalEntries();
+}
+
+function renderJournalEntries(){
+  var container = document.getElementById('journalEntries');
+  var entries = getJournalEntries().slice().reverse();
+  if(entries.length === 0){
+    container.innerHTML = '<div style="text-align:center;opacity:0.25;font-size:0.82rem;padding:20px 0;">No entries yet — start writing above</div>';
+    return;
+  }
+  var html = '';
+  entries.forEach(function(e){
+    var d = new Date(e.date);
+    var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    var moodHtml = e.mood ? '<span class="journal-entry-mood" style="background:'+PAL.ac+'20;color:'+PAL.tx+'">'+e.mood+'</span>' : '';
+    html += '<div class="journal-entry" style="background:'+PAL.tx+'06;">';
+    html += '<div class="journal-entry-head"><span class="journal-entry-date">'+dateStr+'</span>'+moodHtml+'</div>';
+    html += '<div class="journal-entry-text">'+escHtml(e.text)+'</div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── REGULATE (5-4-3-2-1 GROUNDING) ─────────────────────
+var groundState = [false,false,false,false,false];
+
+function toggleGroundStep(el,idx){
+  groundState[idx] = !groundState[idx];
+  el.classList.toggle('done', groundState[idx]);
+  applyGroundStepStyles();
+  // Check if all done
+  if(groundState.every(function(v){return v;})){
+    setTimeout(function(){
+      document.getElementById('regulateDone').classList.add('show');
+    }, 400);
+  } else {
+    document.getElementById('regulateDone').classList.remove('show');
+  }
+}
+
+function resetGrounding(){
+  groundState = [false,false,false,false,false];
+  document.querySelectorAll('.ground-step').forEach(function(el){el.classList.remove('done');});
+  document.getElementById('regulateDone').classList.remove('show');
+  applyGroundStepStyles();
+}
+
+function applyGroundStepStyles(){
+  document.querySelectorAll('.ground-step-num').forEach(function(el,i){
+    if(groundState[i]){
+      el.style.background = PAL.ac;
+      el.style.color = PAL.bg;
+    } else {
+      el.style.background = PAL.ac + '20';
+      el.style.color = PAL.tx;
+    }
+  });
 }
 
 // ─── APPLY STYLES ────────────────────────────────────────
@@ -422,6 +618,30 @@ function applyStyles(){
   document.getElementById('reflectOrb').style.background = PAL.ac;
   document.getElementById('reflectNextBtn').style.background = PAL.ac + '25';
   document.getElementById('reflectNextBtn').style.color = PAL.tx;
+
+  // Journal
+  document.getElementById('journalSaveBtn').style.background = PAL.ac;
+  document.getElementById('journalSaveBtn').style.color = PAL.bg;
+  document.getElementById('journalText').style.borderColor = PAL.tx + '18';
+  document.getElementById('journalText').style.color = PAL.tx;
+  document.querySelectorAll('.mood-chip').forEach(function(c){
+    c.style.borderColor = PAL.tx + '18';
+    c.style.color = PAL.tx;
+  });
+
+  // Regulate
+  document.querySelectorAll('.ground-step').forEach(function(s){
+    s.style.borderColor = PAL.tx + '15';
+    s.style.color = PAL.tx;
+  });
+  document.querySelectorAll('.ground-step-num').forEach(function(n){
+    n.style.background = PAL.ac + '20';
+    n.style.color = PAL.tx;
+  });
+  document.getElementById('regulateDone').style.background = PAL.ac + '15';
+  document.getElementById('regulateDone').style.color = PAL.tx;
+  var regResetBtn = document.querySelector('.regulate-reset');
+  if(regResetBtn){ regResetBtn.style.background = PAL.ac + '25'; regResetBtn.style.color = PAL.tx; }
 }
 
 // ─── INIT ────────────────────────────────────────────────
@@ -429,6 +649,7 @@ applyStyles();
 createPetals();
 setPetalState('contract');
 initReflect();
+applyGroundStepStyles();
 
 </script>
 

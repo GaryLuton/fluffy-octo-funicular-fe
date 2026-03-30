@@ -334,6 +334,148 @@
       .opts-single,.opts-multi{grid-template-columns:1fr;}
       .q-text{font-size:1.9rem;}
     }
+
+    /* ═══════════════════════════════════════
+       DECORATIVE ELEMENTS
+    ═══════════════════════════════════════ */
+
+    /* 1. Sparkle cursor trail */
+    .sparkle-dot {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      animation: sparkleFade 0.6s ease-out forwards;
+    }
+    @keyframes sparkleFade {
+      0%   { opacity: 0.85; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.2) translateY(-12px); }
+    }
+
+    /* 2. Soft glow on ae-title */
+    .ae-title-glow {
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 8px rgba(128,128,128,0.0); }
+      50%      { text-shadow: 0 0 18px rgba(128,128,128,0.25), 0 0 40px rgba(128,128,128,0.10); }
+    }
+
+    /* 3. Floating hearts */
+    .floating-heart {
+      position: fixed;
+      bottom: -40px;
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+      animation: floatUp 8s ease-in infinite;
+    }
+    .floating-heart:nth-child(1) { left: 8%; animation-delay: 0s; }
+    .floating-heart:nth-child(2) { left: 28%; animation-delay: 2.2s; }
+    .floating-heart:nth-child(3) { left: 72%; animation-delay: 4.5s; }
+    .floating-heart:nth-child(4) { left: 91%; animation-delay: 6.8s; }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translateY(0) scale(0.7); }
+      10%  { opacity: 0.18; }
+      70%  { opacity: 0.12; }
+      100% { opacity: 0; transform: translateY(-105vh) scale(1); }
+    }
+
+    /* 4. Hover sparkle / shimmer on browser tiles */
+    .browser-tile {
+      position: relative;
+      overflow: hidden;
+    }
+    .browser-tile::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.25) 50%, transparent 60%);
+      transition: none;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+    .browser-tile:hover::after {
+      animation: tileShimmer 0.55s ease forwards;
+    }
+    @keyframes tileShimmer {
+      0%   { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* 5. NEW badge */
+    .new-badge {
+      display: inline-block;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 0.52rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 20px;
+      line-height: 1.4;
+      margin-top: 2px;
+      animation: badgePulse 2.4s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.08); }
+    }
+
+    /* ── MY PROFILE VIEW ── */
+    #profileView{display:none;flex:1;flex-direction:column;overflow-y:auto;padding:24px 40px 60px;gap:28px;align-items:center;}
+    #profileView.active{display:flex;}
+
+    .profile-card{position:relative;width:100%;max-width:420px;border-radius:20px;padding:32px 28px 28px;text-align:center;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.10);}
+    .profile-card-bg{position:absolute;inset:0;opacity:0.12;pointer-events:none;z-index:0;}
+    .profile-card>*{position:relative;z-index:1;}
+    .profile-avatar-circle{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;letter-spacing:1px;text-transform:uppercase;}
+    .profile-username{font-size:1.4rem;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;}
+    .profile-bio-display{font-size:0.88rem;opacity:0.55;line-height:1.6;margin-bottom:14px;min-height:1.4em;font-style:italic;}
+    .profile-meta-row{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
+    .profile-meta-item{display:flex;align-items:center;gap:6px;font-size:0.76rem;opacity:0.6;}
+    .profile-colour-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;}
+    .profile-join-date{font-size:0.66rem;opacity:0.3;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:6px;}
+
+    .profile-card.deco-sparkles .profile-sparkle{display:block;}
+    .profile-sparkle{display:none;position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;pointer-events:none;z-index:2;animation:sparkleFloat 2s ease-in-out infinite;}
+    @keyframes sparkleFloat{0%,100%{opacity:0;transform:scale(0.5) translateY(0);}50%{opacity:1;transform:scale(1) translateY(-8px);}}
+
+    .profile-card.deco-stars{border:2px dashed rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.10),inset 0 0 0 4px rgba(255,255,255,0.06);}
+
+    .profile-card.deco-glow::before{content:'';position:absolute;inset:-12px;border-radius:28px;z-index:-1;filter:blur(24px);opacity:0.45;}
+
+    .profile-card.deco-pattern .profile-card-bg{opacity:0.25;background-image:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(255,255,255,0.08) 8px,rgba(255,255,255,0.08) 16px);}
+
+    .profile-section{width:100%;max-width:420px;}
+    .profile-section-title{font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.35;margin-bottom:10px;}
+    .profile-bio-textarea{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(128,128,128,0.04);font-family:'Space Grotesk',sans-serif;font-size:0.9rem;color:inherit;resize:none;outline:none;line-height:1.6;transition:border-color 0.2s;}
+    .profile-bio-textarea:focus{border-color:rgba(128,128,128,0.35);}
+    .profile-bio-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+    .profile-bio-count{font-size:0.72rem;opacity:0.3;}
+    .profile-bio-save{padding:8px 22px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .profile-bio-save:hover{opacity:0.8;}
+
+    .profile-theme-grid{display:flex;gap:10px;flex-wrap:wrap;}
+    .profile-theme-swatch{width:44px;height:44px;border-radius:12px;cursor:pointer;border:3px solid transparent;transition:all 0.2s;position:relative;overflow:hidden;}
+    .profile-theme-swatch:hover{transform:scale(1.1);}
+    .profile-theme-swatch.on{border-color:rgba(255,255,255,0.6);transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+    .profile-theme-swatch.on::after{content:'\2713';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,0.4);}
+
+    .profile-deco-grid{display:flex;gap:10px;flex-wrap:wrap;}
+    .profile-deco-toggle{padding:10px 18px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(128,128,128,0.04);font-family:'Space Grotesk',sans-serif;font-size:0.82rem;font-weight:500;cursor:pointer;transition:all 0.2s;color:inherit;}
+    .profile-deco-toggle:hover{background:rgba(128,128,128,0.1);}
+    .profile-deco-toggle.on{border-color:currentColor;font-weight:700;}
+
+    @media(max-width:768px){
+      #profileView{padding:20px 20px 40px;}
+      .profile-card{max-width:100%;padding:24px 20px 22px;}
+      .profile-section{max-width:100%;}
+    }
   </style>
 </head>
 <body>
@@ -366,6 +508,14 @@
 <!-- RESULT PAGE -->
 <div id="lifestylePage">
   <svg id="bgSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <!-- Floating hearts -->
+  <div id="floatingHeartsWrap">
+    <svg class="floating-heart" width="16" height="16" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <svg class="floating-heart" width="12" height="12" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <svg class="floating-heart" width="10" height="10" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <svg class="floating-heart" width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+  </div>
 
   <!-- HOME VIEW -->
   <div id="homeView">
@@ -583,6 +733,52 @@
       </div>
       <div class="hub-grid" id="hubGrid"></div>
     </div>
+
+    <!-- MyProfile custom view -->
+    <div id="profileView">
+      <!-- Profile Card Preview -->
+      <div class="profile-card" id="profileCard">
+        <div class="profile-card-bg" id="profileCardBg"></div>
+        <span class="profile-sparkle" style="top:12%;left:10%;animation-delay:0s;"></span>
+        <span class="profile-sparkle" style="top:8%;left:75%;animation-delay:0.4s;"></span>
+        <span class="profile-sparkle" style="top:60%;left:5%;animation-delay:0.8s;"></span>
+        <span class="profile-sparkle" style="top:70%;left:88%;animation-delay:1.2s;"></span>
+        <span class="profile-sparkle" style="top:30%;left:92%;animation-delay:0.2s;"></span>
+        <span class="profile-sparkle" style="top:85%;left:40%;animation-delay:1.6s;"></span>
+        <span class="profile-sparkle" style="top:15%;left:50%;animation-delay:0.6s;"></span>
+        <span class="profile-sparkle" style="top:50%;left:20%;animation-delay:1.0s;"></span>
+        <div class="profile-avatar-circle" id="profileAvatar"></div>
+        <div class="profile-username" id="profileUsername"></div>
+        <div class="profile-bio-display" id="profileBioDisplay"></div>
+        <div class="profile-meta-row">
+          <div class="profile-meta-item"><span id="profileAesthetic"></span></div>
+          <div class="profile-meta-item"><div class="profile-colour-dot" id="profileColourDot"></div><span id="profileColourName"></span></div>
+        </div>
+        <div class="profile-join-date" id="profileJoinDate"></div>
+      </div>
+
+      <!-- Bio Editor -->
+      <div class="profile-section">
+        <div class="profile-section-title">Your Bio</div>
+        <textarea class="profile-bio-textarea" id="profileBioInput" placeholder="write something about you..." rows="3" maxlength="150" oninput="onProfileBioInput()"></textarea>
+        <div class="profile-bio-row">
+          <span class="profile-bio-count" id="profileBioCount">0 / 150</span>
+          <button class="profile-bio-save bc" id="profileBioSaveBtn" onclick="saveProfileBio()">Save Bio</button>
+        </div>
+      </div>
+
+      <!-- Profile Theme Picker -->
+      <div class="profile-section">
+        <div class="profile-section-title">Profile Theme</div>
+        <div class="profile-theme-grid" id="profileThemeGrid"></div>
+      </div>
+
+      <!-- Profile Decorations -->
+      <div class="profile-section">
+        <div class="profile-section-title">Decorations</div>
+        <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -712,7 +908,8 @@ const RECS = {
 const CORE_IDS = [
   "q_age","q_gender","q_mood","q_saturday","q_music","q_interests","q_fave_colour",
   "q_phone_screen","q_coffee","q_room","q_friday","q_notes_app",
-  "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_energy_word"
+  "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_dream_job",
+  "q_weekend_plan","q_wallpaper","q_energy_word"
 ];
 
 const QS = [
@@ -946,6 +1143,48 @@ const QS = [
    ]
   },
 
+  {id:"q_dream_job", cat:"YOUR FUTURE", multi:false,
+   text:"What is your dream job?",
+   hint:"No wrong answers — just what calls to you.",
+   opts:[
+     {t:"Creative director — running the vision",            ae:{indie:2,coquette:1,cleangirl:1},   dj:"creative_director"},
+     {t:"Influencer or content creator",                     ae:{y2k:2,softgirl:1,kawaii:1},         dj:"influencer"},
+     {t:"Doctor, scientist or something that helps people",  ae:{cleangirl:1,preppy:1},              dj:"doctor"},
+     {t:"Teacher or professor — sharing knowledge",          ae:{darkacad:2,cottage:1},              dj:"teacher"},
+     {t:"Artist — painter, illustrator, something visual",   ae:{indie:2,kawaii:1},                  dj:"artist"},
+     {t:"Musician or something in the music industry",       ae:{grunge:2,indie:1,goth:1},          dj:"musician"},
+     {t:"Entrepreneur — building my own thing",              ae:{street:2,oldmoney:1},               dj:"entrepreneur"},
+     {t:"Athlete or fitness coach",                          ae:{preppy:2,street:1},                 dj:"athlete"},
+   ]
+  },
+
+  {id:"q_weekend_plan", cat:"YOUR WEEKENDS", multi:false,
+   text:"Pick your ideal weekend plan:",
+   opts:[
+     {t:"Shopping with friends — trying things on, getting food after",  ae:{y2k:1,coquette:1,softgirl:1},     wp:"shopping"},
+     {t:"Cosy day in — blankets, candles, comfort content",             ae:{cottage:2,softgirl:1},             wp:"cosy_in"},
+     {t:"Going to a concert or live show",                              ae:{indie:2,grunge:1,goth:1},          wp:"concert"},
+     {t:"Exploring nature — a walk, a hike, being outside",             ae:{cottage:1,hippie:2,tomato:1},      wp:"nature"},
+     {t:"Creating something — art, music, writing, a project",          ae:{indie:2,darkacad:1},               wp:"creating"},
+     {t:"Gaming all day — no interruptions",                            ae:{indie:1,grunge:1},                 wp:"gaming"},
+     {t:"Studying or working on something I care about",                ae:{darkacad:2,cleangirl:1,preppy:1},  wp:"studying"},
+     {t:"Baking or cooking something from scratch",                     ae:{cottage:2,hippie:1},               wp:"baking"},
+   ]
+  },
+
+  {id:"q_wallpaper", cat:"YOUR PHONE", multi:false,
+   text:"What is your phone wallpaper usually?",
+   opts:[
+     {t:"An aesthetic photo — moody, curated, very specific vibe",  ae:{coquette:2,indie:1,darkacad:1},    wp2:"aesthetic"},
+     {t:"My pet — obviously",                                      ae:{cottage:1,softgirl:1,kawaii:1},     wp2:"pet"},
+     {t:"My favourite artist or a concert photo",                   ae:{indie:2,grunge:1,goth:1},          wp2:"artist"},
+     {t:"Nature — sky, ocean, flowers, something peaceful",         ae:{cottage:2,hippie:1},               wp2:"nature"},
+     {t:"Anime or cartoon character",                               ae:{kawaii:3},                          wp2:"anime"},
+     {t:"Solid colour or a simple gradient — clean vibes",          ae:{cleangirl:2,oldmoney:1},           wp2:"solid"},
+     {t:"A photo of me and my friends",                             ae:{preppy:1,y2k:1,softgirl:1},       wp2:"friends"},
+   ]
+  },
+
   {id:"q_energy_word", cat:"LAST ONE", multi:false,
    text:"One word — which is actually you?",
    opts:[
@@ -1047,7 +1286,8 @@ function startQuiz(){
   P.faveColour=null; P.faveShop=null; P.friendGroup=null;
   P.energyWord=null; P.moodToday=null; P.phoneScreen=null;
   P.saturdayMorning=null; P.coffeeOrder=null; P.notesApp=null;
-  P.lastBought=null; P.extraTags=[]; P.answered=new Set();
+  P.lastBought=null; P.dreamJob=null; P.weekendPlan=null; P.wallpaper=null;
+  P.extraTags=[]; P.answered=new Set();
   queue=[];
   document.getElementById('lifestylePage').classList.remove('active');
   document.getElementById('heroSection').style.display='none';
@@ -1124,6 +1364,9 @@ function applyOpt(opt){
   if(opt.co) P.coffeeOrder=opt.co;
   if(opt.na) P.notesApp=opt.na;
   if(opt.lb) P.lastBought=opt.lb;
+  if(opt.dj) P.dreamJob=opt.dj;
+  if(opt.wp) P.weekendPlan=opt.wp;
+  if(opt.wp2) P.wallpaper=opt.wp2;
 }
 
 
@@ -1276,12 +1519,16 @@ function buildPage(){
       friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
       phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
       coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
+      dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
       extraTags:P.extraTags,
     }));
   }catch(e){}
 
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
+
+  // ── Decorative elements init ──
+  initDecorations(searchPal);
 
   // Show welcome message
   var user = window.stufloverUser ? window.stufloverUser() : null;
@@ -1775,6 +2022,20 @@ var HUB_GAMES = [
   // ── FEATURED ──
   {id:'dti', name:'Dress To Impress', desc:'Get a theme, build an outfit, walk the runway — your Flovee rates you', tag:'fashion game', iconFn:'bowSVG',
     isDtiGame:true, prompt:'', opener:''},
+
+  // ── INTERACTIVE ──
+  {id:'outfitrater', name:'Outfit Rater', desc:'Rate mystery outfits 1-10 — then find out if they were real or fake', tag:'fashion game', iconFn:'starSVG',
+    isDtiGame:false,
+    prompt:'You are playing Outfit Rater — an interactive fashion guessing game. Rules:\n- Each round, describe a DETAILED outfit (head to toe — hair, top, bottom, shoes, accessories, bag, jewellery, nails, everything). Be vivid and specific with brands, colours, textures, and styling choices.\n- The outfit must secretly be ONE of three categories: (1) a real celebrity outfit worn to a specific event, (2) a real runway look from a fashion show, or (3) something you completely made up. Decide BEFORE you describe it and remember which it is.\n- After describing the outfit, ask the user to rate it 1-10 and explain why they gave that score.\n- After they rate it, REVEAL which category it was. If it was real, say who wore it and where/when. If made up, say so.\n- Award points: if they rated a real outfit 7+ they get 2 points (good taste!). If they rated a made-up outfit under 5 they get 3 points (they saw through it!). If they rated a made-up outfit 7+ you get 2 points (you fooled them!). Other combos get 1 point each.\n- Keep a running scoreboard (Player vs You) and announce it after each round.\n- Play at least 5 rounds. After round 5, crown a winner.\n- Be dramatic, react to their ratings, tease them if they rate a real iconic look low.\n- Keep all outfits appropriate and fun.',
+    opener:'OUTFIT RATER! i am going to describe outfits and you rate them 1-10. then i reveal if they were a REAL celebrity look, a runway piece, or something i totally made up. points for good taste AND for catching my fakes.\n\nround 1:\n\noversized powder blue blazer with pushed-up sleeves, white corset top underneath, low-rise baggy cargo pants in cream, strappy silver heels, chunky layered silver chains, tiny oval sunglasses, slicked-back bun with two face-framing pieces, french tip nails.\n\nrate it 1-10 and tell me WHY'},
+  {id:'aestheticquiz', name:'Aesthetic Quiz', desc:'Answer 5 fun questions and discover your secret aesthetic', tag:'quiz', iconFn:'flowerSVG',
+    isDtiGame:false,
+    prompt:'You are running the Aesthetic Quiz — an interactive personality quiz game. Rules:\n- You will ask EXACTLY 5 fun scenario-based questions, one at a time. Each question has 4 options labelled A, B, C, D.\n- Format each question clearly like this:\n  **Question X/5:** [the scenario/question]\n  A) [option]\n  B) [option]\n  C) [option]\n  D) [option]\n- Questions should be creative scenarios (NOT boring "what is your favourite colour" questions). Examples: "You find a mysterious door in your school — what is behind it?", "Your phone dies at a party — what do you do?", "Pick a random superpower for everyday life", "You are decorating your dream locker — what goes in first?"\n- Secretly track which aesthetic each answer maps to. Have at least 6 possible result aesthetics that are SURPRISING and specific — not just "cottagecore" or "dark academia" but fun unique ones like "villain origin story chic", "main character in a coming of age film", "cozy chaos gremlin", "ethereal forest runaway", "retro diner sweetheart", "midnight rooftop poet", etc.\n- After all 5 questions, reveal their result dramatically with a full description of what that aesthetic means, what their vibe is, what they probably do on weekends, and what fictional character shares their energy.\n- Make each question feel different and engaging. React briefly to each answer before asking the next question.\n- Keep everything fun, upbeat, and appropriate.',
+    opener:'AESTHETIC QUIZ TIME! answer 5 questions and i will reveal your secret aesthetic — and trust me it is NOT going to be what you expect.\n\n**Question 1/5:** You wake up and realise you have been transported into a TV show. Which world are you in?\n\nA) A chaotic friend group sitcom — drama and laughs every episode\nB) A moody mystery series — you are solving something big\nC) A cosy slice-of-life show — cute moments and golden hour lighting\nD) A wild competition show — you are here to WIN\n\npick one!'},
+  {id:'stylechallenge', name:'Style Challenge', desc:'Build an outfit under wild constraints — your Flovee judges your creativity', tag:'fashion game', iconFn:'bowSVG',
+    isDtiGame:false,
+    prompt:'You are running Style Challenge — a creative fashion constraint game. Rules:\n- Each round, give the player a SPECIFIC and fun constraint they must follow when describing an outfit. Constraints should be creative and challenging, like:\n  - "style a full outfit using ONLY items that are one colour"\n  - "create a look where no single item costs over $20"\n  - "dress for a fancy dinner but you can only use 3 items total"\n  - "build an outfit using ONLY things from your grandparent\'s closet"\n  - "style a look where every item has to start with the same letter"\n  - "create an outfit that works for BOTH a job interview and a concert"\n  - "dress head to toe but everything must have a pattern — no solids allowed"\n- The player describes their full outfit following the constraint.\n- Judge their outfit on three criteria: CREATIVITY (out of 10), STYLE (out of 10), and RULE-FOLLOWING (did they actually follow the constraint? out of 10). Give a total score out of 30.\n- Be a tough but fun judge — call out if they broke the rules, hype them if they were creative, roast them gently if it is boring.\n- Keep a running total score across rounds. Play at least 4 rounds.\n- After 4+ rounds, give them a final ranking title based on total score (e.g. "Style Genius", "Fashion Criminal", "Creative Queen", "Needs Help Immediately").\n- Make it competitive, dramatic, and fun. Keep all suggestions appropriate.',
+    opener:'STYLE CHALLENGE! i give you a rule, you build an outfit, i judge you HARD. creativity, style, and rule-following — scored out of 30 each round. ready?\n\nROUND 1 CONSTRAINT:\n\nyou can ONLY use items that are in shades of ONE colour. pick your colour, then describe your full outfit head to toe — and it better be good because i am not an easy judge.\n\nGO'},
 
   // ── SOCIAL ──
   {id:'justtalk', name:'Just Talk', desc:'Chat with your Flovee about anything', tag:'chill', iconFn:'starSVG',
@@ -2969,7 +3230,29 @@ MOOD MATCHING:
 - If they are stressed → suggest something that makes them feel confident
 
 Keep messages short. Text like a real person. Remember everything they tell you about their wardrobe.`,        opener:'hey! tell me about your wardrobe — what are your go-to pieces? tops, bottoms, shoes, anything. the more you tell me the better outfits i can put together for you'},
-  {id:'beyou',      name:'BeYou',           sub:'confidence & you',      col:1, prompt:'You are in the BeYou section — confidence and self. You know they are feeling {MOOD} today. Their aesthetic is {AE}. Be encouraging without being hollow. You are honest. You are on their side. This is their safe space.',                                                                      opener:'this is your space. what is going on today?'},
+  {id:'beyou',      name:'BeYou',           sub:'confidence & you',      col:1, newBadge:true, prompt:'You are in the BeYou section — confidence and self. You know they are feeling {MOOD} today. Their aesthetic is {AE}. Be encouraging without being hollow. You are honest. You are on their side. This is their safe space.',                                                                      opener:'this is your space. what is going on today?'},
+  {id:'myroutine',  name:'MyRoutine',       sub:'morning & night',       col:8, newBadge:true, prompt:`You are the MyRoutine Flovee — you help build personalized morning and night routines.
+
+You know: aesthetic ({AE}), age ({AGE} — use this to make routines age-appropriate), mood ({MOOD}), interests ({INTERESTS}).
+
+HOW IT WORKS:
+1. First ask: "morning routine or night routine?"
+2. Then ask about their goals (better skin, more energy, less stress, be more productive, feel confident, etc.)
+3. Ask about their schedule — what time they wake up/go to bed, how much time they have
+4. Build a step-by-step routine personalized to them
+
+ROUTINE BUILDING RULES:
+- Make routines realistic for their age — a 14 year old has different needs than a 20 year old
+- Include: skincare steps, outfit prep, mindset/affirmation, breakfast/snack ideas, exercise/stretch suggestions, wind-down activities
+- Match their aesthetic — cottagecore morning routine looks different from streetwear morning routine
+- Be specific with timing: "5 min — wash face with gentle cleanser"
+- Keep it achievable — do not overwhelm them with 20 steps
+- Suggest products/activities they would actually enjoy based on their interests
+- For night routines: include phone-down time, journaling, skincare, relaxation
+
+Remember what they tell you about their routine and refine it over time. Save their routine preferences.
+Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
+  {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
   {id:'contentwithit',name:'ContentWithIt',sub:'watch · read · listen',  col:2, prompt:'You are in the ContentWithIt section. You know their music ({MUSIC}), interests ({INTERESTS}), aesthetic ({AE}). Give specific recs — actual show names, books, channels, playlists. Tell them WHY it fits them. No generic lists.',                                                             opener:'tell me what you have been into lately and i will find your next thing'},
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'fomo fighter',         col:4, prompt:'You are in StufloverDaily — FOMO fighter. You know their taste: aesthetic {AE}, music {MUSIC}, interests {INTERESTS}, shop {SHOP}. Tell them what is happening in their world — new drops, things to follow, content to know about. Specific to them.',                                         opener:'ok what do you need to know about right now — fashion, music, things to follow, or just your world?'},
@@ -2980,15 +3263,17 @@ Keep messages short. Text like a real person. Remember everything they tell you 
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
-  const hues = [0,45,90,135,180,220,270,315];
+  const hues = [0,40,80,120,160,200,240,280,320];
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
   grid.innerHTML = SECTIONS.map((s, i) => {
     const bg = shiftHue(pal.ac, hues[i]);
     const initials = s.name.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase();
+    const badge = s.newBadge ? `<span class="new-badge" style="background:${pal.ac}">NEW</span>` : '';
     return `<div class="browser-tile" onclick="openSection('${s.id}')">
       <div class="tile-favicon" style="background:${bg}">${initials}</div>
       <div class="tile-label" style="color:${pal.tx}">${s.name}</div>
+      ${badge}
     </div>`;
   }).join('');
 }
@@ -3122,7 +3407,7 @@ function formatDateSep(ts){
 function buildPreviousContext(secId){
   var saved = loadChat(secId);
   if(!saved.messages.length) return '';
-  var recent = saved.messages.slice(-20);
+  var recent = saved.messages.slice(-30);
   var lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
   return '\n\nPREVIOUS CONVERSATION (you already had this chat with them — remember it and reference things they told you naturally. Do not repeat yourself or re-introduce yourself):\n'+lines.join('\n');
 }
@@ -3308,11 +3593,13 @@ function buildSystemPrompt(sec){
   const mood = {good:'in a good place',creative:'in a creative mood',low:'having a low day',hyped:'hyped',cosy:'cosy',tired:'tired'}[P.moodToday]||'okay';
   const fg = {fandom:'fandom girls',creative:'creative types',sporty:'sporty',aesthetic:'aesthetic girlies',chaotic:'chaotic group',close:'small close group',online:'mainly online',mixed:'mixed'}[P.friendGroup]||'their group';
 
+  const age = {'under-18':'under 18','18-25':'18-25','26-35':'26-35','36-50':'36-50','50+':'50+'}[P.age]||'unknown';
+
   const rawPrompt = typeof sec.prompt === 'function' ? sec.prompt() : sec.prompt;
   const filled = rawPrompt
     .replace('{AE}',aeName).replace('{MUSIC}',music).replace('{INTERESTS}',interests)
     .replace('{COL}',colour).replace('{SHOP}',shop).replace('{SOCIAL}',social)
-    .replace('{MOOD}',mood).replace('{FG}',fg);
+    .replace('{MOOD}',mood).replace('{FG}',fg).replace('{AGE}',age);
 
   let styleHint = '';
   if(chatUserStyle.count>1){
@@ -3322,7 +3609,7 @@ function buildSystemPrompt(sec){
   var chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
   var prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
 
-  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them.${styleHint}${prevContext}`;
+  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it.${styleHint}${prevContext}`;
 }
 
 function buildOpener(sec){
