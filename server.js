@@ -161,6 +161,79 @@ app.post('/api/data/sync', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── Friends & Messaging ───
+
+// Bad words filter (basic)
+const BAD_WORDS = /\b(fuck|shit|damn|bitch|ass|dick|sex|porn|kill|die|hate)\b/i;
+function isCleanText(text) {
+  return !BAD_WORDS.test(text);
+}
+
+// Send friend request
+app.post('/api/friends/request', auth, (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: 'Username required' });
+  if (username.toLowerCase() === req.user.username.toLowerCase()) return res.status(400).json({ error: 'Cannot add yourself' });
+  const target = stmts.getUserByUsername.get(username);
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  // Check if already friends
+  const friends = stmts.getFriends.all(req.user.id);
+  if (friends.some(f => f.id === target.id)) return res.status(400).json({ error: 'Already friends' });
+  stmts.sendFriendRequest.run(req.user.id, target.id);
+  res.json({ ok: true });
+});
+
+// Get pending requests
+app.get('/api/friends/requests', auth, (req, res) => {
+  const requests = stmts.getPendingRequests.all(req.user.id);
+  res.json({ requests });
+});
+
+// Accept request
+app.post('/api/friends/accept', auth, (req, res) => {
+  const { requestId } = req.body;
+  if (!requestId) return res.status(400).json({ error: 'Request ID required' });
+  stmts.acceptFriendRequest.run(requestId, req.user.id);
+  res.json({ ok: true });
+});
+
+// Decline request
+app.post('/api/friends/decline', auth, (req, res) => {
+  const { requestId } = req.body;
+  if (!requestId) return res.status(400).json({ error: 'Request ID required' });
+  stmts.declineFriendRequest.run(requestId, req.user.id);
+  res.json({ ok: true });
+});
+
+// Get friends list
+app.get('/api/friends', auth, (req, res) => {
+  const friends = stmts.getFriends.all(req.user.id);
+  res.json({ friends });
+});
+
+// Send message
+app.post('/api/friends/message', auth, (req, res) => {
+  const { friendId, text } = req.body;
+  if (!friendId || !text) return res.status(400).json({ error: 'Friend ID and text required' });
+  if (text.length > 500) return res.status(400).json({ error: 'Message too long' });
+  if (!isCleanText(text)) return res.status(400).json({ error: 'Please keep messages appropriate' });
+  // Verify they are friends
+  const friends = stmts.getFriends.all(req.user.id);
+  if (!friends.some(f => f.id === friendId)) return res.status(403).json({ error: 'Not friends' });
+  stmts.sendMessage.run(req.user.id, friendId, text.trim());
+  res.json({ ok: true });
+});
+
+// Get messages with a friend
+app.get('/api/friends/messages/:friendId', auth, (req, res) => {
+  const friendId = parseInt(req.params.friendId);
+  if (!friendId) return res.status(400).json({ error: 'Invalid friend ID' });
+  const friends = stmts.getFriends.all(req.user.id);
+  if (!friends.some(f => f.id === friendId)) return res.status(403).json({ error: 'Not friends' });
+  const messages = stmts.getMessages.all(req.user.id, friendId, 50);
+  res.json({ messages: messages.reverse() });
+});
+
 // ─── Anthropic API Proxy ───
 
 app.post('/api/chat', auth, async (req, res) => {

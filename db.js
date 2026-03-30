@@ -40,6 +40,30 @@ async function initDb() {
     );
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS friend_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      from_user INTEGER NOT NULL,
+      to_user INTEGER NOT NULL,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (from_user) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(from_user, to_user)
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      from_user INTEGER NOT NULL,
+      to_user INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (from_user) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
   save();
   return db;
 }
@@ -119,6 +143,55 @@ const stmts = {
   },
   deleteUser: {
     run: (userId) => run('DELETE FROM users WHERE id = ?', [userId]),
+  },
+  // Friends
+  sendFriendRequest: {
+    run: (fromId, toId) => run(
+      'INSERT OR IGNORE INTO friend_requests (from_user, to_user, status) VALUES (?, ?, \'pending\')',
+      [fromId, toId]
+    ),
+  },
+  getPendingRequests: {
+    all: (userId) => all(
+      `SELECT fr.id, fr.from_user, u.username, fr.created_at
+       FROM friend_requests fr JOIN users u ON u.id = fr.from_user
+       WHERE fr.to_user = ? AND fr.status = 'pending' ORDER BY fr.created_at DESC`, [userId]
+    ),
+  },
+  acceptFriendRequest: {
+    run: (requestId, userId) => run(
+      'UPDATE friend_requests SET status = \'accepted\' WHERE id = ? AND to_user = ?',
+      [requestId, userId]
+    ),
+  },
+  declineFriendRequest: {
+    run: (requestId, userId) => run(
+      'DELETE FROM friend_requests WHERE id = ? AND to_user = ?',
+      [requestId, userId]
+    ),
+  },
+  getFriends: {
+    all: (userId) => all(
+      `SELECT u.id, u.username FROM users u WHERE u.id IN (
+        SELECT CASE WHEN from_user = ? THEN to_user ELSE from_user END
+        FROM friend_requests WHERE (from_user = ? OR to_user = ?) AND status = 'accepted'
+      )`, [userId, userId, userId]
+    ),
+  },
+  sendMessage: {
+    run: (fromId, toId, text) => run(
+      'INSERT INTO messages (from_user, to_user, text) VALUES (?, ?, ?)',
+      [fromId, toId, text]
+    ),
+  },
+  getMessages: {
+    all: (userId, friendId, limit) => all(
+      `SELECT m.id, m.from_user, m.to_user, m.text, m.created_at, u.username as sender_name
+       FROM messages m JOIN users u ON u.id = m.from_user
+       WHERE (m.from_user = ? AND m.to_user = ?) OR (m.from_user = ? AND m.to_user = ?)
+       ORDER BY m.created_at DESC LIMIT ?`,
+      [userId, friendId, friendId, userId, limit || 50]
+    ),
   },
 };
 
