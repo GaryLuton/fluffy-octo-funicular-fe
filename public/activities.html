@@ -101,6 +101,26 @@
 </head>
 <body>
 
+<!-- Decorative background sparkles/stars -->
+<div class="bg-deco">
+  <!-- 4-point star -->
+  <svg class="spark1" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0 C52 40 60 48 100 50 C60 52 52 60 50 100 C48 60 40 52 0 50 C40 48 48 40 50 0Z"/></svg>
+  <!-- sparkle -->
+  <svg class="spark2" viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="6"/><path d="M50 10 L52 44 50 10ZM50 90 L48 56 50 90ZM10 50 L44 48 10 50ZM90 50 L56 52 90 50Z" stroke="currentColor" stroke-width="3"/></svg>
+  <!-- small star -->
+  <svg class="spark3" viewBox="0 0 100 100" fill="currentColor"><polygon points="50,5 61,38 95,38 67,59 78,92 50,72 22,92 33,59 5,38 39,38"/></svg>
+  <!-- 4-point star -->
+  <svg class="spark4" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0 C52 40 60 48 100 50 C60 52 52 60 50 100 C48 60 40 52 0 50 C40 48 48 40 50 0Z"/></svg>
+  <!-- tiny diamond -->
+  <svg class="spark5" viewBox="0 0 100 100" fill="currentColor"><polygon points="50,5 80,50 50,95 20,50"/></svg>
+  <!-- sparkle -->
+  <svg class="spark6" viewBox="0 0 100 100" fill="currentColor"><polygon points="50,5 61,38 95,38 67,59 78,92 50,72 22,92 33,59 5,38 39,38"/></svg>
+  <!-- 4-point star -->
+  <svg class="spark7" viewBox="0 0 100 100" fill="currentColor"><path d="M50 0 C52 40 60 48 100 50 C60 52 52 60 50 100 C48 60 40 52 0 50 C40 48 48 40 50 0Z"/></svg>
+  <!-- small dot cluster -->
+  <svg class="spark8" viewBox="0 0 100 100" fill="currentColor"><circle cx="50" cy="50" r="12"/><circle cx="25" cy="30" r="6"/><circle cx="75" cy="30" r="6"/><circle cx="25" cy="70" r="6"/><circle cx="75" cy="70" r="6"/></svg>
+</div>
+
 <nav id="mainNav">
   <a class="logo" id="navLogo" href="index.html">Stuflover</a>
   <div class="nav-links">
@@ -282,11 +302,15 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
       const row = document.createElement('div');
       row.className = 'cards-row';
 
+      var cardIndex = 0;
       items.forEach(function(item){
         const card = document.createElement('div');
         card.className = 'activity-card';
+        card.setAttribute('data-cat', cat.key);
         card.style.background = pal.bg === '#f9c4c4' ? '#fff' : lightenHex(pal.bg, 0.35);
         card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
+        card.style.animationDelay = (cardIndex * 0.1) + 's';
+        cardIndex++;
 
         const tag = document.createElement('span');
         tag.className = 'card-tag';
