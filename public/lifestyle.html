@@ -479,6 +479,46 @@
       .routine-col{max-width:100%;}
     }
 
+    /* ── FRIENDS / MESSAGES ── */
+    #friendsView{display:none;flex:1;flex-direction:row;overflow:hidden;}
+    #friendsView.active{display:flex;}
+    .fr-sidebar{width:240px;border-right:1px solid rgba(128,128,128,0.08);display:flex;flex-direction:column;overflow:hidden;}
+    .fr-sidebar-header{padding:14px 16px;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;justify-content:space-between;}
+    .fr-sidebar-title{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.35;}
+    .fr-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.15s;}
+    .fr-add-btn:hover{opacity:0.6;}
+    .fr-requests{border-bottom:1px solid rgba(128,128,128,0.06);}
+    .fr-req{display:flex;align-items:center;gap:8px;padding:10px 16px;font-size:0.82rem;}
+    .fr-req-name{flex:1;font-weight:600;}
+    .fr-req-btn{padding:4px 10px;border-radius:6px;font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:none;transition:opacity 0.15s;}
+    .fr-req-btn:hover{opacity:0.7;}
+    .fr-list{flex:1;overflow-y:auto;}
+    .fr-item{padding:12px 16px;cursor:pointer;transition:background 0.1s;display:flex;align-items:center;gap:10px;font-size:0.88rem;}
+    .fr-item:hover{background:rgba(128,128,128,0.06);}
+    .fr-item.on{background:rgba(128,128,128,0.1);}
+    .fr-item-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;}
+    .fr-item-name{font-weight:600;}
+    .fr-chat{flex:1;display:flex;flex-direction:column;}
+    .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;}
+    .fr-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+    .fr-msg{max-width:75%;padding:10px 14px;border-radius:16px;font-size:0.88rem;line-height:1.55;word-break:break-word;}
+    .fr-msg.me{align-self:flex-end;border-bottom-right-radius:4px;}
+    .fr-msg.them{align-self:flex-start;border-bottom-left-radius:4px;}
+    .fr-msg-time{font-size:0.6rem;opacity:0.3;margin-top:3px;}
+    .fr-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(128,128,128,0.06);}
+    .fr-input{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;}
+    .fr-input:focus{border-color:rgba(128,128,128,0.3);}
+    .fr-send{padding:10px 20px;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .fr-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;text-align:center;padding:40px;}
+    .fr-add-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .fr-add-modal.open{display:flex;}
+    .fr-add-box{padding:28px;border-radius:16px;width:90%;max-width:360px;text-align:center;}
+    .fr-add-box h3{font-size:1.2rem;margin-bottom:14px;}
+    .fr-add-box input{width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;color:inherit;outline:none;background:transparent;margin-bottom:8px;}
+    .fr-add-box .fr-add-err{font-size:0.78rem;min-height:20px;margin-bottom:8px;}
+    .fr-add-box button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin:0 4px;}
+    @media(max-width:768px){.fr-sidebar{width:100%;max-height:180px;border-right:none;border-bottom:1px solid rgba(128,128,128,0.08);}#friendsView{flex-direction:column;}}
+
     /* ── ROUTINE BUILDER ── */
     #routineView{display:none;flex:1;flex-direction:column;overflow-y:auto;padding:24px 40px 60px;}
     #routineView.active{display:flex;}
@@ -806,6 +846,36 @@
       <div class="profile-section">
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
+
+    <!-- Friends / Messages View -->
+    <div id="friendsView">
+      <div class="fr-sidebar" id="frSidebar">
+        <div class="fr-sidebar-header">
+          <div class="fr-sidebar-title bc">Friends</div>
+          <button class="fr-add-btn" onclick="openFrAddModal()">+</button>
+        </div>
+        <div class="fr-requests" id="frRequests"></div>
+        <div class="fr-list" id="frList"></div>
+      </div>
+      <div class="fr-chat" id="frChat">
+        <div class="fr-empty" id="frEmpty">Select a friend to start messaging</div>
+        <div class="fr-chat-header" id="frChatHeader" style="display:none;"></div>
+        <div class="fr-msgs" id="frMsgs" style="display:none;"></div>
+        <div class="fr-input-row" id="frInputRow" style="display:none;">
+          <input class="fr-input" id="frInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendFrMsg()"/>
+          <button class="fr-send bc" id="frSendBtn" onclick="sendFrMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="fr-add-modal" id="frAddModal">
+      <div class="fr-add-box" id="frAddBox">
+        <h3>Add a Friend</h3>
+        <input id="frAddInput" placeholder="Enter their username..." onkeydown="if(event.key==='Enter')sendFrRequest()"/>
+        <div class="fr-add-err" id="frAddErr"></div>
+        <button id="frAddSubmit" onclick="sendFrRequest()">Send Request</button>
+        <button onclick="closeFrAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
       </div>
     </div>
 
@@ -3259,6 +3329,166 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── FRIENDS / MESSAGES ──────────────────────────────────
+var API_BASE = window.STUFLOVER_API_URL || '';
+var frSelectedFriend = null;
+var frPollInterval = null;
+
+function frHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+async function openFriendsView(){
+  var pal = searchPal;
+  document.getElementById('frSidebar').style.background = pal.bg;
+  document.getElementById('frSidebar').style.color = pal.tx;
+  document.getElementById('frChat').style.background = pal.bg;
+  document.getElementById('frChat').style.color = pal.tx;
+  document.getElementById('frSendBtn').style.background = pal.ac;
+  document.getElementById('frSendBtn').style.color = pal.bg;
+  document.getElementById('frAddBox').style.background = pal.bg;
+  document.getElementById('frAddBox').style.color = pal.tx;
+  document.getElementById('frAddSubmit').style.background = pal.ac;
+  document.getElementById('frAddSubmit').style.color = pal.bg;
+  await loadFrRequests();
+  await loadFrList();
+  // Poll for new messages every 5s
+  if(frPollInterval) clearInterval(frPollInterval);
+  frPollInterval = setInterval(function(){
+    if(frSelectedFriend) loadFrMessages(frSelectedFriend);
+    loadFrRequests();
+  }, 5000);
+}
+
+async function loadFrRequests(){
+  try{
+    var res = await fetch(API_BASE+'/api/friends/requests',{headers:frHeaders()});
+    var data = await res.json();
+    var container = document.getElementById('frRequests');
+    if(!data.requests || data.requests.length===0){ container.innerHTML=''; return; }
+    var pal = searchPal;
+    container.innerHTML = data.requests.map(function(r){
+      return '<div class="fr-req" style="color:'+pal.tx+'">'+
+        '<span class="fr-req-name">'+escHtml(r.username)+'</span>'+
+        '<button class="fr-req-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="acceptFr('+r.id+')">Accept</button>'+
+        '<button class="fr-req-btn" style="background:transparent;border:1px solid '+pal.tx+'30;color:'+pal.tx+'" onclick="declineFr('+r.id+')">Decline</button>'+
+      '</div>';
+    }).join('');
+  }catch(e){}
+}
+
+async function loadFrList(){
+  try{
+    var res = await fetch(API_BASE+'/api/friends',{headers:frHeaders()});
+    var data = await res.json();
+    var container = document.getElementById('frList');
+    var pal = searchPal;
+    if(!data.friends || data.friends.length===0){
+      container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.3;font-style:italic;font-size:0.82rem;">No friends yet — add someone!</div>';
+      return;
+    }
+    container.innerHTML = data.friends.map(function(f){
+      var isOn = frSelectedFriend && frSelectedFriend.id === f.id;
+      return '<div class="fr-item'+(isOn?' on':'')+'" onclick="selectFriend('+f.id+',\''+escHtml(f.username)+'\')" style="color:'+pal.tx+'">'+
+        '<div class="fr-item-avatar" style="background:'+pal.ac+'">'+f.username.charAt(0).toUpperCase()+'</div>'+
+        '<div class="fr-item-name">'+escHtml(f.username)+'</div>'+
+      '</div>';
+    }).join('');
+  }catch(e){}
+}
+
+async function selectFriend(id, username){
+  frSelectedFriend = {id:id, username:username};
+  var pal = searchPal;
+  document.getElementById('frEmpty').style.display = 'none';
+  document.getElementById('frChatHeader').style.display = 'block';
+  document.getElementById('frChatHeader').textContent = username;
+  document.getElementById('frChatHeader').style.color = pal.tx;
+  document.getElementById('frMsgs').style.display = 'flex';
+  document.getElementById('frInputRow').style.display = 'flex';
+  loadFrList(); // refresh selected state
+  await loadFrMessages(frSelectedFriend);
+}
+
+async function loadFrMessages(friend){
+  try{
+    var res = await fetch(API_BASE+'/api/friends/messages/'+friend.id,{headers:frHeaders()});
+    var data = await res.json();
+    var container = document.getElementById('frMsgs');
+    var pal = searchPal;
+    var user = window.stufloverUser ? window.stufloverUser() : null;
+    var myId = user ? user.id : 0;
+    container.innerHTML = (data.messages||[]).map(function(m){
+      var isMe = m.from_user === myId;
+      var time = new Date(m.created_at+'Z');
+      var h = time.getHours(); var min = time.getMinutes();
+      var ts = (h%12||12)+':'+(min<10?'0':'')+min+(h<12?' am':' pm');
+      return '<div class="fr-msg '+(isMe?'me':'them')+'" style="background:'+(isMe?pal.tx+'12':pal.ac+'18')+';color:'+pal.tx+'">'+
+        escHtml(m.text)+
+        '<div class="fr-msg-time">'+ts+'</div>'+
+      '</div>';
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  }catch(e){}
+}
+
+async function sendFrMsg(){
+  if(!frSelectedFriend) return;
+  var input = document.getElementById('frInput');
+  var text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    var res = await fetch(API_BASE+'/api/friends/message',{
+      method:'POST', headers:frHeaders(),
+      body:JSON.stringify({friendId:frSelectedFriend.id, text:text})
+    });
+    var data = await res.json();
+    if(data.error){ alert(data.error); return; }
+    await loadFrMessages(frSelectedFriend);
+  }catch(e){}
+}
+
+async function acceptFr(id){
+  try{
+    await fetch(API_BASE+'/api/friends/accept',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await loadFrRequests();
+    await loadFrList();
+  }catch(e){}
+}
+
+async function declineFr(id){
+  try{
+    await fetch(API_BASE+'/api/friends/decline',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await loadFrRequests();
+  }catch(e){}
+}
+
+function openFrAddModal(){
+  document.getElementById('frAddModal').classList.add('open');
+  document.getElementById('frAddInput').value = '';
+  document.getElementById('frAddErr').textContent = '';
+  setTimeout(function(){ document.getElementById('frAddInput').focus(); },100);
+}
+function closeFrAddModal(){ document.getElementById('frAddModal').classList.remove('open'); }
+
+async function sendFrRequest(){
+  var username = document.getElementById('frAddInput').value.trim();
+  var err = document.getElementById('frAddErr');
+  if(!username){ err.textContent='Enter a username'; err.style.color='#c44'; return; }
+  try{
+    var res = await fetch(API_BASE+'/api/friends/request',{
+      method:'POST', headers:frHeaders(),
+      body:JSON.stringify({username:username})
+    });
+    var data = await res.json();
+    if(data.error){ err.textContent=data.error; err.style.color='#c44'; return; }
+    err.textContent='Request sent!'; err.style.color=searchPal.ac;
+    document.getElementById('frAddInput').value='';
+    setTimeout(closeFrAddModal, 1200);
+  }catch(e){ err.textContent='Something went wrong'; err.style.color='#c44'; }
+}
+
 // ─── ROUTINE BUILDER ─────────────────────────────────────
 var rtMode = 'morning'; // or 'night'
 
@@ -3826,6 +4056,8 @@ function openSection(id){
   document.getElementById('profileView').classList.remove('active');
   document.getElementById('routineView').style.display = 'none';
   document.getElementById('routineView').classList.remove('active');
+  document.getElementById('friendsView').style.display = 'none';
+  document.getElementById('friendsView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -3847,6 +4079,18 @@ function openSection(id){
     document.getElementById('profileView').style.display = 'flex';
     document.getElementById('profileView').classList.add('active');
     openProfileView();
+    return;
+  } else if(sec.id === 'friends'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'flex';
+    document.getElementById('friendsView').classList.add('active');
+    openFriendsView();
     return;
   } else if(sec.id === 'myroutine'){
     shopBar.style.display = 'none';
