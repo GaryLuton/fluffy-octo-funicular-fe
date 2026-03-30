@@ -479,6 +479,37 @@
       .routine-col{max-width:100%;}
     }
 
+    /* ── CONTENT WITH IT (Pinterest board) ── */
+    #contentView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #contentView.active{display:flex;}
+    .cw-header{padding:14px 24px;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;justify-content:space-between;}
+    .cw-title{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.35;}
+    .cw-post-btn{padding:8px 20px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .cw-post-btn:hover{opacity:0.8;}
+    .cw-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:start;}
+    .cw-card{border-radius:12px;overflow:hidden;cursor:pointer;transition:transform 0.2s;position:relative;}
+    .cw-card:hover{transform:translateY(-3px);}
+    .cw-card img{width:100%;display:block;aspect-ratio:3/4;object-fit:cover;background:rgba(128,128,128,0.08);}
+    .cw-card-info{padding:10px 12px;}
+    .cw-card-caption{font-size:0.82rem;font-weight:600;line-height:1.35;margin-bottom:3px;}
+    .cw-card-meta{display:flex;align-items:center;justify-content:space-between;font-size:0.7rem;opacity:0.4;}
+    .cw-card-user{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;}
+    .cw-card-likes{display:flex;align-items:center;gap:4px;cursor:pointer;transition:opacity 0.15s;}
+    .cw-card-likes:hover{opacity:0.7;}
+    .cw-card-likes.liked{opacity:1;color:inherit;}
+    .cw-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;padding:40px;text-align:center;}
+    .cw-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .cw-modal.open{display:flex;}
+    .cw-modal-box{padding:28px;border-radius:16px;width:90%;max-width:400px;}
+    .cw-modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+    .cw-modal-box input,.cw-modal-box textarea{width:100%;padding:11px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;}
+    .cw-modal-box textarea{resize:none;min-height:60px;}
+    .cw-modal-box .cw-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
+    .cw-modal-btns{display:flex;gap:8px;}
+    .cw-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .cw-img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px;display:none;}
+    @media(max-width:768px){.cw-grid{grid-template-columns:repeat(2,1fr);padding:10px;gap:8px;}}
+
     /* ── FRIENDS / MESSAGES ── */
     #friendsView{display:none;flex:1;flex-direction:row;overflow:hidden;}
     #friendsView.active{display:flex;}
@@ -846,6 +877,31 @@
       <div class="profile-section">
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
+
+    <!-- ContentWithIt Pinterest Board -->
+    <div id="contentView">
+      <div class="cw-header">
+        <div class="cw-title bc">Inspiration Board</div>
+        <button class="cw-post-btn bc" id="cwPostBtn" onclick="openCwModal()">Share a Photo</button>
+      </div>
+      <div class="cw-grid" id="cwGrid">
+        <div class="cw-empty">Loading your board...</div>
+      </div>
+    </div>
+    <div class="cw-modal" id="cwModal">
+      <div class="cw-modal-box" id="cwModalBox">
+        <h3>Share a Photo</h3>
+        <input id="cwUrlInput" placeholder="Paste an image URL..." oninput="previewCwImage()"/>
+        <img class="cw-img-preview" id="cwPreview"/>
+        <textarea id="cwCaptionInput" placeholder="Add a caption..." rows="2" maxlength="200"></textarea>
+        <input id="cwTagsInput" placeholder="Tags (e.g. aesthetic, outfit, cozy)" maxlength="100"/>
+        <div class="cw-err" id="cwErr"></div>
+        <div class="cw-modal-btns">
+          <button id="cwSubmitBtn" onclick="submitCwPost()">Post</button>
+          <button onclick="closeCwModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -3329,6 +3385,121 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── CONTENT WITH IT (Pinterest board) ────────────────────
+function cwFetch(path, opts){
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function cwHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+async function openContentView(){
+  var pal = searchPal;
+  document.getElementById('contentView').style.background = pal.bg;
+  document.getElementById('contentView').style.color = pal.tx;
+  document.getElementById('cwPostBtn').style.background = pal.ac;
+  document.getElementById('cwPostBtn').style.color = pal.bg;
+  document.getElementById('cwModalBox').style.background = pal.bg;
+  document.getElementById('cwModalBox').style.color = pal.tx;
+  document.getElementById('cwSubmitBtn').style.background = pal.ac;
+  document.getElementById('cwSubmitBtn').style.color = pal.bg;
+  await loadCwFeed();
+}
+
+async function loadCwFeed(){
+  var grid = document.getElementById('cwGrid');
+  var pal = searchPal;
+  try{
+    var res = await cwFetch('/api/posts?page=0',{headers:cwHeaders()});
+    var data = await res.json();
+    if(!data.posts || data.posts.length === 0){
+      grid.innerHTML = '<div class="cw-empty">No posts yet — be the first to share!</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    data.posts.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'cw-card';
+      card.style.background = pal.tx+'06';
+      var heartFill = p.liked ? pal.ac : 'none';
+      var heartStroke = p.liked ? pal.ac : pal.tx;
+      card.innerHTML =
+        '<img src="'+escHtml(p.image_url)+'" alt="" onerror="this.style.display=\'none\'"/>'+
+        '<div class="cw-card-info" style="color:'+pal.tx+'">'+
+          (p.caption ? '<div class="cw-card-caption">'+escHtml(p.caption)+'</div>' : '')+
+          '<div class="cw-card-meta">'+
+            '<span class="cw-card-user">'+escHtml(p.username)+'</span>'+
+            '<span class="cw-card-likes'+(p.liked?' liked':'')+'" onclick="toggleCwLike(event,'+p.id+','+(!p.liked)+')">'+
+              '<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+heartFill+'" stroke="'+heartStroke+'" stroke-width="1.5"/></svg>'+
+              ' '+(p.likes||0)+
+            '</span>'+
+          '</div>'+
+          (p.tags ? '<div style="font-size:0.65rem;opacity:0.3;margin-top:4px;">'+escHtml(p.tags)+'</div>' : '')+
+        '</div>';
+      grid.appendChild(card);
+    });
+  }catch(e){
+    grid.innerHTML = '<div class="cw-empty">Could not load — check your connection</div>';
+  }
+}
+
+async function toggleCwLike(e, postId, shouldLike){
+  e.stopPropagation();
+  try{
+    if(shouldLike){
+      await cwFetch('/api/posts/'+postId+'/like',{method:'POST',headers:cwHeaders()});
+    } else {
+      await cwFetch('/api/posts/'+postId+'/like',{method:'DELETE',headers:cwHeaders()});
+    }
+    await loadCwFeed();
+  }catch(e){}
+}
+
+function previewCwImage(){
+  var url = document.getElementById('cwUrlInput').value.trim();
+  var preview = document.getElementById('cwPreview');
+  if(url && url.match(/^https?:\/\//)){
+    preview.src = url;
+    preview.style.display = 'block';
+    preview.onerror = function(){ preview.style.display='none'; };
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function openCwModal(){
+  document.getElementById('cwModal').classList.add('open');
+  document.getElementById('cwUrlInput').value = '';
+  document.getElementById('cwCaptionInput').value = '';
+  document.getElementById('cwTagsInput').value = '';
+  document.getElementById('cwErr').textContent = '';
+  document.getElementById('cwPreview').style.display = 'none';
+  setTimeout(function(){ document.getElementById('cwUrlInput').focus(); },100);
+}
+function closeCwModal(){ document.getElementById('cwModal').classList.remove('open'); }
+
+async function submitCwPost(){
+  var url = document.getElementById('cwUrlInput').value.trim();
+  var caption = document.getElementById('cwCaptionInput').value.trim();
+  var tags = document.getElementById('cwTagsInput').value.trim();
+  var err = document.getElementById('cwErr');
+  if(!url){ err.textContent='Paste an image URL'; err.style.color='#c44'; return; }
+  if(!url.match(/^https?:\/\//)){err.textContent='Must be a valid URL starting with https://'; err.style.color='#c44'; return; }
+  err.textContent='Posting...'; err.style.color=searchPal.tx;
+  try{
+    var res = await cwFetch('/api/posts',{
+      method:'POST', headers:cwHeaders(),
+      body:JSON.stringify({imageUrl:url, caption:caption, tags:tags})
+    });
+    var data = await res.json();
+    if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
+    closeCwModal();
+    await loadCwFeed();
+  }catch(e){ err.textContent='Could not post — try again'; err.style.color='#c44'; }
+}
+
 // ─── FRIENDS / MESSAGES ──────────────────────────────────
 var frSelectedFriend = null;
 var frPollInterval = null;
@@ -3844,7 +4015,7 @@ ROUTINE BUILDING RULES:
 Remember what they tell you about their routine and refine it over time. Save their routine preferences.
 Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
   {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
-  {id:'contentwithit',name:'ContentWithIt',sub:'watch · read · listen',  col:2, prompt:'You are in the ContentWithIt section. You know their music ({MUSIC}), interests ({INTERESTS}), aesthetic ({AE}). Give specific recs — actual show names, books, channels, playlists. Tell them WHY it fits them. No generic lists.',                                                             opener:'tell me what you have been into lately and i will find your next thing'},
+  {id:'contentwithit',name:'ContentWithIt',sub:'inspo board',            col:2},
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'fomo fighter',         col:4, prompt:'You are in StufloverDaily — FOMO fighter. You know their taste: aesthetic {AE}, music {MUSIC}, interests {INTERESTS}, shop {SHOP}. Tell them what is happening in their world — new drops, things to follow, content to know about. Specific to them.',                                         opener:'ok what do you need to know about right now — fashion, music, things to follow, or just your world?'},
   {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
@@ -4075,6 +4246,8 @@ function openSection(id){
   document.getElementById('routineView').classList.remove('active');
   document.getElementById('friendsView').style.display = 'none';
   document.getElementById('friendsView').classList.remove('active');
+  document.getElementById('contentView').style.display = 'none';
+  document.getElementById('contentView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -4096,6 +4269,19 @@ function openSection(id){
     document.getElementById('profileView').style.display = 'flex';
     document.getElementById('profileView').classList.add('active');
     openProfileView();
+    return;
+  } else if(sec.id === 'contentwithit'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'flex';
+    document.getElementById('contentView').classList.add('active');
+    openContentView();
     return;
   } else if(sec.id === 'friends'){
     shopBar.style.display = 'none';

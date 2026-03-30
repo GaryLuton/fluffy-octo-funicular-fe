@@ -63,6 +63,28 @@ async function initDb() {
       FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      image_url TEXT NOT NULL,
+      caption TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS post_likes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      post_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+      UNIQUE(user_id, post_id)
+    );
+  `);
 
   save();
   return db;
@@ -191,6 +213,48 @@ const stmts = {
        WHERE (m.from_user = ? AND m.to_user = ?) OR (m.from_user = ? AND m.to_user = ?)
        ORDER BY m.created_at DESC LIMIT ?`,
       [userId, friendId, friendId, userId, limit || 50]
+    ),
+  },
+  // Posts
+  createPost: {
+    run: (userId, imageUrl, caption, tags) => run(
+      'INSERT INTO posts (user_id, image_url, caption, tags) VALUES (?, ?, ?, ?)',
+      [userId, imageUrl, caption, tags]
+    ),
+  },
+  getFeed: {
+    all: (limit, offset) => all(
+      `SELECT p.id, p.image_url, p.caption, p.tags, p.created_at, u.username,
+       (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes
+       FROM posts p JOIN users u ON u.id = p.user_id
+       ORDER BY p.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+    ),
+  },
+  getUserPosts: {
+    all: (userId) => all(
+      `SELECT p.id, p.image_url, p.caption, p.tags, p.created_at,
+       (SELECT COUNT(*) FROM post_likes WHERE post_id = p.id) as likes
+       FROM posts p WHERE p.user_id = ? ORDER BY p.created_at DESC`, [userId]
+    ),
+  },
+  likePost: {
+    run: (userId, postId) => run(
+      'INSERT OR IGNORE INTO post_likes (user_id, post_id) VALUES (?, ?)', [userId, postId]
+    ),
+  },
+  unlikePost: {
+    run: (userId, postId) => run(
+      'DELETE FROM post_likes WHERE user_id = ? AND post_id = ?', [userId, postId]
+    ),
+  },
+  getUserLikes: {
+    all: (userId) => all(
+      'SELECT post_id FROM post_likes WHERE user_id = ?', [userId]
+    ),
+  },
+  deletePost: {
+    run: (postId, userId) => run(
+      'DELETE FROM posts WHERE id = ? AND user_id = ?', [postId, userId]
     ),
   },
 };
