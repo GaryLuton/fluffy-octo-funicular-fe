@@ -3330,10 +3330,14 @@ function dtiNextRound(){
 }
 
 // ─── FRIENDS / MESSAGES ──────────────────────────────────
-var API_BASE = window.STUFLOVER_API_URL || '';
 var frSelectedFriend = null;
 var frPollInterval = null;
 
+function frFetch(path, opts){
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
 function frHeaders(){
   return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
 }
@@ -3362,7 +3366,7 @@ async function openFriendsView(){
 
 async function loadFrRequests(){
   try{
-    var res = await fetch(API_BASE+'/api/friends/requests',{headers:frHeaders()});
+    var res = await frFetch('/api/friends/requests',{headers:frHeaders()});
     var data = await res.json();
     var container = document.getElementById('frRequests');
     if(!data.requests || data.requests.length===0){ container.innerHTML=''; return; }
@@ -3412,7 +3416,7 @@ async function selectFriend(id, username){
 
 async function loadFrMessages(friend){
   try{
-    var res = await fetch(API_BASE+'/api/friends/messages/'+friend.id,{headers:frHeaders()});
+    var res = await frFetch('/api/friends/messages/'+friend.id,{headers:frHeaders()});
     var data = await res.json();
     var container = document.getElementById('frMsgs');
     var pal = searchPal;
@@ -3439,7 +3443,7 @@ async function sendFrMsg(){
   if(!text) return;
   input.value = '';
   try{
-    var res = await fetch(API_BASE+'/api/friends/message',{
+    var res = await frFetch('/api/friends/message',{
       method:'POST', headers:frHeaders(),
       body:JSON.stringify({friendId:frSelectedFriend.id, text:text})
     });
@@ -3451,7 +3455,7 @@ async function sendFrMsg(){
 
 async function acceptFr(id){
   try{
-    await fetch(API_BASE+'/api/friends/accept',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await frFetch('/api/friends/accept',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
     await loadFrRequests();
     await loadFrList();
   }catch(e){}
@@ -3459,7 +3463,7 @@ async function acceptFr(id){
 
 async function declineFr(id){
   try{
-    await fetch(API_BASE+'/api/friends/decline',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await frFetch('/api/friends/decline',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
     await loadFrRequests();
   }catch(e){}
 }
@@ -3477,16 +3481,20 @@ async function sendFrRequest(){
   var err = document.getElementById('frAddErr');
   if(!username){ err.textContent='Enter a username'; err.style.color='#c44'; return; }
   try{
-    var res = await fetch(API_BASE+'/api/friends/request',{
+    var res = await frFetch('/api/friends/request',{
       method:'POST', headers:frHeaders(),
       body:JSON.stringify({username:username})
     });
+    if(!res.ok){
+      var data = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
+      err.textContent=data.error||'Failed'; err.style.color='#c44'; return;
+    }
     var data = await res.json();
     if(data.error){ err.textContent=data.error; err.style.color='#c44'; return; }
     err.textContent='Request sent!'; err.style.color=searchPal.ac;
     document.getElementById('frAddInput').value='';
     setTimeout(closeFrAddModal, 1200);
-  }catch(e){ err.textContent='Something went wrong'; err.style.color='#c44'; }
+  }catch(e){ err.textContent='Cannot reach server — check connection'; err.style.color='#c44'; console.error('Friend request error:', e); }
 }
 
 // ─── ROUTINE BUILDER ─────────────────────────────────────
