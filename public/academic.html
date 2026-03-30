@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Helper — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <script src="stuflover-config.js"></script>
+  <script src="stuflover-backend.js"></script>
+  <style>
+    :root{--pink:#f9c4c4;--pink-mid:#f5aaaa;--terra:#c4522a;--terra-dark:#a83e1e;--brown:#1e0c06;--white:#fff;--peach:#f7d4b0;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    /* NAV */
+    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);}
+    .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;color:var(--brown);}
+    .nav-links{display:flex;gap:16px;}
+    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--brown);transition:opacity 0.2s;}
+    .nav-link:hover{opacity:0.55;}
+
+    /* TABS */
+    .tabs-bar{display:flex;justify-content:center;gap:0;margin-top:70px;padding:10px 40px 0;background:var(--pink);}
+    .tab-btn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:3px;text-transform:uppercase;padding:14px 32px;border:none;background:none;color:var(--brown);cursor:pointer;opacity:0.4;border-bottom:3px solid transparent;transition:all 0.2s;}
+    .tab-btn.active{opacity:1;border-bottom-color:var(--terra);}
+    .tab-btn:hover{opacity:0.7;}
+
+    /* TAB CONTENT */
+    .tab-content{display:none;max-width:760px;margin:0 auto;padding:30px 24px 60px;}
+    .tab-content.active{display:block;}
+
+    /* HOMEWORK CHAT */
+    .chat-box{background:var(--white);border-radius:12px;padding:20px;min-height:380px;max-height:55vh;overflow-y:auto;margin-bottom:16px;border:1px solid rgba(30,12,6,0.06);}
+    .chat-msg{margin-bottom:14px;line-height:1.7;font-size:0.95rem;}
+    .chat-msg.user{text-align:right;}
+    .chat-msg.user span{background:var(--terra);color:var(--white);padding:8px 14px;border-radius:14px 14px 4px 14px;display:inline-block;max-width:80%;}
+    .chat-msg.ai span{background:var(--peach);color:var(--brown);padding:8px 14px;border-radius:14px 14px 14px 4px;display:inline-block;max-width:80%;}
+    .chat-input-row{display:flex;gap:10px;}
+    .chat-input-row input{flex:1;padding:14px 16px;border-radius:8px;border:1.5px solid rgba(30,12,6,0.1);font-family:inherit;font-size:0.95rem;outline:none;}
+    .chat-input-row input:focus{border-color:var(--terra);}
+    .send-btn,.action-btn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;background:var(--terra);color:white;border:none;border-radius:8px;padding:14px 24px;cursor:pointer;transition:background 0.2s;}
+    .send-btn:hover,.action-btn:hover{background:var(--terra-dark);}
+    .send-btn:disabled,.action-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+    /* FLASH CARDS */
+    .fc-create{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+    .fc-create input{flex:1;min-width:120px;padding:12px 14px;border-radius:8px;border:1.5px solid rgba(30,12,6,0.1);font-family:inherit;font-size:0.95rem;outline:none;}
+    .fc-create input:focus{border-color:var(--terra);}
+    .card-stage{display:flex;flex-direction:column;align-items:center;gap:20px;}
+    .flip-card{width:100%;max-width:440px;height:260px;perspective:800px;cursor:pointer;}
+    .flip-card-inner{position:relative;width:100%;height:100%;transition:transform 0.5s;transform-style:preserve-3d;}
+    .flip-card.flipped .flip-card-inner{transform:rotateY(180deg);}
+    .flip-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;padding:28px;font-size:1.3rem;text-align:center;line-height:1.6;font-weight:500;}
+    .flip-front{background:var(--white);border:2px solid rgba(30,12,6,0.08);}
+    .flip-back{background:var(--terra);color:var(--white);transform:rotateY(180deg);}
+    .fc-controls{display:flex;gap:12px;align-items:center;}
+    .fc-nav{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;border-radius:6px;border:1.5px solid var(--terra);background:none;color:var(--terra);cursor:pointer;transition:all 0.2s;}
+    .fc-nav:hover{background:var(--terra);color:white;}
+    .fc-nav:disabled{opacity:0.3;cursor:not-allowed;}
+    .fc-counter{font-size:0.85rem;color:rgba(30,12,6,0.45);letter-spacing:1px;}
+    .fc-clear{margin-top:10px;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;background:none;border:none;color:rgba(30,12,6,0.35);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;}
+    .fc-clear:hover{color:var(--terra);}
+    .fc-empty{text-align:center;color:rgba(30,12,6,0.35);padding:60px 20px;font-size:1rem;}
+
+    /* QUIZ */
+    .quiz-topic-row{display:flex;gap:10px;margin-bottom:24px;}
+    .quiz-topic-row input{flex:1;padding:14px 16px;border-radius:8px;border:1.5px solid rgba(30,12,6,0.1);font-family:inherit;font-size:0.95rem;outline:none;}
+    .quiz-topic-row input:focus{border-color:var(--terra);}
+    .quiz-q{background:var(--white);border-radius:12px;padding:28px;margin-bottom:16px;border:1px solid rgba(30,12,6,0.06);}
+    .quiz-q h3{font-size:1.15rem;margin-bottom:18px;line-height:1.5;}
+    .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .quiz-opt{padding:14px 16px;border-radius:8px;border:1.5px solid rgba(30,12,6,0.1);background:var(--white);font-family:inherit;font-size:0.95rem;cursor:pointer;text-align:left;transition:all 0.15s;line-height:1.5;}
+    .quiz-opt:hover:not(:disabled){border-color:var(--terra);background:rgba(196,82,42,0.05);}
+    .quiz-opt.correct{background:#c8f5c8;border-color:#3a3;}
+    .quiz-opt.wrong{background:#f5c8c8;border-color:#c33;}
+    .quiz-opt:disabled{cursor:default;}
+    .quiz-explanation{margin-top:14px;padding:14px;background:var(--peach);border-radius:8px;font-size:0.9rem;line-height:1.7;}
+    .quiz-score{font-size:0.85rem;color:rgba(30,12,6,0.5);margin-bottom:16px;letter-spacing:1px;}
+    .quiz-next-row{margin-top:16px;display:flex;gap:12px;}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo bc">Stuflover</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link bc">Home</a>
+    <a href="lifestyle.html" class="nav-link bc">Lifestyle</a>
+  </div>
+</nav>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn bc active" data-tab="homework">Homework Help</button>
+  <button class="tab-btn bc" data-tab="flashcards">Flash Cards</button>
+  <button class="tab-btn bc" data-tab="quiz">Quiz</button>
+</div>
+
+<!-- HOMEWORK HELP -->
+<div id="homework" class="tab-content active">
+  <div class="chat-box" id="chatBox"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask about your homework..." autocomplete="off"/>
+    <button class="send-btn bc" id="chatSend">Send</button>
+  </div>
+</div>
+
+<!-- FLASH CARDS -->
+<div id="flashcards" class="tab-content">
+  <div class="fc-create">
+    <input type="text" id="fcFront" placeholder="Front (question)"/>
+    <input type="text" id="fcBack" placeholder="Back (answer)"/>
+    <button class="action-btn bc" id="fcAdd">Add</button>
+  </div>
+  <div class="card-stage" id="fcStage">
+    <div class="fc-empty" id="fcEmpty">No cards yet. Add some above!</div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="tab-content">
+  <div class="quiz-topic-row">
+    <input type="text" id="quizTopic" placeholder="Enter a topic (e.g. Photosynthesis, WW2, Algebra)"/>
+    <button class="action-btn bc" id="quizGen">Generate</button>
+  </div>
+  <div class="quiz-score bc" id="quizScore"></div>
+  <div id="quizArea"></div>
+</div>
+
+<script>
+(function(){
+  /* ── Palette from profile ── */
+  try{
+    var p=JSON.parse(localStorage.getItem('stuflover_profile'));
+    if(p&&p.palette){
+      var c=p.palette;
+      if(c.bg) document.documentElement.style.setProperty('--pink',c.bg);
+      if(c.accent) {document.documentElement.style.setProperty('--terra',c.accent);document.documentElement.style.setProperty('--terra-dark',c.accent);}
+      if(c.text) document.documentElement.style.setProperty('--brown',c.text);
+      if(c.card) document.documentElement.style.setProperty('--peach',c.card);
+      if(c.secondary) document.documentElement.style.setProperty('--pink-mid',c.secondary);
+      /* nav bg */
+      if(c.bg){var nav=document.querySelector('nav');if(nav)nav.style.background=c.bg+'f7';}
+    }
+  }catch(e){}
+
+  /* ── Tabs ── */
+  var tabs=document.querySelectorAll('.tab-btn');
+  var panes=document.querySelectorAll('.tab-content');
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(b){b.classList.remove('active');});
+      panes.forEach(function(p){p.classList.remove('active');});
+      t.classList.add('active');
+      document.getElementById(t.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ════════════════════════════
+     HOMEWORK HELP (Chat)
+  ════════════════════════════ */
+  var chatBox=document.getElementById('chatBox');
+  var chatInput=document.getElementById('chatInput');
+  var chatSend=document.getElementById('chatSend');
+  var chatHistory=[];
+  var SYSTEM_PROMPT="You are a friendly study buddy. Help them understand homework. Explain simply. Never give direct answers — help them learn. Use the Socratic method.";
+
+  function addMsg(role,text){
+    var d=document.createElement('div');
+    d.className='chat-msg '+(role==='user'?'user':'ai');
+    d.innerHTML='<span>'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</span>';
+    chatBox.appendChild(d);
+    chatBox.scrollTop=chatBox.scrollHeight;
+  }
+
+  async function sendChat(){
+    var msg=chatInput.value.trim();
+    if(!msg)return;
+    chatInput.value='';
+    addMsg('user',msg);
+    chatHistory.push({role:'user',content:msg});
+    chatSend.disabled=true;
+    try{
+      var res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:500,
+          system:SYSTEM_PROMPT,
+          messages:chatHistory
+        })
+      });
+      var data=await res.json();
+      var reply=data.content&&data.content[0]?data.content[0].text:'Sorry, something went wrong.';
+      chatHistory.push({role:'assistant',content:reply});
+      addMsg('ai',reply);
+    }catch(e){
+      addMsg('ai','Error: '+e.message);
+    }
+    chatSend.disabled=false;
+    chatInput.focus();
+  }
+
+  chatSend.addEventListener('click',sendChat);
+  chatInput.addEventListener('keydown',function(e){if(e.key==='Enter')sendChat();});
+
+  /* ════════════════════════════
+     FLASH CARDS
+  ════════════════════════════ */
+  var FC_KEY='stuflover_flashcards';
+  var cards=JSON.parse(localStorage.getItem(FC_KEY)||'[]');
+  var fcIdx=0;
+  var fcStage=document.getElementById('fcStage');
+  var fcEmpty=document.getElementById('fcEmpty');
+
+  function saveCards(){localStorage.setItem(FC_KEY,JSON.stringify(cards));}
+
+  function renderCard(){
+    /* remove old card elements */
+    fcStage.querySelectorAll('.flip-card,.fc-controls,.fc-clear').forEach(function(e){e.remove();});
+    fcEmpty.style.display=cards.length?'none':'block';
+    if(!cards.length)return;
+    if(fcIdx>=cards.length)fcIdx=cards.length-1;
+    if(fcIdx<0)fcIdx=0;
+    var c=cards[fcIdx];
+
+    var fc=document.createElement('div');fc.className='flip-card';
+    fc.innerHTML='<div class="flip-card-inner"><div class="flip-face flip-front">'+esc(c.front)+'</div><div class="flip-face flip-back">'+esc(c.back)+'</div></div>';
+    fc.addEventListener('click',function(){fc.classList.toggle('flipped');});
+
+    var ctrls=document.createElement('div');ctrls.className='fc-controls';
+    var prev=document.createElement('button');prev.className='fc-nav';prev.textContent='Prev';prev.disabled=fcIdx===0;
+    prev.addEventListener('click',function(){fcIdx--;renderCard();});
+    var counter=document.createElement('span');counter.className='fc-counter';counter.textContent=(fcIdx+1)+' / '+cards.length;
+    var next=document.createElement('button');next.className='fc-nav';next.textContent='Next';next.disabled=fcIdx===cards.length-1;
+    next.addEventListener('click',function(){fcIdx++;renderCard();});
+    ctrls.appendChild(prev);ctrls.appendChild(counter);ctrls.appendChild(next);
+
+    var clr=document.createElement('button');clr.className='fc-clear';clr.textContent='Clear All Cards';
+    clr.addEventListener('click',function(){if(confirm('Delete all flash cards?')){cards=[];fcIdx=0;saveCards();renderCard();}});
+
+    fcStage.appendChild(fc);fcStage.appendChild(ctrls);fcStage.appendChild(clr);
+  }
+
+  function esc(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+  document.getElementById('fcAdd').addEventListener('click',function(){
+    var f=document.getElementById('fcFront').value.trim();
+    var b=document.getElementById('fcBack').value.trim();
+    if(!f||!b)return;
+    cards.push({front:f,back:b});
+    saveCards();
+    document.getElementById('fcFront').value='';
+    document.getElementById('fcBack').value='';
+    fcIdx=cards.length-1;
+    renderCard();
+  });
+
+  renderCard();
+
+  /* ════════════════════════════
+     QUIZ
+  ════════════════════════════ */
+  var quizArea=document.getElementById('quizArea');
+  var quizScore=document.getElementById('quizScore');
+  var quizTopic=document.getElementById('quizTopic');
+  var quizGen=document.getElementById('quizGen');
+  var score={correct:0,total:0};
+  var currentTopic='';
+
+  function updateScore(){
+    quizScore.textContent=score.total?'Score: '+score.correct+' / '+score.total:'';
+  }
+
+  async function generateQuestion(){
+    quizArea.innerHTML='<p style="color:rgba(30,12,6,0.4);text-align:center;padding:40px 0;">Generating question...</p>';
+    quizGen.disabled=true;
+    try{
+      var res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:500,
+          system:'Generate exactly 1 multiple-choice question about: '+currentTopic+'. Respond ONLY with valid JSON, no markdown, no extra text. Format: {"question":"...","options":["a","b","c","d"],"correct":0,"explanation":"why"}. The "correct" field is the 0-based index of the right answer.',
+          messages:[{role:'user',content:'Generate a question about '+currentTopic+'. Return only JSON.'}]
+        })
+      });
+      var data=await res.json();
+      var txt=data.content&&data.content[0]?data.content[0].text:'';
+      /* extract JSON from response */
+      var match=txt.match(/\{[\s\S]*\}/);
+      if(!match)throw new Error('No JSON in response');
+      var q=JSON.parse(match[0]);
+      showQuestion(q);
+    }catch(e){
+      quizArea.innerHTML='<p style="color:#c33;text-align:center;">Error: '+e.message+'</p>';
+    }
+    quizGen.disabled=false;
+  }
+
+  function showQuestion(q){
+    quizArea.innerHTML='';
+    var wrap=document.createElement('div');wrap.className='quiz-q';
+    var h=document.createElement('h3');h.textContent=q.question;
+    wrap.appendChild(h);
+
+    var opts=document.createElement('div');opts.className='quiz-opts';
+    var answered=false;
+
+    q.options.forEach(function(opt,i){
+      var btn=document.createElement('button');btn.className='quiz-opt';btn.textContent=opt;
+      btn.addEventListener('click',function(){
+        if(answered)return;
+        answered=true;
+        score.total++;
+        opts.querySelectorAll('.quiz-opt').forEach(function(b){b.disabled=true;});
+        if(i===q.correct){
+          btn.classList.add('correct');
+          score.correct++;
+        }else{
+          btn.classList.add('wrong');
+          opts.querySelectorAll('.quiz-opt')[q.correct].classList.add('correct');
+        }
+        updateScore();
+        /* explanation */
+        if(q.explanation){
+          var exp=document.createElement('div');exp.className='quiz-explanation';
+          exp.textContent=q.explanation;
+          wrap.appendChild(exp);
+        }
+        /* next button */
+        var nrow=document.createElement('div');nrow.className='quiz-next-row';
+        var nxt=document.createElement('button');nxt.className='action-btn bc';nxt.textContent='Next Question';
+        nxt.addEventListener('click',function(){generateQuestion();});
+        nrow.appendChild(nxt);
+        wrap.appendChild(nrow);
+      });
+      opts.appendChild(btn);
+    });
+
+    wrap.appendChild(opts);
+    quizArea.appendChild(wrap);
+  }
+
+  quizGen.addEventListener('click',function(){
+    var t=quizTopic.value.trim();
+    if(!t)return;
+    currentTopic=t;
+    score={correct:0,total:0};
+    updateScore();
+    generateQuestion();
+  });
+
+  quizTopic.addEventListener('keydown',function(e){
+    if(e.key==='Enter')quizGen.click();
+  });
+})();
+</script>
+</body>
+</html>
