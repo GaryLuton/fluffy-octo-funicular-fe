@@ -313,6 +313,68 @@ app.delete('/api/posts/:id', auth, (req, res) => {
   }
 });
 
+// ─── Groups ───
+
+app.post('/api/groups', auth, (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name || name.length < 2) return res.status(400).json({ error: 'Group name required (min 2 chars)' });
+    if (name.length > 40) return res.status(400).json({ error: 'Group name too long (max 40 chars)' });
+    if (!isCleanText(name)) return res.status(400).json({ error: 'Please keep group names appropriate' });
+    if (description && !isCleanText(description)) return res.status(400).json({ error: 'Please keep descriptions appropriate' });
+    const result = stmts.createGroup.run(name.trim(), (description || '').substring(0, 200), req.user.id);
+    // Auto-join the creator
+    stmts.joinGroup.run(result.lastInsertRowid, req.user.id);
+    res.json({ ok: true, groupId: result.lastInsertRowid });
+  } catch (err) {
+    console.error('Create group error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/groups', auth, (req, res) => {
+  try {
+    const groups = stmts.getAllGroups.all();
+    const userGroups = stmts.getUserGroups.all(req.user.id);
+    const joinedIds = new Set(userGroups.map(g => g.id));
+    groups.forEach(g => { g.joined = joinedIds.has(g.id); });
+    res.json({ groups });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/groups/:id', auth, (req, res) => {
+  try {
+    const group = stmts.getGroup.get(parseInt(req.params.id));
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+    const members = stmts.getGroupMembers.all(group.id);
+    const userGroups = stmts.getUserGroups.all(req.user.id);
+    group.joined = userGroups.some(g => g.id === group.id);
+    res.json({ group, members });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/groups/:id/join', auth, (req, res) => {
+  try {
+    stmts.joinGroup.run(parseInt(req.params.id), req.user.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/groups/:id/leave', auth, (req, res) => {
+  try {
+    stmts.leaveGroup.run(parseInt(req.params.id), req.user.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ─── Anthropic API Proxy ───
 
 app.post('/api/chat', auth, async (req, res) => {
