@@ -285,6 +285,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
   function renderActivities(data){
     const container = document.getElementById('activitiesContainer');
     container.innerHTML = '';
+    var globalCardIdx = 0;
 
     CATEGORIES.forEach(function(cat){
       const items = data[cat.key];
@@ -302,15 +303,14 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
       const row = document.createElement('div');
       row.className = 'cards-row';
 
-      var cardIndex = 0;
       items.forEach(function(item){
         const card = document.createElement('div');
         card.className = 'activity-card';
         card.setAttribute('data-cat', cat.key);
         card.style.background = pal.bg === '#f9c4c4' ? '#fff' : lightenHex(pal.bg, 0.35);
         card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
-        card.style.animationDelay = (cardIndex * 0.1) + 's';
-        cardIndex++;
+        card.style.animationDelay = (globalCardIdx * 0.08) + 's';
+        globalCardIdx++;
 
         const tag = document.createElement('span');
         tag.className = 'card-tag';
