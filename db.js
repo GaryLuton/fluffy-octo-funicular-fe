@@ -116,7 +116,7 @@ const stmts = {
     get: (email) => get('SELECT * FROM users WHERE email = ?', [email]),
   },
   getUserByUsername: {
-    get: (username) => get('SELECT * FROM users WHERE username = ?', [username]),
+    get: (username) => get('SELECT * FROM users WHERE LOWER(username) = LOWER(?)', [username]),
   },
   getUserById: {
     get: (id) => get('SELECT id, username, email, created_at FROM users WHERE id = ?', [id]),
