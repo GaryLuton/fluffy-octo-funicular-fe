@@ -108,6 +108,43 @@ async function initDb() {
     );
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS book_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT DEFAULT '',
+      book_title TEXT DEFAULT '',
+      book_author TEXT DEFAULT '',
+      tag TEXT DEFAULT 'discussion',
+      image_url TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS book_comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (post_id) REFERENCES book_posts(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS book_votes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      post_id INTEGER NOT NULL,
+      vote INTEGER DEFAULT 1,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (post_id) REFERENCES book_posts(id) ON DELETE CASCADE,
+      UNIQUE(user_id, post_id)
+    );
+  `);
+
   save();
   return db;
 }
@@ -325,6 +362,48 @@ const stmts = {
     run: (groupId, ownerId) => run(
       'DELETE FROM groups_ WHERE id = ? AND owner_id = ?', [groupId, ownerId]
     ),
+  },
+  // ReadIt (book posts)
+  createBookPost: {
+    run: (userId, title, body, bookTitle, bookAuthor, tag, imageUrl) => run(
+      'INSERT INTO book_posts (user_id, title, body, book_title, book_author, tag, image_url) VALUES (?,?,?,?,?,?,?)',
+      [userId, title, body, bookTitle, bookAuthor, tag, imageUrl||'']
+    ),
+  },
+  getBookFeed: {
+    all: (limit, offset) => all(
+      `SELECT bp.id, bp.title, bp.body, bp.book_title, bp.book_author, bp.tag, bp.image_url, bp.created_at, u.username,
+       (SELECT COALESCE(SUM(vote),0) FROM book_votes WHERE post_id=bp.id) as votes,
+       (SELECT COUNT(*) FROM book_comments WHERE post_id=bp.id) as comment_count
+       FROM book_posts bp JOIN users u ON u.id=bp.user_id ORDER BY bp.created_at DESC LIMIT ? OFFSET ?`, [limit, offset]
+    ),
+  },
+  getBookPost: {
+    get: (postId) => get(
+      `SELECT bp.*, u.username,
+       (SELECT COALESCE(SUM(vote),0) FROM book_votes WHERE post_id=bp.id) as votes,
+       (SELECT COUNT(*) FROM book_comments WHERE post_id=bp.id) as comment_count
+       FROM book_posts bp JOIN users u ON u.id=bp.user_id WHERE bp.id=?`, [postId]
+    ),
+  },
+  getBookComments: {
+    all: (postId) => all(
+      'SELECT bc.*, u.username FROM book_comments bc JOIN users u ON u.id=bc.user_id WHERE bc.post_id=? ORDER BY bc.created_at ASC', [postId]
+    ),
+  },
+  addBookComment: {
+    run: (postId, userId, text) => run(
+      'INSERT INTO book_comments (post_id, user_id, text) VALUES (?,?,?)', [postId, userId, text]
+    ),
+  },
+  voteBookPost: {
+    run: (userId, postId, vote) => run(
+      `INSERT INTO book_votes (user_id, post_id, vote) VALUES (?,?,?)
+       ON CONFLICT(user_id, post_id) DO UPDATE SET vote=excluded.vote`, [userId, postId, vote]
+    ),
+  },
+  getUserBookVote: {
+    get: (userId, postId) => get('SELECT vote FROM book_votes WHERE user_id=? AND post_id=?', [userId, postId]),
   },
 };
 

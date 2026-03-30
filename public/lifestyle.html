@@ -514,6 +514,56 @@
       .routine-col{max-width:100%;}
     }
 
+    /* ── READIT (Book community) ── */
+    #readitView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #readitView.active{display:flex;}
+    .ri-header{padding:14px 24px;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;justify-content:space-between;}
+    .ri-logo{font-size:1.2rem;font-weight:700;letter-spacing:-0.3px;}
+    .ri-logo span{opacity:0.4;}
+    .ri-tabs{display:flex;gap:4px;}
+    .ri-tab{padding:6px 14px;border-radius:16px;font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.1);background:transparent;color:inherit;opacity:0.45;transition:all 0.15s;}
+    .ri-tab.on{opacity:1;}
+    .ri-new-btn{padding:8px 18px;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .ri-new-btn:hover{transform:translateY(-1px);opacity:0.9;}
+    .ri-feed{flex:1;overflow-y:auto;padding:14px 20px;display:flex;flex-direction:column;gap:12px;}
+    .ri-post{border-radius:14px;padding:18px;display:flex;gap:14px;transition:transform 0.15s;cursor:pointer;}
+    .ri-post:hover{transform:translateX(3px);}
+    .ri-vote{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:32px;}
+    .ri-vote-btn{background:transparent;border:none;cursor:pointer;font-size:0.9rem;opacity:0.3;transition:all 0.15s;padding:2px;color:inherit;}
+    .ri-vote-btn:hover{opacity:0.7;transform:scale(1.2);}
+    .ri-vote-btn.on{opacity:1;}
+    .ri-vote-count{font-size:0.78rem;font-weight:700;}
+    .ri-post-body{flex:1;min-width:0;}
+    .ri-post-tag{display:inline-block;font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;padding:3px 8px;border-radius:8px;margin-bottom:6px;opacity:0.6;}
+    .ri-post-title{font-size:0.95rem;font-weight:700;line-height:1.35;margin-bottom:4px;}
+    .ri-post-book{font-size:0.78rem;opacity:0.5;font-style:italic;margin-bottom:4px;}
+    .ri-post-preview{font-size:0.8rem;opacity:0.4;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .ri-post-meta{font-size:0.62rem;opacity:0.25;margin-top:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;}
+    .ri-post-img{width:60px;height:80px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+    .ri-detail{flex:1;overflow-y:auto;padding:20px 24px;display:none;flex-direction:column;gap:14px;}
+    .ri-detail.active{display:flex;}
+    .ri-detail-back{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;opacity:0.4;transition:opacity 0.15s;background:transparent;border:none;color:inherit;padding:0;}
+    .ri-detail-back:hover{opacity:0.8;}
+    .ri-detail-title{font-size:1.3rem;font-weight:700;line-height:1.3;}
+    .ri-detail-body{font-size:0.9rem;opacity:0.6;line-height:1.7;}
+    .ri-comments{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+    .ri-comment{padding:12px;border-radius:10px;font-size:0.85rem;line-height:1.55;}
+    .ri-comment-user{font-size:0.62rem;font-weight:700;opacity:0.5;margin-bottom:3px;letter-spacing:0.5px;}
+    .ri-comment-input{display:flex;gap:8px;margin-top:8px;}
+    .ri-comment-input input{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.85rem;color:inherit;outline:none;}
+    .ri-comment-input button{padding:10px 18px;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .ri-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .ri-modal.open{display:flex;}
+    .ri-modal-box{padding:28px;border-radius:16px;width:90%;max-width:460px;max-height:90vh;overflow-y:auto;}
+    .ri-modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+    .ri-modal-box input,.ri-modal-box textarea,.ri-modal-box select{width:100%;padding:11px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;}
+    .ri-modal-box textarea{resize:none;min-height:100px;}
+    .ri-modal-box select{-webkit-appearance:none;}
+    .ri-modal-box .ri-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
+    .ri-modal-btns{display:flex;gap:8px;}
+    .ri-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .ri-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.25;font-style:italic;padding:40px;text-align:center;}
+
     /* ── FLOVEE GROUPS ── */
     #groupsView{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #groupsView.active{display:flex;}
@@ -976,6 +1026,44 @@
       <div class="profile-section">
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
+
+    <!-- ReadIt Book Community -->
+    <div id="readitView">
+      <div class="ri-header">
+        <div class="ri-logo" id="riLogo">ReadIt <span>by Stuflover</span></div>
+        <div class="ri-tabs">
+          <button class="ri-tab on bc" id="riTabNew" onclick="riSwitchTab('new')">New</button>
+          <button class="ri-tab bc" id="riTabTop" onclick="riSwitchTab('top')">Top</button>
+        </div>
+        <button class="ri-new-btn bc" id="riNewBtn" onclick="openRiModal()">New Post</button>
+      </div>
+      <div class="ri-feed" id="riFeed"><div class="ri-empty">Loading...</div></div>
+      <div class="ri-detail" id="riDetail"></div>
+    </div>
+    <div class="ri-modal" id="riModal">
+      <div class="ri-modal-box" id="riModalBox">
+        <h3>Share on ReadIt</h3>
+        <select id="riTag">
+          <option value="discussion">Discussion</option>
+          <option value="review">Book Review</option>
+          <option value="recommendation">Recommendation</option>
+          <option value="booktok">BookTok Moment</option>
+          <option value="tbr">TBR (To Be Read)</option>
+          <option value="haul">Book Haul</option>
+          <option value="quote">Favourite Quote</option>
+        </select>
+        <input id="riTitle" placeholder="Post title..." maxlength="200"/>
+        <input id="riBookTitle" placeholder="Book title (optional)..." maxlength="200"/>
+        <input id="riBookAuthor" placeholder="Author (optional)..." maxlength="100"/>
+        <input id="riImageUrl" placeholder="Cover image URL (optional)..."/>
+        <textarea id="riBody" placeholder="What are your thoughts?" rows="4" maxlength="2000"></textarea>
+        <div class="ri-err" id="riErr"></div>
+        <div class="ri-modal-btns">
+          <button id="riSubmitBtn" onclick="submitRiPost()">Post</button>
+          <button onclick="closeRiModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -3758,6 +3846,177 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── READIT (Book community) ─────────────────────────────
+var riTab = 'new';
+
+function riFetch(path, opts){
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function riHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+function riSwitchTab(tab){
+  riTab = tab;
+  var pal = searchPal;
+  document.getElementById('riTabNew').classList.toggle('on',tab==='new');
+  document.getElementById('riTabTop').classList.toggle('on',tab==='top');
+  document.getElementById('riTabNew').style.borderColor = tab==='new'?pal.ac:'rgba(128,128,128,0.1)';
+  document.getElementById('riTabTop').style.borderColor = tab==='top'?pal.ac:'rgba(128,128,128,0.1)';
+  loadRiFeed();
+}
+
+async function loadRiFeed(){
+  var feed = document.getElementById('riFeed');
+  var detail = document.getElementById('riDetail');
+  var pal = searchPal;
+  detail.style.display = 'none';
+  detail.classList.remove('active');
+  feed.style.display = 'flex';
+  document.getElementById('readitView').style.background = pal.bg;
+  document.getElementById('readitView').style.color = pal.tx;
+  document.getElementById('riNewBtn').style.background = pal.ac;
+  document.getElementById('riNewBtn').style.color = pal.bg;
+  document.getElementById('riModalBox').style.background = pal.bg;
+  document.getElementById('riModalBox').style.color = pal.tx;
+  document.getElementById('riSubmitBtn').style.background = pal.ac;
+  document.getElementById('riSubmitBtn').style.color = pal.bg;
+  document.querySelectorAll('.ri-tab').forEach(function(t){t.style.color=pal.tx;});
+  document.getElementById('riLogo').style.color = pal.tx;
+
+  feed.innerHTML = '<div class="ri-empty">Loading...</div>';
+  try{
+    var res = await riFetch('/api/books/posts?page=0',{headers:riHeaders()});
+    var data = await res.json();
+    var posts = data.posts||[];
+    if(riTab==='top') posts.sort(function(a,b){return b.votes-a.votes;});
+    if(posts.length===0){
+      feed.innerHTML = '<div class="ri-empty">No posts yet — start the conversation!</div>';
+      return;
+    }
+    var tagColors = {discussion:'#6080c0',review:'#c06040',recommendation:'#40a060',booktok:'#c040a0',tbr:'#a08030',haul:'#4090a0',quote:'#8060c0'};
+    feed.innerHTML = '';
+    posts.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'ri-post';
+      card.style.background = pal.tx+'05';
+      var upOn = p.userVote>0?' on':'';
+      var downOn = p.userVote<0?' on':'';
+      var tagBg = (tagColors[p.tag]||pal.ac)+'20';
+      var tagColor = tagColors[p.tag]||pal.ac;
+      card.innerHTML =
+        '<div class="ri-vote">'+
+          '<button class="ri-vote-btn'+upOn+'" onclick="riVote(event,'+p.id+',1)" style="color:'+(p.userVote>0?pal.ac:pal.tx)+'">&#9650;</button>'+
+          '<div class="ri-vote-count" style="color:'+pal.tx+'">'+p.votes+'</div>'+
+          '<button class="ri-vote-btn'+downOn+'" onclick="riVote(event,'+p.id+',-1)" style="color:'+(p.userVote<0?'#c44':pal.tx)+'">&#9660;</button>'+
+        '</div>'+
+        '<div class="ri-post-body" onclick="openRiDetail('+p.id+')" style="color:'+pal.tx+'">'+
+          '<div class="ri-post-tag" style="background:'+tagBg+';color:'+tagColor+'">'+escHtml(p.tag)+'</div>'+
+          '<div class="ri-post-title">'+escHtml(p.title)+'</div>'+
+          (p.book_title?'<div class="ri-post-book">'+escHtml(p.book_title)+(p.book_author?' by '+escHtml(p.book_author):'')+'</div>':'')+
+          (p.body?'<div class="ri-post-preview">'+escHtml(p.body)+'</div>':'')+
+          '<div class="ri-post-meta">u/'+escHtml(p.username)+' · '+p.comment_count+' comments</div>'+
+        '</div>'+
+        (p.image_url?'<img class="ri-post-img" src="'+escHtml(p.image_url)+'" onerror="this.style.display=\'none\'"/>':'');
+      feed.appendChild(card);
+    });
+  }catch(e){
+    feed.innerHTML = '<div class="ri-empty">Could not load</div>';
+  }
+}
+
+async function riVote(e,postId,vote){
+  e.stopPropagation();
+  try{await riFetch('/api/books/posts/'+postId+'/vote',{method:'POST',headers:riHeaders(),body:JSON.stringify({vote:vote})});}catch(e){}
+  loadRiFeed();
+}
+
+async function openRiDetail(postId){
+  var feed = document.getElementById('riFeed');
+  var detail = document.getElementById('riDetail');
+  var pal = searchPal;
+  feed.style.display = 'none';
+  detail.style.display = 'flex';
+  detail.classList.add('active');
+  detail.innerHTML = '<div class="ri-empty">Loading...</div>';
+  try{
+    var res = await riFetch('/api/books/posts/'+postId,{headers:riHeaders()});
+    var data = await res.json();
+    var p = data.post; var comments = data.comments||[];
+    detail.innerHTML =
+      '<button class="ri-detail-back" onclick="loadRiFeed()" style="color:'+pal.tx+'">&#8592; Back</button>'+
+      '<div class="ri-detail-title" style="color:'+pal.tx+'">'+escHtml(p.title)+'</div>'+
+      (p.book_title?'<div style="font-size:0.85rem;opacity:0.5;font-style:italic;">'+escHtml(p.book_title)+(p.book_author?' by '+escHtml(p.book_author):'')+'</div>':'')+
+      '<div class="ri-detail-body" style="color:'+pal.tx+'">'+escHtml(p.body||'')+'</div>'+
+      '<div style="font-size:0.62rem;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;">u/'+escHtml(p.username)+' · '+p.votes+' votes</div>'+
+      '<div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-top:16px;">Comments ('+comments.length+')</div>'+
+      '<div class="ri-comments" id="riComments"></div>'+
+      '<div class="ri-comment-input">'+
+        '<input id="riCommentInput" placeholder="Add a comment..." maxlength="1000" onkeydown="if(event.key===\'Enter\')riComment('+p.id+')" style="color:'+pal.tx+'"/>'+
+        '<button onclick="riComment('+p.id+')" style="background:'+pal.ac+';color:'+pal.bg+'">Reply</button>'+
+      '</div>';
+    var commentsEl = document.getElementById('riComments');
+    comments.forEach(function(c){
+      var div = document.createElement('div');
+      div.className = 'ri-comment';
+      div.style.background = pal.tx+'06';
+      div.style.color = pal.tx;
+      div.innerHTML = '<div class="ri-comment-user">u/'+escHtml(c.username)+'</div>'+escHtml(c.text);
+      commentsEl.appendChild(div);
+    });
+  }catch(e){
+    detail.innerHTML = '<div class="ri-empty">Could not load post</div>';
+  }
+}
+
+async function riComment(postId){
+  var input = document.getElementById('riCommentInput');
+  var text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    var res = await riFetch('/api/books/posts/'+postId+'/comment',{method:'POST',headers:riHeaders(),body:JSON.stringify({text:text})});
+    var data = await res.json();
+    if(data.error){alert(data.error);return;}
+    openRiDetail(postId);
+  }catch(e){}
+}
+
+function openRiModal(){
+  document.getElementById('riModal').classList.add('open');
+  document.getElementById('riTitle').value='';
+  document.getElementById('riBody').value='';
+  document.getElementById('riBookTitle').value='';
+  document.getElementById('riBookAuthor').value='';
+  document.getElementById('riImageUrl').value='';
+  document.getElementById('riTag').value='discussion';
+  document.getElementById('riErr').textContent='';
+  setTimeout(function(){document.getElementById('riTitle').focus();},100);
+}
+function closeRiModal(){document.getElementById('riModal').classList.remove('open');}
+
+async function submitRiPost(){
+  var title = document.getElementById('riTitle').value.trim();
+  var body = document.getElementById('riBody').value.trim();
+  var bookTitle = document.getElementById('riBookTitle').value.trim();
+  var bookAuthor = document.getElementById('riBookAuthor').value.trim();
+  var tag = document.getElementById('riTag').value;
+  var imageUrl = document.getElementById('riImageUrl').value.trim();
+  var err = document.getElementById('riErr');
+  if(!title||title.length<3){err.textContent='Title must be at least 3 characters';err.style.color='#c44';return;}
+  err.textContent='Posting...';err.style.color=searchPal.tx;
+  try{
+    var res = await riFetch('/api/books/posts',{method:'POST',headers:riHeaders(),
+      body:JSON.stringify({title:title,body:body,bookTitle:bookTitle,bookAuthor:bookAuthor,tag:tag,imageUrl:imageUrl})});
+    var data = await res.json();
+    if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
+    closeRiModal();
+    loadRiFeed();
+  }catch(e){err.textContent='Could not post';err.style.color='#c44';}
+}
+
 // ─── FLOVEE GROUPS ───────────────────────────────────────
 var fgTab = 'all';
 
@@ -4585,12 +4844,13 @@ Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us b
   {id:'stufloverdaily',name:'StufloverDaily',sub:'trending now',         col:4},
   {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
   {id:'floveegroup',name:'FloveeGroup',      sub:'communities',           col:6},
+  {id:'readit',     name:'ReadIt',            sub:'books & booktok',       col:10},
   {id:'boredomhub', name:'Boredom Hub',      sub:'nothing to do?',       col:7, prompt:'You are in the Boredom Hub. Their job is to be bored and yours is to fix it. You know their interests {INTERESTS}, aesthetic {AE}, mood {MOOD}. Give them something actual to do — creative projects, things to watch, places to go. Match who they are.',                                      opener:'ok so you are bored. what kind of bored — creative bored, scroll bored, want to go somewhere, or just low energy?'},
 ];
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
-  const hues = [0,40,80,120,160,200,240,280,320];
+  const hues = [0,35,70,105,140,175,210,245,280,315,350];
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
   grid.innerHTML = SECTIONS.map((s, i) => {
@@ -4817,6 +5077,8 @@ function openSection(id){
   document.getElementById('dailyView').classList.remove('active');
   document.getElementById('groupsView').style.display = 'none';
   document.getElementById('groupsView').classList.remove('active');
+  document.getElementById('readitView').style.display = 'none';
+  document.getElementById('readitView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -4838,6 +5100,23 @@ function openSection(id){
     document.getElementById('profileView').style.display = 'flex';
     document.getElementById('profileView').classList.add('active');
     openProfileView();
+    return;
+  } else if(sec.id === 'readit'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('cardGameView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'none';
+    document.getElementById('readitView').style.display = 'flex';
+    document.getElementById('readitView').classList.add('active');
+    loadRiFeed();
     return;
   } else if(sec.id === 'floveegroup'){
     shopBar.style.display = 'none';
