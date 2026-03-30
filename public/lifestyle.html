@@ -479,6 +479,37 @@
       .routine-col{max-width:100%;}
     }
 
+    /* ── FLOVEE GROUPS ── */
+    #groupsView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #groupsView.active{display:flex;}
+    .fg-header{padding:14px 24px;border-bottom:1px solid rgba(128,128,128,0.06);display:flex;align-items:center;justify-content:space-between;}
+    .fg-title{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.35;}
+    .fg-tabs{display:flex;gap:4px;}
+    .fg-tab{padding:7px 16px;border-radius:20px;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;transition:all 0.15s;opacity:0.5;}
+    .fg-tab.on{opacity:1;}
+    .fg-create-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .fg-list{flex:1;overflow-y:auto;padding:14px 20px;display:flex;flex-direction:column;gap:10px;}
+    .fg-card{display:flex;align-items:center;gap:14px;padding:16px;border-radius:14px;transition:transform 0.15s;}
+    .fg-card:hover{transform:translateX(3px);}
+    .fg-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;flex-shrink:0;}
+    .fg-card-body{flex:1;min-width:0;}
+    .fg-card-name{font-size:0.95rem;font-weight:700;line-height:1.3;}
+    .fg-card-desc{font-size:0.78rem;opacity:0.45;line-height:1.45;margin-top:2px;}
+    .fg-card-meta{font-size:0.62rem;opacity:0.3;margin-top:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;}
+    .fg-card-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;transition:opacity 0.15s;}
+    .fg-card-btn:hover{opacity:0.7;}
+    .fg-card-btn.joined{background:transparent !important;border:1.5px solid rgba(128,128,128,0.2);}
+    .fg-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;text-align:center;padding:40px;}
+    .fg-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .fg-modal.open{display:flex;}
+    .fg-modal-box{padding:28px;border-radius:16px;width:90%;max-width:380px;}
+    .fg-modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+    .fg-modal-box input,.fg-modal-box textarea{width:100%;padding:11px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;}
+    .fg-modal-box textarea{resize:none;min-height:60px;}
+    .fg-modal-box .fg-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
+    .fg-modal-btns{display:flex;gap:8px;}
+    .fg-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+
     /* ── STUFLOVER DAILY (Trending/Notifications) ── */
     #dailyView{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #dailyView.active{display:flex;}
@@ -897,6 +928,35 @@
       <div class="profile-section">
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
+
+    <!-- FloveeGroup Communities -->
+    <div id="groupsView">
+      <div class="fg-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="fg-title bc">Communities</div>
+          <div class="fg-tabs">
+            <button class="fg-tab on" id="fgTabAll" onclick="switchGroupTab('all')">Discover</button>
+            <button class="fg-tab" id="fgTabMine" onclick="switchGroupTab('mine')">My Groups</button>
+          </div>
+        </div>
+        <button class="fg-create-btn bc" id="fgCreateBtn" onclick="openFgModal()">Create Group</button>
+      </div>
+      <div class="fg-list" id="fgList">
+        <div class="fg-empty">Loading communities...</div>
+      </div>
+    </div>
+    <div class="fg-modal" id="fgModal">
+      <div class="fg-modal-box" id="fgModalBox">
+        <h3>Create a Group</h3>
+        <input id="fgNameInput" placeholder="Group name..." maxlength="40"/>
+        <textarea id="fgDescInput" placeholder="What is this group about?" rows="2" maxlength="200"></textarea>
+        <div class="fg-err" id="fgErr"></div>
+        <div class="fg-modal-btns">
+          <button id="fgSubmitBtn" onclick="createGroup()">Create</button>
+          <button onclick="closeFgModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -3416,6 +3476,111 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── FLOVEE GROUPS ───────────────────────────────────────
+var fgTab = 'all';
+
+function fgFetch(path, opts){
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function fgHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+function switchGroupTab(tab){
+  fgTab = tab;
+  var pal = searchPal;
+  document.getElementById('fgTabAll').classList.toggle('on', tab==='all');
+  document.getElementById('fgTabMine').classList.toggle('on', tab==='mine');
+  document.getElementById('fgTabAll').style.borderColor = tab==='all'?pal.ac:'rgba(128,128,128,0.12)';
+  document.getElementById('fgTabMine').style.borderColor = tab==='mine'?pal.ac:'rgba(128,128,128,0.12)';
+  loadGroups(tab);
+}
+
+async function loadGroups(tab){
+  var list = document.getElementById('fgList');
+  var pal = searchPal;
+  document.getElementById('groupsView').style.background = pal.bg;
+  document.getElementById('groupsView').style.color = pal.tx;
+  document.getElementById('fgCreateBtn').style.background = pal.ac;
+  document.getElementById('fgCreateBtn').style.color = pal.bg;
+  document.getElementById('fgModalBox').style.background = pal.bg;
+  document.getElementById('fgModalBox').style.color = pal.tx;
+  document.getElementById('fgSubmitBtn').style.background = pal.ac;
+  document.getElementById('fgSubmitBtn').style.color = pal.bg;
+  document.querySelectorAll('.fg-tab').forEach(function(t){t.style.color=pal.tx;});
+
+  list.innerHTML = '<div class="fg-empty">Loading...</div>';
+  try{
+    var res = await fgFetch('/api/groups',{headers:fgHeaders()});
+    var data = await res.json();
+    var groups = data.groups||[];
+    if(tab==='mine') groups = groups.filter(function(g){return g.joined;});
+    if(groups.length===0){
+      list.innerHTML = '<div class="fg-empty">'+(tab==='mine'?'You have not joined any groups yet':'No groups yet — create the first one!')+'</div>';
+      return;
+    }
+    list.innerHTML = '';
+    var hues = [0,30,60,120,180,220,260,300];
+    groups.forEach(function(g, i){
+      var card = document.createElement('div');
+      card.className = 'fg-card';
+      card.style.background = pal.ac+'06';
+      var iconBg = 'hsl('+(hues[i%hues.length])+',50%,55%)';
+      var initial = g.name.charAt(0).toUpperCase();
+      var btnClass = g.joined ? 'fg-card-btn joined' : 'fg-card-btn';
+      var btnText = g.joined ? 'Joined' : 'Join';
+      var btnAction = g.joined ? 'leaveGroup('+g.id+')' : 'joinGroup('+g.id+')';
+      var btnStyle = g.joined ? 'color:'+pal.tx : 'background:'+pal.ac+';color:'+pal.bg;
+      card.innerHTML =
+        '<div class="fg-card-icon" style="background:'+iconBg+'">'+initial+'</div>'+
+        '<div class="fg-card-body" style="color:'+pal.tx+'">'+
+          '<div class="fg-card-name">'+escHtml(g.name)+'</div>'+
+          (g.description?'<div class="fg-card-desc">'+escHtml(g.description)+'</div>':'')+
+          '<div class="fg-card-meta">'+g.member_count+' member'+(g.member_count!==1?'s':'')+' · by '+escHtml(g.owner_name)+'</div>'+
+        '</div>'+
+        '<button class="'+btnClass+'" style="'+btnStyle+'" onclick="'+btnAction+'">'+btnText+'</button>';
+      list.appendChild(card);
+    });
+  }catch(e){
+    list.innerHTML = '<div class="fg-empty">Could not load groups</div>';
+  }
+}
+
+async function joinGroup(id){
+  try{ await fgFetch('/api/groups/'+id+'/join',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  loadGroups(fgTab);
+}
+async function leaveGroup(id){
+  try{ await fgFetch('/api/groups/'+id+'/leave',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  loadGroups(fgTab);
+}
+
+function openFgModal(){
+  document.getElementById('fgModal').classList.add('open');
+  document.getElementById('fgNameInput').value='';
+  document.getElementById('fgDescInput').value='';
+  document.getElementById('fgErr').textContent='';
+  setTimeout(function(){document.getElementById('fgNameInput').focus();},100);
+}
+function closeFgModal(){document.getElementById('fgModal').classList.remove('open');}
+
+async function createGroup(){
+  var name = document.getElementById('fgNameInput').value.trim();
+  var desc = document.getElementById('fgDescInput').value.trim();
+  var err = document.getElementById('fgErr');
+  if(!name||name.length<2){err.textContent='Name must be at least 2 characters';err.style.color='#c44';return;}
+  err.textContent='Creating...';err.style.color=searchPal.tx;
+  try{
+    var res = await fgFetch('/api/groups',{method:'POST',headers:fgHeaders(),body:JSON.stringify({name:name,description:desc})});
+    var data = await res.json();
+    if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
+    closeFgModal();
+    loadGroups(fgTab);
+  }catch(e){err.textContent='Could not create group';err.style.color='#c44';}
+}
+
 // ─── STUFLOVER DAILY (Trending notifications) ─────────────
 var sdCache = null;
 
@@ -4137,7 +4302,7 @@ Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us b
   {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'trending now',         col:4},
   {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
-  {id:'floveegroup',name:'FloveeGroup',      sub:'your community',       col:6, prompt:'You are in FloveeGroup — community and belonging. You know their aesthetic {AE} and everything about them. Talk about their group, the culture, how to find their people.',                                                                                                                      opener:'your community is here — what do you want to know?'},
+  {id:'floveegroup',name:'FloveeGroup',      sub:'communities',           col:6},
   {id:'boredomhub', name:'Boredom Hub',      sub:'nothing to do?',       col:7, prompt:'You are in the Boredom Hub. Their job is to be bored and yours is to fix it. You know their interests {INTERESTS}, aesthetic {AE}, mood {MOOD}. Give them something actual to do — creative projects, things to watch, places to go. Match who they are.',                                      opener:'ok so you are bored. what kind of bored — creative bored, scroll bored, want to go somewhere, or just low energy?'},
 ];
 
@@ -4368,6 +4533,8 @@ function openSection(id){
   document.getElementById('contentView').classList.remove('active');
   document.getElementById('dailyView').style.display = 'none';
   document.getElementById('dailyView').classList.remove('active');
+  document.getElementById('groupsView').style.display = 'none';
+  document.getElementById('groupsView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -4389,6 +4556,21 @@ function openSection(id){
     document.getElementById('profileView').style.display = 'flex';
     document.getElementById('profileView').classList.add('active');
     openProfileView();
+    return;
+  } else if(sec.id === 'floveegroup'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'flex';
+    document.getElementById('groupsView').classList.add('active');
+    loadGroups('all');
     return;
   } else if(sec.id === 'stufloverdaily'){
     shopBar.style.display = 'none';

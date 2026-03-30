@@ -86,6 +86,28 @@ async function initDb() {
     );
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS groups_ (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      owner_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS group_members (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      joined_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(group_id, user_id)
+    );
+  `);
+
   save();
   return db;
 }
@@ -255,6 +277,53 @@ const stmts = {
   deletePost: {
     run: (postId, userId) => run(
       'DELETE FROM posts WHERE id = ? AND user_id = ?', [postId, userId]
+    ),
+  },
+  // Groups
+  createGroup: {
+    run: (name, desc, ownerId) => run(
+      'INSERT INTO groups_ (name, description, owner_id) VALUES (?, ?, ?)', [name, desc, ownerId]
+    ),
+  },
+  getAllGroups: {
+    all: () => all(
+      `SELECT g.id, g.name, g.description, g.owner_id, u.username as owner_name, g.created_at,
+       (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+       FROM groups_ g JOIN users u ON u.id = g.owner_id ORDER BY member_count DESC, g.created_at DESC`
+    ),
+  },
+  getGroup: {
+    get: (groupId) => get(
+      `SELECT g.id, g.name, g.description, g.owner_id, u.username as owner_name,
+       (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+       FROM groups_ g JOIN users u ON u.id = g.owner_id WHERE g.id = ?`, [groupId]
+    ),
+  },
+  joinGroup: {
+    run: (groupId, userId) => run(
+      'INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)', [groupId, userId]
+    ),
+  },
+  leaveGroup: {
+    run: (groupId, userId) => run(
+      'DELETE FROM group_members WHERE group_id = ? AND user_id = ?', [groupId, userId]
+    ),
+  },
+  getGroupMembers: {
+    all: (groupId) => all(
+      'SELECT u.id, u.username FROM group_members gm JOIN users u ON u.id = gm.user_id WHERE gm.group_id = ?', [groupId]
+    ),
+  },
+  getUserGroups: {
+    all: (userId) => all(
+      `SELECT g.id, g.name, g.description,
+       (SELECT COUNT(*) FROM group_members WHERE group_id = g.id) as member_count
+       FROM group_members gm JOIN groups_ g ON g.id = gm.group_id WHERE gm.user_id = ?`, [userId]
+    ),
+  },
+  deleteGroup: {
+    run: (groupId, ownerId) => run(
+      'DELETE FROM groups_ WHERE id = ? AND owner_id = ?', [groupId, ownerId]
     ),
   },
 };
