@@ -7,9 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:background 1.2s,color 1.2s;display:flex;flex-direction:column;}
+    body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:color 1.2s;display:flex;flex-direction:column;position:relative;}
     .view.scrollable{overflow-y:auto;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    /* ── 1. ANIMATED GRADIENT BACKGROUND ── */
+    #gradientBg{position:fixed;inset:0;z-index:-2;animation:gradientShift 20s ease infinite;background-size:400% 400%;}
+    @keyframes gradientShift{
+      0%{background-position:0% 50%;}
+      25%{background-position:50% 0%;}
+      50%{background-position:100% 50%;}
+      75%{background-position:50% 100%;}
+      100%{background-position:0% 50%;}
+    }
+
+    /* ── 7. VIGNETTE OVERLAY ── */
+    #vignetteOverlay{position:fixed;inset:0;z-index:90;pointer-events:none;background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.18) 100%);}
+
+    /* ── 3. FLOATING PARTICLES CANVAS ── */
+    #particleCanvas{position:fixed;inset:0;z-index:-1;pointer-events:none;}
 
     nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.06);transition:opacity 0.8s;}
     nav.hidden{opacity:0;pointer-events:none;}
@@ -18,22 +34,26 @@
     .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
     .nav-btn:hover{opacity:0.6;}
 
-    /* ── MODE SELECTOR ── */
-    .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:4px;border-radius:30px;backdrop-filter:blur(20px);transition:opacity 0.8s;}
+    /* ── MODE SELECTOR (4. Glass-morphism) ── */
+    .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:6px;border-radius:30px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.12);transition:opacity 0.8s;}
     .mode-bar.hidden{opacity:0;pointer-events:none;}
-    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.3s;opacity:0.5;}
-    .mode-pill.on{opacity:1;}
+    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.35s;opacity:0.45;}
+    .mode-pill.on{opacity:1;background:rgba(255,255,255,0.15);box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+    .mode-pill:hover{opacity:0.8;background:rgba(255,255,255,0.08);}
 
     /* ── FULL SCREEN VIEWS ── */
     .view{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.8s;}
     .view.active{opacity:1;pointer-events:auto;}
 
-    /* ── BREATHE VIEW ── */
+    /* ── BREATHE VIEW (2. Glow/bloom effect) ── */
     .breathe-container{display:flex;flex-direction:column;align-items:center;gap:40px;}
-    .petal-wrap{position:relative;width:220px;height:220px;}
-    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease;}
-    .petal-wrap.inhale .petal{opacity:0.7;}
-    .petal-wrap.exhale .petal{opacity:0.4;}
+    .petal-wrap{position:relative;width:220px;height:220px;filter:blur(0px);}
+    .petal-wrap::after{content:'';position:absolute;inset:-30%;border-radius:50%;opacity:0;transition:opacity 4s ease;pointer-events:none;z-index:-1;}
+    .petal-wrap.inhale::after{opacity:1;}
+    .petal-wrap.exhale::after{opacity:0.3;}
+    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease,box-shadow 4s ease;}
+    .petal-wrap.inhale .petal{opacity:0.7;box-shadow:0 0 24px 8px currentColor;}
+    .petal-wrap.exhale .petal{opacity:0.4;box-shadow:0 0 8px 2px currentColor;}
     .breathe-label{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
     .breathe-instruction{font-size:1.3rem;font-weight:300;text-align:center;min-height:40px;letter-spacing:0.5px;transition:opacity 0.6s;}
     .breathe-timer{font-size:0.78rem;opacity:0.3;letter-spacing:2px;text-align:center;}
@@ -43,32 +63,35 @@
     .dur-btn{padding:8px 16px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.4;}
     .dur-btn.on{opacity:1;}
 
-    /* ── REFLECT VIEW ── */
+    /* ── REFLECT VIEW (6. Typewriter animation) ── */
     .reflect-container{display:flex;flex-direction:column;align-items:center;gap:36px;padding:0 40px;max-width:520px;}
     .reflect-orb{width:120px;height:120px;border-radius:50%;opacity:0.25;animation:orbPulse 6s ease-in-out infinite;}
     @keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.15);opacity:0.35;}}
-    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.3px;transition:opacity 0.6s;}
+    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.3px;transition:opacity 0.6s;min-height:3.2em;}
     .reflect-prompt.fade{opacity:0;}
+    .reflect-prompt .typewriter-cursor{display:inline-block;width:2px;height:1.1em;vertical-align:text-bottom;margin-left:2px;animation:cursorBlink 0.7s step-end infinite;}
+    @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
     .reflect-sub{font-size:0.78rem;opacity:0.3;text-align:center;letter-spacing:1px;line-height:1.8;}
     .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
     .reflect-next:hover{opacity:1;}
 
-    /* ── JOURNAL VIEW ── */
+    /* ── JOURNAL VIEW (5. Cute card design) ── */
     .journal-container{display:flex;flex-direction:column;align-items:center;gap:20px;padding:80px 24px 120px;max-width:540px;width:100%;height:100vh;overflow-y:auto;}
     .journal-title{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
-    .journal-textarea{width:100%;min-height:100px;padding:16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;line-height:1.6;resize:vertical;outline:none;transition:border-color 0.3s;}
-    .journal-textarea:focus{border-color:currentColor;}
+    .journal-textarea{width:100%;min-height:100px;padding:16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(255,255,255,0.06);color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;line-height:1.6;resize:vertical;outline:none;transition:border-color 0.3s,box-shadow 0.3s;}
+    .journal-textarea:focus{border-color:currentColor;box-shadow:0 0 0 3px rgba(128,128,128,0.06);}
     .journal-textarea::placeholder{opacity:0.3;}
     .mood-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
     .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
     .mood-chip.on{opacity:1;border-color:currentColor;}
     .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
     .journal-save:hover{opacity:1;transform:scale(1.02);}
-    .journal-entries{width:100%;display:flex;flex-direction:column;gap:12px;margin-top:8px;}
-    .journal-entry{width:100%;padding:16px 18px;border-radius:14px;border:1px solid rgba(128,128,128,0.08);text-align:left;}
-    .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .journal-entries{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:8px;}
+    .journal-entry{width:100%;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);text-align:left;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);transition:transform 0.25s, box-shadow 0.25s;}
+    .journal-entry:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);}
+    .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
     .journal-entry-date{font-size:0.7rem;opacity:0.35;letter-spacing:1px;}
-    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:3px 10px;border-radius:12px;opacity:0.7;}
+    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:4px 12px;border-radius:14px;opacity:0.7;}
     .journal-entry-text{font-size:0.88rem;line-height:1.65;opacity:0.75;white-space:pre-wrap;}
 
     /* ── REGULATE VIEW ── */
@@ -107,6 +130,13 @@
   </style>
 </head>
 <body>
+
+<!-- Animated gradient background -->
+<div id="gradientBg"></div>
+<!-- Floating particles -->
+<canvas id="particleCanvas"></canvas>
+<!-- Vignette overlay -->
+<div id="vignetteOverlay"></div>
 
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
@@ -540,7 +570,7 @@ function renderJournalEntries(){
     var d = new Date(e.date);
     var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     var moodHtml = e.mood ? '<span class="journal-entry-mood" style="background:'+PAL.ac+'20;color:'+PAL.tx+'">'+e.mood+'</span>' : '';
-    html += '<div class="journal-entry" style="background:'+PAL.tx+'06;">';
+    html += '<div class="journal-entry" style="background:'+PAL.tx+'08;">';
     html += '<div class="journal-entry-head"><span class="journal-entry-date">'+dateStr+'</span>'+moodHtml+'</div>';
     html += '<div class="journal-entry-text">'+escHtml(e.text)+'</div>';
     html += '</div>';
@@ -590,8 +620,14 @@ function applyGroundStepStyles(){
 
 // ─── APPLY STYLES ────────────────────────────────────────
 function applyStyles(){
-  document.body.style.background = PAL.bg;
   document.body.style.color = PAL.tx;
+
+  // 1. Animated gradient background
+  var bgEl = document.getElementById('gradientBg');
+  var bgLight1 = lightenH(PAL.bg, 0.02);
+  var bgLight2 = lightenH(PAL.ac, 0.88);
+  var bgLight3 = lightenH(PAL.bg, 0.05);
+  bgEl.style.background = 'linear-gradient(135deg, '+PAL.bg+' 0%, '+bgLight2+' 25%, '+bgLight1+' 50%, '+bgLight3+' 75%, '+PAL.bg+' 100%)';
 
   var nav = document.getElementById('mainNav');
   nav.style.background = PAL.bg + 'f0';
@@ -609,15 +645,38 @@ function applyStyles(){
     b.style.color = PAL.tx;
   });
 
-  // Mode bar
+  // Petal glow colour
+  document.querySelectorAll('.petal').forEach(function(p){ p.style.color = PAL.ac; });
+
+  // Petal wrap glow
+  var pw = document.querySelector('.petal-wrap');
+  if(pw) pw.style.setProperty('--glow-color', PAL.ac);
+  var styleTag = document.getElementById('dynamicGlow');
+  if(!styleTag){
+    styleTag = document.createElement('style');
+    styleTag.id = 'dynamicGlow';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = '.petal-wrap::after{background:radial-gradient(circle, '+PAL.ac+'30 0%, transparent 70%);}';
+
+  // Mode bar (glassmorphism)
   var modeBar = document.getElementById('modeBar');
-  modeBar.style.background = PAL.tx + '10';
+  modeBar.style.background = PAL.tx + '0c';
   document.querySelectorAll('.mode-pill').forEach(function(p){ p.style.color = PAL.tx; });
 
   // Reflect
   document.getElementById('reflectOrb').style.background = PAL.ac;
   document.getElementById('reflectNextBtn').style.background = PAL.ac + '25';
   document.getElementById('reflectNextBtn').style.color = PAL.tx;
+
+  // Typewriter cursor colour
+  var cursorStyle = document.getElementById('cursorColor');
+  if(!cursorStyle){
+    cursorStyle = document.createElement('style');
+    cursorStyle.id = 'cursorColor';
+    document.head.appendChild(cursorStyle);
+  }
+  cursorStyle.textContent = '.reflect-prompt .typewriter-cursor{background:'+PAL.ac+';}';
 
   // Journal
   document.getElementById('journalSaveBtn').style.background = PAL.ac;
@@ -644,12 +703,103 @@ function applyStyles(){
   if(regResetBtn){ regResetBtn.style.background = PAL.ac + '25'; regResetBtn.style.color = PAL.tx; }
 }
 
+// ─── 3. FLOATING PARTICLES ──────────────────────────────
+function initParticles(){
+  var canvas = document.getElementById('particleCanvas');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var PARTICLE_COUNT = 35;
+
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Parse accent colour for particles
+  function hexToRgb(hex){
+    var c = hex.slice(1).match(/.{2}/g);
+    return c ? c.map(function(x){return parseInt(x,16);}) : [180,140,200];
+  }
+  var rgb = hexToRgb(PAL.ac);
+
+  for(var i=0; i<PARTICLE_COUNT; i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*2.5+1,
+      vx: (Math.random()-0.5)*0.3,
+      vy: (Math.random()-0.5)*0.3,
+      opacity: Math.random()*0.12+0.04
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(var i=0;i<particles.length;i++){
+      var p=particles[i];
+      p.x+=p.vx;
+      p.y+=p.vy;
+      if(p.x<-10)p.x=canvas.width+10;
+      if(p.x>canvas.width+10)p.x=-10;
+      if(p.y<-10)p.y=canvas.height+10;
+      if(p.y>canvas.height+10)p.y=-10;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+p.opacity+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── 6. TYPEWRITER EFFECT FOR REFLECT ───────────────────
+var typewriterTimeout = null;
+
+function typewriterShow(text){
+  var el = document.getElementById('reflectPrompt');
+  el.innerHTML = '';
+  var i = 0;
+  var span = document.createElement('span');
+  el.appendChild(span);
+  var cursor = document.createElement('span');
+  cursor.className = 'typewriter-cursor';
+  el.appendChild(cursor);
+
+  function type(){
+    if(i < text.length){
+      span.textContent += text.charAt(i);
+      i++;
+      typewriterTimeout = setTimeout(type, 28 + Math.random()*22);
+    } else {
+      // Remove cursor after a pause
+      setTimeout(function(){ if(cursor.parentNode) cursor.style.display='none'; }, 1500);
+    }
+  }
+  type();
+}
+
+// Override showReflectPrompt to use typewriter
+var _origShowReflect = showReflectPrompt;
+showReflectPrompt = function(){
+  clearTimeout(typewriterTimeout);
+  var el = document.getElementById('reflectPrompt');
+  el.classList.add('fade');
+  setTimeout(function(){
+    el.classList.remove('fade');
+    typewriterShow(reflectPrompts[reflectIdx % reflectPrompts.length]);
+  }, 350);
+};
+
 // ─── INIT ────────────────────────────────────────────────
 applyStyles();
 createPetals();
 setPetalState('contract');
 initReflect();
 applyGroundStepStyles();
+initParticles();
 
 </script>
 
