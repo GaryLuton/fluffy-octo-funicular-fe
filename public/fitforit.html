@@ -3,568 +3,418 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FitforIt — Stuflover</title>
+  <title>FitforIt — My Closet</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh;transition:background 0.5s,color 0.5s;}
+    body{font-family:'Space Grotesk',sans-serif;min-height:100vh;transition:background 0.5s,color 0.5s;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
-    /* NAV */
-    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.08);}
     .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
-    .nav-links{display:flex;gap:8px;align-items:center;}
-    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;cursor:pointer;background:transparent;color:inherit;}
+    .nav-links{display:flex;gap:8px;}
+    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
     .nav-btn:hover{opacity:0.6;}
-    .nav-btn.active{border-color:currentColor;opacity:1;}
-    .wishlist-count{position:relative;}
-    .wishlist-badge{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;font-size:0.55rem;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
 
-    /* NO PROFILE STATE */
-    #noProfile{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
-    #noProfile h1{font-size:clamp(3rem,10vw,7rem);line-height:0.88;letter-spacing:-2px;margin-bottom:20px;}
-    #noProfile p{font-size:1rem;opacity:0.5;max-width:400px;line-height:1.85;margin-bottom:32px;}
-    .cta{font-size:1.2rem;letter-spacing:3px;background:currentColor;border:none;border-radius:4px;padding:16px 44px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;display:inline-block;transition:opacity 0.2s;}
-    .cta:hover{opacity:0.7;}
+    /* TABS */
+    .tabs{display:flex;border-bottom:1px solid rgba(128,128,128,0.08);padding:0 40px;}
+    .tab{padding:14px 24px;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border-bottom:2px solid transparent;opacity:0.35;transition:all 0.2s;background:transparent;border-top:none;border-left:none;border-right:none;color:inherit;}
+    .tab.on{opacity:1;}
 
-    /* MAIN SHOP */
-    #shopMain{display:none;}
-    #shopMain.active{display:block;}
+    /* CLOSET VIEW */
+    .closet{padding:20px 40px 60px;}
+    .closet-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .closet-title{font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .closet-add{padding:8px 20px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .closet-add:hover{opacity:0.8;}
+    .closet-cats{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+    .closet-cat{padding:6px 14px;border-radius:16px;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;transition:all 0.15s;opacity:0.45;}
+    .closet-cat.on{opacity:1;}
+    .closet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .closet-item{border-radius:12px;overflow:hidden;position:relative;cursor:pointer;transition:transform 0.15s;}
+    .closet-item:hover{transform:translateY(-3px);}
+    .closet-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:rgba(128,128,128,0.06);}
+    .closet-item-info{padding:10px 12px;}
+    .closet-item-name{font-size:0.82rem;font-weight:600;line-height:1.3;}
+    .closet-item-cat{font-size:0.6rem;opacity:0.35;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:2px;}
+    .closet-item-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:white;border:none;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;}
+    .closet-item:hover .closet-item-del{opacity:1;}
+    .closet-item.selected{outline:3px solid;outline-offset:2px;border-radius:14px;}
+    .closet-empty{grid-column:1/-1;text-align:center;padding:60px 20px;opacity:0.3;font-style:italic;}
 
-    /* HERO BANNER */
-    .shop-hero{padding:48px 40px 36px;border-bottom:1px solid rgba(128,128,128,0.08);}
-    .hero-eyebrow{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;margin-bottom:8px;}
-    .hero-title{font-size:clamp(3rem,8vw,7rem);line-height:0.84;letter-spacing:-2px;margin-bottom:16px;}
-    .hero-sub{font-size:0.9rem;opacity:0.5;max-width:500px;line-height:1.8;}
-    .hero-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;}
-    .hero-tag{padding:5px 12px;border-radius:3px;font-size:0.66rem;letter-spacing:2px;text-transform:uppercase;background:rgba(128,128,128,0.08);border:1px solid rgba(128,128,128,0.12);font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    /* OUTFIT BUILDER */
+    .builder{padding:20px 40px 60px;display:none;}
+    .builder.active{display:block;}
+    .builder-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .builder-preview{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;min-height:120px;padding:20px;border-radius:16px;border:2px dashed rgba(128,128,128,0.1);}
+    .builder-slot{width:100px;text-align:center;}
+    .builder-slot img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:rgba(128,128,128,0.06);}
+    .builder-slot-empty{width:100%;aspect-ratio:3/4;border-radius:10px;border:2px dashed rgba(128,128,128,0.15);display:flex;align-items:center;justify-content:center;font-size:0.6rem;opacity:0.3;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .builder-slot-label{font-size:0.58rem;opacity:0.35;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:6px;}
+    .builder-pick-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:12px;}
+    .builder-items{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+    .builder-item{border-radius:10px;overflow:hidden;cursor:pointer;transition:transform 0.15s;border:2px solid transparent;}
+    .builder-item:hover{transform:translateY(-2px);}
+    .builder-item.picked{border-style:solid;}
+    .builder-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+    .builder-btns{display:flex;gap:10px;justify-content:center;margin-top:20px;}
+    .builder-btn{padding:12px 32px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .builder-btn:hover{opacity:0.8;}
+    .builder-btn.outline{background:transparent;border:1.5px solid rgba(128,128,128,0.2);}
 
-    /* FILTER BAR */
-    .filter-bar{padding:16px 40px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(128,128,128,0.08);flex-wrap:wrap;}
-    .filter-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-right:4px;}
-    .filter-chip{padding:7px 16px;border-radius:20px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:all 0.15s;}
-    .filter-chip:hover,.filter-chip.on{background:currentColor;}
-    .filter-chip.on{opacity:1;}
-    .filter-chip.on span{mix-blend-mode:difference;color:white;}
-    .refresh-btn{margin-left:auto;font-size:0.72rem;letter-spacing:2px;padding:8px 18px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
-    .refresh-btn:hover{opacity:0.6;}
+    /* AI SUGGEST */
+    .suggest-result{margin-top:20px;padding:18px;border-radius:12px;font-size:0.9rem;line-height:1.65;display:none;}
+    .suggest-result.visible{display:block;}
 
-    /* PRODUCT GRID */
-    .products-wrap{padding:32px 40px 60px;}
-    .products-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
-    .product-card{display:flex;flex-direction:column;cursor:default;position:relative;}
-    .product-img-wrap{position:relative;overflow:hidden;border-radius:6px;aspect-ratio:3/4;background:rgba(128,128,128,0.08);}
-    .product-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease;cursor:pointer;}
-    .product-img-wrap:hover .product-img{transform:scale(1.04);}
-    .product-img.shimmer{background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.16) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .product-img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:background 0.2s,opacity 0.2s;}
-    .product-img-wrap:hover .product-img-overlay{opacity:1;background:rgba(0,0,0,0.12);}
-    .product-shop-btn{padding:10px 20px;border-radius:4px;font-size:0.75rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;backdrop-filter:blur(8px);background:rgba(255,255,255,0.9);color:#111;transition:transform 0.15s;}
-    .product-shop-btn:hover{transform:scale(1.04);}
-    .product-info{padding:12px 0 0;display:flex;flex-direction:column;gap:4px;}
-    .product-brand{font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.38;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .product-name{font-size:0.92rem;font-weight:600;line-height:1.35;}
-    .product-price{font-size:0.82rem;opacity:0.55;margin-top:2px;}
-    .product-actions{display:flex;align-items:center;gap:8px;margin-top:10px;}
-    .wish-btn{flex:1;padding:9px 0;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;font-size:0.72rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
-    .wish-btn:hover{background:rgba(128,128,128,0.08);}
-    .wish-btn.wished{border-color:currentColor;}
-    .wish-btn.wished .wish-icon{opacity:1;}
-    .wish-icon{font-size:0.9rem;opacity:0.4;transition:opacity 0.15s;}
-    .buy-btn{padding:9px 14px;border-radius:4px;font-size:0.72rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;border:none;cursor:pointer;text-decoration:none;display:flex;align-items:center;transition:opacity 0.2s;}
-    .buy-btn:hover{opacity:0.75;}
+    /* ADD MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .modal-bg.open{display:flex;}
+    .modal-box{padding:28px;border-radius:16px;width:90%;max-width:420px;}
+    .modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+    .modal-box input{width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;}
+    .modal-box select{width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;-webkit-appearance:none;}
+    .modal-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:none;}
+    .modal-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
+    .modal-btns{display:flex;gap:8px;}
+    .modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
-    /* SKELETON CARDS */
-    .skeleton{animation:shimmer 1.5s infinite;}
-    .skeleton .product-img-wrap{background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.14) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
-    .skeleton-line{height:10px;border-radius:4px;margin-top:8px;background:linear-gradient(90deg,rgba(128,128,128,0.08) 25%,rgba(128,128,128,0.14) 50%,rgba(128,128,128,0.08) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
-
-    /* EMPTY / LOADING */
-    .load-msg{padding:80px 40px;text-align:center;opacity:0.35;font-style:italic;}
-
-    @media(max-width:900px){.products-grid{grid-template-columns:repeat(3,1fr);}}
-    @media(max-width:680px){nav{padding:13px 20px;}.products-grid{grid-template-columns:repeat(2,1fr);gap:12px;}.products-wrap{padding:20px;}.shop-hero,.filter-bar{padding-left:20px;padding-right:20px;}}
-    @media(max-width:400px){.products-grid{grid-template-columns:1fr 1fr;gap:10px;}}
+    @media(max-width:768px){
+      nav{padding:13px 20px;} .closet,.builder{padding:16px 20px 40px;}
+      .closet-grid{grid-template-columns:repeat(2,1fr);}
+      .builder-items{grid-template-columns:repeat(3,1fr);}
+      .builder-preview{gap:8px;padding:14px;}
+      .builder-slot{width:72px;}
+    }
   </style>
 </head>
 <body>
 
 <nav id="mainNav">
-  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
   <div class="nav-links">
-    <a class="nav-btn bc" href="wishingwell.html" id="navWish">
-      WishingWell
-      <span class="wishlist-badge" id="wishBadge" style="display:none"></span>
-    </a>
-    <a class="nav-btn bc" href="catalog.html">Catalog</a>
     <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+    <a class="nav-btn bc" href="index.html">Home</a>
   </div>
 </nav>
 
-<!-- NO PROFILE -->
-<div id="noProfile">
-  <h1 class="bc">FitforIt</h1>
-  <p>Do the lifestyle quiz first so we can build your personal shop.</p>
-  <a class="cta bc" href="lifestyle.html" id="noProfileCta" style="color:white;background:#c4522a;">Take the Quiz</a>
+<div class="tabs" id="mainTabs">
+  <button class="tab bc on" id="tabCloset" onclick="switchTab('closet')">My Closet</button>
+  <button class="tab bc" id="tabBuilder" onclick="switchTab('builder')">Build Outfit</button>
 </div>
 
-<!-- MAIN SHOP -->
-<div id="shopMain">
-  <div class="shop-hero">
-    <div class="hero-eyebrow bc" id="heroEyebrow">Your Personal Shop</div>
-    <div class="hero-title bc" id="heroTitle"></div>
-    <p class="hero-sub" id="heroSub"></p>
-    <div class="hero-tags" id="heroTags"></div>
+<!-- CLOSET VIEW -->
+<div class="closet" id="closetView">
+  <div class="closet-header">
+    <div class="closet-title bc" id="closetCount">0 items</div>
+    <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()">Add Item</button>
   </div>
+  <div class="closet-cats" id="closetCats"></div>
+  <div class="closet-grid" id="closetGrid"></div>
+</div>
 
-  <div class="filter-bar" id="filterBar">
-    <span class="filter-label">Filter</span>
-    <button class="filter-chip bc on" data-cat="all" onclick="setFilter('all')"><span>All</span></button>
-    <button class="filter-chip bc" data-cat="tops" onclick="setFilter('tops')"><span>Tops</span></button>
-    <button class="filter-chip bc" data-cat="bottoms" onclick="setFilter('bottoms')"><span>Bottoms</span></button>
-    <button class="filter-chip bc" data-cat="shoes" onclick="setFilter('shoes')"><span>Shoes</span></button>
-    <button class="filter-chip bc" data-cat="accessories" onclick="setFilter('accessories')"><span>Accessories</span></button>
-    <button class="filter-chip bc" data-cat="outerwear" onclick="setFilter('outerwear')"><span>Outerwear</span></button>
-    <button class="refresh-btn bc" onclick="loadProducts(true)">Refresh ↻</button>
+<!-- OUTFIT BUILDER -->
+<div class="builder" id="builderView">
+  <div class="builder-header">
+    <div class="closet-title bc">Your Outfit</div>
+    <button class="builder-btn outline bc" onclick="clearOutfit()">Clear</button>
   </div>
+  <div class="builder-preview" id="builderPreview"></div>
+  <div class="builder-btns">
+    <button class="builder-btn bc" id="suggestBtn" onclick="aiSuggest()">AI Suggest Outfit</button>
+  </div>
+  <div class="suggest-result" id="suggestResult"></div>
+  <div class="builder-pick-label" id="pickLabel">Pick items from your closet</div>
+  <div class="closet-cats" id="builderCats"></div>
+  <div class="builder-items" id="builderItems"></div>
+</div>
 
-  <div class="products-wrap">
-    <div class="products-grid" id="productsGrid"></div>
-    <div class="load-msg" id="loadMsg" style="display:none"></div>
+<!-- ADD MODAL -->
+<div class="modal-bg" id="addModal">
+  <div class="modal-box" id="addModalBox">
+    <h3>Add to Closet</h3>
+    <input id="addUrl" placeholder="Paste a photo URL of your item..." oninput="previewAdd()"/>
+    <img class="modal-preview" id="addPreview"/>
+    <input id="addName" placeholder="What is it? (e.g. black crop top)"/>
+    <select id="addCat">
+      <option value="">Pick a category...</option>
+      <option value="tops">Tops</option>
+      <option value="bottoms">Bottoms</option>
+      <option value="dresses">Dresses</option>
+      <option value="outerwear">Outerwear</option>
+      <option value="shoes">Shoes</option>
+      <option value="bags">Bags</option>
+      <option value="accessories">Accessories</option>
+    </select>
+    <div class="modal-err" id="addErr"></div>
+    <div class="modal-btns">
+      <button id="addSubmit" onclick="addItem()">Add to Closet</button>
+      <button onclick="closeAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
+    </div>
+    <div style="margin-top:12px;font-size:0.72rem;opacity:0.35;text-align:center;">Or let AI identify it:</div>
+    <button id="aiIdentify" onclick="aiIdentifyItem()" style="width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(128,128,128,0.15);border-radius:8px;background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;cursor:pointer;transition:opacity 0.15s;">Auto-detect item from photo</button>
   </div>
 </div>
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
+var profile = (function(){try{return JSON.parse(localStorage.getItem('stuflover_profile')||'null');}catch(e){return null;}})();
 
-// ─── LOAD PROFILE ─────────────────────────────────────────
-const profile = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
-const wishlist = (()=>{ try{ return JSON.parse(localStorage.getItem('stuflover_wishlist')||'[]'); }catch(e){return [];} })();
-
-function saveWishlist(){ try{ localStorage.setItem('stuflover_wishlist', JSON.stringify(wishlist)); }catch(e){} }
-
-// ─── PALETTE FROM PROFILE ─────────────────────────────────
 function resolvePalette(){
-  if(!profile) return {bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
-  const fc = profile.faveColour;
-  const ae = profile.aesthetics||{};
-  const top = Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-  if(fc){
-    const h = fc.hex;
-    const isDark = fc.dark;
-    if(isDark) return {bg:darkenH(h,0.3), tx:lightenH(h,0.72), ac:h};
-    return {bg:lightenH(h,0.84), tx:darkenH(h,0.5), ac:h};
-  }
-  const map={
-    kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},
-    softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},
-    cleangirl:{bg:'#f2ede6',tx:'#1a1408',ac:'#8a7a5a'},
-    coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},
-    goth:{bg:'#120810',tx:'#e8d0f0',ac:'#9040c0'},
-    darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},
-    grunge:{bg:'#1e1208',tx:'#f0d4a0',ac:'#c4943a'},
-    y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},
-    street:{bg:'#141414',tx:'#f4c8a0',ac:'#e08040'},
-    cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},
-    hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},
-    oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},
-    preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},
-    tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},
-    indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},
-  };
-  return map[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
+  var fc=profile&&profile.faveColour;var ae=(profile&&profile.aesthetics)||{};
+  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
+  top=top?top[0]:'softgirl';
+  function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
+  function lighten(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]+(255-c[0])*a)+toHex(c[1]+(255-c[1])*a)+toHex(c[2]+(255-c[2])*a);}catch(e){return hex;}}
+  function darken(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]*(1-a))+toHex(c[1]*(1-a))+toHex(c[2]*(1-a));}catch(e){return hex;}}
+  if(fc&&!fc.dark)return{bg:lighten(fc.hex,0.92),tx:darken(fc.hex,0.6),ac:fc.hex};
+  if(fc&&fc.dark)return{bg:darken(fc.hex,0.45),tx:lighten(fc.hex,0.8),ac:fc.hex};
+  var m={kawaii:{bg:'#fdf0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
+  return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
 }
+var PAL = resolvePalette();
 
-function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
-function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a);}catch(e){return hex;}}
-function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a));}catch(e){return hex;}}
+// ─── CLOSET DATA ─────────────────────────────────────────
+function getCloset(){
+  try{return JSON.parse(localStorage.getItem('stuflover_closet')||'[]');}catch(e){return[];}
+}
+function saveCloset(items){localStorage.setItem('stuflover_closet',JSON.stringify(items));}
 
-const PAL = resolvePalette();
+var currentCat = 'all';
+var currentTab = 'closet';
+var outfitPicks = {tops:null,bottoms:null,dresses:null,outerwear:null,shoes:null,bags:null,accessories:null};
+var builderCat = 'tops';
+var CATS = ['all','tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
 
-// ─── APPLY STYLES ─────────────────────────────────────────
+// ─── STYLES ──────────────────────────────────────────────
 function applyStyles(){
-  document.body.style.background = PAL.bg;
-  document.body.style.color = PAL.tx;
-  const nav = document.getElementById('mainNav');
-  nav.style.background = PAL.bg+'f0';
-  nav.style.borderColor = PAL.tx+'12';
-  document.querySelectorAll('.nav-logo,.nav-btn').forEach(el=>{ el.style.color=PAL.tx; el.style.borderColor=PAL.tx+'22'; });
-  const badge = document.getElementById('wishBadge');
-  if(badge){ badge.style.background=PAL.ac; badge.style.color=PAL.bg; }
+  document.body.style.background=PAL.bg;document.body.style.color=PAL.tx;
+  var nav=document.getElementById('mainNav');nav.style.background=PAL.bg+'f0';nav.style.borderColor=PAL.tx+'10';
+  document.querySelectorAll('.nav-logo,.nav-btn').forEach(function(e){e.style.color=PAL.tx;e.style.borderColor=PAL.tx+'22';});
+  document.getElementById('addItemBtn').style.background=PAL.ac;document.getElementById('addItemBtn').style.color=PAL.bg;
+  document.getElementById('addSubmit').style.background=PAL.ac;document.getElementById('addSubmit').style.color=PAL.bg;
+  document.getElementById('suggestBtn').style.background=PAL.ac;document.getElementById('suggestBtn').style.color=PAL.bg;
+  document.getElementById('addModalBox').style.background=PAL.bg;document.getElementById('addModalBox').style.color=PAL.tx;
+  document.querySelectorAll('.tab').forEach(function(t){t.style.color=PAL.tx;});
 }
 
-// ─── RESOLVE AE NAME ─────────────────────────────────────
-function resolveAeName(){
-  if(!profile) return 'Your Style';
-  const ae=profile.aesthetics||{};
-  const et=profile.extraTags||[];
-  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
-  const map={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
-  const specials={'pastel_goth':'Pastel Goth','dark_fem':'Dark Feminine','emo_core':'Emo','quiet_luxury':'Quiet Luxury','that_girl':'That Girl','full_grunge':'Grunge','full_indie':'Indie Alt','kawaii_full':'Kawaii'};
-  for(const [tag,name] of Object.entries(specials)) if(et.includes(tag)) return name;
-  return map[top]||'Your Style';
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(tab){
+  currentTab=tab;
+  document.getElementById('tabCloset').classList.toggle('on',tab==='closet');
+  document.getElementById('tabBuilder').classList.toggle('on',tab==='builder');
+  document.getElementById('tabCloset').style.borderBottomColor=tab==='closet'?PAL.ac:'transparent';
+  document.getElementById('tabBuilder').style.borderBottomColor=tab==='builder'?PAL.ac:'transparent';
+  document.getElementById('closetView').style.display=tab==='closet'?'block':'none';
+  document.getElementById('builderView').classList.toggle('active',tab==='builder');
+  if(tab==='builder')renderBuilder();
 }
 
-// ─── SHOP URLS ────────────────────────────────────────────
-const SHOP_URLS = {
-  'Depop / Vinted':    {name:'Depop',   url:'https://www.depop.com/search/?q='},
-  'ASOS / H&M':        {name:'ASOS',    url:'https://www.asos.com/search/?q='},
-  'Urban Outfitters':  {name:'UO',      url:'https://www.urbanoutfitters.com/search?q='},
-  'Sezane / Rouje':    {name:'Sezane',  url:'https://www.sezane.com/uk/result?keywords='},
-  'Nike / NB':         {name:'Nike',    url:'https://www.nike.com/gb/search?q='},
-  'Charity Shops':     {name:'Depop',   url:'https://www.depop.com/search/?q='},
-  'Brandy Melville':   {name:'Brandy',  url:'https://www.brandymelvilleusa.com/search?q='},
-  'Princess Polly':    {name:'PP',      url:'https://us.princesspolly.com/search?q='},
-  'No favourite':      {name:'ASOS',    url:'https://www.asos.com/search/?q='},
-};
+// ─── CLOSET ──────────────────────────────────────────────
+function renderCloset(){
+  var items=getCloset();
+  var filtered=currentCat==='all'?items:items.filter(function(i){return i.cat===currentCat;});
+  document.getElementById('closetCount').textContent=items.length+' item'+(items.length!==1?'s':'');
 
-function getShop(){ return SHOP_URLS[profile?.faveShop||''] || {name:'Shop',url:'https://www.asos.com/search/?q='}; }
+  // Cat filters
+  var catsHtml='';
+  CATS.forEach(function(c){
+    var on=c===currentCat?' on':'';
+    var style='color:'+PAL.tx+';border-color:'+(c===currentCat?PAL.ac:'rgba(128,128,128,0.12)');
+    catsHtml+='<button class="closet-cat'+on+' bc" style="'+style+'" onclick="filterCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('closetCats').innerHTML=catsHtml;
 
-// ─── STATE ────────────────────────────────────────────────
-let allProducts = [];
-let activeFilter = 'all';
-let isLoading = false;
-
-// ─── INIT ─────────────────────────────────────────────────
-function init(){
-  applyStyles();
-  updateWishBadge();
-
-  if(!profile){
-    document.getElementById('noProfile').style.display='flex';
+  var grid=document.getElementById('closetGrid');
+  if(filtered.length===0){
+    grid.innerHTML='<div class="closet-empty">'+
+      (items.length===0?'Your closet is empty — add items to get started!':'No items in this category')+
+    '</div>';
     return;
   }
-
-  document.getElementById('noProfile').style.display='none';
-  document.getElementById('shopMain').classList.add('active');
-
-  // Hero
-  const aeName = resolveAeName();
-  document.getElementById('heroTitle').textContent = aeName;
-  document.getElementById('heroTitle').style.color = PAL.tx;
-  document.getElementById('heroSub').textContent = 'Items picked for you based on your style, your colours, and where you shop.';
-
-  // Tags
-  const tags = [
-    aeName,
-    ...(profile.faveColour?[profile.faveColour.name]:[]),
-    ...(profile.faveShop?[profile.faveShop.split('/')[0].trim()]:[]),
-    ...(profile.interests||[]).slice(0,2).map(k=>({fashion:'Fashion',thrifting:'Thrifting',dance:'Dance',sport:'Sport',art:'Art',music_make:'Music',photography:'Photography'})[k]).filter(Boolean),
-  ].filter(Boolean);
-  document.getElementById('heroTags').innerHTML = tags.map(t=>`<span class="hero-tag" style="border-color:${PAL.tx}14;color:${PAL.tx}">${t}</span>`).join('');
-
-  // Style filter chips
-  document.querySelectorAll('.filter-chip').forEach(btn=>{
-    btn.style.color=PAL.tx; btn.style.borderColor=PAL.tx+'20';
-    if(btn.classList.contains('on')){ btn.style.background=PAL.ac; btn.querySelector('span').style.color=PAL.bg; }
+  grid.innerHTML='';
+  filtered.forEach(function(item,i){
+    var idx=items.indexOf(item);
+    var card=document.createElement('div');
+    card.className='closet-item';
+    card.style.background=PAL.tx+'06';
+    card.innerHTML=
+      '<img src="'+escHtml(item.url)+'" alt="" onerror="this.style.background=\'rgba(128,128,128,0.1)\'"/>'+
+      '<div class="closet-item-info" style="color:'+PAL.tx+'">'+
+        '<div class="closet-item-name">'+escHtml(item.name)+'</div>'+
+        '<div class="closet-item-cat">'+escHtml(item.cat)+'</div>'+
+      '</div>'+
+      '<button class="closet-item-del" onclick="deleteItem(event,'+idx+')">x</button>';
+    grid.appendChild(card);
   });
-  document.querySelector('.refresh-btn').style.borderColor=PAL.tx+'20';
-  document.querySelector('.refresh-btn').style.color=PAL.tx;
-
-  loadProducts();
 }
 
-// ─── SET FILTER ───────────────────────────────────────────
-function setFilter(cat){
-  activeFilter = cat;
-  document.querySelectorAll('.filter-chip').forEach(btn=>{
-    const isOn = btn.dataset.cat===cat;
-    btn.classList.toggle('on', isOn);
-    btn.style.background = isOn ? PAL.ac : 'transparent';
-    btn.querySelector('span').style.color = isOn ? PAL.bg : PAL.tx;
-  });
-  renderProducts();
+function filterCat(cat){currentCat=cat;renderCloset();}
+
+function deleteItem(e,idx){
+  e.stopPropagation();
+  var items=getCloset();
+  items.splice(idx,1);
+  saveCloset(items);
+  renderCloset();
 }
 
-// ─── LOAD PRODUCTS FROM CLAUDE API ────────────────────────
-async function loadProducts(forceRefresh=false){
-  if(isLoading) return;
-  isLoading=true;
+// ─── ADD ITEM ────────────────────────────────────────────
+function openAddModal(){
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('addUrl').value='';
+  document.getElementById('addName').value='';
+  document.getElementById('addCat').value='';
+  document.getElementById('addErr').textContent='';
+  document.getElementById('addPreview').style.display='none';
+  setTimeout(function(){document.getElementById('addUrl').focus();},100);
+}
+function closeAddModal(){document.getElementById('addModal').classList.remove('open');}
 
-  // Show skeletons
-  const grid = document.getElementById('productsGrid');
-  grid.innerHTML = Array(12).fill(0).map(()=>`
-    <div class="product-card skeleton">
-      <div class="product-img-wrap" style="height:280px"></div>
-      <div class="skeleton-line" style="width:60%;margin-top:12px"></div>
-      <div class="skeleton-line" style="width:80%;margin-top:6px"></div>
-      <div class="skeleton-line" style="width:40%;margin-top:6px"></div>
-    </div>`).join('');
+function previewAdd(){
+  var url=document.getElementById('addUrl').value.trim();
+  var p=document.getElementById('addPreview');
+  if(url&&url.match(/^https?:\/\//)){p.src=url;p.style.display='block';p.onerror=function(){p.style.display='none';};}
+  else{p.style.display='none';}
+}
 
+function addItem(){
+  var url=document.getElementById('addUrl').value.trim();
+  var name=document.getElementById('addName').value.trim();
+  var cat=document.getElementById('addCat').value;
+  var err=document.getElementById('addErr');
+  if(!url){err.textContent='Paste a photo URL';err.style.color='#c44';return;}
+  if(!name){err.textContent='Give it a name';err.style.color='#c44';return;}
+  if(!cat){err.textContent='Pick a category';err.style.color='#c44';return;}
+  var items=getCloset();
+  items.push({url:url,name:name,cat:cat,added:Date.now()});
+  saveCloset(items);
+  closeAddModal();
+  renderCloset();
+}
+
+async function aiIdentifyItem(){
+  var url=document.getElementById('addUrl').value.trim();
+  var err=document.getElementById('addErr');
+  if(!url){err.textContent='Paste a photo URL first';err.style.color='#c44';return;}
+  var btn=document.getElementById('aiIdentify');
+  btn.textContent='Identifying...';btn.disabled=true;
   try{
-    const ae = resolveAeName();
-    const colour = profile.faveColour?.name || 'neutral';
-    const shop = profile.faveShop?.split('/')[0].trim() || 'various shops';
-    const interests = (profile.interests||[]).slice(0,4).join(', ') || 'fashion';
-    const top = Object.entries(profile.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-    const mood = profile.moodToday||'good';
-    const music = (profile.music||[]).slice(0,3).join(', ');
-    const extraTags = (profile.extraTags||[]).join(', ');
-
-    const systemPrompt = `You are a personal fashion AI with strong opinions and emotional intelligence. You generate product recommendations as structured JSON only. No markdown, no preamble, just the JSON object. You read mood and match outfits to how someone is feeling — comfort fits when they are low, power pieces when they need confidence, statement items when they are hyped. You never suggest anything off-brand for their aesthetic.`;
-
-    const userPrompt = `Generate 16 fashion product recommendations for someone with this profile:
-- Aesthetic: ${ae}
-- Favourite colour: ${colour}
-- Shops at: ${shop}
-- Interests: ${interests}
-- Current mood: ${mood} (IMPORTANT: match items to this mood — comfort pieces if low/tired, bold pieces if hyped/creative, power fits if stressed)
-- Music: ${music}
-- Extra style tags: ${extraTags}
-
-Return ONLY a JSON object like this (no markdown, no explanation):
-{
-  "products": [
-    {
-      "id": "p1",
-      "name": "Black Platform Mary Janes",
-      "brand": "ASOS",
-      "price": "£45",
-      "category": "shoes",
-      "searchQuery": "black platform mary janes",
-      "shopUrl": "https://www.asos.com/search/?q=black+platform+mary+janes",
-      "imageQuery": "black platform mary janes shoes fashion",
-      "why": "Power shoes for when you need to feel untouchable"
-    }
-  ]
-}
-
-Categories must be one of: tops, bottoms, shoes, accessories, outerwear.
-
-RULES:
-- Make items specific to their aesthetic — someone kawaii gets pink bows and cute details, someone goth gets black and chunky, someone clean girl gets neutrals and minimalist pieces.
-- Match items to their MOOD: low/tired = cosy comfort (soft knits, oversized, warm textures), hyped/creative = bold statement pieces, stressed = power outfits that give confidence.
-- The "why" field should connect the outfit to how they feel — not just their aesthetic but their emotional state.
-- Have strong opinions. Every item should feel intentional, not generic.
-shopUrl should use their preferred shop: ${shop}.
-imageQuery should be descriptive for finding a fashion product photo.
-Include a mix of all categories. Make items they would genuinely love based on their profile.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{},
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        system: systemPrompt,
-        messages:[{role:'user',content:userPrompt}]
+        model:'claude-sonnet-4-20250514',max_tokens:150,
+        system:'You identify clothing items from image URLs. Return ONLY a JSON object: {name:"item description",cat:"category"} where cat is one of: tops, bottoms, dresses, outerwear, shoes, bags, accessories. Name should be specific like "black cropped cardigan" or "white platform sneakers". No markdown.',
+        messages:[{role:'user',content:'Identify this clothing item. The image URL is: '+url+'\n\nBased on the URL and common fashion items, what is this most likely? Return JSON {name, cat}.'}]
       })
     });
-
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '{}';
-    const clean = text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
-    allProducts = parsed.products || [];
-
-  }catch(e){
-    console.error(e);
-    allProducts = getFallbackProducts();
-  }
-
-  isLoading = false;
-  renderProducts();
+    var data=await res.json();
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    var match=text.match(/\{[\s\S]*\}/);
+    if(match){
+      var result=JSON.parse(match[0]);
+      if(result.name)document.getElementById('addName').value=result.name;
+      if(result.cat)document.getElementById('addCat').value=result.cat;
+      err.textContent='Detected! Check and adjust if needed.';err.style.color=PAL.ac;
+    }
+  }catch(e){err.textContent='Could not identify — enter manually';err.style.color='#c44';}
+  btn.textContent='Auto-detect item from photo';btn.disabled=false;
 }
 
+// ─── OUTFIT BUILDER ──────────────────────────────────────
+function renderBuilder(){
+  // Preview slots
+  var preview=document.getElementById('builderPreview');
+  var slots=['tops','bottoms','shoes','outerwear','accessories'];
+  preview.innerHTML='';
+  slots.forEach(function(cat){
+    var pick=outfitPicks[cat];
+    var slot=document.createElement('div');
+    slot.className='builder-slot';
+    if(pick){
+      slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt=""/><div class="builder-slot-label">'+cat+'</div>';
+    }else{
+      slot.innerHTML='<div class="builder-slot-empty">'+cat+'</div><div class="builder-slot-label">'+cat+'</div>';
+    }
+    preview.appendChild(slot);
+  });
 
-// ─── PRODUCT PHOTO LIBRARY ────────────────────────────────
-// Real Unsplash photo IDs curated by category and aesthetic
-// Format: https://images.unsplash.com/photo-{id}?w=400&h=530&fit=crop
+  // Cat filter for picking
+  var catsHtml='';
+  ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'].forEach(function(c){
+    var on=c===builderCat?' on':'';
+    var style='color:'+PAL.tx+';border-color:'+(c===builderCat?PAL.ac:'rgba(128,128,128,0.12)');
+    catsHtml+='<button class="closet-cat'+on+' bc" style="'+style+'" onclick="pickBuilderCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('builderCats').innerHTML=catsHtml;
 
-const PHOTO_LIBRARY = {
-  tops: {
-    dark:     ['1594938298870-c1fa2df3c7a0','1558618666-fcd25c85cd64','1503342217505-b0a15ec3261c','1583743814966-8d4d0ec60851','1542060748-2c35da05fd48'],
-    kawaii:   ['1515886657613-9f3515b0c78f','1567401893414-76b7b1e5a7a5','1490481651871-ab68de25d43d','1614676471928-2ed0ad1061a4','1518895949257-6b3f82c07e8b'],
-    clean:    ['1434389677669-e08b4cac3105','1524360367517-1b5c73e07e58','1521572163474-6864f9cf17ab','1491553895911-0055eca6402d','1516762689617-e1cffcef479d'],
-    y2k:      ['1515886657613-9f3515b0c78f','1567401893414-76b7b1e5a7a5','1529139574466-a303027bc851','1583744584823-3f3f78c5ac04','1468495244123-6c6c332eeece'],
-    street:   ['1542060748-2c35da05fd48','1503342217505-b0a15ec3261c','1556905055-8f358a7a47b2','1583743814966-8d4d0ec60851','1583744584823-3f3f78c5ac04'],
-    cottage:  ['1490481651871-ab68de25d43d','1614676471928-2ed0ad1061a4','1518895949257-6b3f82c07e8b','1524360367517-1b5c73e07e58','1516762689617-e1cffcef479d'],
-    default:  ['1434389677669-e08b4cac3105','1524360367517-1b5c73e07e58','1521572163474-6864f9cf17ab','1515886657613-9f3515b0c78f','1490481651871-ab68de25d43d'],
-  },
-  bottoms: {
-    dark:     ['1542272454315-4c01d7abdf4a','1624378441584-f7e9b4a25a56','1506629082955-511b1aa562c8','1541099649105-f69ad21f3246','1527719327859-a9e28d16c2a3'],
-    kawaii:   ['1583744584823-3f3f78c5ac04','1606107557195-0e29a4b5b4aa','1553545985-fd0f0069c2d0','1559561853-08f79f2296b4','1541099649105-f69ad21f3246'],
-    clean:    ['1506629082955-511b1aa562c8','1542272454315-4c01d7abdf4a','1624378441584-f7e9b4a25a56','1527719327859-a9e28d16c2a3','1541099649105-f69ad21f3246'],
-    default:  ['1542272454315-4c01d7abdf4a','1506629082955-511b1aa562c8','1624378441584-f7e9b4a25a56','1541099649105-f69ad21f3246','1553545985-fd0f0069c2d0'],
-  },
-  shoes: {
-    dark:     ['1542291026-7eec264c27ff','1608256246096-0e32a4f4d63f','1528701800489-717bc2d0e06c','1460353581641-37baddab0fa2','1605408499391-84ea0da8d888'],
-    kawaii:   ['1543163521-1bf539c55dd2','1535043934128-cf0b28d52f95','1549298916-b41d501d3772','1605100804763-247f67b3557e','1596484252834-c7ef3cabd8f7'],
-    clean:    ['1542291026-7eec264c27ff','1516478177764-9fe5bd7e9717','1549298916-b41d501d3772','1542291026-7eec264c27ff','1460353581641-37baddab0fa2'],
-    street:   ['1542291026-7eec264c27ff','1608256246096-0e32a4f4d63f','1542291026-7eec264c27ff','1605100804763-247f67b3557e','1519562078-6f7d0346be90'],
-    default:  ['1542291026-7eec264c27ff','1528701800489-717bc2d0e06c','1543163521-1bf539c55dd2','1460353581641-37baddab0fa2','1516478177764-9fe5bd7e9717'],
-  },
-  accessories: {
-    dark:     ['1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a','1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527'],
-    kawaii:   ['1599643478519-b1a4b037c1a8','1586861203927-4d6a8e27c9a8','1611591437281-460bfbe1220a','1629480052703-b9b82b98f4e4','1527814246094-591e9e85c1cc'],
-    clean:    ['1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527','1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a'],
-    default:  ['1599643478519-b1a4b037c1a8','1611591437281-460bfbe1220a','1535632066927-ab7c9ab60908','1520975661595-6c5d41b6d4cd','1602751584552-8ba85bd7d527'],
-  },
-  outerwear: {
-    dark:     ['1544923246-b77d6b77c4eb','1564557287817-3b9d2b65c5c8','1551028719-00167b16eac5','1556905055-8f358a7a47b2','1548036161-18c9e3f4e5ad'],
-    kawaii:   ['1517841905240-472988babdf9','1542060748-2c35da05fd48','1548036161-18c9e3f4e5ad','1551028719-00167b16eac5','1564557287817-3b9d2b65c5c8'],
-    clean:    ['1551028719-00167b16eac5','1544923246-b77d6b77c4eb','1548036161-18c9e3f4e5ad','1564557287817-3b9d2b65c5c8','1556905055-8f358a7a47b2'],
-    default:  ['1544923246-b77d6b77c4eb','1551028719-00167b16eac5','1548036161-18c9e3f4e5ad','1564557287817-3b9d2b65c5c8','1542060748-2c35da05fd48'],
-  },
-};
-
-function getProductImage(product, seed){
-  const cat = product.category || 'tops';
-  const ae = Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'default';
-  // Map aesthetic to photo style
-  const styleKey = ['goth','darkacad','grunge','emo'].includes(ae) ? 'dark'
-    : ['kawaii','softgirl','coquette','ballet'].includes(ae) ? 'kawaii'
-    : ['cleangirl','oldmoney','preppy','tomato'].includes(ae) ? 'clean'
-    : ['street','y2k'].includes(ae) ? 'street'
-    : 'default';
-
-  const catPhotos = PHOTO_LIBRARY[cat] || PHOTO_LIBRARY.tops;
-  const photos = catPhotos[styleKey] || catPhotos.default || catPhotos[Object.keys(catPhotos)[0]];
-  const idx = seed % photos.length;
-  const photoId = photos[idx];
-  return `https://images.unsplash.com/photo-${photoId}?w=400&h=530&fit=crop&crop=center`;
-}
-
-// ─── RENDER PRODUCTS ──────────────────────────────────────
-function renderProducts(){
-  const filtered = activeFilter==='all' ? allProducts : allProducts.filter(p=>p.category===activeFilter);
-  const grid = document.getElementById('productsGrid');
-  const loadMsg = document.getElementById('loadMsg');
-
-  if(filtered.length===0){
-    grid.innerHTML='';
-    loadMsg.style.display='block';
-    loadMsg.textContent = isLoading ? 'Building your shop...' : 'No items in this category yet.';
+  // Items to pick from
+  var items=getCloset().filter(function(i){return i.cat===builderCat;});
+  var grid=document.getElementById('builderItems');
+  grid.innerHTML='';
+  if(items.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;opacity:0.3;font-style:italic;">No '+builderCat+' in your closet</div>';
     return;
   }
-  loadMsg.style.display='none';
-
-  grid.innerHTML = filtered.map(p => {
-    const isWished = wishlist.some(w=>w.id===p.id);
-    const shopInfo = getShop();
-    const shopUrl = p.shopUrl || (shopInfo.url + encodeURIComponent(p.searchQuery||p.name));
-    const seed = p.id ? p.id.split('').reduce((a,b)=>a+b.charCodeAt(0),0) : Math.random()*9999|0;
-    const imgUrl = getProductImage(p, seed);
-    const fallbackUrl = `https://picsum.photos/seed/${seed}/400/530`;
-
-    return `<div class="product-card" id="card-${p.id}">
-      <div class="product-img-wrap">
-        <img class="product-img shimmer"
-          src="${imgUrl}"
-          alt="${p.name}"
-          onload="this.classList.remove('shimmer')"
-          onerror="this.src='${fallbackUrl}';this.classList.remove('shimmer')"
-        />
-        <div class="product-img-overlay">
-          ${isApproved(p.id)
-            ? `<a class="product-shop-btn" href="${shopUrl}" target="_blank" rel="noopener">Shop Now</a>`
-            : `<button class="product-shop-btn" onclick="showLockedMsg()" style="cursor:not-allowed;opacity:0.7;">🔒 Try on first</button>`
-          }
-        </div>
-      </div>
-      <div class="product-info">
-        ${isApproved(p.id) ? `<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;color:${PAL.ac};margin-bottom:4px;">✓ Flovee Approved</div>` : ''}
-        <div class="product-brand" style="color:${PAL.tx}">${p.brand||getShop().name}</div>
-        <div class="product-name" style="color:${PAL.tx}">${p.name}</div>
-        <div class="product-price" style="color:${PAL.tx}">${p.price||''}</div>
-        <div class="product-actions">
-          <button class="wish-btn ${isWished?'wished':''}" style="border-color:${PAL.tx}22;color:${PAL.tx}" onclick="toggleWish(${JSON.stringify(p).replace(/"/g,'&quot;')})">
-            <span class="wish-icon" style="color:${PAL.ac}">${isWished?'♥':'♡'}</span>
-            ${isWished?'Saved':'Save'}
-          </button>
-${isApproved(p.id)
-            ? `<a class="buy-btn bc" href="${shopUrl}" target="_blank" rel="noopener" style="background:${PAL.ac};color:${PAL.bg}">Buy</a>`
-            : `<button class="buy-btn bc locked-btn" onclick="showLockedMsg()" style="background:${PAL.tx}18;color:${PAL.tx};opacity:0.5;cursor:not-allowed;border:none;">Locked</button>`
-          }
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  items.forEach(function(item){
+    var isPicked=outfitPicks[builderCat]&&outfitPicks[builderCat].url===item.url;
+    var card=document.createElement('div');
+    card.className='builder-item'+(isPicked?' picked':'');
+    card.style.borderColor=isPicked?PAL.ac:'transparent';
+    card.style.background=PAL.tx+'06';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt=""/>';
+    card.onclick=function(){
+      if(isPicked){outfitPicks[builderCat]=null;}else{outfitPicks[builderCat]=item;}
+      renderBuilder();
+    };
+    grid.appendChild(card);
+  });
 }
 
-// ─── APPROVAL CHECK ──────────────────────────────────────
-function getApprovedIds(){
-  try{ return JSON.parse(localStorage.getItem('stuflover_approved')||'[]'); }catch(e){ return []; }
-}
-function isApproved(id){
-  return getApprovedIds().includes(id);
-}
-function showLockedMsg(){
-  // Show a brief toast message
-  let toast = document.getElementById('lockToast');
-  if(!toast){
-    toast = document.createElement('div');
-    toast.id = 'lockToast';
-    toast.style.cssText = 'position:fixed;bottom:32px;left:50%;transform:translateX(-50%);padding:14px 28px;border-radius:6px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;z-index:999;transition:opacity 0.3s;pointer-events:none;background:'+PAL.tx+';color:'+PAL.bg;
-    document.body.appendChild(toast);
-  }
-  toast.textContent = 'Add to Catalog & get Flovee approval first';
-  toast.style.opacity = '1';
-  setTimeout(()=>{ toast.style.opacity='0'; }, 2800);
+function pickBuilderCat(cat){builderCat=cat;renderBuilder();}
+
+function clearOutfit(){
+  for(var k in outfitPicks)outfitPicks[k]=null;
+  document.getElementById('suggestResult').style.display='none';
+  renderBuilder();
 }
 
-// ─── WISHLIST ─────────────────────────────────────────────
-function toggleWish(product){
-  const idx = wishlist.findIndex(w=>w.id===product.id);
-  if(idx>-1){
-    wishlist.splice(idx,1);
-  } else {
-    wishlist.push({...product, savedAt: Date.now()});
-  }
-  saveWishlist();
-  updateWishBadge();
-  renderProducts();
+async function aiSuggest(){
+  var items=getCloset();
+  if(items.length<3){alert('Add at least 3 items to your closet first!');return;}
+  var btn=document.getElementById('suggestBtn');
+  btn.disabled=true;btn.textContent='Thinking...';
+
+  var closetDesc=items.map(function(i){return i.cat+': '+i.name;}).join('\n');
+  var aeName=profile?Object.entries(profile.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0]:'';
+  aeName=aeName?aeName[0]:'casual';
+
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:300,
+        system:'You are a personal stylist. The user has a '+aeName+' aesthetic. Given their closet items, suggest ONE complete outfit combination. Be specific — name the exact items from their list. Explain why it works in 1-2 sentences. Keep it fun and encouraging.',
+        messages:[{role:'user',content:'Here is everything in my closet:\n'+closetDesc+'\n\nSuggest a complete outfit from these items!'}]
+      })
+    });
+    var data=await res.json();
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'Could not generate a suggestion right now.';
+    var result=document.getElementById('suggestResult');
+    result.textContent=text;
+    result.style.display='block';
+    result.style.background=PAL.ac+'12';
+    result.style.color=PAL.tx;
+  }catch(e){}
+
+  btn.disabled=false;btn.textContent='AI Suggest Outfit';
 }
 
-function updateWishBadge(){
-  const badge = document.getElementById('wishBadge');
-  if(!badge) return;
-  if(wishlist.length>0){
-    badge.style.display='flex';
-    badge.textContent = wishlist.length;
-  } else {
-    badge.style.display='none';
-  }
-}
+function escHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-// ─── FALLBACK PRODUCTS ────────────────────────────────────
-function getFallbackProducts(){
-  const ae = resolveAeName().toLowerCase();
-  const isGoth = ae.includes('goth')||ae.includes('dark')||ae.includes('grunge')||ae.includes('emo');
-  const isKawaii = ae.includes('kawaii')||ae.includes('soft');
-  const isClean = ae.includes('clean')||ae.includes('money')||ae.includes('preppy');
-  const isY2K = ae.includes('y2k')||ae.includes('bratz');
-
-  const fallbacks = isGoth ? [
-    {id:'f1',name:'Oversized Black Hoodie',brand:'ASOS',price:'£28',category:'tops',searchQuery:'oversized black hoodie',shopUrl:'https://www.asos.com/search/?q=oversized+black+hoodie',imageQuery:'oversized black hoodie streetwear'},
-    {id:'f2',name:'Black Platform Boots',brand:'ASOS',price:'£65',category:'shoes',searchQuery:'black platform boots',shopUrl:'https://www.asos.com/search/?q=black+platform+boots',imageQuery:'black platform boots gothic'},
-    {id:'f3',name:'Wide Leg Black Jeans',brand:'ASOS',price:'£35',category:'bottoms',searchQuery:'wide leg black jeans',shopUrl:'https://www.asos.com/search/?q=wide+leg+black+jeans',imageQuery:'wide leg black jeans fashion'},
-    {id:'f4',name:'Silver Layered Chains',brand:'ASOS',price:'£14',category:'accessories',searchQuery:'silver layered chains',shopUrl:'https://www.asos.com/search/?q=silver+layered+chains',imageQuery:'silver chain necklace layered gothic'},
-    {id:'f5',name:'Black Corset Top',brand:'ASOS',price:'£22',category:'tops',searchQuery:'black corset top',shopUrl:'https://www.asos.com/search/?q=black+corset+top',imageQuery:'black corset top fashion'},
-    {id:'f6',name:'Chunky Black Belt',brand:'ASOS',price:'£16',category:'accessories',searchQuery:'chunky black belt',shopUrl:'https://www.asos.com/search/?q=chunky+black+belt',imageQuery:'chunky black belt fashion'},
-  ] : isKawaii ? [
-    {id:'f1',name:'Pink Bow Hair Clip Set',brand:'ASOS',price:'£10',category:'accessories',searchQuery:'pink bow hair clips',shopUrl:'https://www.asos.com/search/?q=pink+bow+hair+clips',imageQuery:'pink bow hair clips cute kawaii'},
-    {id:'f2',name:'Lace Trim Cardigan',brand:'ASOS',price:'£32',category:'tops',searchQuery:'lace trim cardigan pink',shopUrl:'https://www.asos.com/search/?q=lace+trim+cardigan',imageQuery:'lace trim pink cardigan soft girl'},
-    {id:'f3',name:'Mary Jane Platform Shoes',brand:'ASOS',price:'£45',category:'shoes',searchQuery:'mary jane platform shoes',shopUrl:'https://www.asos.com/search/?q=mary+jane+platform+shoes',imageQuery:'mary jane platform shoes pink'},
-    {id:'f4',name:'Pleated Mini Skirt',brand:'ASOS',price:'£24',category:'bottoms',searchQuery:'pleated mini skirt pink',shopUrl:'https://www.asos.com/search/?q=pleated+mini+skirt',imageQuery:'pleated mini skirt pink soft girl'},
-    {id:'f5',name:'Baby Pink Knit Top',brand:'ASOS',price:'£20',category:'tops',searchQuery:'baby pink knit top',shopUrl:'https://www.asos.com/search/?q=baby+pink+knit+top',imageQuery:'baby pink knit top cute'},
-    {id:'f6',name:'Heart Charm Bag',brand:'ASOS',price:'£30',category:'accessories',searchQuery:'heart charm bag pink',shopUrl:'https://www.asos.com/search/?q=heart+charm+bag',imageQuery:'heart charm bag pink cute'},
-  ] : [
-    {id:'f1',name:'White Fitted T-Shirt',brand:'ASOS',price:'£14',category:'tops',searchQuery:'white fitted t-shirt',shopUrl:'https://www.asos.com/search/?q=white+fitted+tshirt',imageQuery:'white fitted t-shirt clean minimal'},
-    {id:'f2',name:'Straight Leg Jeans',brand:'ASOS',price:'£38',category:'bottoms',searchQuery:'straight leg jeans',shopUrl:'https://www.asos.com/search/?q=straight+leg+jeans',imageQuery:'straight leg jeans fashion'},
-    {id:'f3',name:'White Leather Trainers',brand:'ASOS',price:'£45',category:'shoes',searchQuery:'white leather trainers',shopUrl:'https://www.asos.com/search/?q=white+leather+trainers',imageQuery:'white leather trainers clean'},
-    {id:'f4',name:'Gold Hoop Earrings',brand:'ASOS',price:'£12',category:'accessories',searchQuery:'gold hoop earrings',shopUrl:'https://www.asos.com/search/?q=gold+hoop+earrings',imageQuery:'gold hoop earrings minimal'},
-    {id:'f5',name:'Oversized Blazer',brand:'ASOS',price:'£55',category:'outerwear',searchQuery:'oversized blazer',shopUrl:'https://www.asos.com/search/?q=oversized+blazer',imageQuery:'oversized blazer fashion minimal'},
-    {id:'f6',name:'Satin Slip Skirt',brand:'ASOS',price:'£28',category:'bottoms',searchQuery:'satin slip skirt',shopUrl:'https://www.asos.com/search/?q=satin+slip+skirt',imageQuery:'satin slip skirt fashion'},
-  ];
-  return fallbacks;
-}
-
-init();
+// ─── INIT ────────────────────────────────────────────────
+applyStyles();
+renderCloset();
 </script>
-
-
 </body>
 </html>
