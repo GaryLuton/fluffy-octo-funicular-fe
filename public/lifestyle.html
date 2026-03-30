@@ -1545,6 +1545,11 @@ function buildPage(){
 
   // Load For You recommendations
   setTimeout(loadForYou, 400);
+
+  // Viral decorations
+  initSparkleTrail();
+  initFloatingHearts();
+  initGlowTitle();
 }
 
 // ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
@@ -3205,6 +3210,179 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── MY PROFILE ──────────────────────────────────────────
+var PROFILE_THEMES = [
+  {name:'Rose',bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'},
+  {name:'Lavender',bg:'#e8d0f0',tx:'#1a0828',ac:'#8040a0'},
+  {name:'Mint',bg:'#c8ecd8',tx:'#0a2010',ac:'#2a8a4a'},
+  {name:'Sky',bg:'#c8e0f8',tx:'#081830',ac:'#3060b0'},
+  {name:'Peach',bg:'#f8dcc8',tx:'#1e0c00',ac:'#c87030'},
+  {name:'Noir',bg:'#1a1a1a',tx:'#e8e0d8',ac:'#c8a878'},
+  {name:'Sunset',bg:'#f0c8b0',tx:'#1e0800',ac:'#e06030'},
+  {name:'Berry',bg:'#e8c0d8',tx:'#280818',ac:'#a83070'},
+];
+
+var PROFILE_DECOS = [
+  {id:'sparkles',label:'Sparkles'},
+  {id:'stars',label:'Star Border'},
+  {id:'glow',label:'Glow'},
+  {id:'pattern',label:'Pattern'},
+];
+
+function openProfileView(){
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var username = (user && user.username) || 'you';
+  var bio = localStorage.getItem('stuflover_bio') || '';
+  var theme = JSON.parse(localStorage.getItem('stuflover_profile_theme') || 'null');
+  var decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topAe = topAe ? topAe[0] : 'softgirl';
+  var aeName = resolveAeName();
+  var colName = P.faveColour ? P.faveColour.name : 'not set';
+  var colHex = P.faveColour ? P.faveColour.hex : pal.ac;
+
+  // Apply theme or default palette
+  var t = theme || pal;
+  var card = document.getElementById('profileCard');
+  card.style.background = t.bg || pal.bg;
+  card.style.color = t.tx || pal.tx;
+  card.className = 'profile-card';
+  decos.forEach(function(d){ card.classList.add('deco-'+d); });
+  if(decos.includes('glow')){
+    card.style.setProperty('--glow-color', t.ac || pal.ac);
+    var before = card.querySelector(':scope');//just set via style
+    card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10), 0 0 40px '+(t.ac||pal.ac)+'40';
+  }
+
+  // Avatar
+  var av = document.getElementById('profileAvatar');
+  av.style.background = t.ac || pal.ac;
+  av.textContent = username.charAt(0).toUpperCase();
+
+  // Username
+  document.getElementById('profileUsername').textContent = username;
+  document.getElementById('profileUsername').style.color = t.tx || pal.tx;
+
+  // Bio
+  document.getElementById('profileBioDisplay').textContent = bio || 'no bio yet';
+  document.getElementById('profileBioInput').value = bio;
+  document.getElementById('profileBioCount').textContent = bio.length + ' / 150';
+
+  // Meta
+  document.getElementById('profileAesthetic').textContent = aeName;
+  document.getElementById('profileColourDot').style.background = colHex;
+  document.getElementById('profileColourName').textContent = colName;
+
+  // Join date
+  var jd = user && user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB',{month:'short',year:'numeric'}) : '';
+  document.getElementById('profileJoinDate').textContent = jd ? 'Joined '+jd : '';
+
+  // Save button
+  var saveBtn = document.getElementById('profileBioSaveBtn');
+  saveBtn.style.background = t.ac || pal.ac;
+  saveBtn.style.color = t.bg || pal.bg;
+
+  // Theme grid
+  var tGrid = document.getElementById('profileThemeGrid');
+  tGrid.innerHTML = '';
+  PROFILE_THEMES.forEach(function(pt){
+    var sw = document.createElement('div');
+    sw.className = 'profile-theme-swatch' + (theme && theme.name===pt.name ? ' on' : '');
+    sw.style.background = 'linear-gradient(135deg,'+pt.bg+','+pt.ac+'40)';
+    sw.title = pt.name;
+    sw.onclick = function(){ pickProfileTheme(pt); };
+    tGrid.appendChild(sw);
+  });
+
+  // Deco grid
+  var dGrid = document.getElementById('profileDecoGrid');
+  dGrid.innerHTML = '';
+  PROFILE_DECOS.forEach(function(dc){
+    var btn = document.createElement('button');
+    btn.className = 'profile-deco-toggle' + (decos.includes(dc.id) ? ' on' : '');
+    btn.textContent = dc.label;
+    btn.style.color = t.tx || pal.tx;
+    if(decos.includes(dc.id)){ btn.style.borderColor = t.ac || pal.ac; }
+    btn.onclick = function(){ toggleProfileDeco(dc.id); };
+    dGrid.appendChild(btn);
+  });
+
+  // Style the profileView bg
+  document.getElementById('profileView').style.background = pal.bg;
+  document.getElementById('profileView').style.color = pal.tx;
+}
+
+function onProfileBioInput(){
+  var input = document.getElementById('profileBioInput');
+  document.getElementById('profileBioCount').textContent = input.value.length + ' / 150';
+}
+
+function saveProfileBio(){
+  var bio = document.getElementById('profileBioInput').value.trim().substring(0,150);
+  localStorage.setItem('stuflover_bio', bio);
+  document.getElementById('profileBioDisplay').textContent = bio || 'no bio yet';
+  var btn = document.getElementById('profileBioSaveBtn');
+  btn.textContent = 'Saved!';
+  setTimeout(function(){ btn.textContent = 'Save Bio'; }, 1500);
+}
+
+function pickProfileTheme(pt){
+  localStorage.setItem('stuflover_profile_theme', JSON.stringify(pt));
+  openProfileView();
+}
+
+function toggleProfileDeco(id){
+  var decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  var idx = decos.indexOf(id);
+  if(idx >= 0) decos.splice(idx,1); else decos.push(id);
+  localStorage.setItem('stuflover_profile_decos', JSON.stringify(decos));
+  openProfileView();
+}
+
+// ─── VIRAL DECORATIONS ───────────────────────────────────
+// Sparkle cursor trail on lifestyle page
+var sparklePool = [];
+function initSparkleTrail(){
+  var page = document.getElementById('lifestylePage');
+  if(!page) return;
+  page.addEventListener('mousemove', function(e){
+    if(sparklePool.length > 12) return;
+    var dot = document.createElement('div');
+    dot.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:999;background:'+searchPal.ac+';opacity:0.7;transition:all 0.6s ease;left:'+e.clientX+'px;top:'+e.clientY+'px;';
+    document.body.appendChild(dot);
+    sparklePool.push(dot);
+    setTimeout(function(){ dot.style.opacity='0'; dot.style.transform='scale(0) translateY(-15px)'; }, 50);
+    setTimeout(function(){ dot.remove(); sparklePool.splice(sparklePool.indexOf(dot),1); }, 650);
+  });
+}
+
+// Floating hearts
+function initFloatingHearts(){
+  var page = document.getElementById('lifestylePage');
+  if(!page) return;
+  var css = document.createElement('style');
+  css.textContent = '@keyframes floatHeart{0%{transform:translateY(0) scale(1);opacity:0.12;}50%{opacity:0.18;}100%{transform:translateY(-100vh) scale(0.6);opacity:0;}}';
+  document.head.appendChild(css);
+  for(var i=0;i<4;i++){
+    var h = document.createElement('div');
+    h.style.cssText = 'position:fixed;bottom:-20px;left:'+(10+Math.random()*80)+'%;z-index:0;pointer-events:none;animation:floatHeart '+(8+Math.random()*6)+'s ease-in infinite;animation-delay:'+(i*3)+'s;';
+    h.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+searchPal.ac+'" opacity="0.5"/></svg>';
+    page.appendChild(h);
+  }
+}
+
+// Glowing title
+function initGlowTitle(){
+  var title = document.getElementById('aeTitle');
+  if(!title) return;
+  title.style.textShadow = '0 0 20px '+searchPal.ac+'30, 0 0 40px '+searchPal.ac+'15';
+  var css = document.createElement('style');
+  css.textContent = '@keyframes titleGlow{0%,100%{text-shadow:0 0 20px '+searchPal.ac+'30,0 0 40px '+searchPal.ac+'15;}50%{text-shadow:0 0 30px '+searchPal.ac+'50,0 0 60px '+searchPal.ac+'25;}}';
+  document.head.appendChild(css);
+  title.style.animation = 'titleGlow 4s ease-in-out infinite';
+}
+
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
   {id:'fitforit',   name:'FitforIt',       sub:'my wardrobe',       col:0, prompt:`You are in the FitforIt section — the user's personal wardrobe stylist. You help them style outfits from clothes they ALREADY OWN.
@@ -3473,9 +3651,11 @@ function openSection(id){
   document.querySelector('.back-btn').style.borderColor = pal.tx+'22';
   document.querySelector('.back-btn').style.color = pal.tx;
 
-  // Hide hub view by default
+  // Hide hub and profile views by default
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -3484,7 +3664,18 @@ function openSection(id){
     shopBar.style.display = 'none';
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
     openHub();
+    return;
+  } else if(sec.id === 'myprofile'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'flex';
+    document.getElementById('profileView').classList.add('active');
+    openProfileView();
     return;
   } else if(sec.id === 'fitforit'){
     shopBar.style.display = 'none';
@@ -3568,6 +3759,8 @@ function goHome(){
   document.getElementById('hubView').classList.remove('active');
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileView').classList.remove('active');
   if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval) clearInterval(dtiTimerInterval);
   // Restore hub section if it was overridden
   if(currentSection && currentSection._origPrompt){
