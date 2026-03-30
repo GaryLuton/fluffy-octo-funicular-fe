@@ -169,18 +169,34 @@ function isCleanText(text) {
   return !BAD_WORDS.test(text);
 }
 
+// Search for a user by username
+app.get('/api/friends/search/:username', auth, (req, res) => {
+  try {
+    const target = stmts.getUserByUsername.get(req.params.username);
+    if (!target) return res.json({ found: false });
+    res.json({ found: true, username: target.username });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Send friend request
 app.post('/api/friends/request', auth, (req, res) => {
-  const { username } = req.body;
-  if (!username) return res.status(400).json({ error: 'Username required' });
-  if (username.toLowerCase() === req.user.username.toLowerCase()) return res.status(400).json({ error: 'Cannot add yourself' });
-  const target = stmts.getUserByUsername.get(username);
-  if (!target) return res.status(404).json({ error: 'User not found' });
-  // Check if already friends
-  const friends = stmts.getFriends.all(req.user.id);
-  if (friends.some(f => f.id === target.id)) return res.status(400).json({ error: 'Already friends' });
-  stmts.sendFriendRequest.run(req.user.id, target.id);
-  res.json({ ok: true });
+  try {
+    const { username } = req.body;
+    if (!username) return res.status(400).json({ error: 'Username required' });
+    if (username.toLowerCase() === req.user.username.toLowerCase()) return res.status(400).json({ error: 'Cannot add yourself' });
+    const target = stmts.getUserByUsername.get(username);
+    if (!target) return res.status(404).json({ error: 'User not found — they need to sign up first' });
+    // Check if already friends
+    const friends = stmts.getFriends.all(req.user.id);
+    if (friends.some(f => f.id === target.id)) return res.status(400).json({ error: 'Already friends' });
+    stmts.sendFriendRequest.run(req.user.id, target.id);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Friend request error:', err);
+    res.status(500).json({ error: 'Server error — try again' });
+  }
 });
 
 // Get pending requests

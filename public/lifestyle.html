@@ -3480,21 +3480,28 @@ async function sendFrRequest(){
   var username = document.getElementById('frAddInput').value.trim();
   var err = document.getElementById('frAddErr');
   if(!username){ err.textContent='Enter a username'; err.style.color='#c44'; return; }
+  err.textContent='Searching...'; err.style.color=searchPal.tx;
   try{
+    // First check if user exists
+    var check = await frFetch('/api/friends/search/'+encodeURIComponent(username),{headers:frHeaders()});
+    if(check.ok){
+      var checkData = await check.json();
+      if(!checkData.found){
+        err.textContent='No account with that username — they need to sign up on Stuflover first'; err.style.color='#c44';
+        return;
+      }
+    }
+    // Send the request
     var res = await frFetch('/api/friends/request',{
       method:'POST', headers:frHeaders(),
       body:JSON.stringify({username:username})
     });
-    if(!res.ok){
-      var data = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
-      err.textContent=data.error||'Failed'; err.style.color='#c44'; return;
-    }
-    var data = await res.json();
-    if(data.error){ err.textContent=data.error; err.style.color='#c44'; return; }
-    err.textContent='Request sent!'; err.style.color=searchPal.ac;
+    var data = await res.json().catch(function(){return{error:'Server error'};});
+    if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
+    err.textContent='Request sent to '+username+'!'; err.style.color=searchPal.ac;
     document.getElementById('frAddInput').value='';
-    setTimeout(closeFrAddModal, 1200);
-  }catch(e){ err.textContent='Cannot reach server — check connection'; err.style.color='#c44'; console.error('Friend request error:', e); }
+    setTimeout(closeFrAddModal, 1500);
+  }catch(e){ err.textContent='Cannot reach server — is your internet working?'; err.style.color='#c44'; console.error('Friend request error:', e); }
 }
 
 // ─── ROUTINE BUILDER ─────────────────────────────────────
