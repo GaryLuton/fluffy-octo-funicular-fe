@@ -475,7 +475,36 @@
       #profileView{padding:20px 20px 40px;}
       .profile-card{max-width:100%;padding:24px 20px 22px;}
       .profile-section{max-width:100%;}
+      #routineView{padding:20px 16px 40px;}
+      .routine-col{max-width:100%;}
     }
+
+    /* ── ROUTINE BUILDER ── */
+    #routineView{display:none;flex:1;flex-direction:column;overflow-y:auto;padding:24px 40px 60px;}
+    #routineView.active{display:flex;}
+    .routine-toggle{display:flex;justify-content:center;gap:8px;margin-bottom:24px;}
+    .routine-toggle-btn{padding:10px 28px;border-radius:24px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:2px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;}
+    .routine-toggle-btn.on{border-color:currentColor;}
+    .routine-cols{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+    .routine-col{width:100%;max-width:400px;}
+    .routine-col-title{font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;margin-bottom:12px;}
+    .routine-steps{display:flex;flex-direction:column;gap:8px;min-height:60px;}
+    .routine-step{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.1);transition:all 0.15s;}
+    .routine-step:hover{border-color:rgba(128,128,128,0.25);}
+    .routine-step-time{font-size:0.68rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;opacity:0.4;min-width:42px;text-align:right;}
+    .routine-step-text{flex:1;font-size:0.88rem;line-height:1.4;}
+    .routine-step-icon{font-size:0.72rem;opacity:0.3;width:20px;text-align:center;}
+    .routine-step-del{background:transparent;border:none;cursor:pointer;font-size:0.7rem;opacity:0.2;color:inherit;padding:4px;transition:opacity 0.15s;}
+    .routine-step-del:hover{opacity:0.6;}
+    .routine-add-row{display:flex;gap:8px;margin-top:12px;}
+    .routine-add-input{flex:1;padding:10px 14px;border-radius:8px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.85rem;color:inherit;outline:none;}
+    .routine-add-input:focus{border-color:rgba(128,128,128,0.3);}
+    .routine-add-time{width:56px;padding:10px 6px;border-radius:8px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.82rem;color:inherit;outline:none;text-align:center;}
+    .routine-add-btn{padding:10px 18px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+    .routine-add-btn:hover{opacity:0.8;}
+    .routine-suggest-btn{width:100%;padding:12px;border:1.5px dashed rgba(128,128,128,0.15);border-radius:10px;background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.15s;margin-top:12px;opacity:0.5;}
+    .routine-suggest-btn:hover{opacity:0.8;border-color:rgba(128,128,128,0.3);}
+    .routine-suggest-btn:disabled{opacity:0.2;cursor:not-allowed;}
   </style>
 </head>
 <body>
@@ -777,6 +806,26 @@
       <div class="profile-section">
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
+      </div>
+    </div>
+
+    <!-- Routine Builder View -->
+    <div id="routineView">
+      <div class="routine-toggle">
+        <button class="routine-toggle-btn bc on" id="rtMorningBtn" onclick="switchRoutine('morning')">Morning</button>
+        <button class="routine-toggle-btn bc" id="rtNightBtn" onclick="switchRoutine('night')">Night</button>
+      </div>
+      <div class="routine-cols">
+        <div class="routine-col">
+          <div class="routine-col-title bc" id="rtColTitle">My Morning Routine</div>
+          <div class="routine-steps" id="rtSteps"></div>
+          <div class="routine-add-row">
+            <input class="routine-add-time" id="rtAddTime" placeholder="7:00" maxlength="5"/>
+            <input class="routine-add-input" id="rtAddText" placeholder="Add a step..." onkeydown="if(event.key==='Enter')addRoutineStep()"/>
+            <button class="routine-add-btn bc" id="rtAddBtn" onclick="addRoutineStep()">Add</button>
+          </div>
+          <button class="routine-suggest-btn" id="rtSuggestBtn" onclick="suggestRoutineSteps()">Generate routine with AI</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3210,6 +3259,125 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── ROUTINE BUILDER ─────────────────────────────────────
+var rtMode = 'morning'; // or 'night'
+
+function getRoutines(){
+  try{ return JSON.parse(localStorage.getItem('stuflover_routines')||'null')||{morning:[],night:[]}; }
+  catch(e){ return {morning:[],night:[]}; }
+}
+function saveRoutines(r){ localStorage.setItem('stuflover_routines', JSON.stringify(r)); }
+
+function switchRoutine(mode){
+  rtMode = mode;
+  document.getElementById('rtMorningBtn').classList.toggle('on', mode==='morning');
+  document.getElementById('rtNightBtn').classList.toggle('on', mode==='night');
+  document.getElementById('rtMorningBtn').style.borderColor = mode==='morning' ? searchPal.ac : 'rgba(128,128,128,0.15)';
+  document.getElementById('rtNightBtn').style.borderColor = mode==='night' ? searchPal.ac : 'rgba(128,128,128,0.15)';
+  renderRoutineSteps();
+}
+
+function openRoutineView(){
+  var pal = searchPal;
+  document.getElementById('routineView').style.background = pal.bg;
+  document.getElementById('routineView').style.color = pal.tx;
+  document.getElementById('rtAddBtn').style.background = pal.ac;
+  document.getElementById('rtAddBtn').style.color = pal.bg;
+  document.querySelectorAll('.routine-toggle-btn').forEach(function(b){ b.style.color = pal.tx; });
+  switchRoutine(rtMode);
+}
+
+function renderRoutineSteps(){
+  var pal = searchPal;
+  var routines = getRoutines();
+  var steps = routines[rtMode] || [];
+  var title = rtMode === 'morning' ? 'My Morning Routine' : 'My Night Routine';
+  document.getElementById('rtColTitle').textContent = title;
+
+  var container = document.getElementById('rtSteps');
+  container.innerHTML = '';
+
+  if(steps.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.3;font-style:italic;">No steps yet — add some or let AI generate a routine</div>';
+    return;
+  }
+
+  steps.forEach(function(step, i){
+    var div = document.createElement('div');
+    div.className = 'routine-step';
+    div.style.background = pal.ac + '08';
+    div.style.borderColor = pal.tx + '0a';
+    div.innerHTML =
+      '<div class="routine-step-time" style="color:'+pal.ac+'">'+escHtml(step.time||'')+'</div>'+
+      '<div class="routine-step-text" style="color:'+pal.tx+'">'+escHtml(step.text)+'</div>'+
+      '<button class="routine-step-del" onclick="deleteRoutineStep('+i+')" style="color:'+pal.tx+'">x</button>';
+    container.appendChild(div);
+  });
+}
+
+function addRoutineStep(){
+  var time = document.getElementById('rtAddTime').value.trim();
+  var text = document.getElementById('rtAddText').value.trim();
+  if(!text) return;
+  var routines = getRoutines();
+  if(!routines[rtMode]) routines[rtMode] = [];
+  routines[rtMode].push({time:time, text:text});
+  saveRoutines(routines);
+  document.getElementById('rtAddTime').value = '';
+  document.getElementById('rtAddText').value = '';
+  renderRoutineSteps();
+}
+
+function deleteRoutineStep(idx){
+  var routines = getRoutines();
+  if(routines[rtMode]) routines[rtMode].splice(idx, 1);
+  saveRoutines(routines);
+  renderRoutineSteps();
+}
+
+async function suggestRoutineSteps(){
+  var btn = document.getElementById('rtSuggestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  var aeName = resolveAeName();
+  var age = P.age || 'unknown';
+  var interests = (P.interests||[]).join(', ') || 'various';
+  var mood = P.moodToday || 'okay';
+  var prompt = rtMode === 'morning'
+    ? 'Generate a morning routine for a '+age+' year old with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
+    : 'Generate a night routine for a '+age+' year old with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
+
+  try{
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        system:'Generate a personalized routine. Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic and age.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    var data = await res.json();
+    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    var match = text.match(/\[[\s\S]*\]/);
+    if(match){
+      var steps = JSON.parse(match[0]);
+      if(Array.isArray(steps) && steps.length > 0){
+        var routines = getRoutines();
+        routines[rtMode] = steps.map(function(s){ return {time:s.time||'', text:s.text||s.step||''}; });
+        saveRoutines(routines);
+        renderRoutineSteps();
+      }
+    }
+  }catch(e){
+    console.error('Routine generation failed:', e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate routine with AI';
+}
+
 // ─── MY PROFILE ──────────────────────────────────────────
 var PROFILE_THEMES = [
   {name:'Rose',bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'},
@@ -3656,6 +3824,8 @@ function openSection(id){
   document.getElementById('hubView').classList.remove('active');
   document.getElementById('profileView').style.display = 'none';
   document.getElementById('profileView').classList.remove('active');
+  document.getElementById('routineView').style.display = 'none';
+  document.getElementById('routineView').classList.remove('active');
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -3673,9 +3843,21 @@ function openSection(id){
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
     document.getElementById('profileView').style.display = 'flex';
     document.getElementById('profileView').classList.add('active');
     openProfileView();
+    return;
+  } else if(sec.id === 'myroutine'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'flex';
+    document.getElementById('routineView').classList.add('active');
+    openRoutineView();
     return;
   } else if(sec.id === 'fitforit'){
     shopBar.style.display = 'none';
@@ -3761,6 +3943,8 @@ function goHome(){
   document.getElementById('dtiView').classList.remove('active');
   document.getElementById('profileView').style.display = 'none';
   document.getElementById('profileView').classList.remove('active');
+  document.getElementById('routineView').style.display = 'none';
+  document.getElementById('routineView').classList.remove('active');
   if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval) clearInterval(dtiTimerInterval);
   // Restore hub section if it was overridden
   if(currentSection && currentSection._origPrompt){
