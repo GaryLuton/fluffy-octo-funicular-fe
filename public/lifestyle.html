@@ -4903,14 +4903,27 @@ Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us b
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
   const hues = [0,35,70,105,140,175,210,245,280,315,350];
+  const icons = {
+    fitforit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76zM10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="white" opacity="0.9"/></svg>',
+    beyou:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white" opacity="0.5"/></svg>',
+    myroutine:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="3" r="1" fill="white"/></svg>',
+    myprofile:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+    floverhub:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.4"/></svg>',
+    stufloverdaily:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="white" stroke-width="1.5"/></svg>',
+    contentwithit:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="8" height="8" rx="2" fill="white" opacity="0.7"/><rect x="13" y="3" width="8" height="5" rx="2" fill="white" opacity="0.5"/><rect x="3" y="13" width="8" height="5" rx="2" fill="white" opacity="0.5"/><rect x="13" y="10" width="8" height="8" rx="2" fill="white" opacity="0.7"/></svg>',
+    friends:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="9" cy="10" r="1" fill="white"/><circle cx="12" cy="10" r="1" fill="white"/><circle cx="15" cy="10" r="1" fill="white"/></svg>',
+    floveegroup:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="9" cy="7" r="3" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5" fill="none" stroke="white" stroke-width="1.5"/><path d="M16 15c2 0 5 1 5 4" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/></svg>',
+    readit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" fill="none" stroke="white" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" fill="none" stroke="white" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke="white" stroke-width="1.2" opacity="0.5"/><line x1="8" y1="11" x2="14" y2="11" stroke="white" stroke-width="1.2" opacity="0.5"/></svg>',
+    boredomhub:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
   grid.innerHTML = SECTIONS.map((s, i) => {
-    const bg = shiftHue(pal.ac, hues[i]);
-    const initials = s.name.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase();
+    const bg = shiftHue(pal.ac, hues[i%hues.length]);
+    const icon = icons[s.id] || s.name.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase();
     const badge = s.newBadge ? `<span class="new-badge" style="background:${pal.ac}">NEW</span>` : '';
     return `<div class="browser-tile" onclick="openSection('${s.id}')">
-      <div class="tile-favicon" style="background:${bg}">${initials}</div>
+      <div class="tile-favicon" style="background:${bg}">${icon}</div>
       <div class="tile-label" style="color:${pal.tx}">${s.name}</div>
       ${badge}
     </div>`;
