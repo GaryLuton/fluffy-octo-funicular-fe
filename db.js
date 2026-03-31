@@ -11,10 +11,17 @@ async function initDb() {
   const SQL = await initSqlJs();
 
   // Load existing database file if it exists
-  if (fs.existsSync(dbPath)) {
-    const fileBuffer = fs.readFileSync(dbPath);
-    db = new SQL.Database(fileBuffer);
-  } else {
+  try {
+    if (fs.existsSync(dbPath)) {
+      const fileBuffer = fs.readFileSync(dbPath);
+      db = new SQL.Database(fileBuffer);
+      console.log('Loaded existing database from', dbPath);
+    } else {
+      db = new SQL.Database();
+      console.log('Created new database');
+    }
+  } catch (err) {
+    console.error('Database load error, creating fresh:', err.message);
     db = new SQL.Database();
   }
 
