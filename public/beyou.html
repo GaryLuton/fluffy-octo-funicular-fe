@@ -37,8 +37,15 @@
     /* ── MODE SELECTOR (4. Glass-morphism) ── */
     .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:6px;border-radius:30px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.12);transition:opacity 0.8s;}
     .mode-bar.hidden{opacity:0;pointer-events:none;}
+    @keyframes pillBounce{
+      0%{transform:scale(1);}
+      30%{transform:scale(0.88);}
+      60%{transform:scale(1.08);}
+      80%{transform:scale(0.97);}
+      100%{transform:scale(1);}
+    }
     .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.35s;opacity:0.45;}
-    .mode-pill.on{opacity:1;background:rgba(255,255,255,0.15);box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+    .mode-pill.on{opacity:1;background:rgba(255,255,255,0.15);box-shadow:0 2px 12px rgba(0,0,0,0.06);animation:pillBounce 0.4s cubic-bezier(0.34,1.56,0.64,1);}
     .mode-pill:hover{opacity:0.8;background:rgba(255,255,255,0.08);}
 
     /* ── FULL SCREEN VIEWS ── */
@@ -48,12 +55,12 @@
     /* ── BREATHE VIEW (2. Glow/bloom effect) ── */
     .breathe-container{display:flex;flex-direction:column;align-items:center;gap:40px;}
     .petal-wrap{position:relative;width:220px;height:220px;filter:blur(0px);}
-    .petal-wrap::after{content:'';position:absolute;inset:-30%;border-radius:50%;opacity:0;transition:opacity 4s ease;pointer-events:none;z-index:-1;}
-    .petal-wrap.inhale::after{opacity:1;}
-    .petal-wrap.exhale::after{opacity:0.3;}
-    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease,box-shadow 4s ease;}
-    .petal-wrap.inhale .petal{opacity:0.7;box-shadow:0 0 24px 8px currentColor;}
-    .petal-wrap.exhale .petal{opacity:0.4;box-shadow:0 0 8px 2px currentColor;}
+    .petal-wrap::after{content:'';position:absolute;inset:-40%;border-radius:50%;opacity:0;transition:opacity 4s ease, transform 4s ease;pointer-events:none;z-index:-1;filter:blur(8px);}
+    .petal-wrap.inhale::after{opacity:0.8;transform:scale(1.1);}
+    .petal-wrap.exhale::after{opacity:0.2;transform:scale(0.9);}
+    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease,box-shadow 4s ease,filter 4s ease;}
+    .petal-wrap.inhale .petal{opacity:0.65;box-shadow:0 0 32px 14px currentColor, 0 0 60px 20px currentColor;filter:blur(1.5px);}
+    .petal-wrap.exhale .petal{opacity:0.35;box-shadow:0 0 12px 4px currentColor, 0 0 24px 8px currentColor;filter:blur(0.5px);}
     .breathe-label{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
     .breathe-instruction{font-size:1.3rem;font-weight:300;text-align:center;min-height:40px;letter-spacing:0.5px;transition:opacity 0.6s;}
     .breathe-timer{font-size:0.78rem;opacity:0.3;letter-spacing:2px;text-align:center;}
@@ -67,7 +74,7 @@
     .reflect-container{display:flex;flex-direction:column;align-items:center;gap:36px;padding:0 40px;max-width:520px;}
     .reflect-orb{width:120px;height:120px;border-radius:50%;opacity:0.25;animation:orbPulse 6s ease-in-out infinite;}
     @keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.15);opacity:0.35;}}
-    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.3px;transition:opacity 0.6s;min-height:3.2em;}
+    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.5px;transition:opacity 0.6s;min-height:3.2em;}
     .reflect-prompt.fade{opacity:0;}
     .reflect-prompt .typewriter-cursor{display:inline-block;width:2px;height:1.1em;vertical-align:text-bottom;margin-left:2px;animation:cursorBlink 0.7s step-end infinite;}
     @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
@@ -89,6 +96,8 @@
     .journal-entries{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:8px;}
     .journal-entry{width:100%;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);text-align:left;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);transition:transform 0.25s, box-shadow 0.25s;}
     .journal-entry:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);}
+    .journal-entry:nth-child(even){background:rgba(128,128,128,0.04) !important;}
+    .journal-entry:nth-child(odd){background:rgba(128,128,128,0.01) !important;}
     .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
     .journal-entry-date{font-size:0.7rem;opacity:0.35;letter-spacing:1px;}
     .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:4px 12px;border-radius:14px;opacity:0.7;}
@@ -103,8 +112,14 @@
     .ground-step.done{opacity:1;}
     .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
     .ground-step-text{font-size:0.88rem;line-height:1.5;}
+    @keyframes checkPop{
+      0%{transform:scale(0) rotate(-45deg);opacity:0;}
+      50%{transform:scale(1.3) rotate(5deg);opacity:1;}
+      70%{transform:scale(0.9) rotate(-2deg);}
+      100%{transform:scale(1) rotate(0deg);opacity:1;}
+    }
     .ground-step .ground-check{display:none;font-size:1rem;}
-    .ground-step.done .ground-check{display:inline;}
+    .ground-step.done .ground-check{display:inline-block;animation:checkPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;}
     .ground-step.done .ground-step-num-val{display:none;}
     .regulate-done-msg{text-align:center;padding:24px;border-radius:16px;display:none;flex-direction:column;align-items:center;gap:10px;}
     .regulate-done-msg.show{display:flex;}
