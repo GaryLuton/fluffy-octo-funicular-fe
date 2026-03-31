@@ -11,11 +11,15 @@
     body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;transition:background 0.6s,color 0.6s;position:relative;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
-    /* DOT GRID BACKGROUND */
+    /* DOT + CROSS GRID BACKGROUND */
     body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
-      background-image:radial-gradient(circle, var(--tx) 0.7px, transparent 0.7px);
-      background-size:28px 28px;
-      opacity:0.04;
+      background-image:
+        radial-gradient(circle, var(--tx) 0.7px, transparent 0.7px),
+        linear-gradient(var(--tx) 1px, transparent 1px),
+        linear-gradient(90deg, var(--tx) 1px, transparent 1px);
+      background-size:28px 28px, 56px 56px, 56px 56px;
+      background-position:0 0, 14px 14px, 14px 14px;
+      opacity:0.03;
     }
 
     /* DECORATIVE SVG SPARKLES */
@@ -54,29 +58,34 @@
     .refresh-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
     .refresh-btn .spinner{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
     @keyframes spin{to{transform:rotate(360deg);}}
+    .refresh-btn .refresh-icon{display:inline-block;vertical-align:middle;margin-right:8px;transition:transform 0.4s ease;}
+    .refresh-btn:disabled .refresh-icon{animation:rotateIcon 0.8s linear infinite;}
+    @keyframes rotateIcon{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 
     /* CATEGORY */
     .category{padding:0 40px 50px;max-width:1100px;margin:0 auto;}
-    .cat-label{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;margin-bottom:20px;color:var(--ac);display:flex;align-items:center;gap:12px;}
+    .cat-label{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;margin-bottom:20px;color:var(--ac);display:flex;align-items:center;gap:12px;padding-bottom:10px;position:relative;}
+    .cat-label::after{content:'';position:absolute;bottom:0;left:0;height:3px;width:60px;border-radius:3px;background:linear-gradient(90deg, var(--ac), transparent);opacity:0.6;transition:width 0.4s ease;}
+    .category:hover .cat-label::after{width:120px;opacity:0.8;}
     .cat-emoji{font-size:1.4rem;}
     .cards-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:10px;}
 
     /* CARD */
-    .activity-card{background:var(--white);border-radius:16px;padding:24px;box-shadow:0 2px 16px rgba(30,12,6,0.07);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease;display:flex;flex-direction:column;gap:10px;min-height:140px;position:relative;overflow:hidden;
+    .activity-card{background:var(--white);border-radius:16px;padding:24px;box-shadow:0 2px 16px rgba(30,12,6,0.07);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.3s ease,background 0.3s ease,backdrop-filter 0.3s ease,border-color 0.3s ease;display:flex;flex-direction:column;gap:10px;min-height:140px;position:relative;overflow:hidden;border:1px solid transparent;
       opacity:0;transform:translateY(20px);animation:cardFadeIn 0.5s ease forwards;}
     .activity-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;opacity:0.7;transition:opacity 0.3s;}
-    .activity-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 16px 40px rgba(30,12,6,0.15);}
+    .activity-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 16px 40px rgba(30,12,6,0.15);background:rgba(255,255,255,0.55) !important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.3);}
 
     /* CATEGORY-SPECIFIC CARD TINTS */
-    .activity-card[data-cat="creative"]{border-left:3px solid rgba(168,80,200,0.3);}
+    .activity-card[data-cat="creative"]{border-left:4px solid rgba(168,80,200,0.6);}
     .activity-card[data-cat="creative"]::before{background:linear-gradient(90deg,rgba(168,80,200,0.4),transparent);}
-    .activity-card[data-cat="social"]{border-left:3px solid rgba(255,140,80,0.3);}
+    .activity-card[data-cat="social"]{border-left:4px solid rgba(255,140,80,0.6);}
     .activity-card[data-cat="social"]::before{background:linear-gradient(90deg,rgba(255,140,80,0.4),transparent);}
-    .activity-card[data-cat="solo"]{border-left:3px solid rgba(100,140,220,0.3);}
+    .activity-card[data-cat="solo"]{border-left:4px solid rgba(100,140,220,0.6);}
     .activity-card[data-cat="solo"]::before{background:linear-gradient(90deg,rgba(100,140,220,0.4),transparent);}
-    .activity-card[data-cat="active"]{border-left:3px solid rgba(80,200,120,0.3);}
+    .activity-card[data-cat="active"]{border-left:4px solid rgba(80,200,120,0.6);}
     .activity-card[data-cat="active"]::before{background:linear-gradient(90deg,rgba(80,200,120,0.4),transparent);}
-    .activity-card[data-cat="chill"]{border-left:3px solid rgba(200,160,220,0.3);}
+    .activity-card[data-cat="chill"]{border-left:4px solid rgba(200,160,220,0.6);}
     .activity-card[data-cat="chill"]::before{background:linear-gradient(90deg,rgba(200,160,220,0.4),transparent);}
 
     /* STAGGERED CARD FADE-IN */
@@ -136,7 +145,7 @@
 
 <div class="refresh-row">
   <button class="refresh-btn" id="refreshBtn" onclick="generateActivities()">
-    Refresh Activities
+    <span class="refresh-icon">&#x21bb;</span> Refresh Activities
   </button>
 </div>
 
@@ -381,7 +390,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     }
 
     btn.disabled = false;
-    btn.innerHTML = 'Refresh Activities';
+    btn.innerHTML = '<span class="refresh-icon">&#x21bb;</span> Refresh Activities';
     generating = false;
   };
 
