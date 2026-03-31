@@ -4535,8 +4535,15 @@ async function sendFrRequest(){
     if(check.ok){
       var checkData = await check.json();
       if(!checkData.found){
-        err.textContent='No account with that username — they need to sign up on Stuflover first'; err.style.color='#c44';
+        err.textContent='No account found for "'+username+'" — they need to sign up at '+window.location.origin+'/auth.html first';
+        err.style.color='#c44';
         return;
+      }
+      // Use the exact username from server
+      username = checkData.username;
+      if(checkData.suggestions && checkData.suggestions.length > 1){
+        err.textContent='Found: '+checkData.suggestions.join(', ');
+        err.style.color=searchPal.ac;
       }
     }
     // Send the request

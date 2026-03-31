@@ -2,27 +2,51 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'stuflover.db');
+const dbPath = process.env.DATABASE_PATH || '/app/data/stuflover.db';
+
+// Ensure data directory exists
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  try { fs.mkdirSync(dbDir, { recursive: true }); } catch(e) { console.log('Could not create db dir, using fallback'); }
+}
+// Fallback if directory isn't writable
+const fallbackPath = path.join(__dirname, 'stuflover.db');
 
 let db;
+let actualDbPath = dbPath;
 
 // sql.js is async, so we need an init function
 async function initDb() {
   const SQL = await initSqlJs();
 
   // Load existing database file if it exists
-  try {
-    if (fs.existsSync(dbPath)) {
-      const fileBuffer = fs.readFileSync(dbPath);
-      db = new SQL.Database(fileBuffer);
-      console.log('Loaded existing database from', dbPath);
-    } else {
-      db = new SQL.Database();
-      console.log('Created new database');
+  // Try primary path, fall back to app directory
+  var loaded = false;
+  [dbPath, fallbackPath].forEach(function(p) {
+    if (loaded) return;
+    try {
+      if (fs.existsSync(p)) {
+        const fileBuffer = fs.readFileSync(p);
+        db = new SQL.Database(fileBuffer);
+        actualDbPath = p;
+        loaded = true;
+        console.log('Loaded database from', p);
+      }
+    } catch (err) {
+      console.log('Could not load from', p, ':', err.message);
     }
-  } catch (err) {
-    console.error('Database load error, creating fresh:', err.message);
+  });
+  if (!loaded) {
     db = new SQL.Database();
+    // Try to write to primary, fall back
+    try {
+      fs.writeFileSync(dbPath, Buffer.from(db.export()));
+      actualDbPath = dbPath;
+      console.log('Created new database at', dbPath);
+    } catch(e) {
+      actualDbPath = fallbackPath;
+      console.log('Created new database at', fallbackPath);
+    }
   }
 
   // Create tables
@@ -159,9 +183,13 @@ async function initDb() {
 // Persist database to disk
 function save() {
   if (!db) return;
-  const data = db.export();
-  const buffer = Buffer.from(data);
-  fs.writeFileSync(dbPath, buffer);
+  try {
+    const data = db.export();
+    const buffer = Buffer.from(data);
+    fs.writeFileSync(actualDbPath, buffer);
+  } catch(e) {
+    console.error('DB save error:', e.message);
+  }
 }
 
 // Helper: run a query and return all rows as objects
@@ -414,4 +442,4 @@ const stmts = {
   },
 };
 
-module.exports = { initDb, stmts };
+module.exports = { initDb, stmts, all };
