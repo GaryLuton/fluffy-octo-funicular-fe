@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
+      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
+      --brown:#1e0c06; --white:#ffffff;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;
+      background-image:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(30,12,6,0.018) 18px,rgba(30,12,6,0.018) 19px),
+        repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(30,12,6,0.018) 18px,rgba(30,12,6,0.018) 19px),
+        radial-gradient(circle at 30% 20%,rgba(245,170,170,0.4) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(247,212,176,0.3) 0%,transparent 50%);}
+    h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.93);backdrop-filter:blur(10px);border-bottom:2px solid rgba(30,12,6,0.08);}
+    .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);text-decoration:none;}
+    .nav-right{display:flex;align-items:center;gap:20px;}
+    .nav-right span{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.5);}
+    .nav-right button{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;background:transparent;border:2px solid rgba(30,12,6,0.15);color:var(--brown);padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+    .nav-right button:hover{border-color:var(--brown);}
+
+    /* Login */
+    .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+    .auth-container{width:90%;max-width:440px;animation:fadeUp 0.5s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    .logo-top{text-align:center;margin-bottom:40px;}
+    .logo-top h1{font-size:3.2rem;letter-spacing:5px;color:var(--brown);}
+    .logo-top p{font-size:0.85rem;color:rgba(30,12,6,0.45);margin-top:4px;letter-spacing:1px;}
+    .auth-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 20px 60px rgba(30,12,6,0.1),0 0 0 1px rgba(30,12,6,0.03);}
+    .form-group{margin-bottom:16px;}
+    .form-group label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.45);margin-bottom:6px;}
+    .form-group input{width:100%;padding:14px 18px;border:2px solid rgba(30,12,6,0.12);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;color:var(--brown);outline:none;transition:border-color 0.25s,box-shadow 0.25s;}
+    .form-group input:focus{border-color:var(--terracotta);box-shadow:0 0 0 3px rgba(196,82,42,0.15);}
+    .form-group input::placeholder{color:rgba(30,12,6,0.25);}
+    .error-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;}
+    .submit-btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.25s,transform 0.25s;}
+    .submit-btn:hover:not(:disabled){background:var(--terracotta-dark);transform:translateY(-1px);}
+    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+    /* Dashboard */
+    .dashboard{max-width:1100px;margin:0 auto;padding:100px 24px 60px;}
+    .hidden{display:none;}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
+    .stat-card{background:var(--white);border-radius:20px;padding:28px 24px;box-shadow:0 8px 32px rgba(30,12,6,0.06);text-align:center;transition:transform 0.2s;}
+    .stat-card:hover{transform:translateY(-2px);}
+    .stat-value{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.8rem;color:var(--terracotta);letter-spacing:1px;}
+    .stat-label{font-size:0.78rem;color:rgba(30,12,6,0.45);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
+
+    .section-card{background:var(--white);border-radius:24px;padding:32px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
+    .section-title{font-size:1.3rem;letter-spacing:3px;margin-bottom:6px;}
+    .section-subtitle{font-size:0.82rem;color:rgba(30,12,6,0.4);margin-bottom:20px;}
+
+    .tabs{display:flex;gap:0;margin-bottom:24px;border-radius:12px;overflow:hidden;border:2px solid rgba(30,12,6,0.1);}
+    .tab{flex:1;text-align:center;padding:11px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(30,12,6,0.35);transition:all 0.3s;}
+    .tab:hover:not(.active){color:rgba(30,12,6,0.6);background:rgba(196,82,42,0.06);}
+    .tab.active{background:var(--terracotta);color:white;}
+
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.4);text-align:left;padding:10px 12px;border-bottom:2px solid rgba(30,12,6,0.08);}
+    td{padding:12px;font-size:0.9rem;border-bottom:1px solid rgba(30,12,6,0.06);}
+    tr:hover td{background:rgba(196,82,42,0.03);}
+    .table-wrap{overflow-x:auto;}
+
+    .user-row{cursor:pointer;}
+    .user-row:hover td{background:rgba(196,82,42,0.06);}
+
+    .badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;}
+    .badge-active{background:rgba(42,138,74,0.12);color:#2a8a4a;}
+    .badge-inactive{background:rgba(30,12,6,0.06);color:rgba(30,12,6,0.4);}
+
+    .bar-chart{display:flex;flex-direction:column;gap:8px;}
+    .bar-row{display:flex;align-items:center;gap:12px;}
+    .bar-label{font-size:0.82rem;font-weight:600;min-width:100px;text-align:right;color:rgba(30,12,6,0.6);}
+    .bar-track{flex:1;height:28px;background:rgba(30,12,6,0.04);border-radius:8px;overflow:hidden;position:relative;}
+    .bar-fill{height:100%;background:linear-gradient(135deg,var(--terracotta),var(--peach));border-radius:8px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;min-width:30px;}
+    .bar-count{font-size:0.72rem;font-weight:700;color:var(--white);}
+
+    /* Modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(30,12,6,0.4);backdrop-filter:blur(4px);z-index:300;align-items:center;justify-content:center;}
+    .modal-overlay.show{display:flex;}
+    .modal{background:var(--white);border-radius:24px;padding:36px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 80px rgba(30,12,6,0.2);animation:fadeUp 0.3s ease both;}
+    .modal-close{float:right;background:transparent;border:none;font-size:1.4rem;cursor:pointer;color:rgba(30,12,6,0.3);transition:color 0.2s;}
+    .modal-close:hover{color:var(--brown);}
+    .modal h2{margin-bottom:4px;}
+    .modal-meta{font-size:0.82rem;color:rgba(30,12,6,0.4);margin-bottom:20px;}
+    .activity-list{list-style:none;max-height:400px;overflow-y:auto;}
+    .activity-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(30,12,6,0.06);}
+    .activity-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+    .activity-icon.login{background:rgba(42,138,74,0.12);color:#2a8a4a;}
+    .activity-icon.page{background:rgba(196,82,42,0.12);color:var(--terracotta);}
+    .activity-text{font-size:0.88rem;}
+    .activity-time{font-size:0.75rem;color:rgba(30,12,6,0.35);margin-left:auto;white-space:nowrap;}
+
+    .loading{text-align:center;padding:40px;color:rgba(30,12,6,0.35);font-weight:600;}
+
+    @media(max-width:600px){
+      nav{padding:12px 16px;}
+      .dashboard{padding:80px 12px 40px;}
+      .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+      .stat-value{font-size:2rem;}
+      .bar-label{min-width:70px;font-size:0.75rem;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-wrap">
+  <div class="auth-container">
+    <div class="logo-top">
+      <h1>Stuflover</h1>
+      <p>admin dashboard</p>
+    </div>
+    <div class="auth-card">
+      <form onsubmit="handleAdminLogin(event)" novalidate>
+        <div class="form-group">
+          <label>Admin Email</label>
+          <input type="text" id="admin-email" placeholder="admin@email.com" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="admin-password" placeholder="admin password" autocomplete="current-password"/>
+        </div>
+        <div id="login-error" class="error-msg"></div>
+        <button type="submit" class="submit-btn" id="login-btn">Sign In</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboardScreen" class="hidden">
+  <nav>
+    <a class="logo" href="admin.html">Stuflover Admin</a>
+    <div class="nav-right">
+      <span id="adminEmail"></span>
+      <button onclick="adminLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <!-- Overview Stats -->
+    <div class="stat-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-value" id="statTotalUsers">—</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-card"><div class="stat-value" id="statTodayLogins">—</div><div class="stat-label">Today's Logins</div></div>
+      <div class="stat-card"><div class="stat-value" id="statWeekLogins">—</div><div class="stat-label">This Week Active</div></div>
+      <div class="stat-card"><div class="stat-value" id="statPageViews">—</div><div class="stat-label">Total Page Views</div></div>
+      <div class="stat-card"><div class="stat-value" id="statNewUsers">—</div><div class="stat-label">New This Week</div></div>
+    </div>
+
+    <!-- Tabs: Users / Login Activity / Page Usage -->
+    <div class="section-card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('users')">Users</button>
+        <button class="tab" onclick="switchTab('logins')">Login Activity</button>
+        <button class="tab" onclick="switchTab('pages')">Page Usage</button>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="tab-users">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Username</th><th>Email</th><th>Joined</th><th>Logins</th><th>Last Login</th><th>Status</th></tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Login Activity Tab -->
+      <div id="tab-logins" class="hidden">
+        <h3 class="section-title">Daily Logins</h3>
+        <p class="section-subtitle">Last 30 days</p>
+        <div class="bar-chart" id="loginChart"></div>
+      </div>
+
+      <!-- Page Usage Tab -->
+      <div id="tab-pages" class="hidden">
+        <h3 class="section-title">Page Visits</h3>
+        <p class="section-subtitle">Last 30 days</p>
+        <div class="bar-chart" id="pageChart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h2 id="modalUsername"></h2>
+    <div class="modal-meta" id="modalMeta"></div>
+    <h3 style="font-size:0.9rem;letter-spacing:2px;margin-bottom:12px;">Recent Activity</h3>
+    <ul class="activity-list" id="modalActivity"></ul>
+  </div>
+</div>
+
+<script src="/stuflover-config.js"></script>
+<script>
+var API_BASE = window.STUFLOVER_API_URL || '';
+var ADMIN_TOKEN_KEY = 'stuflover_admin_token';
+
+function getAdminToken() { return localStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
+
+function adminFetch(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ 'Authorization': 'Bearer ' + getAdminToken(), 'Content-Type': 'application/json' }, opts.headers || {});
+  return fetch(API_BASE + path, opts);
+}
+
+// ─── Login ───
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  var email = document.getElementById('admin-email').value.trim();
+  var password = document.getElementById('admin-password').value;
+  var errEl = document.getElementById('login-error');
+  var btn = document.getElementById('login-btn');
+  if (!email || !password) { errEl.textContent = 'Enter email and password'; return; }
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'SIGNING IN...';
+  try {
+    var res = await fetch(API_BASE + '/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+    showDashboard(email);
+  } catch (err) {
+    errEl.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = 'SIGN IN';
+  }
+}
+
+function adminLogout() {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  location.reload();
+}
+
+// ─── Dashboard ───
+function showDashboard(email) {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dashboardScreen').classList.remove('hidden');
+  document.getElementById('adminEmail').textContent = email || 'Admin';
+  loadOverview();
+  loadUsers();
+  loadLoginStats();
+  loadPageStats();
+}
+
+async function loadOverview() {
+  try {
+    var res = await adminFetch('/api/admin/overview');
+    if (!res.ok) throw new Error('unauthorized');
+    var data = await res.json();
+    document.getElementById('statTotalUsers').textContent = data.totalUsers;
+    document.getElementById('statTodayLogins').textContent = data.todayLogins;
+    document.getElementById('statWeekLogins').textContent = data.weekLogins;
+    document.getElementById('statPageViews').textContent = data.totalPageViews;
+    document.getElementById('statNewUsers').textContent = data.recentSignups;
+  } catch (err) {
+    if (err.message === 'unauthorized') { adminLogout(); }
+  }
+}
+
+var usersCache = [];
+async function loadUsers() {
+  try {
+    var res = await adminFetch('/api/admin/users');
+    if (!res.ok) return;
+    var data = await res.json();
+    usersCache = data.users;
+    var tbody = document.getElementById('usersBody');
+    tbody.innerHTML = '';
+    data.users.forEach(function(u) {
+      var joined = u.created_at ? new Date(u.created_at + 'Z').toLocaleDateString() : '—';
+      var lastLogin = u.last_login ? timeAgo(new Date(u.last_login + 'Z')) : 'Never';
+      var isActive = u.last_login && (Date.now() - new Date(u.last_login + 'Z').getTime()) < 7 * 86400000;
+      var tr = document.createElement('tr');
+      tr.className = 'user-row';
+      tr.onclick = function() { showUserModal(u); };
+      tr.innerHTML = '<td><strong>' + esc(u.username) + '</strong></td>'
+        + '<td style="font-size:0.82rem;color:rgba(30,12,6,0.5)">' + esc(u.email) + '</td>'
+        + '<td style="font-size:0.82rem">' + joined + '</td>'
+        + '<td style="text-align:center">' + (u.login_count || 0) + '</td>'
+        + '<td style="font-size:0.82rem">' + lastLogin + '</td>'
+        + '<td><span class="badge ' + (isActive ? 'badge-active' : 'badge-inactive') + '">' + (isActive ? 'Active' : 'Inactive') + '</span></td>';
+      tbody.appendChild(tr);
+    });
+  } catch (err) {}
+}
+
+async function loadLoginStats() {
+  try {
+    var res = await adminFetch('/api/admin/stats/logins?days=30');
+    if (!res.ok) return;
+    var data = await res.json();
+    var container = document.getElementById('loginChart');
+    container.innerHTML = '';
+    if (data.stats.length === 0) { container.innerHTML = '<div class="loading">No login data yet</div>'; return; }
+    var maxLogins = Math.max.apply(null, data.stats.map(function(s){ return s.logins; }));
+    data.stats.slice(0, 14).forEach(function(s) {
+      var pct = maxLogins > 0 ? (s.logins / maxLogins * 100) : 0;
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var d = new Date(s.day + 'T00:00:00Z');
+      row.innerHTML = '<div class="bar-label">' + d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + '</div>'
+        + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct, 5) + '%"><span class="bar-count">' + s.logins + ' (' + s.unique_users + ' users)</span></div></div>';
+      container.appendChild(row);
+    });
+  } catch (err) {}
+}
+
+async function loadPageStats() {
+  try {
+    var res = await adminFetch('/api/admin/stats/pages?days=30');
+    if (!res.ok) return;
+    var data = await res.json();
+    var container = document.getElementById('pageChart');
+    container.innerHTML = '';
+    if (data.stats.length === 0) { container.innerHTML = '<div class="loading">No page visit data yet</div>'; return; }
+    var maxVisits = Math.max.apply(null, data.stats.map(function(s){ return s.visits; }));
+    data.stats.forEach(function(s) {
+      var pct = maxVisits > 0 ? (s.visits / maxVisits * 100) : 0;
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = '<div class="bar-label">' + esc(s.page) + '</div>'
+        + '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct, 5) + '%"><span class="bar-count">' + s.visits + ' visits / ' + s.unique_users + ' users</span></div></div>';
+      container.appendChild(row);
+    });
+  } catch (err) {}
+}
+
+// ─── User Modal ───
+async function showUserModal(u) {
+  document.getElementById('modalUsername').textContent = u.username;
+  var joined = u.created_at ? new Date(u.created_at + 'Z').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}) : '';
+  document.getElementById('modalMeta').textContent = u.email + ' — Joined ' + joined + ' — ' + (u.login_count || 0) + ' logins';
+  var list = document.getElementById('modalActivity');
+  list.innerHTML = '<li class="loading">Loading...</li>';
+  document.getElementById('userModal').classList.add('show');
+  try {
+    var res = await adminFetch('/api/admin/users/' + u.id + '/activity');
+    if (!res.ok) return;
+    var data = await res.json();
+    list.innerHTML = '';
+    if (data.activity.length === 0) { list.innerHTML = '<li class="loading">No activity recorded yet</li>'; return; }
+    data.activity.forEach(function(a) {
+      var li = document.createElement('li');
+      li.className = 'activity-item';
+      var isLogin = a.type === 'login';
+      li.innerHTML = '<div class="activity-icon ' + (isLogin ? 'login' : 'page') + '">' + (isLogin ? '&#x2713;' : '&#x25CF;') + '</div>'
+        + '<div class="activity-text">' + (isLogin ? 'Logged in' : 'Visited <strong>' + esc(a.page) + '</strong>') + '</div>'
+        + '<div class="activity-time">' + timeAgo(new Date(a.timestamp + 'Z')) + '</div>';
+      list.appendChild(li);
+    });
+  } catch (err) {
+    list.innerHTML = '<li class="loading">Failed to load</li>';
+  }
+}
+
+function closeModal() {
+  document.getElementById('userModal').classList.remove('show');
+}
+document.getElementById('userModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── Tabs ───
+function switchTab(tab) {
+  ['users','logins','pages'].forEach(function(t) {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+  });
+  document.querySelectorAll('.tabs .tab').forEach(function(btn, i) {
+    var tabs = ['users','logins','pages'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+}
+
+// ─── Helpers ───
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function timeAgo(date) {
+  var diff = Date.now() - date.getTime();
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+  if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+  return date.toLocaleDateString();
+}
+
+// ─── Auto-login if token exists ───
+(function() {
+  var token = getAdminToken();
+  if (token) {
+    // Verify the token is still valid
+    adminFetch('/api/admin/overview').then(function(res) {
+      if (res.ok) {
+        try {
+          var payload = JSON.parse(atob(token.split('.')[1]));
+          showDashboard(payload.email || 'Admin');
+        } catch(e) { showDashboard('Admin'); }
+      } else { localStorage.removeItem(ADMIN_TOKEN_KEY); }
+    }).catch(function() {});
+  }
+})();
+</script>
+</body>
+</html>

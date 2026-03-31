@@ -108,6 +108,19 @@
     window.location.href = '/auth.html';
   };
 
+  // ─── Track page visits ───
+  if (getToken() && !window.location.pathname.includes('auth.html') && !window.location.pathname.includes('admin.html')) {
+    var page = window.location.pathname.replace(/^\//, '').replace(/\.html$/, '') || 'index';
+    _origFetch.call(window, API_BASE + '/api/activity/page', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + getToken(),
+      },
+      body: JSON.stringify({ page: page }),
+    }).catch(function () {});
+  }
+
   // ─── Expose user info and API base ───
   window.stufloverUser = getUser;
   window.STUFLOVER_API_URL = API_BASE;
