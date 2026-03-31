@@ -42,6 +42,14 @@
     .btn-danger:hover{background:#c0392b;color:white;}
 
     .status-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;text-align:center;}
+
+    @media(max-width:768px){
+      nav{padding:14px 20px;}
+      nav ul{display:none;}
+      .account-container{padding:90px 16px 40px;}
+      .welcome-card,.section-card{padding:28px 20px;border-radius:18px;}
+      .welcome-title{font-size:1.8rem;}
+    }
   </style>
 </head>
 <body>
@@ -53,6 +61,9 @@
     <li><a href="index.html">Home</a></li>
   </ul>
 </nav>
+<!-- Mobile back link -->
+<style>.mobile-nav-link{display:none;}@media(max-width:768px){.mobile-nav-link{display:block;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--brown);text-decoration:none;opacity:0.5;position:fixed;top:60px;left:0;z-index:100;}}</style>
+<a class="mobile-nav-link" href="lifestyle.html">&larr; My Page</a>
 
 <div class="account-container">
   <div class="welcome-card">

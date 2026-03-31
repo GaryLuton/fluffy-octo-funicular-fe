@@ -128,12 +128,31 @@
     .modal-btns{display:flex;gap:8px;}
     .modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
+    /* ── HAMBURGER ── */
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
+
     @media(max-width:768px){
-      nav{padding:13px 20px;} .closet,.builder{padding:16px 20px 40px;}
+      nav{padding:13px 20px;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+      .nav-toggle{display:block;}
+      .closet,.builder{padding:16px 20px 40px;}
       .closet-grid{grid-template-columns:repeat(2,1fr);}
       .builder-items{grid-template-columns:repeat(3,1fr);}
       .builder-preview{gap:8px;padding:14px;}
       .builder-slot{width:72px;}
+      .tabs{padding:10px 20px;gap:4px;}
+      .tab{padding:8px 16px;font-size:0.68rem;letter-spacing:2px;}
+      .closet-banner-title{font-size:clamp(1.8rem,5vw,2.8rem);}
+      .modal-box{width:calc(100vw - 32px);max-width:420px;padding:24px 20px;}
+    }
+    @media(max-width:420px){
+      .closet-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+      .builder-items{grid-template-columns:repeat(2,1fr);}
+      .builder-slot{width:60px;}
+      .builder-btn{padding:10px 20px;font-size:0.78rem;}
     }
   </style>
 </head>
@@ -141,6 +160,7 @@
 
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a class="nav-btn bc" href="lifestyle.html">My Page</a>
     <a class="nav-btn bc" href="index.html">Home</a>

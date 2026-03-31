@@ -99,12 +99,27 @@
     .loading-msg{text-align:center;padding:80px 40px;font-size:1.1rem;color:var(--tx);opacity:0.4;line-height:2;}
     .loading-msg .spinner-lg{display:inline-block;width:28px;height:28px;border:3px solid rgba(30,12,6,0.1);border-top-color:var(--ac);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;}
 
+    /* ── HAMBURGER ── */
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
+
     /* RESPONSIVE */
     @media(max-width:700px){
       .hero h1{font-size:clamp(2.8rem,12vw,5rem);}
       .category{padding:0 20px 40px;}
       .cards-row{grid-template-columns:1fr;}
       nav{padding:14px 20px;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
+      .nav-toggle{display:block;}
+      .hero{padding:100px 20px 40px;}
+      .hero-sub{font-size:0.88rem;}
+      .refresh-row{padding:16px 20px;}
+    }
+    @media(max-width:420px){
+      .hero h1{font-size:clamp(2.2rem,11vw,3.5rem);}
+      .card{padding:20px 18px;}
     }
   </style>
 </head>
@@ -132,6 +147,7 @@
 
 <nav id="mainNav">
   <a class="logo" id="navLogo" href="index.html">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a class="nav-link" id="navHome" href="index.html">Home</a>
     <a class="nav-link" id="navLifestyle" href="lifestyle.html">Lifestyle</a>

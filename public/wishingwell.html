@@ -48,13 +48,32 @@
     .remove-btn:hover{opacity:0.8;}
     .in-catalog-badge{position:absolute;top:8px;right:8px;padding:4px 10px;border-radius:20px;font-size:0.6rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;}
 
+    /* ── HAMBURGER ── */
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
+
     @media(max-width:900px){.products-grid{grid-template-columns:repeat(3,1fr);}}
-    @media(max-width:680px){nav{padding:13px 20px;}.products-grid{grid-template-columns:repeat(2,1fr);}.products-wrap,.page-header,.section-bar{padding-left:20px;padding-right:20px;}}
+    @media(max-width:680px){
+      nav{padding:13px 20px;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+      .nav-toggle{display:block;}
+      .products-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+      .products-wrap,.page-header,.section-bar{padding-left:16px;padding-right:16px;}
+      .page-header{padding-top:32px;padding-bottom:20px;}
+      .page-title{font-size:clamp(2.2rem,10vw,4rem);}
+      .empty-state{padding:40px 20px;}
+    }
+    @media(max-width:420px){
+      .products-grid{grid-template-columns:1fr;gap:16px;max-width:320px;margin:0 auto;}
+    }
   </style>
 </head>
 <body>
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
     <a class="nav-btn bc" href="catalog.html">Catalog</a>
