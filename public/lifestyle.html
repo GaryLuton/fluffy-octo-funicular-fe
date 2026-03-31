@@ -27,7 +27,7 @@
 
     /* QUIZ */
     #quizWrap{display:none;min-height:100vh;background:var(--white);padding:110px 40px 80px;flex-direction:column;align-items:center;}
-    #quizWrap.active{display:flex;}
+    #quizWrap.active{display:flex;animation:sectionFadeIn 0.4s ease both;}
     .quiz-inner{width:100%;max-width:800px;margin:0 auto;}
     .progress-track{width:100%;height:2px;background:rgba(30,12,6,0.07);margin-bottom:12px;overflow:hidden;}
     .progress-fill{height:100%;background:var(--terra);transition:width 0.4s ease;}
@@ -52,7 +52,7 @@
        RESULT PAGE — Anthropologie editorial
     ═══════════════════════════════════════ */
     #lifestylePage{display:none;}
-    #lifestylePage.active{display:block;}
+    #lifestylePage.active{display:block;animation:sectionFadeIn 0.4s ease both;}
     #bgSvg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;}
 
     /* HEADER STRIP — ae name + search */
@@ -62,8 +62,8 @@
 
     /* SEARCH BAR — browser style */
     .search-wrap{display:flex;align-items:center;gap:0;max-width:600px;border-radius:6px;overflow:visible;position:relative;}
-    .search-chrome{display:flex;align-items:center;gap:10px;flex:1;padding:12px 18px;border:1.5px solid rgba(128,128,128,0.2);border-right:none;border-radius:6px 0 0 6px;background:rgba(128,128,128,0.05);}
-    .search-chrome:focus-within{border-color:rgba(128,128,128,0.38);}
+    .search-chrome{display:flex;align-items:center;gap:10px;flex:1;padding:12px 18px;border:1.5px solid rgba(128,128,128,0.2);border-right:none;border-radius:6px 0 0 6px;background:rgba(128,128,128,0.05);transition:border-color 0.2s,box-shadow 0.2s;}
+    .search-chrome:focus-within{border-color:rgba(128,128,128,0.38);box-shadow:0 0 12px rgba(196,82,42,0.25),0 0 24px rgba(196,82,42,0.1);}
     .search-dots{display:flex;gap:4px;}
     .search-dot{width:8px;height:8px;border-radius:50%;background:rgba(128,128,128,0.2);}
     .search-input{flex:1;background:transparent;border:none;outline:none;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;letter-spacing:0.3px;}
@@ -82,24 +82,25 @@
 
     /* CHROME NEW TAB GRID */
     .content-grid{position:relative;z-index:2;padding:32px 40px 60px;display:flex;flex-wrap:wrap;justify-content:center;gap:0;}
-    .browser-tile{display:flex;flex-direction:column;align-items:center;gap:10px;width:96px;padding:16px 8px;cursor:pointer;border-radius:12px;transition:background 0.15s;}
-    .browser-tile:hover{background:rgba(128,128,128,0.1);}
+    .browser-tile{display:flex;flex-direction:column;align-items:center;gap:10px;width:96px;padding:16px 8px;cursor:pointer;border-radius:12px;transition:background 0.15s,backdrop-filter 0.15s;}
+    .browser-tile:hover{background:rgba(128,128,128,0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
     .browser-tile:active{background:rgba(128,128,128,0.18);}
     .tile-favicon{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:0;color:white;flex-shrink:0;}
     .tile-label{font-size:0.74rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:84px;font-family:'Space Grotesk',sans-serif;font-weight:500;letter-spacing:0;}
 
     /* SECTION VIEW */
     #sectionView{display:none;position:relative;z-index:2;min-height:100vh;padding-top:72px;flex-direction:column;}
-    #sectionView.active{display:flex;}
-    .section-nav{display:flex;align-items:center;gap:16px;padding:16px 40px;border-bottom:1px solid rgba(128,128,128,0.08);}
+    #sectionView.active{display:flex;animation:sectionFadeIn 0.35s ease both;}
+    .section-nav{display:flex;align-items:center;gap:16px;padding:16px 40px;border-bottom:1px solid rgba(128,128,128,0.08);background:rgba(128,128,128,0.06);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
     .back-btn{font-size:0.78rem;letter-spacing:3px;background:transparent;border:1.5px solid rgba(128,128,128,0.18);border-radius:4px;padding:8px 18px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:inherit;transition:opacity 0.2s;}
     .back-btn:hover{opacity:0.55;}
     .section-name-nav{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;opacity:0.7;}
     .chat-area{flex:1;display:flex;flex-direction:column;padding:0 40px 32px;}
     .chat-messages{flex:1;display:flex;flex-direction:column;gap:14px;padding:24px 0 20px;overflow-y:auto;max-height:calc(100vh - 220px);}
-    .cmsg{max-width:72%;padding:14px 18px;border-radius:18px;font-size:0.95rem;line-height:1.72;word-break:break-word;}
-    .cmsg.flovee{align-self:flex-start;border-bottom-left-radius:4px;}
-    .cmsg.user{align-self:flex-end;border-bottom-right-radius:4px;opacity:0.86;}
+    .cmsg{max-width:72%;padding:14px 18px;border-radius:20px;font-size:0.95rem;line-height:1.72;word-break:break-word;transition:box-shadow 0.2s;}
+    .cmsg:hover{box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+    .cmsg.flovee{align-self:flex-start;border-bottom-left-radius:6px;}
+    .cmsg.user{align-self:flex-end;border-bottom-right-radius:6px;opacity:0.86;}
     .cmsg-time{font-size:0.62rem;opacity:0.3;margin-top:4px;letter-spacing:0.5px;}
     .chat-date-sep{text-align:center;font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;padding:14px 0 6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
     .clear-chat-btn{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1px solid rgba(128,128,128,0.15);border-radius:4px;padding:5px 12px;cursor:pointer;opacity:0.3;transition:opacity 0.2s;color:inherit;}
@@ -712,9 +713,25 @@
     .routine-suggest-btn{width:100%;padding:12px;border:1.5px dashed rgba(128,128,128,0.15);border-radius:10px;background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;cursor:pointer;transition:all 0.15s;margin-top:12px;opacity:0.5;}
     .routine-suggest-btn:hover{opacity:0.8;border-color:rgba(128,128,128,0.3);}
     .routine-suggest-btn:disabled{opacity:0.2;cursor:not-allowed;}
+
+    /* ── VISUAL POLISH ── */
+
+    /* Section fade animation */
+    @keyframes sectionFadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+    /* Consistent button hover lift */
+    button:not(:disabled):hover, .nav-home:hover, .shop-link:hover {
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.10);
+    }
+
+    /* Vignette overlay */
+    .vignette-overlay{position:fixed;inset:0;pointer-events:none;z-index:999;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.12) 100%);}
   </style>
 </head>
 <body>
+
+<div class="vignette-overlay"></div>
 
 <nav id="mainNav">
   <a class="logo bc" id="navLogo" href="index.html">Stuflover</a>
