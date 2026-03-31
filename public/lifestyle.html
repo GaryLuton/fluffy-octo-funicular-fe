@@ -2031,20 +2031,21 @@ function buildRecProfile(){
 async function loadForYou(){
   var grid = document.getElementById('recBoard');
   var btn = document.getElementById('foryouRefresh');
-  if(!grid) return;
+  if(!grid || !searchPal) return;
 
-  // If called from button click, clear cache to force regeneration
-  if(forYouCache && !btn.disabled){
+  // If clicking refresh, clear cache
+  if(btn && !btn.disabled && forYouCache){
     forYouCache = null;
+    localStorage.removeItem('stuflover_foryou_cache');
   }
-  // Show cached results on page load
+  // Show cached results instantly
   if(forYouCache){
-    renderRecs(forYouCache);
-    return;
+    try{ renderRecs(forYouCache); } catch(e){ forYouCache=null; localStorage.removeItem('stuflover_foryou_cache'); }
+    if(forYouCache) return;
   }
 
-  grid.innerHTML = '<div class="rec-loading"><span class="spinner" style="display:inline-block;width:12px;height:12px;border:2px solid rgba(128,128,128,0.15);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:8px;"></span>Personalising...</div>';
-  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Loading'; }
+  grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
+  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
 
   try{
     var profileStr = buildRecProfile();
@@ -2081,10 +2082,9 @@ async function loadForYou(){
 }
 
 function getAeIcons(){
-  // Return SVG icon generators based on user aesthetic
   var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
   topK = topK?topK[0]:'softgirl';
-  var c = searchPal.ac;
+  var c = (searchPal&&searchPal.ac)||'#e8829a';
   var icons = [];
   // Primary icons per aesthetic
   var m = {
@@ -2155,7 +2155,7 @@ function makeStarBurstSvg(c, size){
 
 function renderRecs(recs){
   var board = document.getElementById('recBoard');
-  if(!board) return;
+  if(!board || !searchPal) return;
   var pal = searchPal;
   var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
   var aeIcons = getAeIcons();
