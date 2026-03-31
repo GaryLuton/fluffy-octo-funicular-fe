@@ -2,7 +2,11 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, 'stuflover.db');
+const dbPath = process.env.DATABASE_PATH || '/app/data/stuflover.db';
+
+// Ensure directory exists
+const dbDir = path.dirname(dbPath);
+try { if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir, { recursive: true }); } catch(e) {}
 
 let db;
 let actualDbPath = dbPath;
