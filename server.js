@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 const path = require('path');
-const { initDb, stmts } = require('./db');
+const { initDb, stmts, all } = require('./db');
 
 const cors = require('cors');
 
@@ -161,13 +161,19 @@ function isCleanText(text) {
   return !BAD_WORDS.test(text);
 }
 
-// Search for a user by username
+// Search for a user by username (case insensitive, partial match)
 app.get('/api/friends/search/:username', auth, (req, res) => {
   try {
-    const target = stmts.getUserByUsername.get(req.params.username);
-    if (!target) return res.json({ found: false });
-    res.json({ found: true, username: target.username });
+    const search = req.params.username.toLowerCase();
+    // Exact match first
+    const exact = stmts.getUserByUsername.get(search);
+    if (exact) return res.json({ found: true, username: exact.username, id: exact.id });
+    // Partial match — search all users
+    const matches = all('SELECT id, username FROM users WHERE LOWER(username) LIKE ? LIMIT 5', ['%'+search+'%']);
+    if (matches.length > 0) return res.json({ found: true, username: matches[0].username, id: matches[0].id, suggestions: matches.map(m=>m.username) });
+    res.json({ found: false });
   } catch (err) {
+    console.error('Search error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
