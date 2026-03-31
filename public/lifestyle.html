@@ -4950,15 +4950,17 @@ function initFontPicker(){
 function initCursorSettings(){
   var btn = document.createElement('div');
   btn.id = 'cursorSettingsBtn';
-  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;font-size:0.9rem;border:1.5px solid '+searchPal.tx+'15;background:'+searchPal.bg+'e0;color:'+searchPal.tx+';backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(0,0,0,0.08);transition:transform 0.2s;';
-  btn.textContent = '*';
-  btn.title = 'Cursor Trail Settings';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:200;padding:8px 16px;border-radius:20px;border:1.5px solid '+searchPal.tx+'18;background:'+searchPal.bg+'f0;color:'+searchPal.tx+';backdrop-filter:blur(14px);box-shadow:0 4px 18px rgba(0,0,0,0.1);transition:all 0.25s;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="'+searchPal.ac+'"/></svg> Settings';
+  btn.title = 'Customize cursor trail, font, and more';
+  btn.onmouseenter = function(){btn.style.transform='translateY(-2px)';btn.style.boxShadow='0 6px 24px rgba(0,0,0,0.14)';};
+  btn.onmouseleave = function(){btn.style.transform='';btn.style.boxShadow='0 4px 18px rgba(0,0,0,0.1)';};
   btn.onclick = toggleCursorPanel;
   document.body.appendChild(btn);
 
   var panel = document.createElement('div');
   panel.id = 'cursorPanel';
-  panel.style.cssText = 'position:fixed;bottom:64px;right:20px;width:200px;padding:16px;border-radius:14px;z-index:200;display:none;background:'+searchPal.bg+';color:'+searchPal.tx+';border:1.5px solid '+searchPal.tx+'10;box-shadow:0 8px 30px rgba(0,0,0,0.12);backdrop-filter:blur(16px);font-size:0.78rem;';
+  panel.style.cssText = 'position:fixed;bottom:56px;right:20px;width:220px;padding:18px;border-radius:16px;z-index:200;display:none;background:'+searchPal.bg+';color:'+searchPal.tx+';border:1.5px solid '+searchPal.tx+'10;box-shadow:0 12px 40px rgba(0,0,0,0.15);backdrop-filter:blur(20px);font-size:0.78rem;animation:fadeSlideIn 0.2s ease both;';
   var curType = localStorage.getItem('stuflover_cursor_type')||'dots';
   var curColor = localStorage.getItem('stuflover_cursor_color')||'palette';
   var curOn = localStorage.getItem('stuflover_cursor_on')!=='false';
