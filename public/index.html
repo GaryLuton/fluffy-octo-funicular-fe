@@ -156,16 +156,41 @@
       100%{background-position:200% center;}
     }
     .footer-logo{position:relative;display:inline-block;background:linear-gradient(90deg,var(--brown) 30%,rgba(247,212,176,0.9) 48%,rgba(196,82,42,0.8) 50%,rgba(247,212,176,0.9) 52%,var(--brown) 70%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3.5s ease-in-out infinite;}
+    /* ── HAMBURGER MENU ── */
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--brown);}
+    .nav-toggle svg{width:24px;height:24px;display:block;}
+
     @media(max-width:768px){
-      nav ul{display:none;}
-      .hero{padding:100px 30px 60px;flex-direction:column;}
-      .hero-circle{position:relative;right:auto;top:auto;transform:none;margin-top:36px;width:240px;height:240px;}
+      nav{padding:14px 20px;}
+      nav ul{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(30,12,6,0.08);padding:8px 0;}
+      nav ul.open{display:flex;}
+      nav ul a{display:block;padding:14px 24px;border-bottom:1px solid rgba(30,12,6,0.05);}
+      .nav-toggle{display:block;}
+      .hero{padding:100px 24px 60px;flex-direction:column;}
+      .hero h1{font-size:clamp(4rem,12vw,8rem);}
+      .hero-circle{position:relative;right:auto;top:auto;transform:none;margin-top:36px;width:200px;height:200px;}
       .flower{display:none;}
-      .be-unique,.style-section{flex-direction:column;padding:60px 28px;}
-      .arch-image{max-width:260px;}
-      .boredom-cards{grid-template-columns:1fr;}.video-grid{grid-template-columns:repeat(2,1fr);}
-      .viral,.boredom-hub,.videos,.style-section{padding:60px 28px;}
+      .be-unique,.style-section{flex-direction:column;padding:50px 20px;}
+      .be-unique h2{font-size:clamp(3rem,9vw,6rem);}
+      .arch-image{max-width:220px;height:280px;}
+      .polaroid{width:220px;padding:10px 10px 40px;transform:rotate(4deg);}
+      .polaroid-inner{height:190px;}
+      .boredom-cards{grid-template-columns:1fr;}
+      .boredom-hub{padding:50px 20px;}
+      .boredom-hub h2{font-size:clamp(2.4rem,8vw,4rem);}
+      .video-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+      .viral,.videos{padding:50px 20px;}
       .videos-header{flex-direction:column;align-items:flex-start;}
+      .modal{padding:28px 20px;max-width:calc(100vw - 32px);}
+      footer{padding:40px 20px;}
+      .footer-logo{font-size:2.6rem;}
+    }
+    @media(max-width:420px){
+      .hero h1{font-size:clamp(3rem,14vw,5rem);}
+      .hero-circle{width:160px;height:160px;}
+      .video-grid{grid-template-columns:1fr;}
+      .boredom-card{padding:20px 18px 24px;min-height:140px;}
+      .add-btn,.refresh-btn{padding:12px 22px;font-size:0.88rem;}
     }
   </style>
 </head>
@@ -173,6 +198,7 @@
 
 <nav>
   <div class="logo">Stuflover</div>
+  <button class="nav-toggle" onclick="document.querySelector('nav ul').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <ul>
     <li><span id="navWelcome" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;opacity:0.5;"></span></li>
     <li><a href="#boredom">Boredom Hub</a></li>

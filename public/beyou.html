@@ -137,10 +137,25 @@
     .complete-btn{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;opacity:0.7;margin-top:10px;}
     .complete-btn:hover{opacity:1;}
 
+    /* ── HAMBURGER ── */
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
+
     @media(max-width:680px){
-      nav{padding:13px 20px;}
+      nav{padding:13px 16px;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+      .nav-toggle{display:block;}
       .petal-wrap{width:180px;height:180px;}
       .petal{width:56px;height:56px;}
+      .mode-bar{bottom:20px;padding:4px;}
+      .mode-pill{padding:8px 16px;font-size:0.65rem;letter-spacing:2px;}
+      .complete-title{font-size:1.3rem;}
+    }
+    @media(max-width:420px){
+      .petal-wrap{width:150px;height:150px;}
+      .petal{width:48px;height:48px;}
     }
   </style>
 </head>
@@ -155,6 +170,7 @@
 
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a class="nav-btn bc" href="lifestyle.html">My Page</a>
     <a class="nav-btn bc" href="fitforit.html">FitforIt</a>

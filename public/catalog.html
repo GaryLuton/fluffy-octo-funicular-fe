@@ -86,12 +86,30 @@
  .buy-link-btn{font-size:0.7rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;padding:5px 12px;border-radius:3px;transition:opacity 0.2s;}
  .buy-link-btn:hover{opacity:0.7;}
 
+ /* ── HAMBURGER ── */
+ .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+ .nav-toggle svg{width:22px;height:22px;display:block;}
+
  @media(max-width:900px){.catalog-layout{grid-template-columns:1fr;}.flovee-side{position:relative;top:0;height:auto;border-top:1px solid rgba(128,128,128,0.08);}.cat-items{grid-template-columns:repeat(3,1fr);}nav,.page-header,.items-side,.flovee-side{padding-left:20px;padding-right:20px;}}
+ @media(max-width:600px){
+   nav{padding:12px 16px;}
+   .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+   .nav-links.open{display:flex;}
+   .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+   .nav-toggle{display:block;}
+   .page-header{padding:32px 16px 24px;}
+   .page-title{font-size:clamp(2.2rem,10vw,4rem);}
+   .cat-items{grid-template-columns:repeat(2,1fr);gap:8px;}
+   .flovee-msgs{max-height:220px;}
+   .flovee-side{padding:20px 16px;}
+   .items-side{padding:20px 16px;}
+ }
  </style>
 </head>
 <body>
 <nav id="mainNav">
  <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
+ <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
  <div class="nav-links">
  <a class="nav-btn bc" href="fitforit.html">FitforIt</a>
  <a class="nav-btn bc" href="wishingwell.html">WishingWell</a>
