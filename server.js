@@ -588,14 +588,20 @@ app.all('/api/*', (req, res) => {
 app.get('*', (req, res) => {
   const filePath = path.join(__dirname, 'public', req.path);
   res.sendFile(filePath, (err) => {
-    if (err) res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    if (err && !res.headersSent) {
+      res.sendFile(path.join(__dirname, 'public', 'index.html'), (err2) => {
+        if (err2 && !res.headersSent) res.status(404).end();
+      });
+    }
   });
 });
 
 // Global error handler — always return JSON for API errors
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Initialize database then start server
