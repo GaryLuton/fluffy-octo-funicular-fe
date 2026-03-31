@@ -3968,6 +3968,11 @@ async function loadRiFeed(){
   feed.innerHTML = '<div class="ri-empty">Loading...</div>';
   try{
     var res = await riFetch('/api/books/posts?page=0',{headers:riHeaders()});
+    if(!res.ok){
+      var errData = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
+      feed.innerHTML = '<div class="ri-empty">'+escHtml(errData.error||'Could not load')+'</div>';
+      return;
+    }
     var data = await res.json();
     var posts = data.posts||[];
     if(riTab==='top') posts.sort(function(a,b){return b.votes-a.votes;});
