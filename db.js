@@ -176,6 +176,25 @@ async function initDb() {
     );
   `);
 
+  // Admin & analytics tables
+  db.run(`
+    CREATE TABLE IF NOT EXISTS login_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      logged_in_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS page_visits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      page TEXT NOT NULL,
+      visited_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
   save();
   return db;
 }
@@ -439,6 +458,43 @@ const stmts = {
   },
   getUserBookVote: {
     get: (userId, postId) => get('SELECT vote FROM book_votes WHERE user_id=? AND post_id=?', [userId, postId]),
+  },
+  // Admin & analytics
+  logLogin: {
+    run: (userId) => run('INSERT INTO login_log (user_id) VALUES (?)', [userId]),
+  },
+  logPageVisit: {
+    run: (userId, page) => run('INSERT INTO page_visits (user_id, page) VALUES (?, ?)', [userId, page]),
+  },
+  getAllUsers: {
+    all: () => all(`
+      SELECT u.id, u.username, u.email, u.created_at,
+        (SELECT COUNT(*) FROM login_log WHERE user_id = u.id) as login_count,
+        (SELECT MAX(logged_in_at) FROM login_log WHERE user_id = u.id) as last_login
+      FROM users u ORDER BY u.created_at DESC
+    `),
+  },
+  getLoginStats: {
+    all: (days) => all(`
+      SELECT DATE(logged_in_at) as day, COUNT(*) as logins, COUNT(DISTINCT user_id) as unique_users
+      FROM login_log WHERE logged_in_at >= datetime('now', '-' || ? || ' days')
+      GROUP BY DATE(logged_in_at) ORDER BY day DESC
+    `, [days]),
+  },
+  getPageStats: {
+    all: (days) => all(`
+      SELECT page, COUNT(*) as visits, COUNT(DISTINCT user_id) as unique_users
+      FROM page_visits WHERE visited_at >= datetime('now', '-' || ? || ' days')
+      GROUP BY page ORDER BY visits DESC
+    `, [days]),
+  },
+  getUserActivity: {
+    all: (userId, limit) => all(`
+      SELECT 'login' as type, NULL as page, logged_in_at as timestamp FROM login_log WHERE user_id = ?
+      UNION ALL
+      SELECT 'page_visit' as type, page, visited_at as timestamp FROM page_visits WHERE user_id = ?
+      ORDER BY timestamp DESC LIMIT ?
+    `, [userId, userId, limit || 50]),
   },
 };
 

@@ -12,6 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 
 // Middleware
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -73,6 +75,9 @@ app.post('/api/auth/login', (req, res) => {
   if (!user || !bcrypt.compareSync(password, user.password_hash)) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
+
+  // Log the login
+  stmts.logLogin.run(user.id);
 
   const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
   res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
@@ -426,6 +431,104 @@ app.post('/api/books/posts/:id/vote', auth, (req, res) => {
     stmts.voteBookPost.run(req.user.id, parseInt(req.params.id), v);
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ─── Activity Tracking ───
+
+app.post('/api/activity/page', auth, (req, res) => {
+  const { page } = req.body;
+  if (!page || typeof page !== 'string') return res.status(400).json({ error: 'Page required' });
+  stmts.logPageVisit.run(req.user.id, page.substring(0, 100));
+  res.json({ ok: true });
+});
+
+// ─── Admin Routes ───
+
+function adminAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  try {
+    const token = header.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+    req.admin = decoded;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+app.post('/api/admin/login', (req, res) => {
+  const { email, password } = req.body;
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    return res.status(503).json({ error: 'Admin access not configured' });
+  }
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Invalid admin credentials' });
+  }
+  const token = jwt.sign({ isAdmin: true, email }, JWT_SECRET, { expiresIn: '8h' });
+  res.json({ token });
+});
+
+app.get('/api/admin/users', adminAuth, (req, res) => {
+  try {
+    const users = stmts.getAllUsers.all();
+    res.json({ users });
+  } catch (err) {
+    console.error('Admin users error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/admin/users/:id/activity', adminAuth, (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const activity = stmts.getUserActivity.all(userId, 100);
+    res.json({ activity });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/admin/stats/logins', adminAuth, (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const stats = stmts.getLoginStats.all(days);
+    res.json({ stats });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/admin/stats/pages', adminAuth, (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const stats = stmts.getPageStats.all(days);
+    res.json({ stats });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/admin/overview', adminAuth, (req, res) => {
+  try {
+    const totalUsers = all('SELECT COUNT(*) as count FROM users', [])[0].count;
+    const todayLogins = all("SELECT COUNT(DISTINCT user_id) as count FROM login_log WHERE DATE(logged_in_at) = DATE('now')", [])[0].count;
+    const weekLogins = all("SELECT COUNT(DISTINCT user_id) as count FROM login_log WHERE logged_in_at >= datetime('now', '-7 days')", [])[0].count;
+    const totalPageViews = all('SELECT COUNT(*) as count FROM page_visits', [])[0].count;
+    const recentSignups = all("SELECT COUNT(*) as count FROM users WHERE created_at >= datetime('now', '-7 days')", [])[0].count;
+    res.json({ totalUsers, todayLogins, weekLogins, totalPageViews, recentSignups });
+  } catch (err) {
+    console.error('Admin overview error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ─── Anthropic API Proxy ───
