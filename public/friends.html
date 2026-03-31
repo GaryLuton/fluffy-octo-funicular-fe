@@ -405,14 +405,75 @@ function sendMessage(){
   renderMessages();
   renderContacts();
   clearTypingTimer();
+
+  // Auto-reply from friend after a short delay
+  const contact=contacts.find(c=>c.id===activeContactId);
+  if(contact) simulateFriendReply(text, contact);
 }
 
 function handleMsgKey(e){
   if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }
 }
 
-// ─── RECEIVE THEIR MESSAGE ────────────────────────────────
-// User types what the friend said — shown as their bubble
+// ─── FRIEND AUTO-REPLY ───────────────────────────────────
+let friendTypingEl=null;
+async function simulateFriendReply(myMessage, contact){
+  const chatId=contact.id;
+  const msgs=document.getElementById('chatMsgs');
+
+  // Show typing indicator
+  friendTypingEl=document.createElement('div');
+  friendTypingEl.className='bubble-wrap them';
+  friendTypingEl.innerHTML=`<div class="bubble" style="background:${PAL.tx}14;color:${PAL.tx};font-style:italic;opacity:0.5">${contact.name} is typing...</div>`;
+  msgs.appendChild(friendTypingEl);
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // Small delay to feel natural
+  await new Promise(r=>setTimeout(r,800+Math.random()*1200));
+
+  const history=(conversations[chatId]||[]).filter(m=>m.from!=='flovee_suggestion').slice(-10);
+  const historyStr=history.map(m=>`${m.from==='me'?'Me':contact.name}: ${m.text}`).join('\n');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:150,
+        system:`You are roleplaying as ${contact.name}, who is the user's ${contact.rel||'friend'}. You are texting them casually. Stay in character as a real person — use natural texting style (lowercase, short messages, abbreviations are fine). Never break character or mention being AI. Match the energy and tone of a ${contact.rel||'friend'}. Keep replies to 1-3 short sentences max. Be genuine.`,
+        messages:[{role:'user',content:`Here is our recent text conversation:\n${historyStr}\n\nRespond as ${contact.name}. Just the message text, nothing else.`}]
+      })
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text?.trim()||'';
+
+    if(friendTypingEl){ friendTypingEl.remove(); friendTypingEl=null; }
+
+    if(reply && chatId===activeContactId){
+      if(!conversations[chatId]) conversations[chatId]=[];
+      conversations[chatId].push({from:'them',text:reply,ts:Date.now()});
+      saveData();
+      renderMessages();
+      renderContacts();
+    }
+  }catch(e){
+    if(friendTypingEl){ friendTypingEl.remove(); friendTypingEl=null; }
+    // Fallback — generate a simple response
+    if(chatId===activeContactId){
+      const fallbacks=['haha yeah','omg','wait really??','no way','lol true','hmm idk','that\'s so funny','tell me more','literally same','okay bet'];
+      const reply=fallbacks[Math.floor(Math.random()*fallbacks.length)];
+      if(!conversations[chatId]) conversations[chatId]=[];
+      conversations[chatId].push({from:'them',text:reply,ts:Date.now()});
+      saveData();
+      renderMessages();
+      renderContacts();
+    }
+  }
+}
+
+// ─── RECEIVE THEIR MESSAGE (manual) ──────────────────────
+// User can also manually type what the friend said
 function addTheirMessage(){
   const text=prompt('What did they say?');
   if(!text||!activeContactId) return;
