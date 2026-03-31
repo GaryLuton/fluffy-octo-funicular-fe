@@ -228,13 +228,14 @@ app.get('/api/friends', auth, (req, res) => {
 // Send message
 app.post('/api/friends/message', auth, (req, res) => {
   const { friendId, text } = req.body;
-  if (!friendId || !text) return res.status(400).json({ error: 'Friend ID and text required' });
+  const fid = parseInt(friendId);
+  if (!fid || !text) return res.status(400).json({ error: 'Friend ID and text required' });
   if (text.length > 500) return res.status(400).json({ error: 'Message too long' });
   if (!isCleanText(text)) return res.status(400).json({ error: 'Please keep messages appropriate' });
   // Verify they are friends
   const friends = stmts.getFriends.all(req.user.id);
-  if (!friends.some(f => f.id === friendId)) return res.status(403).json({ error: 'Not friends' });
-  stmts.sendMessage.run(req.user.id, friendId, text.trim());
+  if (!friends.some(f => parseInt(f.id) === fid)) return res.status(403).json({ error: 'Not friends — you need to add them first' });
+  stmts.sendMessage.run(req.user.id, fid, text.trim());
   res.json({ ok: true });
 });
 
@@ -243,7 +244,7 @@ app.get('/api/friends/messages/:friendId', auth, (req, res) => {
   const friendId = parseInt(req.params.friendId);
   if (!friendId) return res.status(400).json({ error: 'Invalid friend ID' });
   const friends = stmts.getFriends.all(req.user.id);
-  if (!friends.some(f => f.id === friendId)) return res.status(403).json({ error: 'Not friends' });
+  if (!friends.some(f => parseInt(f.id) === friendId)) return res.status(403).json({ error: 'Not friends' });
   const messages = stmts.getMessages.all(req.user.id, friendId, 50);
   res.json({ messages: messages.reverse() });
 });

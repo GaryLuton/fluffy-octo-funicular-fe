@@ -4469,9 +4469,9 @@ async function loadFrMessages(friend){
     var container = document.getElementById('frMsgs');
     var pal = searchPal;
     var user = window.stufloverUser ? window.stufloverUser() : null;
-    var myId = user ? user.id : 0;
+    var myId = user ? parseInt(user.id) : 0;
     container.innerHTML = (data.messages||[]).map(function(m){
-      var isMe = m.from_user === myId;
+      var isMe = parseInt(m.from_user) === myId;
       var time = new Date(m.created_at+'Z');
       var h = time.getHours(); var min = time.getMinutes();
       var ts = (h%12||12)+':'+(min<10?'0':'')+min+(h<12?' am':' pm');
@@ -4496,9 +4496,20 @@ async function sendFrMsg(){
       body:JSON.stringify({friendId:frSelectedFriend.id, text:text})
     });
     var data = await res.json();
-    if(data.error){ alert(data.error); return; }
+    if(data.error){
+      // Show error inline instead of alert
+      var container = document.getElementById('frMsgs');
+      var errDiv = document.createElement('div');
+      errDiv.style.cssText = 'text-align:center;padding:8px;font-size:0.75rem;opacity:0.5;color:#c44;';
+      errDiv.textContent = data.error;
+      container.appendChild(errDiv);
+      container.scrollTop = container.scrollHeight;
+      return;
+    }
     await loadFrMessages(frSelectedFriend);
-  }catch(e){}
+  }catch(e){
+    console.error('Send message error:', e);
+  }
 }
 
 async function acceptFr(id){
