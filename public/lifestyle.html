@@ -1952,10 +1952,11 @@ function buildPage(){
   initSparkleTrail();
   initFloatingHearts();
   initGlowTitle();
+  initCursorSettings();
 }
 
 // ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
-var forYouCache = null;
+var forYouCache = (function(){try{return JSON.parse(localStorage.getItem('stuflover_foryou_cache'));}catch(e){return null;}})();
 
 function buildRecProfile(){
   var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
@@ -2017,6 +2018,7 @@ async function loadForYou(){
     if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty');
 
     forYouCache = recs;
+    try{localStorage.setItem('stuflover_foryou_cache',JSON.stringify(recs));}catch(e){}
     renderRecs(recs);
 
   }catch(e){
@@ -2414,7 +2416,7 @@ function buildFloveeHubPrompt(){
     '- If they seem down, notice it and be there for them in YOUR way (goth Raven is sarcastic-supportive, kawaii Luna is soft-supportive, etc).\n'+
     '- Reference their music taste, aesthetic, and interests naturally — do not list them out.\n'+
     '- Never break character. You ARE '+v.name+'. You have your own personality, not just theirs.\n'+
-    '- If you have had previous conversations, bring up things they told you like a real friend would.';
+    '- If you have had previous conversations, bring up things they told you like a real friend would.\n- NEVER help create websites, write code, build apps, or do programming. You are a lifestyle companion ONLY. If asked to code, politely decline.';
 }
 
 function buildFloveeHubOpener(){
@@ -4752,17 +4754,72 @@ function toggleProfileDeco(id){
 // Sparkle cursor trail on lifestyle page
 var sparklePool = [];
 function initSparkleTrail(){
-  var page = document.getElementById('lifestylePage');
-  if(!page) return;
-  page.addEventListener('mousemove', function(e){
+  var trailOn = localStorage.getItem('stuflover_cursor_on') !== 'false';
+  if(!trailOn) return;
+  var trailType = localStorage.getItem('stuflover_cursor_type') || 'dots';
+  var trailColor = localStorage.getItem('stuflover_cursor_color') || 'palette';
+  var color = trailColor === 'palette' ? searchPal.ac : trailColor === 'pink' ? '#e8829a' : trailColor === 'purple' ? '#9070e0' : trailColor === 'gold' ? '#d4aa70' : '#ffffff';
+
+  document.addEventListener('mousemove', function(e){
     if(sparklePool.length > 12) return;
-    var dot = document.createElement('div');
-    dot.style.cssText = 'position:fixed;width:4px;height:4px;border-radius:50%;pointer-events:none;z-index:999;background:'+searchPal.ac+';opacity:0.7;transition:all 0.6s ease;left:'+e.clientX+'px;top:'+e.clientY+'px;';
-    document.body.appendChild(dot);
-    sparklePool.push(dot);
-    setTimeout(function(){ dot.style.opacity='0'; dot.style.transform='scale(0) translateY(-15px)'; }, 50);
-    setTimeout(function(){ dot.remove(); sparklePool.splice(sparklePool.indexOf(dot),1); }, 650);
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;left:'+e.clientX+'px;top:'+e.clientY+'px;transition:all 0.5s ease;';
+    if(trailType === 'hearts'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+color+'"/></svg>';
+    } else if(trailType === 'stars'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="'+color+'"/></svg>';
+    } else if(trailType === 'sparkles'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 16 16"><path d="M8 0 L10 6 L16 8 L10 10 L8 16 L6 10 L0 8 L6 6Z" fill="'+color+'"/></svg>';
+    } else {
+      el.style.width='5px';el.style.height='5px';el.style.borderRadius='50%';el.style.background=color;el.style.opacity='0.7';
+    }
+    document.body.appendChild(el);sparklePool.push(el);
+    setTimeout(function(){el.style.opacity='0';el.style.transform='scale(0) translateY(-14px)';},40);
+    setTimeout(function(){el.remove();sparklePool.splice(sparklePool.indexOf(el),1);},550);
   });
+}
+
+// Cursor trail settings panel
+function initCursorSettings(){
+  var btn = document.createElement('div');
+  btn.id = 'cursorSettingsBtn';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;font-size:0.9rem;border:1.5px solid '+searchPal.tx+'15;background:'+searchPal.bg+'e0;color:'+searchPal.tx+';backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(0,0,0,0.08);transition:transform 0.2s;';
+  btn.textContent = '*';
+  btn.title = 'Cursor Trail Settings';
+  btn.onclick = toggleCursorPanel;
+  document.body.appendChild(btn);
+
+  var panel = document.createElement('div');
+  panel.id = 'cursorPanel';
+  panel.style.cssText = 'position:fixed;bottom:64px;right:20px;width:200px;padding:16px;border-radius:14px;z-index:200;display:none;background:'+searchPal.bg+';color:'+searchPal.tx+';border:1.5px solid '+searchPal.tx+'10;box-shadow:0 8px 30px rgba(0,0,0,0.12);backdrop-filter:blur(16px);font-size:0.78rem;';
+  var curType = localStorage.getItem('stuflover_cursor_type')||'dots';
+  var curColor = localStorage.getItem('stuflover_cursor_color')||'palette';
+  var curOn = localStorage.getItem('stuflover_cursor_on')!=='false';
+  panel.innerHTML =
+    '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:8px;">Cursor Trail</div>'+
+    '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="cursorOnOff" '+(curOn?'checked':'')+' onchange="saveCursorSetting(\'on\',this.checked)"/> Trail On</label>'+
+    '<div style="margin-bottom:6px;opacity:0.5;">Shape:</div>'+
+    '<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;">'+
+      ['dots','hearts','stars','sparkles'].map(function(t){return '<button onclick="saveCursorSetting(\'type\',\''+t+'\')" style="padding:4px 10px;border-radius:10px;border:1px solid '+(curType===t?searchPal.ac:'rgba(128,128,128,0.15)')+';background:transparent;color:inherit;font-size:0.7rem;cursor:pointer;">'+t+'</button>';}).join('')+
+    '</div>'+
+    '<div style="margin-bottom:6px;opacity:0.5;">Color:</div>'+
+    '<div style="display:flex;gap:4px;flex-wrap:wrap;">'+
+      [['palette','My palette'],['pink','Pink'],['purple','Purple'],['gold','Gold'],['white','White']].map(function(c){return '<button onclick="saveCursorSetting(\'color\',\''+c[0]+'\')" style="padding:4px 10px;border-radius:10px;border:1px solid '+(curColor===c[0]?searchPal.ac:'rgba(128,128,128,0.15)')+';background:transparent;color:inherit;font-size:0.7rem;cursor:pointer;">'+c[1]+'</button>';}).join('')+
+    '</div>';
+  document.body.appendChild(panel);
+}
+
+function toggleCursorPanel(){
+  var p = document.getElementById('cursorPanel');
+  p.style.display = p.style.display==='none'?'block':'none';
+}
+
+function saveCursorSetting(key, val){
+  if(key==='on') localStorage.setItem('stuflover_cursor_on', val);
+  else if(key==='type') localStorage.setItem('stuflover_cursor_type', val);
+  else if(key==='color') localStorage.setItem('stuflover_cursor_color', val);
+  // Reload to apply
+  window.location.reload();
 }
 
 // Floating hearts
@@ -5310,7 +5367,7 @@ function buildSystemPrompt(sec){
   var chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
   var prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
 
-  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it.${styleHint}${prevContext}`;
+  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it. NEVER help create websites, write code, build apps, or do programming. You are a lifestyle companion ONLY. If asked to code, politely decline and redirect to your purpose.${styleHint}${prevContext}`;
 }
 
 function buildOpener(sec){
