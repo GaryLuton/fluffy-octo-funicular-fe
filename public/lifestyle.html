@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Lifestyle — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Satisfy&family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root{--pink:#f9c4c4;--pink-mid:#f5aaaa;--terra:#c4522a;--brown:#1e0c06;--white:#fff;}
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -287,6 +287,24 @@
       .dti-outfit-label{text-align:left;}
       .dti-items{grid-template-columns:repeat(2,1fr);}
     }
+
+    /* ── CUSTOM EMOJI PICKER ── */
+    .emoji-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(128,128,128,0.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;font-size:0.8rem;color:inherit;opacity:0.5;}
+    .emoji-btn:hover{opacity:1;transform:scale(1.1);}
+    .emoji-picker{display:none;position:absolute;bottom:48px;right:0;width:240px;padding:10px;border-radius:14px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:300;backdrop-filter:blur(16px);}
+    .emoji-picker.open{display:block;}
+    .emoji-picker-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;}
+    .emoji-pick{width:32px;height:32px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;transition:all 0.15s;color:inherit;}
+    .emoji-pick:hover{background:rgba(128,128,128,0.1);transform:scale(1.15);}
+    .emoji-picker-label{font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin:6px 0 4px;padding-top:6px;border-top:1px solid rgba(128,128,128,0.06);}
+    .emoji-picker-label:first-child{border:none;margin-top:0;padding-top:0;}
+
+    /* ── FONT SELECTOR ── */
+    .font-selector{position:fixed;bottom:64px;right:20px;width:180px;padding:12px;border-radius:12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 24px rgba(0,0,0,0.1);z-index:200;display:none;backdrop-filter:blur(16px);}
+    .font-selector.open{display:block;}
+    .font-option{padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.88rem;transition:all 0.15s;border:none;background:transparent;color:inherit;width:100%;text-align:left;display:block;}
+    .font-option:hover{background:rgba(128,128,128,0.08);}
+    .font-option.on{font-weight:700;opacity:1;}
 
     /* ── CARD GAME VIEW ── */
     #cardGameView{display:none;flex:1;flex-direction:column;align-items:center;overflow-y:auto;padding:24px 20px 60px;}
@@ -1970,6 +1988,11 @@ function buildPage(){
   initFloatingHearts();
   initGlowTitle();
   initCursorSettings();
+  initFontPicker();
+  applyChatFont();
+  // Add emoji pickers to chat inputs
+  var chatRow1 = document.querySelector('#normalChat .chat-input-row');
+  if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
 }
 
 // ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
@@ -4797,6 +4820,133 @@ function initSparkleTrail(){
 }
 
 // Cursor trail settings panel
+// ─── CUSTOM EMOJI SYSTEM ─────────────────────────────────
+var CUSTOM_EMOJIS = {
+  'Stuf Emojis': [
+    {code:':heart:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>'},
+    {code:':star:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="currentColor"/></svg>'},
+    {code:':sparkle:', display:'<svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="currentColor"/></svg>'},
+    {code:':flower:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor"/><ellipse cx="12" cy="5" rx="2.5" ry="3.5" fill="currentColor" opacity="0.6"/><ellipse cx="12" cy="19" rx="2.5" ry="3.5" fill="currentColor" opacity="0.6"/><ellipse cx="5" cy="12" rx="3.5" ry="2.5" fill="currentColor" opacity="0.6"/><ellipse cx="19" cy="12" rx="3.5" ry="2.5" fill="currentColor" opacity="0.6"/></svg>'},
+    {code:':moon:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/></svg>'},
+    {code:':butterfly:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 10C8 4 2 6 2 10s4 8 10 4" fill="currentColor" opacity="0.7"/><path d="M12 10c4-6 10-4 10 0s-4 8-10 4" fill="currentColor" opacity="0.7"/><line x1="12" y1="8" x2="12" y2="18" stroke="currentColor" stroke-width="1"/></svg>'},
+  ],
+  'Faces': [
+    {code:':happy:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/></svg>'},
+    {code:':love:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7.5 8.5C7.5 7 9 7 9 8.5S7.5 11 7.5 11 6 10 7.5 8.5z" fill="currentColor"/><path d="M13.5 8.5C13.5 7 15 7 15 8.5S13.5 11 13.5 11 12 10 13.5 8.5z" fill="currentColor"/></svg>'},
+    {code:':sad:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/></svg>'},
+    {code:':wink:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><path d="M14 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'},
+    {code:':shy:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 15c1 1 5 1 6 0" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="8" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="8" cy="12" rx="2.5" ry="1.5" fill="currentColor" opacity="0.15"/><ellipse cx="16" cy="12" rx="2.5" ry="1.5" fill="currentColor" opacity="0.15"/></svg>'},
+    {code:':cool:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="6" y="8" width="5" height="3" rx="1" fill="currentColor" opacity="0.7"/><rect x="13" y="8" width="5" height="3" rx="1" fill="currentColor" opacity="0.7"/><line x1="11" y1="9.5" x2="13" y2="9.5" stroke="currentColor" stroke-width="1"/></svg>'},
+  ],
+  'Vibes': [
+    {code:':fire:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 23c-4.5 0-7-3-7-7 0-3 2-5 3-7 .5 2 2 3 2 3 0-4 3-8 6-10-1 3 1 5 2 6 1.5-1 2-3 2-3 1 2 2 4 2 6 0 4-2.5 7-7 7z" fill="currentColor" opacity="0.8"/></svg>'},
+    {code:':cloud:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z" fill="currentColor" opacity="0.6"/></svg>'},
+    {code:':rain:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M16 7h-.26A7 7 0 107 17h9a4 4 0 100-8z" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="20" x2="7" y2="23" stroke="currentColor" stroke-width="1.2"/><line x1="12" y1="20" x2="11" y2="23" stroke="currentColor" stroke-width="1.2"/><line x1="16" y1="20" x2="15" y2="23" stroke="currentColor" stroke-width="1.2"/></svg>'},
+    {code:':bow:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 8C8 4 2 6 4 8s6 4 8 0z" fill="currentColor" opacity="0.7"/><path d="M12 8c4-4 10-2 8 0s-6 4-8 0z" fill="currentColor" opacity="0.7"/><circle cx="12" cy="8" r="2" fill="currentColor"/></svg>'},
+    {code:':crown:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M2 18l3-12 5 6 2-8 2 8 5-6 3 12z" fill="currentColor" opacity="0.7"/><rect x="2" y="18" width="20" height="3" rx="1" fill="currentColor"/></svg>'},
+    {code:':gem:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 3h12l4 7-10 12L2 10z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1"/><line x1="12" y1="22" x2="8" y2="10" stroke="currentColor" stroke-width="0.8" opacity="0.5"/><line x1="12" y1="22" x2="16" y2="10" stroke="currentColor" stroke-width="0.8" opacity="0.5"/></svg>'},
+  ]
+};
+
+function createEmojiPicker(inputId, parentEl){
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:relative;display:inline-block;';
+  var btn = document.createElement('button');
+  btn.className = 'emoji-btn';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>';
+  btn.title = 'Stuf Emojis';
+  var picker = document.createElement('div');
+  picker.className = 'emoji-picker';
+  picker.style.background = searchPal.bg;
+  picker.style.color = searchPal.tx;
+  var html = '';
+  for(var cat in CUSTOM_EMOJIS){
+    html += '<div class="emoji-picker-label">'+cat+'</div><div class="emoji-picker-grid">';
+    CUSTOM_EMOJIS[cat].forEach(function(em){
+      html += '<button class="emoji-pick" title="'+em.code+'" data-code="'+em.code+'" data-input="'+inputId+'">'+em.display+'</button>';
+    });
+    html += '</div>';
+  }
+  picker.innerHTML = html;
+  btn.onclick = function(e){e.stopPropagation();picker.classList.toggle('open');};
+  picker.querySelectorAll || (picker.innerHTML = html); // ensure parsed
+  wrap.appendChild(btn);
+  wrap.appendChild(picker);
+  parentEl.appendChild(wrap);
+
+  // After inserting, bind click handlers
+  setTimeout(function(){
+    wrap.querySelectorAll('.emoji-pick').forEach(function(b){
+      b.onclick = function(e){
+        e.stopPropagation();
+        var input = document.getElementById(b.dataset.input);
+        if(input){
+          var code = b.dataset.code;
+          input.value += ' '+code+' ';
+          input.focus();
+        }
+        picker.classList.remove('open');
+      };
+    });
+  },50);
+  // Close on outside click
+  document.addEventListener('click',function(){picker.classList.remove('open');});
+}
+
+// Replace :emoji: codes with SVG in displayed messages
+function renderCustomEmojis(text){
+  var result = text;
+  for(var cat in CUSTOM_EMOJIS){
+    CUSTOM_EMOJIS[cat].forEach(function(em){
+      var regex = new RegExp(em.code.replace(/([.*+?^${}()|[\]\\])/g,'\\$1'),'g');
+      result = result.replace(regex, '<span class="inline-emoji" style="display:inline-flex;vertical-align:middle;margin:0 1px;">'+em.display+'</span>');
+    });
+  }
+  return result;
+}
+
+// ─── FONT PICKER ─────────────────────────────────────────
+var CHAT_FONTS = [
+  {id:'default', name:'Default', family:"'Space Grotesk',sans-serif"},
+  {id:'cute', name:'Cute', family:"'Quicksand',sans-serif"},
+  {id:'handwritten', name:'Handwritten', family:"'Caveat',cursive"},
+  {id:'fancy', name:'Fancy', family:"'Satisfy',cursive"},
+  {id:'round', name:'Round', family:"'Comfortaa',sans-serif"},
+];
+
+function getChatFont(){
+  var id = localStorage.getItem('stuflover_chat_font') || 'default';
+  return CHAT_FONTS.find(function(f){return f.id===id;})||CHAT_FONTS[0];
+}
+
+function setChatFont(id){
+  localStorage.setItem('stuflover_chat_font', id);
+  applyChatFont();
+}
+
+function applyChatFont(){
+  var font = getChatFont();
+  document.querySelectorAll('.cmsg,.fr-msg,.ri-comment,.chat-input,.fr-input').forEach(function(el){
+    el.style.fontFamily = font.family;
+  });
+}
+
+function initFontPicker(){
+  var btn = document.getElementById('cursorSettingsBtn');
+  if(!btn) return;
+  // Add font section to the cursor panel
+  var panel = document.getElementById('cursorPanel');
+  if(!panel) return;
+  var fontHtml = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(128,128,128,0.1);">'+
+    '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;">Chat Font</div>';
+  var current = getChatFont();
+  CHAT_FONTS.forEach(function(f){
+    fontHtml += '<button class="font-option'+(f.id===current.id?' on':'')+'" onclick="setChatFont(\''+f.id+'\')" style="font-family:'+f.family+'">'+f.name+'</button>';
+  });
+  fontHtml += '</div>';
+  panel.innerHTML += fontHtml;
+}
+
 function initCursorSettings(){
   var btn = document.createElement('div');
   btn.id = 'cursorSettingsBtn';
@@ -5455,7 +5605,10 @@ function addMsg(text, roleClass){
   const isTyping = roleClass.includes('typing');
   div.style.background = isUser ? pal.tx+'12' : pal.ac+'1a';
   div.style.color = pal.tx;
-  div.textContent = text;
+  div.style.fontFamily = getChatFont().family;
+  // Render custom emojis
+  var rendered = renderCustomEmojis(escHtml(text));
+  if(rendered !== escHtml(text)){ div.innerHTML = rendered; } else { div.textContent = text; }
 
   // Add timestamp (not on typing indicators)
   if(!isTyping){
