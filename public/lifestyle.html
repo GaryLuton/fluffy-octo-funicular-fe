@@ -4452,6 +4452,7 @@ async function openFriendsView(){
   frPollInterval = setInterval(function(){
     if(frSelectedFriend) loadFrMessages(frSelectedFriend);
     loadFrRequests();
+    loadFrList();
   }, 5000);
 }
 
@@ -4476,8 +4477,8 @@ async function loadFrList(){
   try{
     var pal = searchPal;
     var container = document.getElementById('frList');
-    var friendsRes = fetch(API_BASE+'/api/friends',{headers:frHeaders()});
-    var sentRes = fetch(API_BASE+'/api/friends/sent-requests',{headers:frHeaders()});
+    var friendsRes = frFetch('/api/friends',{headers:frHeaders()});
+    var sentRes = frFetch('/api/friends/sent-requests',{headers:frHeaders()});
     var results = await Promise.all([friendsRes, sentRes]);
     var data = await results[0].json();
     var sentData = await results[1].json();
