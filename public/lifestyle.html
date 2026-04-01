@@ -2425,15 +2425,11 @@ function saveScrapbookPositions(){
   try{localStorage.setItem('stuflover_sb_positions',JSON.stringify(sbSavedPositions));}catch(e){}
 }
 
+var _sbDragInit = false;
 function initScrapbookDrag(){
   var board = document.getElementById('recBoard');
-  if(!board) return;
-  var pieces = board.querySelectorAll('.sb-piece');
-  pieces.forEach(function(piece){
-    // Touch support
-    piece.addEventListener('mousedown', startDrag);
-    piece.addEventListener('touchstart', startDrag, {passive:false});
-  });
+  if(!board || _sbDragInit) return;
+  _sbDragInit = true;
 
   var dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, hasMoved = false;
 
@@ -2442,8 +2438,18 @@ function initScrapbookDrag(){
     return {x:e.clientX, y:e.clientY};
   }
 
+  function findPiece(target){
+    while(target && target !== board){
+      if(target.classList && target.classList.contains('sb-piece')) return target;
+      target = target.parentElement;
+    }
+    return null;
+  }
+
   function startDrag(e){
-    dragging = this;
+    var piece = findPiece(e.target);
+    if(!piece) return;
+    dragging = piece;
     hasMoved = false;
     var ptr = getPointer(e);
     startX = ptr.x;
@@ -2457,13 +2463,15 @@ function initScrapbookDrag(){
     document.addEventListener('touchend', endDrag);
   }
 
+  board.addEventListener('mousedown', startDrag);
+  board.addEventListener('touchstart', startDrag, {passive:false});
+
   function onDrag(e){
     if(!dragging) return;
     e.preventDefault();
     var ptr = getPointer(e);
     var dx = ptr.x - startX;
     var dy = ptr.y - startY;
-    // Only activate drag visual after moving at least 4px
     if(!hasMoved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
     if(!hasMoved){
       hasMoved = true;
@@ -2472,7 +2480,6 @@ function initScrapbookDrag(){
     }
     var newX = origX + dx;
     var newY = origY + dy;
-    // Constrain within board
     var bw = board.clientWidth;
     var bh = board.clientHeight;
     var pw = dragging.offsetWidth;
@@ -2485,15 +2492,13 @@ function initScrapbookDrag(){
 
   function endDrag(){
     if(!dragging) return;
-    var rot = dragging.dataset.rot || 0;
-    dragging.style.transform = 'rotate('+rot+'deg)';
-    dragging.classList.remove('dragging');
     if(hasMoved){
-      // Save position
+      var rot = dragging.dataset.rot || 0;
+      dragging.style.transform = 'rotate('+rot+'deg)';
+      dragging.classList.remove('dragging');
       var idx = dragging.dataset.idx;
       sbSavedPositions[idx] = {x:dragging.offsetLeft, y:dragging.offsetTop};
       saveScrapbookPositions();
-      // Update board height
       var maxB = 0;
       board.querySelectorAll('.sb-piece').forEach(function(p){
         var b = p.offsetTop + p.offsetHeight;
