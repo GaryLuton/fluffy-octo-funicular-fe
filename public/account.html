@@ -17,9 +17,9 @@
 
     nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.93);backdrop-filter:blur(10px);border-bottom:2px solid rgba(30,12,6,0.08);}
     .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);text-decoration:none;}
-    nav ul{list-style:none;display:flex;gap:32px;}
-    nav ul a{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:2px;text-transform:uppercase;color:var(--brown);text-decoration:none;transition:opacity 0.2s;}
-    nav ul a:hover{opacity:0.45;}
+    .nav-links{display:flex;gap:8px;}
+    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--brown);transition:opacity 0.2s;}
+    .nav-link:hover{opacity:0.55;}
 
     .account-container{max-width:520px;margin:0 auto;padding:120px 24px 60px;}
 
@@ -45,7 +45,7 @@
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      nav ul{display:none;}
+      .nav-links{display:none;}
       .account-container{padding:90px 16px 40px;}
       .welcome-card,.section-card{padding:28px 20px;border-radius:18px;}
       .welcome-title{font-size:1.8rem;}
@@ -55,15 +55,12 @@
 <body>
 
 <nav>
-  <a class="logo" href="index.html">Stuflover</a>
-  <ul>
-    <li><a href="lifestyle.html">My Page</a></li>
-    <li><a href="index.html">Home</a></li>
-  </ul>
+  <a class="logo" href="lifestyle.html">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-link" href="lifestyle.html">My Page</a>
+    <a class="nav-link" href="index.html">Home</a>
+  </div>
 </nav>
-<!-- Mobile back link -->
-<style>.mobile-nav-link{display:none;}@media(max-width:768px){.mobile-nav-link{display:block;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;color:var(--brown);text-decoration:none;opacity:0.5;position:fixed;top:60px;left:0;z-index:100;}}</style>
-<a class="mobile-nav-link" href="lifestyle.html">&larr; My Page</a>
 
 <div class="account-container">
   <div class="welcome-card">
