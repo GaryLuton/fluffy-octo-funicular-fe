@@ -334,7 +334,50 @@ app.get('/api/friends/messages/:friendId', auth, (req, res) => {
   const friends = stmts.getFriends.all(req.user.id);
   if (!friends.some(f => parseInt(f.id) === friendId)) return res.status(403).json({ error: 'Not friends' });
   const messages = stmts.getMessages.all(req.user.id, friendId, 50);
+  // Mark messages from this friend as read
+  stmts.markMessagesRead.run(req.user.id, friendId);
   res.json({ messages: messages.reverse() });
+});
+
+// Get unread message count
+app.get('/api/friends/unread', auth, (req, res) => {
+  const result = stmts.getUnreadCount.get(req.user.id);
+  const perFriend = stmts.getUnreadPerFriend.all(req.user.id);
+  res.json({ total: result ? result.count : 0, perFriend });
+});
+
+// Mark messages from a friend as read
+app.post('/api/friends/messages/:friendId/read', auth, (req, res) => {
+  const friendId = parseInt(req.params.friendId);
+  if (!friendId) return res.status(400).json({ error: 'Invalid friend ID' });
+  stmts.markMessagesRead.run(req.user.id, friendId);
+  res.json({ ok: true });
+});
+
+// Get sent (outgoing) friend requests
+app.get('/api/friends/sent-requests', auth, (req, res) => {
+  const requests = stmts.getSentRequests.all(req.user.id);
+  res.json({ requests });
+});
+
+// Delete friend connection
+app.delete('/api/friends/:friendId', auth, (req, res) => {
+  const friendId = parseInt(req.params.friendId);
+  if (!friendId) return res.status(400).json({ error: 'Invalid friend ID' });
+  stmts.deleteFriend.run(req.user.id, friendId);
+  res.json({ ok: true });
+});
+
+// Get friend profile
+app.get('/api/friends/profile/:userId', auth, (req, res) => {
+  const userId = parseInt(req.params.userId);
+  if (!userId) return res.status(400).json({ error: 'Invalid user ID' });
+  const profile = stmts.getFriendProfile.get(userId);
+  if (!profile) return res.status(404).json({ error: 'User not found' });
+  // Check if they are friends
+  const friends = stmts.getFriends.all(req.user.id);
+  const isFriend = friends.some(f => parseInt(f.id) === userId);
+  res.json({ profile, isFriend });
 });
 
 // ─── Posts / ContentWithIt ───
