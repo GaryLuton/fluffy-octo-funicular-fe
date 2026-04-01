@@ -157,6 +157,19 @@ async function initDb() {
     );
   `);
 
+  // Password resets
+  db.run(`
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
   // Admin & analytics tables
   db.run(`
     CREATE TABLE IF NOT EXISTS login_log (
@@ -439,6 +452,29 @@ const stmts = {
   },
   getUserBookVote: {
     get: (userId, postId) => get('SELECT vote FROM book_votes WHERE user_id=? AND post_id=?', [userId, postId]),
+  },
+  // Password resets
+  createPasswordReset: {
+    run: (userId, token, expiresAt) => run(
+      'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)',
+      [userId, token, expiresAt]
+    ),
+  },
+  getPasswordReset: {
+    get: (token) => get(
+      "SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > datetime('now')",
+      [token]
+    ),
+  },
+  markPasswordResetUsed: {
+    run: (token) => run(
+      'UPDATE password_resets SET used = 1 WHERE token = ?', [token]
+    ),
+  },
+  updateUserPassword: {
+    run: (userId, hash) => run(
+      'UPDATE users SET password_hash = ? WHERE id = ?', [hash, userId]
+    ),
   },
   // Admin & analytics
   logLogin: {
