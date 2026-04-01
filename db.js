@@ -70,6 +70,7 @@ async function initDb() {
       from_user INTEGER NOT NULL,
       to_user INTEGER NOT NULL,
       text TEXT NOT NULL,
+      read_at TEXT DEFAULT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (from_user) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE
@@ -156,6 +157,14 @@ async function initDb() {
       UNIQUE(user_id, post_id)
     );
   `);
+
+  // Migrate: add read_at to messages if missing
+  try {
+    const cols = all("PRAGMA table_info(messages)");
+    if (!cols.some(c => c.name === 'read_at')) {
+      db.run("ALTER TABLE messages ADD COLUMN read_at TEXT DEFAULT NULL");
+    }
+  } catch (e) { /* column already exists or fresh db */ }
 
   // Password resets
   db.run(`
@@ -320,6 +329,42 @@ const stmts = {
        WHERE (m.from_user = ? AND m.to_user = ?) OR (m.from_user = ? AND m.to_user = ?)
        ORDER BY m.created_at DESC LIMIT ?`,
       [userId, friendId, friendId, userId, limit || 50]
+    ),
+  },
+  markMessagesRead: {
+    run: (userId, friendId) => run(
+      "UPDATE messages SET read_at = datetime('now') WHERE to_user = ? AND from_user = ? AND read_at IS NULL",
+      [userId, friendId]
+    ),
+  },
+  getUnreadCount: {
+    get: (userId) => get(
+      'SELECT COUNT(*) as count FROM messages WHERE to_user = ? AND read_at IS NULL',
+      [userId]
+    ),
+  },
+  getUnreadPerFriend: {
+    all: (userId) => all(
+      'SELECT from_user, COUNT(*) as count FROM messages WHERE to_user = ? AND read_at IS NULL GROUP BY from_user',
+      [userId]
+    ),
+  },
+  getSentRequests: {
+    all: (userId) => all(
+      `SELECT fr.id, fr.to_user, u.username, fr.created_at
+       FROM friend_requests fr JOIN users u ON u.id = fr.to_user
+       WHERE fr.from_user = ? AND fr.status = 'pending' ORDER BY fr.created_at DESC`, [userId]
+    ),
+  },
+  deleteFriend: {
+    run: (userId, friendId) => run(
+      "DELETE FROM friend_requests WHERE ((from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?)) AND status = 'accepted'",
+      [userId, friendId, friendId, userId]
+    ),
+  },
+  getFriendProfile: {
+    get: (userId) => get(
+      'SELECT id, username, created_at FROM users WHERE id = ?', [userId]
     ),
   },
   // Posts
