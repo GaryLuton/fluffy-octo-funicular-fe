@@ -345,7 +345,7 @@ const stmts = {
   },
   getUnreadPerFriend: {
     all: (userId) => all(
-      'SELECT from_user, COUNT(*) as count FROM messages WHERE to_user = ? AND read_at IS NULL GROUP BY from_user',
+      'SELECT m.from_user, u.username, COUNT(*) as count FROM messages m JOIN users u ON u.id = m.from_user WHERE m.to_user = ? AND m.read_at IS NULL GROUP BY m.from_user',
       [userId]
     ),
   },

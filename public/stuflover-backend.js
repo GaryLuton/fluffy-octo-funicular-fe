@@ -121,6 +121,57 @@
     }).catch(function () {});
   }
 
+  // ─── Unread message notification banner ───
+  if (getToken() && !window.location.pathname.includes('auth.html')) {
+    window.addEventListener('DOMContentLoaded', function () {
+      var banner = document.createElement('div');
+      banner.id = 'stuflover-unread-banner';
+      banner.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;font-family:"Space Grotesk",sans-serif;font-size:0.82rem;font-weight:600;text-align:center;cursor:pointer;transition:opacity 0.2s;';
+      banner.addEventListener('click', function () {
+        var dest = window.location.pathname.includes('lifestyle.html') ? '#' : '/lifestyle.html';
+        if (dest === '#') {
+          // Already on lifestyle — try to open friends view
+          if (typeof openFriendsView === 'function') openFriendsView();
+          if (typeof showSection === 'function') showSection('friendsView');
+        } else {
+          window.location.href = dest;
+        }
+      });
+      document.body.insertBefore(banner, document.body.firstChild);
+
+      function checkUnread() {
+        _origFetch.call(window, API_BASE + '/api/friends/unread', {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        }).then(function (res) { return res.json(); }).then(function (data) {
+          if (data.total && data.total > 0) {
+            var prof;
+            try { prof = JSON.parse(localStorage.getItem('stuflover_profile') || '{}'); } catch (e) { prof = {}; }
+            var ac = '#b48a78'; // default accent
+            var bg = '#fdf6f0';
+            if (prof.aesthetic) {
+              var palettes = {kawaii:'#f7a8c4',softgirl:'#d4a0a0',cottagecore:'#8fbc8f',goth:'#8b008b',grunge:'#8b4513',fairycore:'#dda0dd',royalcore:'#b8860b',darkacademia:'#6b4423',lightacademia:'#c4a882',y2k:'#ff69b4',indie:'#cd853f',streetwear:'#4a4a4a',coquette:'#e8b4b8',balletcore:'#e8c4c4',coastal:'#5f9ea0',minimalist:'#888888'};
+              if (palettes[prof.aesthetic]) ac = palettes[prof.aesthetic];
+            }
+            banner.style.background = ac;
+            banner.style.color = '#fff';
+            var names = (data.perFriend || []).map(function (f) { return f.username; });
+            var text = data.total === 1 ? '1 new message' : data.total + ' new messages';
+            if (names.length === 1) text += ' from ' + names[0];
+            else if (names.length === 2) text += ' from ' + names[0] + ' & ' + names[1];
+            else if (names.length > 2) text += ' from ' + names[0] + ' & ' + (names.length - 1) + ' others';
+            banner.textContent = text + ' — tap to view';
+            banner.style.display = 'block';
+          } else {
+            banner.style.display = 'none';
+          }
+        }).catch(function () {});
+      }
+
+      checkUnread();
+      setInterval(checkUnread, 10000);
+    });
+  }
+
   // ─── Expose user info and API base ───
   window.stufloverUser = getUser;
   window.STUFLOVER_API_URL = API_BASE;
