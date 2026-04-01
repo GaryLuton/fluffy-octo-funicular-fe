@@ -162,20 +162,20 @@
     @keyframes sparklepop{0%{transform:scale(0) rotate(0deg);opacity:0}50%{opacity:1}100%{transform:scale(1) rotate(20deg);opacity:0.7}}
 
     /* Polaroid */
-    .sb-polaroid{background:#fff;padding:8px 8px 34px;box-shadow:2px 3px 14px rgba(0,0,0,0.08);border-radius:3px;}
+    .sb-polaroid{background:#fff;padding:10px 10px 40px;box-shadow:2px 4px 18px rgba(0,0,0,0.12);border-radius:3px;}
     .sb-polaroid:hover{box-shadow:3px 8px 28px rgba(0,0,0,0.12) !important;}
     .sb-polaroid .sb-inner{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;border-radius:2px;}
-    .sb-polaroid .sb-label{position:absolute;bottom:7px;left:12px;right:12px;font-size:0.72rem;font-weight:600;line-height:1.35;color:#333;}
-    .sb-polaroid .sb-label-sub{font-size:0.58rem;opacity:0.4;font-weight:400;margin-top:2px;}
+    .sb-polaroid .sb-label{position:absolute;bottom:7px;left:12px;right:12px;font-size:0.85rem;font-weight:700;line-height:1.35;color:#333;}
+    .sb-polaroid .sb-label-sub{font-size:0.7rem;opacity:0.6;font-weight:400;margin-top:2px;}
     .sb-corner{position:absolute;width:16px;height:16px;opacity:0.2;pointer-events:none;}
     .sb-corner svg{width:100%;height:100%;}
 
     /* Notebook page */
-    .sb-notebook{padding:20px 18px 18px 30px;box-shadow:1px 2px 10px rgba(0,0,0,0.05);border-left:3px solid;border-radius:2px 8px 8px 2px;position:relative;
+    .sb-notebook{padding:22px 20px 20px 32px;box-shadow:2px 3px 14px rgba(0,0,0,0.1);border-left:3px solid;border-radius:2px 8px 8px 2px;position:relative;
       background-image:repeating-linear-gradient(transparent,transparent 23px,rgba(128,128,128,0.05) 23px,rgba(128,128,128,0.05) 24px);}
-    .sb-notebook .sb-nb-cat{font-size:0.5rem;letter-spacing:3.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;}
-    .sb-notebook .sb-nb-title{font-size:0.92rem;font-weight:700;line-height:1.35;margin-bottom:4px;}
-    .sb-notebook .sb-nb-body{font-size:0.74rem;opacity:0.48;line-height:1.65;}
+    .sb-notebook .sb-nb-cat{font-size:0.6rem;letter-spacing:3.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.5;margin-bottom:6px;}
+    .sb-notebook .sb-nb-title{font-size:1.05rem;font-weight:700;line-height:1.35;margin-bottom:4px;}
+    .sb-notebook .sb-nb-body{font-size:0.85rem;opacity:0.7;line-height:1.65;}
 
     /* Washi tape — translucent with cute patterns */
     .sb-tape{position:absolute;height:20px;border-radius:1px;pointer-events:none;z-index:30;opacity:0.55;}
@@ -188,24 +188,24 @@
     .sb-heart .sb-heart-title{font-size:0.68rem;font-weight:700;line-height:1.3;margin-top:4px;}
 
     /* Bubbly note */
-    .sb-bubble{border-radius:20px;padding:18px 16px;box-shadow:1px 3px 12px rgba(0,0,0,0.05);position:relative;}
+    .sb-bubble{border-radius:20px;padding:20px 18px;box-shadow:2px 4px 16px rgba(0,0,0,0.1);position:relative;}
     .sb-bubble::after{content:'';position:absolute;bottom:-8px;left:20px;width:16px;height:16px;border-radius:50%;background:inherit;}
     .sb-bubble::before{content:'';position:absolute;bottom:-4px;left:40px;width:9px;height:9px;border-radius:50%;background:inherit;}
-    .sb-bubble .sb-bubble-title{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
-    .sb-bubble .sb-bubble-body{font-size:0.72rem;opacity:0.45;line-height:1.6;}
+    .sb-bubble .sb-bubble-title{font-size:1.0rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
+    .sb-bubble .sb-bubble-body{font-size:0.85rem;opacity:0.7;line-height:1.6;}
 
     /* Torn paper */
-    .sb-torn{padding:16px 14px;box-shadow:1px 2px 8px rgba(0,0,0,0.04);border-radius:3px;}
+    .sb-torn{padding:18px 16px;box-shadow:2px 3px 14px rgba(0,0,0,0.1);border-radius:3px;}
     .sb-torn::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:8px;background:inherit;
       clip-path:polygon(0% 40%,3% 80%,6% 30%,9% 70%,12% 20%,15% 65%,18% 35%,21% 75%,24% 25%,27% 60%,30% 40%,33% 80%,36% 20%,39% 70%,42% 30%,45% 65%,48% 45%,51% 80%,54% 25%,57% 70%,60% 35%,63% 75%,66% 20%,69% 60%,72% 40%,75% 80%,78% 30%,81% 65%,84% 25%,87% 75%,90% 40%,93% 70%,96% 30%,100% 60%,100% 100%,0% 100%);}
-    .sb-torn .sb-torn-title{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
-    .sb-torn .sb-torn-body{font-size:0.72rem;opacity:0.45;line-height:1.6;}
+    .sb-torn .sb-torn-title{font-size:1.0rem;font-weight:700;line-height:1.3;margin-bottom:4px;}
+    .sb-torn .sb-torn-body{font-size:0.85rem;opacity:0.7;line-height:1.6;}
 
     /* Doodle border */
-    .sb-doodle-border{border:2.5px dashed;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 2px 6px rgba(0,0,0,0.03);}
-    .sb-doodle-border .sb-db-cat{font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;}
-    .sb-doodle-border .sb-db-title{font-size:0.85rem;font-weight:700;line-height:1.3;}
-    .sb-doodle-border .sb-db-body{font-size:0.7rem;opacity:0.42;line-height:1.6;}
+    .sb-doodle-border{border:2.5px dashed;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:6px;box-shadow:2px 3px 14px rgba(0,0,0,0.08);}
+    .sb-doodle-border .sb-db-cat{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.5;}
+    .sb-doodle-border .sb-db-title{font-size:1.0rem;font-weight:700;line-height:1.3;}
+    .sb-doodle-border .sb-db-body{font-size:0.85rem;opacity:0.7;line-height:1.6;}
 
     /* Paper clip */
     .sb-clip{position:absolute;z-index:25;pointer-events:none;opacity:0.3;}
@@ -861,7 +861,7 @@
     <div class="foryou" id="foryouSection">
       <div class="foryou-header">
         <div class="foryou-title bc">For You</div>
-        <button class="foryou-refresh bc" id="foryouRefresh" onclick="loadForYou()">Refresh</button>
+        <button class="foryou-refresh bc" id="foryouRefresh" onclick="refreshForYou()">Refresh</button>
       </div>
       <div class="rec-board" id="recBoard">
         <div class="rec-loading">Putting together your scrapbook...</div>
@@ -2066,16 +2066,17 @@ function buildRecProfile(){
   return parts.join('\n');
 }
 
+function refreshForYou(){
+  forYouCache = null;
+  localStorage.removeItem('stuflover_foryou_cache');
+  loadForYou();
+}
+
 async function loadForYou(){
   var grid = document.getElementById('recBoard');
   var btn = document.getElementById('foryouRefresh');
   if(!grid || !searchPal) return;
 
-  // If clicking refresh, clear cache
-  if(btn && !btn.disabled && forYouCache){
-    forYouCache = null;
-    localStorage.removeItem('stuflover_foryou_cache');
-  }
   // Show cached results instantly
   if(forYouCache){
     try{ renderRecs(forYouCache); } catch(e){ forYouCache=null; localStorage.removeItem('stuflover_foryou_cache'); }
