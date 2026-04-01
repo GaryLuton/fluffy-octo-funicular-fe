@@ -1976,10 +1976,12 @@ function buildPage(){
   const nav = document.getElementById('mainNav');
   nav.style.background = pal.bg+'f4';
   nav.style.borderColor = pal.tx+'10';
-  document.getElementById('navLogo').style.color = pal.tx;
-  const navHome = document.getElementById('navHome');
-  navHome.style.color = pal.tx;
-  navHome.style.borderColor = pal.tx+'25';
+  var navLogo = document.getElementById('navLogo');
+  if(navLogo) navLogo.style.color = pal.tx;
+  var navHome = document.getElementById('navHome');
+  if(navHome){ navHome.style.color = pal.tx; navHome.style.borderColor = pal.tx+'25'; }
+  var navAcct = document.getElementById('navAccount');
+  if(navAcct){ navAcct.style.color = pal.tx; navAcct.style.borderColor = pal.tx+'25'; }
 
   // BG SVG
   buildBgSvg(pal, topK);
@@ -2028,12 +2030,15 @@ function buildPage(){
   var fyBtn = document.getElementById('foryouRefresh');
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
-  // Load For You recommendations — instant from cache, delayed for API
-  if(forYouCache){
-    loadForYou();
-  } else {
-    setTimeout(loadForYou, 400);
-  }
+  // Load For You recommendations
+  try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
+  // Safety net — if scrapbook still hasn't rendered after 2s, retry
+  setTimeout(function(){
+    var b = document.getElementById('recBoard');
+    if(b && !b.querySelector('.sb-piece') && forYouCache && searchPal){
+      try{ renderRecs(forYouCache); }catch(e){ console.error('Safety renderRecs failed:', e); }
+    }
+  }, 2000);
 
   // Viral decorations
   initSparkleTrail();
@@ -2093,8 +2098,13 @@ async function loadForYou(){
   // Show cached results instantly — skip if board already has pieces
   if(forYouCache){
     if(grid.querySelector('.sb-piece')) return;
-    try{ renderRecs(forYouCache); } catch(e){ forYouCache=null; localStorage.removeItem('stuflover_foryou_cache'); }
-    if(forYouCache) return;
+    try{
+      renderRecs(forYouCache);
+      return;
+    } catch(e){
+      console.error('renderRecs from cache failed:', e);
+      // Don't clear cache — it may work on next attempt after page is fully ready
+    }
   }
 
   grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
@@ -6153,7 +6163,13 @@ function showShopMenu(e, item, pal){
 
   // Hide the landing hero and show the result page
   document.getElementById('heroSection').style.display='none';
-  buildPage();
+  try{
+    buildPage();
+  }catch(e){
+    console.error('buildPage error:', e);
+    // Ensure lifestyle page is at least visible
+    document.getElementById('lifestylePage').classList.add('active');
+  }
 
   // Show welcome message
   var user = window.stufloverUser ? window.stufloverUser() : null;
