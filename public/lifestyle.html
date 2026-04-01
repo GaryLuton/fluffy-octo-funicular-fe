@@ -2072,6 +2072,7 @@ function buildRecProfile(){
 
 function refreshForYou(){
   forYouCache = null;
+  _forYouFetchAttempt = 0;
   localStorage.removeItem('stuflover_foryou_cache');
   sbSavedPositions = {};
   localStorage.removeItem('stuflover_sb_positions');
@@ -2079,6 +2080,7 @@ function refreshForYou(){
 }
 
 var _forYouRetries = 0;
+var _forYouFetchAttempt = 0;
 async function loadForYou(){
   var grid = document.getElementById('recBoard');
   var btn = document.getElementById('foryouRefresh');
@@ -2120,13 +2122,22 @@ async function loadForYou(){
     var recs = JSON.parse(match[0]);
     if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty');
 
+    _forYouFetchAttempt = 0;
     forYouCache = recs;
     try{localStorage.setItem('stuflover_foryou_cache',JSON.stringify(recs));}catch(e){}
     renderRecs(recs);
 
   }catch(e){
     console.error('For You failed:', e);
-    grid.innerHTML = '<div class="rec-loading">Could not load — tap refresh to try again</div>';
+    // Auto-retry once after 3 seconds
+    if(_forYouFetchAttempt < 1){
+      _forYouFetchAttempt++;
+      if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
+      grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Loading your scrapbook... retrying</div>';
+      setTimeout(loadForYou, 3000);
+      return;
+    }
+    grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
   }
 
   if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
