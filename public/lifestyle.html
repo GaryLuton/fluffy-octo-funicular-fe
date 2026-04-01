@@ -719,7 +719,17 @@
     .fr-item-name{font-weight:600;}
     .fr-item-pending{font-size:0.65rem;padding:2px 8px;border-radius:10px;opacity:0.7;font-weight:600;white-space:nowrap;}
     .fr-chat{flex:1;display:flex;flex-direction:column;}
-    .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;}
+    .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:10px;}
+    .fr-chat-header:hover{opacity:0.7;}
+    .fr-profile-panel{display:none;flex-direction:column;align-items:center;gap:16px;padding:40px 20px;flex:1;}
+    .fr-profile-panel.open{display:flex;}
+    .fr-profile-avatar{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;}
+    .fr-profile-name{font-weight:700;font-size:1.2rem;}
+    .fr-profile-joined{font-size:0.75rem;opacity:0.4;}
+    .fr-profile-actions{display:flex;gap:8px;margin-top:8px;}
+    .fr-profile-btn{padding:8px 20px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;}
+    .fr-profile-btn:hover{opacity:0.7;}
+    .fr-profile-btn.danger{background:rgba(200,60,60,0.12);color:#c44;}
     .fr-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
     .fr-msg{max-width:75%;padding:10px 14px;border-radius:16px;font-size:0.88rem;line-height:1.55;word-break:break-word;}
     .fr-msg.me{align-self:flex-end;border-bottom-right-radius:4px;}
@@ -1216,7 +1226,8 @@
       </div>
       <div class="fr-chat" id="frChat">
         <div class="fr-empty" id="frEmpty">Select a friend to start messaging</div>
-        <div class="fr-chat-header" id="frChatHeader" style="display:none;"></div>
+        <div class="fr-chat-header" id="frChatHeader" style="display:none;" onclick="toggleFrProfile()"></div>
+        <div class="fr-profile-panel" id="frProfile"></div>
         <div class="fr-msgs" id="frMsgs" style="display:none;"></div>
         <div class="fr-input-row" id="frInputRow" style="display:none;">
           <input class="fr-input" id="frInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendFrMsg()"/>
@@ -4500,13 +4511,67 @@ async function selectFriend(id, username){
   frSelectedFriend = {id:id, username:username};
   var pal = searchPal;
   document.getElementById('frEmpty').style.display = 'none';
-  document.getElementById('frChatHeader').style.display = 'block';
-  document.getElementById('frChatHeader').textContent = username;
+  document.getElementById('frChatHeader').style.display = 'flex';
+  document.getElementById('frChatHeader').innerHTML = '<div class="fr-item-avatar" style="background:'+pal.ac+';width:28px;height:28px;font-size:0.6rem;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;">'+username.charAt(0).toUpperCase()+'</div>'+escHtml(username);
   document.getElementById('frChatHeader').style.color = pal.tx;
+  document.getElementById('frProfile').classList.remove('open');
   document.getElementById('frMsgs').style.display = 'flex';
   document.getElementById('frInputRow').style.display = 'flex';
   loadFrList(); // refresh selected state
   await loadFrMessages(frSelectedFriend);
+}
+
+async function toggleFrProfile(){
+  if(!frSelectedFriend) return;
+  var panel = document.getElementById('frProfile');
+  var msgs = document.getElementById('frMsgs');
+  var input = document.getElementById('frInputRow');
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    msgs.style.display = 'flex';
+    input.style.display = 'flex';
+    return;
+  }
+  var pal = searchPal;
+  panel.style.color = pal.tx;
+  panel.innerHTML = '<div style="opacity:0.4;font-size:0.8rem;">Loading...</div>';
+  panel.classList.add('open');
+  msgs.style.display = 'none';
+  input.style.display = 'none';
+  try{
+    var res = await frFetch('/api/friends/profile/'+frSelectedFriend.id,{headers:frHeaders()});
+    var data = await res.json();
+    var p = data.profile || {};
+    var joined = p.created_at ? new Date(p.created_at+'Z') : null;
+    var joinedStr = joined ? joined.toLocaleDateString(undefined,{month:'long',year:'numeric'}) : '';
+    panel.innerHTML =
+      '<div class="fr-profile-avatar" style="background:'+pal.ac+'">'+escHtml((p.username||'?').charAt(0).toUpperCase())+'</div>'+
+      '<div class="fr-profile-name" style="color:'+pal.tx+'">'+escHtml(p.username||frSelectedFriend.username)+'</div>'+
+      (joinedStr ? '<div class="fr-profile-joined">Joined '+escHtml(joinedStr)+'</div>' : '')+
+      '<div class="fr-profile-actions">'+
+        '<button class="fr-profile-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="toggleFrProfile()">Message</button>'+
+        '<button class="fr-profile-btn danger" onclick="deleteFriend('+frSelectedFriend.id+')">Remove Friend</button>'+
+      '</div>';
+  }catch(e){
+    panel.innerHTML = '<div style="opacity:0.4;font-size:0.8rem;">Could not load profile</div>';
+  }
+}
+
+async function deleteFriend(friendId){
+  if(!confirm('Remove this friend? You won\'t be able to message them anymore.')) return;
+  try{
+    var res = await frFetch('/api/friends/'+friendId,{method:'DELETE',headers:frHeaders()});
+    var data = await res.json();
+    if(data.error){ alert(data.error); return; }
+    frSelectedFriend = null;
+    document.getElementById('frProfile').classList.remove('open');
+    document.getElementById('frProfile').innerHTML = '';
+    document.getElementById('frChatHeader').style.display = 'none';
+    document.getElementById('frMsgs').style.display = 'none';
+    document.getElementById('frInputRow').style.display = 'none';
+    document.getElementById('frEmpty').style.display = 'flex';
+    await loadFrList();
+  }catch(e){ console.error('Delete friend error:', e); }
 }
 
 async function loadFrMessages(friend){
