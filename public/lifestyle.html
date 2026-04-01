@@ -149,7 +149,7 @@
     .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
 
     .rec-board{position:relative;min-height:520px;margin:0 auto;max-width:960px;
-      border-radius:16px;padding:32px 24px;
+      border-radius:16px;padding:32px 24px;overflow:hidden;
       background-image:radial-gradient(circle,rgba(128,128,128,0.04) 1px,transparent 1px);background-size:18px 18px;}
 
     .sb-piece{position:absolute;transition:box-shadow 0.25s;cursor:grab;user-select:none;-webkit-user-select:none;}
@@ -2449,6 +2449,7 @@ function initScrapbookDrag(){
   function startDrag(e){
     var piece = findPiece(e.target);
     if(!piece) return;
+    var scrollY = window.scrollY;
     dragging = piece;
     hasMoved = false;
     var ptr = getPointer(e);
@@ -2457,6 +2458,9 @@ function initScrapbookDrag(){
     origX = dragging.offsetLeft;
     origY = dragging.offsetTop;
     e.preventDefault();
+    e.stopPropagation();
+    // Restore scroll position in case browser auto-scrolled
+    requestAnimationFrame(function(){ window.scrollTo(window.scrollX, scrollY); });
     document.addEventListener('mousemove', onDrag);
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchmove', onDrag, {passive:false});
@@ -2465,6 +2469,10 @@ function initScrapbookDrag(){
 
   board.addEventListener('mousedown', startDrag);
   board.addEventListener('touchstart', startDrag, {passive:false});
+  // Prevent clicks on pieces from bubbling or causing scroll
+  board.addEventListener('click', function(e){
+    if(findPiece(e.target)){ e.preventDefault(); e.stopPropagation(); }
+  });
 
   function onDrag(e){
     if(!dragging) return;
