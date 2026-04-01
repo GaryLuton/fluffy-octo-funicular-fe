@@ -717,6 +717,7 @@
     .fr-item.on{background:rgba(128,128,128,0.1);}
     .fr-item-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;}
     .fr-item-name{font-weight:600;}
+    .fr-item-pending{font-size:0.65rem;padding:2px 8px;border-radius:10px;opacity:0.7;font-weight:600;white-space:nowrap;}
     .fr-chat{flex:1;display:flex;flex-direction:column;}
     .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;}
     .fr-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
@@ -4462,21 +4463,36 @@ async function loadFrRequests(){
 
 async function loadFrList(){
   try{
-    var res = await fetch(API_BASE+'/api/friends',{headers:frHeaders()});
-    var data = await res.json();
-    var container = document.getElementById('frList');
     var pal = searchPal;
-    if(!data.friends || data.friends.length===0){
+    var container = document.getElementById('frList');
+    var friendsRes = fetch(API_BASE+'/api/friends',{headers:frHeaders()});
+    var sentRes = fetch(API_BASE+'/api/friends/sent-requests',{headers:frHeaders()});
+    var results = await Promise.all([friendsRes, sentRes]);
+    var data = await results[0].json();
+    var sentData = await results[1].json();
+    var friends = data.friends || [];
+    var sent = sentData.requests || [];
+    if(friends.length===0 && sent.length===0){
       container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.3;font-style:italic;font-size:0.82rem;">No friends yet — add someone!</div>';
       return;
     }
-    container.innerHTML = data.friends.map(function(f){
+    var html = friends.map(function(f){
       var isOn = frSelectedFriend && frSelectedFriend.id === f.id;
       return '<div class="fr-item'+(isOn?' on':'')+'" onclick="selectFriend('+f.id+',\''+escHtml(f.username)+'\')" style="color:'+pal.tx+'">'+
         '<div class="fr-item-avatar" style="background:'+pal.ac+'">'+f.username.charAt(0).toUpperCase()+'</div>'+
         '<div class="fr-item-name">'+escHtml(f.username)+'</div>'+
       '</div>';
     }).join('');
+    if(sent.length > 0){
+      html += sent.map(function(r){
+        return '<div class="fr-item" style="color:'+pal.tx+';opacity:0.6;">'+
+          '<div class="fr-item-avatar" style="background:'+pal.ac+'40">'+r.username.charAt(0).toUpperCase()+'</div>'+
+          '<div class="fr-item-name">'+escHtml(r.username)+'</div>'+
+          '<div class="fr-item-pending" style="background:'+pal.ac+'22;color:'+pal.ac+'">Pending</div>'+
+        '</div>';
+      }).join('');
+    }
+    container.innerHTML = html;
   }catch(e){}
 }
 
@@ -4597,6 +4613,7 @@ async function sendFrRequest(){
     if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
     err.textContent='Request sent to '+username+'!'; err.style.color=searchPal.ac;
     document.getElementById('frAddInput').value='';
+    loadFrList();
     setTimeout(closeFrAddModal, 1500);
   }catch(e){ err.textContent='Cannot reach server — is your internet working?'; err.style.color='#c44'; console.error('Friend request error:', e); }
 }
