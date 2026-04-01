@@ -2,8 +2,10 @@ require('dotenv').config();
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const fetch = require('node-fetch');
 const path = require('path');
+const { Resend } = require('resend');
 const { initDb, stmts, all } = require('./db');
 
 const cors = require('cors');
@@ -14,6 +16,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+const RESEND_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@stuflover.com';
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 // Middleware
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -87,6 +92,84 @@ app.get('/api/auth/me', auth, (req, res) => {
   const user = stmts.getUserById.get(req.user.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ user });
+});
+
+// ─── Forgot Password ───
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  // Always return success to avoid leaking whether an email exists
+  const user = stmts.getUserByEmail.get(email);
+  if (!user) {
+    return res.json({ ok: true });
+  }
+
+  if (!resend) {
+    console.error('Resend not configured — cannot send password reset email');
+    return res.status(503).json({ error: 'Email service not configured' });
+  }
+
+  try {
+    const token = crypto.randomBytes(32).toString('hex');
+    // Token expires in 1 hour
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString().replace('T', ' ').replace('Z', '');
+    stmts.createPasswordReset.run(user.id, token, expiresAt);
+
+    // Build reset URL from request origin
+    const origin = req.headers.origin || `${req.protocol}://${req.headers.host}`;
+    const resetUrl = `${origin}/reset-password.html?token=${token}`;
+
+    await resend.emails.send({
+      from: RESEND_FROM_EMAIL,
+      to: email,
+      subject: 'Stuflover - Reset Your Password',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;">
+          <h1 style="font-size:24px;color:#1e0c06;margin-bottom:8px;">Reset Your Password</h1>
+          <p style="color:#555;font-size:15px;line-height:1.5;">
+            We received a request to reset your password for your Stuflover account.
+            Click the button below to choose a new password.
+          </p>
+          <a href="${resetUrl}" style="display:inline-block;margin:24px 0;padding:14px 32px;background:#c4522a;color:#fff;text-decoration:none;border-radius:10px;font-weight:bold;font-size:15px;">
+            Reset Password
+          </a>
+          <p style="color:#999;font-size:13px;line-height:1.5;">
+            This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
+});
+
+app.post('/api/auth/reset-password', (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password) {
+    return res.status(400).json({ error: 'Token and new password are required' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  const reset = stmts.getPasswordReset.get(token);
+  if (!reset) {
+    return res.status(400).json({ error: 'Invalid or expired reset link' });
+  }
+
+  const hash = bcrypt.hashSync(password, 10);
+  stmts.updateUserPassword.run(reset.user_id, hash);
+  stmts.markPasswordResetUsed.run(token);
+
+  res.json({ ok: true });
 });
 
 app.delete('/api/auth/account', auth, (req, res) => {
