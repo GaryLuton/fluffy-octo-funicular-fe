@@ -2031,10 +2031,13 @@ function buildPage(){
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
   // Load scrapbook from server, then render
+  var recB = document.getElementById('recBoard');
+  if(recB) recB.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Loading your scrapbook...</div>';
   loadScrapbookFromServer().then(function(){
     try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
-  }).catch(function(){
-    try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
+  }).catch(function(e){
+    console.error('loadScrapbookFromServer failed:', e);
+    try{ loadForYou(); }catch(e2){ console.error('loadForYou error:', e2); }
   });
 
   // Viral decorations
@@ -2064,20 +2067,25 @@ function saveScrapbookToServer(){
 }
 
 async function loadScrapbookFromServer(){
+  var authH = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
-    var res = await _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:sbAuthHeaders()});
-    var data = await res.json();
-    if(data.data && Array.isArray(data.data) && data.data.length > 0){
-      forYouCache = data.data;
+    var res = await _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:authH});
+    if(res.ok){
+      var data = await res.json();
+      if(data.data && Array.isArray(data.data) && data.data.length > 0){
+        forYouCache = data.data;
+      }
     }
-  }catch(e){}
+  }catch(e){ console.error('Load scrapbook cache failed:', e); }
   try{
-    var res2 = await _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:sbAuthHeaders()});
-    var data2 = await res2.json();
-    if(data2.data && typeof data2.data === 'object'){
-      sbSavedPositions = data2.data;
+    var res2 = await _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:authH});
+    if(res2.ok){
+      var data2 = await res2.json();
+      if(data2.data && typeof data2.data === 'object'){
+        sbSavedPositions = data2.data;
+      }
     }
-  }catch(e){}
+  }catch(e){ console.error('Load scrapbook positions failed:', e); }
 }
 
 function buildRecProfile(){
