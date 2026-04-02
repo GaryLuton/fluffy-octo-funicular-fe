@@ -20,6 +20,8 @@
     .nav-links{display:flex;gap:8px;}
     .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--brown);transition:opacity 0.2s;}
     .nav-link:hover{opacity:0.55;}
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
 
     .account-container{max-width:520px;margin:0 auto;padding:120px 24px 60px;}
 
@@ -45,7 +47,10 @@
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      .nav-links{display:none;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
+      .nav-toggle{display:block;}
       .account-container{padding:90px 16px 40px;}
       .welcome-card,.section-card{padding:28px 20px;border-radius:18px;}
       .welcome-title{font-size:1.8rem;}
@@ -56,8 +61,10 @@
 
 <nav>
   <a class="logo" href="lifestyle.html">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
-    <a class="nav-link" href="lifestyle.html">My Page</a>
+    <a class="nav-link" href="lifestyle.html">← Back</a>
+    <a class="nav-link" href="account.html">Account</a>
     <a class="nav-link" href="index.html">Home</a>
   </div>
 </nav>
