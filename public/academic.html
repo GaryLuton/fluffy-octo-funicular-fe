@@ -26,7 +26,9 @@
     /* NAV */
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);}
     .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;color:var(--brown);}
-    .nav-links{display:flex;gap:16px;}
+    .nav-links{display:flex;gap:8px;}
+    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
+    .nav-toggle svg{width:22px;height:22px;display:block;}
     .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--brown);transition:opacity 0.2s;}
     .nav-link:hover{opacity:0.55;}
 
@@ -134,13 +136,21 @@
     .quiz-explanation{margin-top:14px;padding:14px;background:var(--peach);border-radius:12px;font-size:0.9rem;line-height:1.7;}
     .quiz-score{font-size:0.85rem;color:rgba(30,12,6,0.5);margin-bottom:16px;letter-spacing:1px;}
     .quiz-next-row{margin-top:16px;display:flex;gap:12px;}
+    @media(max-width:768px){
+      nav{padding:14px 20px;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
+      .nav-links.open{display:flex;}
+      .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
+      .nav-toggle{display:block;}
+    }
   </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav>
+<nav id="mainNav">
   <a href="lifestyle.html" class="logo bc">Stuflover</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a href="lifestyle.html" class="nav-link bc">← Back</a>
     <a href="account.html" class="nav-link bc">Account</a>
