@@ -2449,18 +2449,18 @@ function initScrapbookDrag(){
   function startDrag(e){
     var piece = findPiece(e.target);
     if(!piece) return;
-    var scrollY = window.scrollY;
     dragging = piece;
     hasMoved = false;
     var ptr = getPointer(e);
     startX = ptr.x;
     startY = ptr.y;
-    origX = dragging.offsetLeft;
-    origY = dragging.offsetTop;
+    // Use getBoundingClientRect for accurate position relative to board
+    var boardRect = board.getBoundingClientRect();
+    var pieceRect = dragging.getBoundingClientRect();
+    origX = pieceRect.left - boardRect.left;
+    origY = pieceRect.top - boardRect.top;
     e.preventDefault();
     e.stopPropagation();
-    // Restore scroll position in case browser auto-scrolled
-    requestAnimationFrame(function(){ window.scrollTo(window.scrollX, scrollY); });
     document.addEventListener('mousemove', onDrag);
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchmove', onDrag, {passive:false});
