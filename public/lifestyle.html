@@ -2041,9 +2041,6 @@ function buildPage(){
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
 
-  // ── Decorative elements init ──
-  initDecorations(searchPal);
-
   // Show welcome message
   var user = window.stufloverUser ? window.stufloverUser() : null;
   if(user && user.username){
