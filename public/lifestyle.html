@@ -5610,6 +5610,10 @@ function openSection(id){
   // Hide hub and profile views by default
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
+  if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval=null; }
+  currentHubGame = null;
   document.getElementById('profileView').style.display = 'none';
   document.getElementById('profileView').classList.remove('active');
   document.getElementById('routineView').style.display = 'none';
@@ -5847,6 +5851,8 @@ function goHome(){
   currentHubGame=null;
   document.getElementById('chatMessages').innerHTML='';
   document.getElementById('chatMessages2').innerHTML='';
+  document.getElementById('fitLayout').style.display='none';
+  document.getElementById('normalChat').style.display='none';
   // Re-render scrapbook if cards are missing from DOM but cache exists
   var recB = document.getElementById('recBoard');
   if(recB && !recB.querySelector('.sb-card') && _sb.cache){
