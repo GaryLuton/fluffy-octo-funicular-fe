@@ -1966,17 +1966,8 @@ function buildPage(){
   var fyBtn = document.getElementById('foryouRefresh');
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
-  // Load scrapbook from server, then render
-  _forYouRetries = 0;
-  _forYouFetchAttempt = 0;
-  var recB = document.getElementById('recBoard');
-  if(recB) recB.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Loading your scrapbook...</div>';
-  loadScrapbookFromServer().then(function(){
-    try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
-  }).catch(function(e){
-    console.error('loadScrapbookFromServer failed:', e);
-    try{ loadForYou(); }catch(e2){ console.error('loadForYou error:', e2); }
-  });
+  // Load scrapbook
+  loadScrapbook();
 
   // Viral decorations
   initSparkleTrail();
@@ -1991,514 +1982,272 @@ function buildPage(){
   if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
 }
 
-// ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
-var forYouCache = null;
+// ─── SCRAPBOOK ───────────────────────────────────────────
+var _sb = {
+  cache: null,       // array of 5 {cat, title, desc} objects
+  positions: {},     // {0:{x,y}, 1:{x,y}, ...}
+  dragReady: false,  // whether drag listeners are attached
+  BOARD_H: 480,      // fixed board height in px
+  CARD_W: 220,       // card width desktop
+  api: function(){ return (window.STUFLOVER_API_URL||''); },
+  auth: function(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; },
+  fetch: window._origFetch || window.fetch
+};
 
-function sbApiBase(){ return (window.STUFLOVER_API_URL||''); }
-function sbAuthHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; }
-var _origF = window._origFetch || window.fetch;
-
-function saveScrapbookToServer(){
-  if(!forYouCache) return;
-  var h = sbAuthHeaders();
-  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:forYouCache})})
-    .catch(function(e){ console.error('Save scrapbook cache failed:', e); });
-  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:sbSavedPositions})})
-    .catch(function(e){ console.error('Save scrapbook positions failed:', e); });
+// ── Server persistence ──
+function sbSave(){
+  if(!_sb.cache) return;
+  var h = _sb.auth();
+  _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}).catch(function(){});
+  _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})}).catch(function(){});
 }
 
-async function loadScrapbookFromServer(){
-  var authH = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+async function sbLoad(){
+  var h = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
-    var results = await Promise.all([
-      _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:authH}),
-      _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:authH})
+    var r = await Promise.all([
+      _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{headers:h}),
+      _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{headers:h})
     ]);
-    if(results[0].ok){
-      var d1 = await results[0].json();
-      if(d1.data && Array.isArray(d1.data) && d1.data.length > 0){
-        forYouCache = d1.data;
-      }
-    }
-    if(results[1].ok){
-      var d2 = await results[1].json();
-      if(d2.data && typeof d2.data === 'object'){
-        sbSavedPositions = d2.data;
-      }
-    }
-  }catch(e){ console.error('Load scrapbook from server failed:', e); }
+    if(r[0].ok){ var d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
+    if(r[1].ok){ var d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
+  }catch(e){ console.error('sbLoad failed:', e); }
 }
 
+function sbDelete(){
+  var h = _sb.auth();
+  _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
+  _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
+}
+
+// ── Build user profile string for AI ──
 function buildRecProfile(){
   var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
   var music = (P.music||[]).slice(0,4).join(', ');
   var interests = (P.interests||[]).slice(0,5).join(', ');
-  var parts = [];
-  parts.push('Aesthetic: ' + (topAe.join(', ')||'not set'));
-  parts.push('Favourite colour: ' + (P.faveColour?P.faveColour.name:'not set'));
-  parts.push('Current mood: ' + (P.moodToday||'okay'));
-  parts.push('Music taste: ' + (music||'not set'));
-  parts.push('Shopping: ' + (P.faveShop||'not set'));
-  parts.push('Interests: ' + (interests||'not set'));
-  parts.push('Social energy: ' + (P.social||'ambivert'));
-  parts.push('Energy: ' + (P.energyWord||'chill'));
-  parts.push('Age: ' + (P.age||'not set'));
-  parts.push('Saturday morning: ' + (P.saturdayMorning||'not set'));
-  parts.push('Coffee order: ' + (P.coffeeOrder||'not set'));
-  return parts.join('\n');
+  return [
+    'Aesthetic: '+(topAe.join(', ')||'not set'),
+    'Favourite colour: '+(P.faveColour?P.faveColour.name:'not set'),
+    'Current mood: '+(P.moodToday||'okay'),
+    'Music taste: '+(music||'not set'),
+    'Shopping: '+(P.faveShop||'not set'),
+    'Interests: '+(interests||'not set'),
+    'Social energy: '+(P.social||'ambivert'),
+    'Energy: '+(P.energyWord||'chill'),
+    'Age: '+(P.age||'not set'),
+    'Saturday morning: '+(P.saturdayMorning||'not set'),
+    'Coffee order: '+(P.coffeeOrder||'not set')
+  ].join('\n');
 }
 
-function refreshForYou(){
-  forYouCache = null;
-  _forYouFetchAttempt = 0;
-  _forYouRetries = 0;
-  sbSavedPositions = {};
-  // Clear old cards from the board immediately
-  var board = document.getElementById('recBoard');
-  if(board) board.innerHTML = '';
-  // Delete old data from server
-  var h = sbAuthHeaders();
-  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
-  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
-  // Generate fresh content
-  loadForYou();
-}
-
-var _forYouRetries = 0;
-var _forYouFetchAttempt = 0;
-async function loadForYou(){
-  var grid = document.getElementById('recBoard');
-  var btn = document.getElementById('foryouRefresh');
-  if(!grid) return;
-  if(!searchPal){
-    if(_forYouRetries < 10){ _forYouRetries++; setTimeout(loadForYou, 500); }
-    return;
-  }
-
-  // Show cached results instantly — skip if board already has pieces
-  if(forYouCache){
-    if(grid.querySelector('.sb-piece')) return;
-    try{
-      renderRecs(forYouCache);
-      return;
-    } catch(e){
-      console.error('renderRecs from cache failed:', e);
-      // Don't clear cache — it may work on next attempt after page is fully ready
-    }
-  }
-
-  grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
-  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
-
-  try{
-    var profileStr = buildRecProfile();
-
-    var res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1200,
-        system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Do NOT use any emojis anywhere in your response.\n- Return ONLY a JSON array of 5 objects: {cat, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - title: short catchy title (no emojis)\n  - desc: brief specific description (no emojis)\n- No markdown, no code fences, no text outside the JSON array.',
-        messages:[{role:'user',content:'My profile:\n'+profileStr+'\n\nGenerate 5 personalised recommendations for me right now.'}]
-      })
-    });
-
-    var data = await res.json();
-    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
-    var match = text.match(/\[[\s\S]*\]/);
-    if(!match) throw new Error('No recs');
-
-    var recs = JSON.parse(match[0]);
-    if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty');
-
-    _forYouFetchAttempt = 0;
-    forYouCache = recs;
-    saveScrapbookToServer();
-    renderRecs(recs);
-
-  }catch(e){
-    console.error('For You failed:', e);
-    // Auto-retry once after 3 seconds
-    if(_forYouFetchAttempt < 1){
-      _forYouFetchAttempt++;
-      if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
-      grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Loading your scrapbook... retrying</div>';
-      setTimeout(loadForYou, 3000);
-      return;
-    }
-    grid.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
-  }
-
-  if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
-}
-
-function getAeIcons(){
-  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
-  topK = topK?topK[0]:'softgirl';
-  var c = (searchPal&&searchPal.ac)||'#e8829a';
-  var icons = [];
-  // Primary icons per aesthetic
-  var m = {
-    kawaii:[bowSVG,flowerSVG,starSVG],softgirl:[flowerSVG,bowSVG,starSVG],
-    cleangirl:[starSVG,moonSVG,flowerSVG],coquette:[bowSVG,butterflySVG,flowerSVG],
-    goth:[batSVG,moonSVG,starSVG],darkacad:[bookSVG,moonSVG,starSVG],
-    grunge:[starSVG,batSVG,moonSVG],y2k:[butterflySVG,starSVG,flowerSVG],
-    street:[starSVG,vinylSVG,noteSVG],cottage:[flowerSVG,butterflySVG,starSVG],
-    hippie:[flowerSVG,moonSVG,starSVG],oldmoney:[bookSVG,starSVG,moonSVG],
-    preppy:[bowSVG,starSVG,bookSVG],tomato:[flowerSVG,starSVG,butterflySVG],
-    indie:[moonSVG,vinylSVG,starSVG],emo:[batSVG,moonSVG,starSVG],
-    ballet:[bowSVG,flowerSVG,starSVG]
-  };
-  return m[topK]||[starSVG,flowerSVG,moonSVG];
-}
-
-function makeIconSvg(fn,c,size){
-  var raw = fn(0,0,c,0.55,0);
-  // Strip the outer <g> transform to get clean SVG
-  var inner = raw.replace(/<g[^>]*>/,'').replace(/<\/g>/,'');
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
-}
-
-var tapeStyles = ['dotty','stripy','hearty'];
-
-function addTape(parent, pal, x, rot, w){
-  var t = document.createElement('div');
-  t.className = 'sb-tape '+tapeStyles[Math.floor(Math.random()*3)];
-  t.style.cssText = 'width:'+(w||55)+'px;top:-9px;left:'+x+'%;background-color:'+pal.ac+'40;transform:rotate('+rot+'deg);';
-  parent.appendChild(t);
-}
-
-function addSparkle(parent, pal, x, y){
-  var s = document.createElement('div');
-  s.className = 'sb-sparkle';
-  s.style.cssText = 'right:'+x+'px;top:'+y+'px;';
-  s.innerHTML = '<svg width="18" height="18" viewBox="0 0 18 18"><path d="M9 0 L10.5 7 L18 9 L10.5 11 L9 18 L7.5 11 L0 9 L7.5 7 Z" fill="'+pal.ac+'" opacity="0.7"/></svg>';
-  parent.appendChild(s);
-}
-
-function addClip(parent, pal, side){
-  var cl = document.createElement('div');
-  cl.className = 'sb-clip';
-  cl.style[side]='-6px'; cl.style.top='-4px';
-  cl.innerHTML = '<svg width="18" height="40" viewBox="0 0 18 40"><path d="M9 0 V12 C9 16 2 16 2 20 C2 24 9 24 9 28 V40" fill="none" stroke="'+pal.ac+'" stroke-width="2" opacity="0.5"/></svg>';
-  parent.appendChild(cl);
-}
-
-function addCorners(parent){
-  [[0,0,0],[1,0,'auto'],[2,'auto',0],[3,'auto','auto']].forEach(function(p){
-    var c = document.createElement('div');
-    c.className = 'sb-corner';
-    c.style.top = p[1]===0?'0':'auto'; c.style.bottom = p[1]==='auto'?'0':'auto';
-    c.style.left = p[2]===0?'0':'auto'; c.style.right = p[2]==='auto'?'0':'auto';
-    c.style.transform = 'rotate('+(p[0]*90)+'deg)';
-    c.innerHTML = '<svg viewBox="0 0 16 16"><path d="M0 0 L16 0 L16 4 L4 4 L4 16 L0 16 Z" fill="currentColor"/></svg>';
-    parent.appendChild(c);
+// ── Generate new recommendations via AI ──
+async function sbGenerate(){
+  var res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST', headers:{},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1200,
+      system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Do NOT use any emojis anywhere in your response.\n- Return ONLY a JSON array of 5 objects: {cat, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - title: short catchy title (no emojis)\n  - desc: brief specific description (no emojis)\n- No markdown, no code fences, no text outside the JSON array.',
+      messages:[{role:'user',content:'My profile:\n'+buildRecProfile()+'\n\nGenerate 5 personalised recommendations for me right now.'}]
+    })
   });
+  var data = await res.json();
+  var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+  var match = text.match(/\[[\s\S]*\]/);
+  if(!match) throw new Error('No recommendations returned');
+  var recs = JSON.parse(match[0]);
+  if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty recommendations');
+  return recs;
 }
 
-function makeHeartSvg(c, size){
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+c+'" opacity="0.6"/></svg>';
-}
-
-function makeStarBurstSvg(c, size){
-  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24"><path d="M12 0 L13.5 9 L24 12 L13.5 15 L12 24 L10.5 15 L0 12 L10.5 9 Z" fill="'+c+'" opacity="0.5"/></svg>';
-}
-
-function renderRecs(recs){
+// ── Render cards into the board ──
+function sbRender(){
   var board = document.getElementById('recBoard');
-  if(!board || !searchPal) return;
+  if(!board || !searchPal || !_sb.cache) return;
   var pal = searchPal;
   var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
-  var aeIcons = getAeIcons();
   var mob = window.innerWidth < 768;
+  var cardW = mob ? board.clientWidth - 16 : _sb.CARD_W;
 
   board.innerHTML = '';
+  board.style.height = _sb.BOARD_H + 'px';
 
-  // Layouts: x%, y, w, rot, type — grid-style to avoid overlap
-  var layouts = mob ? [
-    {x:3,  y:12,  w:90, rot:-1.5, type:'polaroid'},
-    {x:3,  y:200, w:90, rot:1,    type:'bubble'},
-    {x:3,  y:370, w:90, rot:-0.5, type:'notebook'},
-    {x:3,  y:540, w:90, rot:0.8,  type:'torn'},
-    {x:3,  y:710, w:90, rot:-1,   type:'doodle'},
+  // Default positions: 3 across top, 2 across bottom (desktop) or stacked (mobile)
+  var defaults = mob ? [
+    {x:8, y:10},{x:8, y:170},{x:8, y:330},{x:8, y:490},{x:8, y:650}
   ] : [
-    {x:1,  y:10,  w:220, rot:-2,   type:'polaroid'},
-    {x:28, y:15,  w:220, rot:1.5,  type:'bubble'},
-    {x:55, y:10,  w:220, rot:-1,   type:'notebook'},
-    {x:1,  y:240, w:280, rot:1,    type:'torn'},
-    {x:38, y:245, w:280, rot:-0.8, type:'doodle'},
+    {x:10, y:10},
+    {x:10 + cardW + 20, y:10},
+    {x:10 + (cardW + 20)*2, y:10},
+    {x:10, y:230},
+    {x:10 + cardW + 20, y:230}
   ];
 
-  // --- Floating sparkles ---
-  var sparkleCount = mob ? 6 : 12;
-  for(var sp=0;sp<sparkleCount;sp++){
-    var spk = document.createElement('div');
-    spk.className = 'sb-float-sparkle';
-    spk.style.left = (Math.random()*92+2)+'%';
-    spk.style.top = (Math.random()*(mob?600:380)+10)+'px';
-    spk.style.animationDelay = (Math.random()*4).toFixed(1)+'s';
-    spk.style.animationDuration = (3+Math.random()*3).toFixed(1)+'s';
-    spk.innerHTML = (sp%3===0) ? makeHeartSvg(pal.ac, 12+Math.round(Math.random()*8)) :
-                    (sp%3===1) ? makeStarBurstSvg(pal.ac, 10+Math.round(Math.random()*10)) :
-                    makeIconSvg(aeIcons[sp%aeIcons.length], pal.ac, 16+Math.round(Math.random()*14));
-    board.appendChild(spk);
-  }
+  _sb.cache.forEach(function(rec, i){
+    var card = document.createElement('div');
+    card.className = 'sb-card';
+    card.style.width = cardW + 'px';
+    card.style.background = pal.bg;
+    card.style.color = pal.tx;
+    card.style.borderLeft = '3px solid ' + pal.ac + '50';
+    card.dataset.idx = i;
 
-  // --- Scattered aesthetic icons ---
-  var decoCount = mob ? 4 : 7;
-  for(var d=0;d<decoCount;d++){
-    var deco = document.createElement('div');
-    deco.className = 'sb-icon';
-    deco.style.cssText = 'position:absolute;z-index:0;opacity:0.08;pointer-events:none;';
-    deco.style.left = (Math.random()*88+4)+'%';
-    deco.style.top = (Math.random()*(mob?550:360)+5)+'px';
-    deco.style.transform = 'rotate('+(Math.random()*50-25).toFixed(0)+'deg)';
-    deco.innerHTML = makeIconSvg(aeIcons[d%aeIcons.length], pal.ac, 28+Math.round(Math.random()*24));
-    board.appendChild(deco);
-  }
+    card.innerHTML =
+      '<div class="sb-card-cat" style="color:'+pal.ac+'">'+(catLabels[rec.cat]||rec.cat||'')+'</div>'+
+      '<div class="sb-card-title">'+escHtml(rec.title||'')+'</div>'+
+      '<div class="sb-card-body">'+escHtml(rec.desc||'')+'</div>';
 
-  // --- Loose washi tape strips ---
-  var tapeCount = mob ? 2 : 4;
-  for(var t=0;t<tapeCount;t++){
-    var strip = document.createElement('div');
-    strip.className = 'sb-tape '+tapeStyles[t%3];
-    strip.style.cssText = 'width:'+(60+Math.round(Math.random()*70))+'px;position:absolute;z-index:1;background-color:'+pal.ac+'28;top:'+(Math.random()*(mob?530:340)+20)+'px;left:'+(Math.random()*75+5)+'%;transform:rotate('+(Math.random()*30-15).toFixed(0)+'deg);';
-    board.appendChild(strip);
-  }
+    // Position: use saved or default
+    var pos = _sb.positions[i] || defaults[i] || {x:10, y:10};
+    card.style.left = pos.x + 'px';
+    card.style.top = pos.y + 'px';
+    card.style.zIndex = i + 1;
 
-  // --- Scattered hearts ---
-  var heartCount = mob ? 3 : 5;
-  for(var h=0;h<heartCount;h++){
-    var hrt = document.createElement('div');
-    hrt.style.cssText = 'position:absolute;z-index:0;pointer-events:none;opacity:0.1;';
-    hrt.style.left = (Math.random()*90+3)+'%';
-    hrt.style.top = (Math.random()*(mob?580:370))+'px';
-    hrt.style.transform = 'rotate('+(Math.random()*40-20).toFixed(0)+'deg)';
-    hrt.innerHTML = makeHeartSvg(pal.ac, 14+Math.round(Math.random()*12));
-    board.appendChild(hrt);
-  }
-
-  // --- Render cards ---
-  recs.forEach(function(rec, i){
-    if(i >= layouts.length) return;
-    var L = layouts[i];
-    var iconFn = aeIcons[i % aeIcons.length];
-    var el;
-    var wStr = mob ? L.w+'%' : L.w+'px';
-
-    if(L.type === 'polaroid'){
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-polaroid';
-      el.style.width = wStr;
-      el.innerHTML =
-        '<div class="sb-inner" style="background:linear-gradient(135deg,'+pal.ac+'30,'+pal.ac+'18)">'+
-          '<div class="sb-icon" style="opacity:0.55">'+makeIconSvg(iconFn, pal.ac, mob?52:68)+'</div>'+
-        '</div>'+
-        '<div class="sb-label" style="color:#333">'+escHtml(rec.title||'')+
-          '<div class="sb-label-sub">'+escHtml(rec.desc||'')+'</div>'+
-        '</div>';
-      addCorners(el);
-      addTape(el, pal, 20+Math.round(Math.random()*35), (Math.random()*14-7).toFixed(1), 48+Math.round(Math.random()*22));
-      addSparkle(el, pal, -6, -6);
-
-    } else if(L.type === 'bubble'){
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-bubble';
-      el.style.width = wStr;
-      el.style.background = pal.bg;
-      el.style.color = pal.tx;
-      el.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
-          '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
-          makeHeartSvg(pal.ac, 14)+
-        '</div>'+
-        '<div class="sb-bubble-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-bubble-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
-      addSparkle(el, pal, 8, -8);
-
-    } else if(L.type === 'notebook'){
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-notebook';
-      el.style.width = wStr;
-      el.style.backgroundColor = pal.bg;
-      el.style.borderLeftColor = pal.ac+'50';
-      el.style.color = pal.tx;
-      el.innerHTML =
-        '<div style="position:absolute;left:22px;top:0;bottom:0;width:1px;background:'+pal.ac+'18;"></div>'+
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-          '<div class="sb-icon" style="opacity:0.4">'+makeIconSvg(iconFn, pal.ac, 24)+'</div>'+
-          '<div class="sb-nb-cat" style="color:'+pal.tx+';margin:0">'+(catLabels[rec.cat]||'')+'</div>'+
-        '</div>'+
-        '<div class="sb-nb-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-nb-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
-      addClip(el, pal, 'right');
-      addSparkle(el, pal, -4, 10);
-
-    } else if(L.type === 'torn'){
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-torn';
-      el.style.width = wStr;
-      el.style.background = pal.bg;
-      el.style.color = pal.tx;
-      el.innerHTML =
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-          '<div class="sb-icon" style="opacity:0.45">'+makeIconSvg(iconFn, pal.ac, 22)+'</div>'+
-          makeHeartSvg(pal.ac, 12)+
-        '</div>'+
-        '<div class="sb-torn-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-torn-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
-      addTape(el, pal, 30+Math.round(Math.random()*25), (Math.random()*10-5).toFixed(1));
-
-    } else {
-      // doodle border card
-      el = document.createElement('div');
-      el.className = 'sb-piece sb-doodle-border';
-      el.style.width = wStr;
-      el.style.borderColor = pal.ac+'60';
-      el.style.background = pal.bg;
-      el.style.color = pal.tx;
-      el.innerHTML =
-        '<div style="display:flex;align-items:center;gap:6px">'+
-          '<div class="sb-icon" style="opacity:0.5">'+makeIconSvg(iconFn, pal.ac, 16)+'</div>'+
-          '<div class="sb-db-cat" style="color:'+pal.tx+'">'+(catLabels[rec.cat]||'')+'</div>'+
-          makeStarBurstSvg(pal.ac, 10)+
-        '</div>'+
-        '<div class="sb-db-title" style="color:'+pal.tx+'">'+escHtml(rec.title||'')+'</div>'+
-        '<div class="sb-db-body" style="color:'+pal.tx+'">'+escHtml(rec.desc||'')+'</div>';
-      addSparkle(el, pal, -4, -4);
-    }
-
-    // Restore saved position or use default layout (always in px)
-    var savedPos = sbSavedPositions[i];
-    if(savedPos){
-      el.style.left = savedPos.x+'px';
-      el.style.top = savedPos.y+'px';
-    } else {
-      // Convert percentage to pixels using clientWidth (padding-box)
-      el.style.left = Math.round(L.x / 100 * board.clientWidth)+'px';
-      el.style.top = L.y+'px';
-    }
-    el.style.zIndex = (i+3).toString();
-    el.style.setProperty('--rot', L.rot+'deg');
-    el.style.transform = 'rotate('+L.rot+'deg)';
-    el.dataset.idx = i;
-    el.dataset.rot = L.rot;
-    board.appendChild(el);
+    board.appendChild(card);
   });
 
-  initScrapbookDrag();
+  // Update board height to fit content
+  var maxB = 0;
+  board.querySelectorAll('.sb-card').forEach(function(c){
+    var b = parseFloat(c.style.top) + c.offsetHeight;
+    if(b > maxB) maxB = b;
+  });
+  board.style.height = Math.max(_sb.BOARD_H, maxB + 30) + 'px';
 
-  setTimeout(function(){
-    var maxB = 0;
-    board.querySelectorAll('.sb-piece,.sb-float-sparkle').forEach(function(p){
-      var b = p.offsetTop + p.offsetHeight;
-      if(b>maxB) maxB = b;
-    });
-    board.style.minHeight = (maxB+50)+'px';
-  }, 50);
+  sbInitDrag();
 }
 
-// ─── SCRAPBOOK DRAG ──────────────────────────────────────
-var sbSavedPositions = {};
-
-function saveScrapbookPositions(){
-  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:sbSavedPositions})}).catch(function(){});
-}
-
-var _sbDragInit = false;
-function initScrapbookDrag(){
+// ── Drag and drop ──
+function sbInitDrag(){
   var board = document.getElementById('recBoard');
-  if(!board || _sbDragInit) return;
-  _sbDragInit = true;
+  if(!board || _sb.dragReady) return;
+  _sb.dragReady = true;
 
-  var dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, hasMoved = false;
+  var dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, moved = false;
 
-  function getPointer(e){
+  function ptr(e){
     if(e.touches && e.touches.length) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
     return {x:e.clientX, y:e.clientY};
   }
 
-  function findPiece(target){
-    while(target && target !== board){
-      if(target.classList && target.classList.contains('sb-piece')) return target;
-      target = target.parentElement;
+  function findCard(el){
+    while(el && el !== board){
+      if(el.classList && el.classList.contains('sb-card')) return el;
+      el = el.parentElement;
     }
     return null;
   }
 
-  function startDrag(e){
-    var piece = findPiece(e.target);
-    if(!piece) return;
-    dragging = piece;
-    hasMoved = false;
-    var ptr = getPointer(e);
-    startX = ptr.x;
-    startY = ptr.y;
-    // Read current CSS left/top directly — these are the values we set
+  function down(e){
+    var card = findCard(e.target);
+    if(!card) return;
+    dragging = card;
+    moved = false;
+    var p = ptr(e);
+    startX = p.x; startY = p.y;
     origX = parseFloat(dragging.style.left) || 0;
     origY = parseFloat(dragging.style.top) || 0;
     e.preventDefault();
-    e.stopPropagation();
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchmove', onDrag, {passive:false});
-    document.addEventListener('touchend', endDrag);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchmove', move, {passive:false});
+    document.addEventListener('touchend', up);
   }
 
-  board.addEventListener('mousedown', startDrag);
-  board.addEventListener('touchstart', startDrag, {passive:false});
-  // Prevent clicks on pieces from bubbling or causing scroll
-  board.addEventListener('click', function(e){
-    if(findPiece(e.target)){ e.preventDefault(); e.stopPropagation(); }
-  });
-
-  function onDrag(e){
+  function move(e){
     if(!dragging) return;
     e.preventDefault();
-    var ptr = getPointer(e);
-    var dx = ptr.x - startX;
-    var dy = ptr.y - startY;
-    if(!hasMoved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
-    if(!hasMoved){
-      hasMoved = true;
-      dragging.classList.add('dragging');
-      dragging.style.transform = 'scale(1.04)';
-    }
+    var p = ptr(e);
+    var dx = p.x - startX, dy = p.y - startY;
+    if(!moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+    if(!moved){ moved = true; dragging.classList.add('dragging'); }
+
     var newX = origX + dx;
     var newY = origY + dy;
-    // Constrain to board boundaries — same area for all cards
-    var pw = dragging.offsetWidth;
-    var ph = dragging.offsetHeight;
-    newX = Math.max(0, Math.min(newX, board.clientWidth - pw));
-    newY = Math.max(0, Math.min(newY, board.clientHeight - ph));
-    dragging.style.left = newX+'px';
-    dragging.style.top = newY+'px';
+    // Same boundary for every card: 0 to (board - card) in both axes
+    var maxX = board.clientWidth - dragging.offsetWidth;
+    var maxY = board.clientHeight - dragging.offsetHeight;
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+    dragging.style.left = newX + 'px';
+    dragging.style.top = newY + 'px';
   }
 
-  function endDrag(){
+  function up(){
     if(!dragging) return;
-    if(hasMoved){
-      var rot = dragging.dataset.rot || 0;
-      dragging.style.transform = 'rotate('+rot+'deg)';
-      dragging.classList.remove('dragging');
+    dragging.classList.remove('dragging');
+    if(moved){
       var idx = dragging.dataset.idx;
-      sbSavedPositions[idx] = {x: parseFloat(dragging.style.left)||0, y: parseFloat(dragging.style.top)||0};
-      saveScrapbookPositions();
-      var maxB = 0;
-      board.querySelectorAll('.sb-piece').forEach(function(p){
-        var b = p.offsetTop + p.offsetHeight;
-        if(b>maxB) maxB = b;
-      });
-      board.style.minHeight = (maxB+50)+'px';
+      _sb.positions[idx] = {x: parseFloat(dragging.style.left)||0, y: parseFloat(dragging.style.top)||0};
+      sbSave();
     }
-    dragging = null;
-    hasMoved = false;
-    document.removeEventListener('mousemove', onDrag);
-    document.removeEventListener('mouseup', endDrag);
-    document.removeEventListener('touchmove', onDrag);
-    document.removeEventListener('touchend', endDrag);
+    dragging = null; moved = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('touchend', up);
   }
+
+  board.addEventListener('mousedown', down);
+  board.addEventListener('touchstart', down, {passive:false});
+}
+
+// ── Main entry: load scrapbook ──
+async function loadScrapbook(){
+  var board = document.getElementById('recBoard');
+  if(!board) return;
+  if(!searchPal){ setTimeout(loadScrapbook, 300); return; }
+
+  var pal = searchPal;
+  board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Loading your scrapbook...</div>';
+
+  // 1. Try loading from server
+  await sbLoad();
+
+  // 2. If cache exists, render it
+  if(_sb.cache){
+    sbRender();
+    return;
+  }
+
+  // 3. No cache — generate new via AI
+  board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Personalising your scrapbook...</div>';
+  var btn = document.getElementById('foryouRefresh');
+  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  try{
+    _sb.cache = await sbGenerate();
+    _sb.positions = {};
+    sbSave();
+    sbRender();
+  }catch(e){
+    console.error('Scrapbook generation failed:', e);
+    board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
+}
+
+// ── Refresh: clear and regenerate ──
+async function refreshForYou(){
+  _sb.cache = null;
+  _sb.positions = {};
+  var board = document.getElementById('recBoard');
+  if(board && searchPal) board.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
+  var btn = document.getElementById('foryouRefresh');
+  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  sbDelete();
+
+  try{
+    _sb.cache = await sbGenerate();
+    _sb.positions = {};
+    sbSave();
+    sbRender();
+  }catch(e){
+    console.error('Scrapbook refresh failed:', e);
+    if(board && searchPal) board.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
 }
 
 function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
@@ -5816,8 +5565,8 @@ function goHome(){
   document.getElementById('chatMessages2').innerHTML='';
   // Re-render scrapbook if cards are missing from DOM but cache exists
   var recB = document.getElementById('recBoard');
-  if(recB && !recB.querySelector('.sb-piece') && forYouCache){
-    try{ renderRecs(forYouCache); }catch(e){}
+  if(recB && !recB.querySelector('.sb-card') && _sb.cache){
+    try{ sbRender(); }catch(e){}
   }
 }
 
