@@ -2505,7 +2505,9 @@ function initScrapbookDrag(){
       dragging.style.transform = 'rotate('+rot+'deg)';
       dragging.classList.remove('dragging');
       var idx = dragging.dataset.idx;
-      sbSavedPositions[idx] = {x:dragging.offsetLeft, y:dragging.offsetTop};
+      var boardRect = board.getBoundingClientRect();
+      var pieceRect = dragging.getBoundingClientRect();
+      sbSavedPositions[idx] = {x:pieceRect.left - boardRect.left, y:pieceRect.top - boardRect.top};
       saveScrapbookPositions();
       var maxB = 0;
       board.querySelectorAll('.sb-piece').forEach(function(p){
