@@ -2310,19 +2310,20 @@ async function loadScrapbook(){
   if(!board) return;
   if(!searchPal){ setTimeout(loadScrapbook, 300); return; }
 
-  var pal = searchPal;
-  board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Loading your scrapbook...</div>';
+  // If cards are already in the DOM, don't reload
+  if(board.querySelector('.sb-card')) return;
 
-  // 1. Try loading from server
+  // Try loading data (sessionStorage first, then server)
   await sbLoad();
 
-  // 2. If cache exists, render it
+  // If cache exists, render it immediately — no loading message needed
   if(_sb.cache){
     sbRender();
     return;
   }
 
-  // 3. No cache — generate new via AI
+  // No cache — show loading state and generate new via AI
+  var pal = searchPal;
   board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Personalising your scrapbook...</div>';
   var btn = document.getElementById('foryouRefresh');
   if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
