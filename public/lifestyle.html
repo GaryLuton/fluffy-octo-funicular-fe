@@ -695,6 +695,7 @@
     .fr-item-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;}
     .fr-item-name{font-weight:600;}
     .fr-item-pending{font-size:0.65rem;padding:2px 8px;border-radius:10px;opacity:0.7;font-weight:600;white-space:nowrap;}
+    .fr-item-unread{font-size:0.6rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto;flex-shrink:0;}
     .fr-chat{flex:1;display:flex;flex-direction:column;}
     .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:10px;}
     .fr-chat-header:hover{opacity:0.7;}
@@ -4579,22 +4580,30 @@ async function loadFrList(){
   try{
     var pal = searchPal;
     var container = document.getElementById('frList');
-    var friendsRes = frFetch('/api/friends',{headers:frHeaders()});
-    var sentRes = frFetch('/api/friends/sent-requests',{headers:frHeaders()});
-    var results = await Promise.all([friendsRes, sentRes]);
+    var results = await Promise.all([
+      frFetch('/api/friends',{headers:frHeaders()}),
+      frFetch('/api/friends/sent-requests',{headers:frHeaders()}),
+      frFetch('/api/friends/unread',{headers:frHeaders()})
+    ]);
     var data = await results[0].json();
     var sentData = await results[1].json();
+    var unreadData = await results[2].json();
     var friends = data.friends || [];
     var sent = sentData.requests || [];
+    var unreadMap = {};
+    (unreadData.perFriend||[]).forEach(function(u){ unreadMap[u.from_user] = u.count; });
     if(friends.length===0 && sent.length===0){
       container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.3;font-style:italic;font-size:0.82rem;">No friends yet — add someone!</div>';
       return;
     }
     var html = friends.map(function(f){
       var isOn = frSelectedFriend && frSelectedFriend.id === f.id;
+      var unread = unreadMap[f.id] || 0;
+      var badge = unread > 0 ? '<div class="fr-item-unread" style="background:'+pal.ac+';color:'+pal.bg+'">'+unread+'</div>' : '';
       return '<div class="fr-item'+(isOn?' on':'')+'" onclick="selectFriend('+f.id+',\''+escHtml(f.username)+'\')" style="color:'+pal.tx+'">'+
         '<div class="fr-item-avatar" style="background:'+pal.ac+'">'+f.username.charAt(0).toUpperCase()+'</div>'+
         '<div class="fr-item-name">'+escHtml(f.username)+'</div>'+
+        badge+
       '</div>';
     }).join('');
     if(sent.length > 0){
