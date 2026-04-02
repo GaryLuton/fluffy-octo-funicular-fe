@@ -2486,11 +2486,14 @@ function initScrapbookDrag(){
     var ptr = getPointer(e);
     startX = ptr.x;
     startY = ptr.y;
-    // Use getBoundingClientRect for accurate position relative to board
+    // Use getBoundingClientRect minus padding for accurate CSS left/top
     var boardRect = board.getBoundingClientRect();
     var pieceRect = dragging.getBoundingClientRect();
-    origX = pieceRect.left - boardRect.left;
-    origY = pieceRect.top - boardRect.top;
+    var cs = getComputedStyle(board);
+    var padL = parseFloat(cs.paddingLeft) || 0;
+    var padT = parseFloat(cs.paddingTop) || 0;
+    origX = pieceRect.left - boardRect.left - padL;
+    origY = pieceRect.top - boardRect.top - padT;
     e.preventDefault();
     e.stopPropagation();
     document.addEventListener('mousemove', onDrag);
@@ -2520,8 +2523,9 @@ function initScrapbookDrag(){
     }
     var newX = origX + dx;
     var newY = origY + dy;
-    var bw = board.clientWidth;
-    var bh = board.clientHeight;
+    var cs3 = getComputedStyle(board);
+    var bw = board.clientWidth - (parseFloat(cs3.paddingLeft)||0) - (parseFloat(cs3.paddingRight)||0);
+    var bh = board.clientHeight - (parseFloat(cs3.paddingTop)||0) - (parseFloat(cs3.paddingBottom)||0);
     var pw = dragging.offsetWidth;
     var ph = dragging.offsetHeight;
     newX = Math.max(0, Math.min(newX, bw - pw));
@@ -2539,7 +2543,10 @@ function initScrapbookDrag(){
       var idx = dragging.dataset.idx;
       var boardRect = board.getBoundingClientRect();
       var pieceRect = dragging.getBoundingClientRect();
-      sbSavedPositions[idx] = {x:pieceRect.left - boardRect.left, y:pieceRect.top - boardRect.top};
+      var cs2 = getComputedStyle(board);
+      var padL2 = parseFloat(cs2.paddingLeft) || 0;
+      var padT2 = parseFloat(cs2.paddingTop) || 0;
+      sbSavedPositions[idx] = {x:pieceRect.left - boardRect.left - padL2, y:pieceRect.top - boardRect.top - padT2};
       saveScrapbookPositions();
       var maxB = 0;
       board.querySelectorAll('.sb-piece').forEach(function(p){
