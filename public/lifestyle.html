@@ -2081,8 +2081,7 @@ var _sb = {
   BOARD_H: 480,      // fixed board height in px
   CARD_W: 220,       // card width desktop
   api: function(){ return (window.STUFLOVER_API_URL||''); },
-  auth: function(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; },
-  fetch: window._origFetch || window.fetch
+  auth: function(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; }
 };
 
 // ── Server persistence ──
@@ -2092,9 +2091,10 @@ function sbSave(){
   try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
   try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
   var h = _sb.auth();
+  var base = _sb.api();
   return Promise.all([
-    _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
-    _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})})
+    fetch(base+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
+    fetch(base+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})})
   ]).catch(function(e){ console.error('sbSave failed:', e); });
 }
 
@@ -2109,11 +2109,12 @@ async function sbLoad(){
   // If sessionStorage had data, we're done — render will be instant
   if(_sb.cache) return;
   // Otherwise fetch from server
-  var h = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+  var base = _sb.api();
+  var authOnly = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
     var r = await Promise.all([
-      _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{headers:h}),
-      _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{headers:h})
+      fetch(base+'/api/data/foryou_cache',{headers:authOnly}),
+      fetch(base+'/api/data/sb_positions',{headers:authOnly})
     ]);
     if(r[0].ok){ var d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
     if(r[1].ok){ var d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
@@ -2127,9 +2128,10 @@ async function sbLoad(){
 
 function sbDelete(){
   var h = _sb.auth();
+  var base = _sb.api();
   try{ sessionStorage.removeItem('sb_cache'); sessionStorage.removeItem('sb_pos'); }catch(e){}
-  _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
-  _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
+  fetch(base+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
+  fetch(base+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
 }
 
 // ── Build user profile string for AI ──
