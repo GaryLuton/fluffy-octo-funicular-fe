@@ -122,7 +122,32 @@ async function initDb() {
   `);
 
   db.run(`
-    CREATE TABLE IF NOT EXISTS book_posts (
+    CREATE TABLE IF NOT EXISTS group_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS group_store_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      image_url TEXT DEFAULT '',
+      price TEXT DEFAULT '',
+      link TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE
+    );
+  `);
+
+  db.run(`
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       title TEXT NOT NULL,
@@ -454,6 +479,46 @@ const stmts = {
   deleteGroup: {
     run: (groupId, ownerId) => run(
       'DELETE FROM groups_ WHERE id = ? AND owner_id = ?', [groupId, ownerId]
+    ),
+  },
+  // Group posts
+  createGroupPost: {
+    run: (groupId, userId, text) => run(
+      'INSERT INTO group_posts (group_id, user_id, text) VALUES (?, ?, ?)', [groupId, userId, text]
+    ),
+  },
+  getGroupPosts: {
+    all: (groupId) => all(
+      `SELECT gp.id, gp.text, gp.created_at, u.username
+       FROM group_posts gp JOIN users u ON u.id = gp.user_id
+       WHERE gp.group_id = ? ORDER BY gp.created_at DESC`, [groupId]
+    ),
+  },
+  deleteGroupPost: {
+    run: (postId, userId) => run(
+      'DELETE FROM group_posts WHERE id = ? AND user_id = ?', [postId, userId]
+    ),
+  },
+  // Group store items
+  createStoreItem: {
+    run: (groupId, name, desc, imageUrl, price, link) => run(
+      'INSERT INTO group_store_items (group_id, name, description, image_url, price, link) VALUES (?,?,?,?,?,?)',
+      [groupId, name, desc, imageUrl, price, link]
+    ),
+  },
+  getStoreItems: {
+    all: (groupId) => all(
+      'SELECT * FROM group_store_items WHERE group_id = ? ORDER BY created_at DESC', [groupId]
+    ),
+  },
+  deleteStoreItem: {
+    run: (itemId, groupId) => run(
+      'DELETE FROM group_store_items WHERE id = ? AND group_id = ?', [itemId, groupId]
+    ),
+  },
+  updateGroupDescription: {
+    run: (groupId, description) => run(
+      'UPDATE groups_ SET description = ? WHERE id = ?', [description, groupId]
     ),
   },
   // ReadIt (book posts)
