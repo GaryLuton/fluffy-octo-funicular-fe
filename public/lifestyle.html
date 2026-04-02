@@ -2421,13 +2421,15 @@ function renderRecs(recs){
       addSparkle(el, pal, -4, -4);
     }
 
-    // Restore saved position or use default layout
+    // Restore saved position or use default layout (always in px)
     var savedPos = sbSavedPositions[i];
     if(savedPos){
       el.style.left = savedPos.x+'px';
       el.style.top = savedPos.y+'px';
     } else {
-      el.style.left = L.x+'%';
+      // Convert percentage to pixels so drag reads consistent values
+      var boardW = board.clientWidth - (parseFloat(getComputedStyle(board).paddingLeft)||0) - (parseFloat(getComputedStyle(board).paddingRight)||0);
+      el.style.left = Math.round(L.x / 100 * boardW)+'px';
       el.style.top = L.y+'px';
     }
     el.style.zIndex = (i+3).toString();
@@ -2486,14 +2488,9 @@ function initScrapbookDrag(){
     var ptr = getPointer(e);
     startX = ptr.x;
     startY = ptr.y;
-    // Use getBoundingClientRect minus padding for accurate CSS left/top
-    var boardRect = board.getBoundingClientRect();
-    var pieceRect = dragging.getBoundingClientRect();
-    var cs = getComputedStyle(board);
-    var padL = parseFloat(cs.paddingLeft) || 0;
-    var padT = parseFloat(cs.paddingTop) || 0;
-    origX = pieceRect.left - boardRect.left - padL;
-    origY = pieceRect.top - boardRect.top - padT;
+    // Read current CSS left/top directly — these are the values we set
+    origX = parseFloat(dragging.style.left) || 0;
+    origY = parseFloat(dragging.style.top) || 0;
     e.preventDefault();
     e.stopPropagation();
     document.addEventListener('mousemove', onDrag);
@@ -2537,12 +2534,7 @@ function initScrapbookDrag(){
       dragging.style.transform = 'rotate('+rot+'deg)';
       dragging.classList.remove('dragging');
       var idx = dragging.dataset.idx;
-      var boardRect = board.getBoundingClientRect();
-      var pieceRect = dragging.getBoundingClientRect();
-      var cs2 = getComputedStyle(board);
-      var padL2 = parseFloat(cs2.paddingLeft) || 0;
-      var padT2 = parseFloat(cs2.paddingTop) || 0;
-      sbSavedPositions[idx] = {x:pieceRect.left - boardRect.left - padL2, y:pieceRect.top - boardRect.top - padT2};
+      sbSavedPositions[idx] = {x: parseFloat(dragging.style.left)||0, y: parseFloat(dragging.style.top)||0};
       saveScrapbookPositions();
       var maxB = 0;
       board.querySelectorAll('.sb-piece').forEach(function(p){
