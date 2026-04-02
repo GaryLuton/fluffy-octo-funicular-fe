@@ -2460,7 +2460,7 @@ function ffiRenderCloset(){
   filtered.forEach(function(item){
     var idx=items.indexOf(item);
     var card=document.createElement('div');card.className='ffi-grid-item';card.style.background=pal.tx+'06';
-    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="" onerror="this.style.background=\'rgba(128,128,128,0.1)\'"/><div class="ffi-grid-item-info" style="color:'+pal.tx+'"><div class="ffi-grid-item-name">'+escHtml(item.name)+'</div><div class="ffi-grid-item-cat">'+escHtml(item.cat)+'</div></div><button class="ffi-grid-item-del" onclick="ffiDeleteItem(event,'+idx+')">x</button>';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"/><div class="ffi-grid-placeholder" style="display:none;aspect-ratio:3/4;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:0.75rem;opacity:0.4;background:'+pal.ac+'10;border-radius:8px;">'+escHtml(item.name)+'</div><div class="ffi-grid-item-info" style="color:'+pal.tx+'"><div class="ffi-grid-item-name">'+escHtml(item.name)+'</div><div class="ffi-grid-item-cat">'+escHtml(item.cat)+'</div></div><button class="ffi-grid-item-del" onclick="ffiDeleteItem(event,'+idx+')">x</button>';
     grid.appendChild(card);
   });
 }
@@ -2485,7 +2485,7 @@ function ffiRenderBuilder(){
   preview.innerHTML='';
   slots.forEach(function(cat){
     var pick=ffiOutfitPicks[cat];var slot=document.createElement('div');slot.className='ffi-builder-slot';
-    if(pick){slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt=""/><div class="ffi-builder-slot-label">'+cat+'</div>';}
+    if(pick){slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt="'+escHtml(pick.name)+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"/><div class="ffi-builder-slot-label">'+cat+'</div>';}
     else{slot.innerHTML='<div class="ffi-builder-slot-empty">'+cat+'</div><div class="ffi-builder-slot-label">'+cat+'</div>';}
     preview.appendChild(slot);
   });
@@ -2501,7 +2501,7 @@ function ffiRenderBuilder(){
   items.forEach(function(item){
     var isPicked=ffiOutfitPicks[ffiBuilderCat]&&ffiOutfitPicks[ffiBuilderCat].url===item.url;
     var card=document.createElement('div');card.className='ffi-builder-item'+(isPicked?' picked':'');card.style.borderColor=isPicked?pal.ac:'transparent';card.style.background=pal.tx+'06';
-    card.innerHTML='<img src="'+escHtml(item.url)+'" alt=""/>';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" onerror="this.style.background=\''+pal.ac+'12\';this.style.minHeight=\'60px\'"/>';
     card.onclick=function(){if(isPicked){ffiOutfitPicks[ffiBuilderCat]=null;}else{ffiOutfitPicks[ffiBuilderCat]=item;}ffiRenderBuilder();};
     grid.appendChild(card);
   });
