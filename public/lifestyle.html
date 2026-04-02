@@ -2421,13 +2421,15 @@ function renderRecs(recs){
       addSparkle(el, pal, -4, -4);
     }
 
-    // Restore saved position or use default layout
+    // Restore saved position or use default layout (always in px)
     var savedPos = sbSavedPositions[i];
     if(savedPos){
       el.style.left = savedPos.x+'px';
       el.style.top = savedPos.y+'px';
     } else {
-      el.style.left = L.x+'%';
+      // Convert percentage to pixels so drag reads consistent values
+      var boardW = board.clientWidth - (parseFloat(getComputedStyle(board).paddingLeft)||0) - (parseFloat(getComputedStyle(board).paddingRight)||0);
+      el.style.left = Math.round(L.x / 100 * boardW)+'px';
       el.style.top = L.y+'px';
     }
     el.style.zIndex = (i+3).toString();
