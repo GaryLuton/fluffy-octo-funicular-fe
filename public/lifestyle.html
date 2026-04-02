@@ -149,7 +149,7 @@
     .foryou-refresh .spinner{display:inline-block;width:10px;height:10px;border:2px solid rgba(128,128,128,0.2);border-top-color:currentColor;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle;}
 
     .rec-board{position:relative;min-height:520px;margin:0 auto;max-width:960px;
-      border-radius:16px;padding:32px 24px;overflow:hidden;
+      border-radius:16px;padding:32px 24px;
       background-image:radial-gradient(circle,rgba(128,128,128,0.04) 1px,transparent 1px);background-size:18px 18px;}
 
     .sb-piece{position:absolute;transition:box-shadow 0.25s;cursor:grab;user-select:none;-webkit-user-select:none;}
@@ -2062,30 +2062,33 @@ var _origF = window._origFetch || window.fetch;
 
 function saveScrapbookToServer(){
   if(!forYouCache) return;
-  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:forYouCache})}).catch(function(){});
-  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:sbSavedPositions})}).catch(function(){});
+  var h = sbAuthHeaders();
+  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:forYouCache})})
+    .catch(function(e){ console.error('Save scrapbook cache failed:', e); });
+  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:sbSavedPositions})})
+    .catch(function(e){ console.error('Save scrapbook positions failed:', e); });
 }
 
 async function loadScrapbookFromServer(){
   var authH = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
-    var res = await _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:authH});
-    if(res.ok){
-      var data = await res.json();
-      if(data.data && Array.isArray(data.data) && data.data.length > 0){
-        forYouCache = data.data;
+    var results = await Promise.all([
+      _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:authH}),
+      _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:authH})
+    ]);
+    if(results[0].ok){
+      var d1 = await results[0].json();
+      if(d1.data && Array.isArray(d1.data) && d1.data.length > 0){
+        forYouCache = d1.data;
       }
     }
-  }catch(e){ console.error('Load scrapbook cache failed:', e); }
-  try{
-    var res2 = await _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:authH});
-    if(res2.ok){
-      var data2 = await res2.json();
-      if(data2.data && typeof data2.data === 'object'){
-        sbSavedPositions = data2.data;
+    if(results[1].ok){
+      var d2 = await results[1].json();
+      if(d2.data && typeof d2.data === 'object'){
+        sbSavedPositions = d2.data;
       }
     }
-  }catch(e){ console.error('Load scrapbook positions failed:', e); }
+  }catch(e){ console.error('Load scrapbook from server failed:', e); }
 }
 
 function buildRecProfile(){
@@ -2110,9 +2113,16 @@ function buildRecProfile(){
 function refreshForYou(){
   forYouCache = null;
   _forYouFetchAttempt = 0;
+  _forYouRetries = 0;
   sbSavedPositions = {};
-  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'DELETE',headers:sbAuthHeaders()}).catch(function(){});
-  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'DELETE',headers:sbAuthHeaders()}).catch(function(){});
+  // Clear old cards from the board immediately
+  var board = document.getElementById('recBoard');
+  if(board) board.innerHTML = '';
+  // Delete old data from server
+  var h = sbAuthHeaders();
+  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
+  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
+  // Generate fresh content
   loadForYou();
 }
 
@@ -2427,9 +2437,8 @@ function renderRecs(recs){
       el.style.left = savedPos.x+'px';
       el.style.top = savedPos.y+'px';
     } else {
-      // Convert percentage to pixels so drag reads consistent values
-      var boardW = board.clientWidth - (parseFloat(getComputedStyle(board).paddingLeft)||0) - (parseFloat(getComputedStyle(board).paddingRight)||0);
-      el.style.left = Math.round(L.x / 100 * boardW)+'px';
+      // Convert percentage to pixels using clientWidth (padding-box)
+      el.style.left = Math.round(L.x / 100 * board.clientWidth)+'px';
       el.style.top = L.y+'px';
     }
     el.style.zIndex = (i+3).toString();
@@ -2520,9 +2529,11 @@ function initScrapbookDrag(){
     }
     var newX = origX + dx;
     var newY = origY + dy;
-    // Allow free movement within board, only prevent going outside edges
-    newX = Math.max(0, newX);
-    newY = Math.max(0, newY);
+    // Constrain to board boundaries — same area for all cards
+    var pw = dragging.offsetWidth;
+    var ph = dragging.offsetHeight;
+    newX = Math.max(0, Math.min(newX, board.clientWidth - pw));
+    newY = Math.max(0, Math.min(newY, board.clientHeight - ph));
     dragging.style.left = newX+'px';
     dragging.style.top = newY+'px';
   }
