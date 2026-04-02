@@ -2523,13 +2523,9 @@ function initScrapbookDrag(){
     }
     var newX = origX + dx;
     var newY = origY + dy;
-    var cs3 = getComputedStyle(board);
-    var bw = board.clientWidth - (parseFloat(cs3.paddingLeft)||0) - (parseFloat(cs3.paddingRight)||0);
-    var bh = board.clientHeight - (parseFloat(cs3.paddingTop)||0) - (parseFloat(cs3.paddingBottom)||0);
-    var pw = dragging.offsetWidth;
-    var ph = dragging.offsetHeight;
-    newX = Math.max(0, Math.min(newX, bw - pw));
-    newY = Math.max(0, Math.min(newY, bh - ph));
+    // Allow free movement within board, only prevent going outside edges
+    newX = Math.max(0, newX);
+    newY = Math.max(0, newY);
     dragging.style.left = newX+'px';
     dragging.style.top = newY+'px';
   }
