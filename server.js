@@ -181,7 +181,7 @@ app.delete('/api/auth/account', auth, (req, res) => {
 // ─── Data Routes (CRUD for user data) ───
 
 // Valid keys that map to the frontend's localStorage keys
-const VALID_KEYS = ['profile', 'wishlist', 'catalog', 'approved', 'contacts', 'convos', 'vids', 'vid_liked', 'vid_disliked'];
+const VALID_KEYS = ['profile', 'wishlist', 'catalog', 'approved', 'contacts', 'convos', 'vids', 'vid_liked', 'vid_disliked', 'foryou_cache', 'sb_positions'];
 // Dynamic key prefixes (chat history per section, etc.)
 const VALID_KEY_PREFIXES = ['chat_'];
 function isValidKey(key) {
