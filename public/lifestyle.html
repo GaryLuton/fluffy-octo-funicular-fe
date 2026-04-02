@@ -2839,6 +2839,13 @@ function backToHub(){
   if(dtiTimerInterval) clearInterval(dtiTimerInterval);
   document.getElementById('chatMessages2').innerHTML = '';
   document.getElementById('sectionNameNav').textContent = 'FloveeHub';
+  // Clear FloveeHub game chat histories
+  for(var i = localStorage.length - 1; i >= 0; i--){
+    var key = localStorage.key(i);
+    if(key && key.indexOf('stuflover_chat_floverhub_') === 0){
+      localStorage.removeItem(key);
+    }
+  }
   openHub();
 }
 
@@ -5612,6 +5619,8 @@ function openSection(id){
   document.getElementById('hubView').classList.remove('active');
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
+  document.getElementById('cardGameView').style.display = 'none';
+  document.getElementById('cardGameView').classList.remove('active');
   if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval=null; }
   currentHubGame = null;
   document.getElementById('profileView').style.display = 'none';
@@ -5835,6 +5844,8 @@ function goHome(){
   document.getElementById('hubView').classList.remove('active');
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
+  document.getElementById('cardGameView').style.display = 'none';
+  document.getElementById('cardGameView').classList.remove('active');
   document.getElementById('profileView').style.display = 'none';
   document.getElementById('profileView').classList.remove('active');
   document.getElementById('routineView').style.display = 'none';
