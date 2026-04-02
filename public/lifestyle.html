@@ -2657,6 +2657,30 @@ var HUB_GAMES = [
 
 var currentHubGame = null;
 
+// ── SVG icon helpers (used by FloveeHub and decorations) ──
+function getAeIcons(){
+  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topK = topK?topK[0]:'softgirl';
+  var m = {
+    kawaii:[bowSVG,flowerSVG,starSVG],softgirl:[flowerSVG,bowSVG,starSVG],
+    cleangirl:[starSVG,moonSVG,flowerSVG],coquette:[bowSVG,butterflySVG,flowerSVG],
+    goth:[batSVG,moonSVG,starSVG],darkacad:[bookSVG,moonSVG,starSVG],
+    grunge:[starSVG,batSVG,moonSVG],y2k:[butterflySVG,starSVG,flowerSVG],
+    street:[starSVG,vinylSVG,noteSVG],cottage:[flowerSVG,butterflySVG,starSVG],
+    hippie:[flowerSVG,moonSVG,starSVG],oldmoney:[bookSVG,starSVG,moonSVG],
+    preppy:[bowSVG,starSVG,bookSVG],tomato:[flowerSVG,starSVG,butterflySVG],
+    indie:[moonSVG,vinylSVG,starSVG],emo:[batSVG,moonSVG,starSVG],
+    ballet:[bowSVG,flowerSVG,starSVG]
+  };
+  return m[topK]||[starSVG,flowerSVG,moonSVG];
+}
+
+function makeIconSvg(fn,c,size){
+  var raw = fn(0,0,c,0.55,0);
+  var inner = raw.replace(/<g[^>]*>/,'').replace(/<\/g>/,'');
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
+}
+
 function openHub(){
   var pal = searchPal;
   var aeIcons = getAeIcons();
