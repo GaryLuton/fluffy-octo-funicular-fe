@@ -1997,6 +1997,9 @@ var _sb = {
 // ── Server persistence ──
 function sbSave(){
   if(!_sb.cache) return Promise.resolve();
+  // Cache locally for instant restore on back-navigation
+  try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
+  try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
   var h = _sb.auth();
   return Promise.all([
     _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
@@ -2005,6 +2008,16 @@ function sbSave(){
 }
 
 async function sbLoad(){
+  // Try sessionStorage first for instant render
+  try{
+    var sc = sessionStorage.getItem('sb_cache');
+    var sp = sessionStorage.getItem('sb_pos');
+    if(sc){ var parsed = JSON.parse(sc); if(Array.isArray(parsed)&&parsed.length>0) _sb.cache = parsed; }
+    if(sp){ var parsed2 = JSON.parse(sp); if(typeof parsed2==='object') _sb.positions = parsed2; }
+  }catch(e){}
+  // If sessionStorage had data, we're done — render will be instant
+  if(_sb.cache) return;
+  // Otherwise fetch from server
   var h = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
     var r = await Promise.all([
@@ -2013,11 +2026,17 @@ async function sbLoad(){
     ]);
     if(r[0].ok){ var d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
     if(r[1].ok){ var d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
+    // Store in sessionStorage for next time
+    if(_sb.cache){
+      try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
+      try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
+    }
   }catch(e){ console.error('sbLoad failed:', e); }
 }
 
 function sbDelete(){
   var h = _sb.auth();
+  try{ sessionStorage.removeItem('sb_cache'); sessionStorage.removeItem('sb_pos'); }catch(e){}
   _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
   _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
 }
