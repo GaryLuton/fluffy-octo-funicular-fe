@@ -157,6 +157,47 @@
     .rec-loading{width:100%;text-align:center;padding:60px;opacity:0.3;font-style:italic;}
     @media(max-width:768px){.foryou{padding:0 14px 10px;}.sb-card{width:calc(100% - 16px) !important;left:8px !important;}}
 
+    /* ── FITFORIT (CLOSET) ── */
+    .ffi-tab{padding:10px 24px;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);border-radius:24px;opacity:0.4;transition:all 0.25s;background:transparent;color:inherit;}
+    .ffi-tab.on{opacity:1;border-color:currentColor;}
+    .ffi-count{font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;}
+    .ffi-add-btn{padding:10px 24px;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.12);}
+    .ffi-add-btn:hover{opacity:0.9;}
+    .ffi-outline-btn{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;}
+    .ffi-cat{padding:6px 14px;border-radius:16px;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);color:inherit;opacity:0.45;background:transparent;transition:all 0.2s;}
+    .ffi-cat.on{opacity:1;border-color:currentColor;}
+    .ffi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+    .ffi-grid-item{border-radius:16px;overflow:hidden;position:relative;cursor:pointer;transition:transform 0.3s,box-shadow 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.06);}
+    .ffi-grid-item:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(0,0,0,0.12);}
+    .ffi-grid-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+    .ffi-grid-item-info{padding:10px 12px;}
+    .ffi-grid-item-name{font-size:0.82rem;font-weight:600;line-height:1.3;}
+    .ffi-grid-item-cat{font-size:0.6rem;opacity:0.35;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:2px;}
+    .ffi-grid-item-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.5);color:white;border:none;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;}
+    .ffi-grid-item:hover .ffi-grid-item-del{opacity:1;}
+    .ffi-grid-empty{grid-column:1/-1;text-align:center;padding:60px 20px;opacity:0.3;font-style:italic;}
+    .ffi-builder-preview{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;min-height:100px;padding:20px;border-radius:20px;border:2px dashed rgba(128,128,128,0.08);}
+    .ffi-builder-slot{width:80px;text-align:center;}
+    .ffi-builder-slot img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;}
+    .ffi-builder-slot-empty{width:100%;aspect-ratio:3/4;border-radius:10px;border:2px dashed rgba(128,128,128,0.15);display:flex;align-items:center;justify-content:center;font-size:0.55rem;opacity:0.3;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .ffi-builder-slot-label{font-size:0.55rem;opacity:0.35;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:4px;}
+    .ffi-builder-items{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+    .ffi-builder-item{border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:transform 0.15s;}
+    .ffi-builder-item:hover{transform:translateY(-3px);}
+    .ffi-builder-item.picked{border-style:solid;}
+    .ffi-builder-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+    .ffi-suggest-result{margin-top:20px;padding:20px;border-radius:16px;font-size:0.92rem;line-height:1.7;display:none;}
+    .ffi-suggest-result.visible{display:block;}
+    .ffi-modal-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+    .ffi-modal-bg.open{display:flex;}
+    .ffi-modal-box{padding:28px;border-radius:16px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+    .ffi-modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+    .ffi-modal-box input,.ffi-modal-box select{width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;background:transparent;margin-bottom:10px;-webkit-appearance:none;}
+    .ffi-modal-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-bottom:10px;display:none;}
+    .ffi-modal-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
+    .ffi-banner-title{font-size:clamp(2rem,5vw,3rem);letter-spacing:-1px;margin-bottom:4px;}
+    @media(max-width:768px){.ffi-grid{grid-template-columns:repeat(2,1fr);}.ffi-builder-items{grid-template-columns:repeat(3,1fr);}.ffi-builder-slot{width:60px;}#fitforitView{padding:16px 20px 40px;}}
+
     /* ── DTI GAME ── */
     #dtiView{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #dtiView.active{display:flex;}
@@ -1200,6 +1241,56 @@
         </div>
       </div>
     </div>
+
+    <!-- FitforIt Closet View -->
+    <div id="fitforitView" style="display:none;padding:20px 40px 60px;">
+      <div style="text-align:center;padding:24px 20px 16px;position:relative;overflow:hidden;">
+        <div class="ffi-banner-title bc" id="ffiBannerTitle">My Closet</div>
+        <div style="font-size:0.85rem;opacity:0.4;line-height:1.7;">add your clothes, build outfits, let your flovee style you</div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button class="ffi-tab on bc" id="ffiTabCloset" onclick="ffiSwitchTab('closet')">My Closet</button>
+        <button class="ffi-tab bc" id="ffiTabBuilder" onclick="ffiSwitchTab('builder')">Build Outfit</button>
+      </div>
+      <div id="ffiClosetView">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div class="ffi-count bc" id="ffiClosetCount">0 items</div>
+          <button class="ffi-add-btn bc" id="ffiAddItemBtn" onclick="ffiOpenAddModal()">Add Item</button>
+        </div>
+        <div id="ffiClosetCats" style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;"></div>
+        <div class="ffi-grid" id="ffiClosetGrid"></div>
+      </div>
+      <div id="ffiBuilderView" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div class="ffi-count bc">Your Outfit</div>
+          <button class="ffi-outline-btn bc" onclick="ffiClearOutfit()">Clear</button>
+        </div>
+        <div class="ffi-builder-preview" id="ffiBuilderPreview"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+          <button class="ffi-add-btn bc" id="ffiSuggestBtn" onclick="ffiAiSuggest()">AI Suggest Outfit</button>
+        </div>
+        <div class="ffi-suggest-result" id="ffiSuggestResult"></div>
+        <div class="ffi-count bc" style="margin:20px 0 12px;opacity:0.3;letter-spacing:4px;">Pick items from your closet</div>
+        <div id="ffiBuilderCats" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;"></div>
+        <div class="ffi-builder-items" id="ffiBuilderItems"></div>
+      </div>
+    </div>
+    <!-- FitforIt Add Modal -->
+    <div class="ffi-modal-bg" id="ffiAddModal">
+      <div class="ffi-modal-box" id="ffiAddModalBox">
+        <h3>Add to Closet</h3>
+        <input id="ffiAddUrl" placeholder="Paste a photo URL of your item..." oninput="ffiPreviewAdd()"/>
+        <img class="ffi-modal-preview" id="ffiAddPreview"/>
+        <input id="ffiAddName" placeholder="What is it? (e.g. black crop top)"/>
+        <select id="ffiAddCat"><option value="">Pick a category...</option><option value="tops">Tops</option><option value="bottoms">Bottoms</option><option value="dresses">Dresses</option><option value="outerwear">Outerwear</option><option value="shoes">Shoes</option><option value="bags">Bags</option><option value="accessories">Accessories</option></select>
+        <div class="ffi-modal-err" id="ffiAddErr"></div>
+        <div style="display:flex;gap:8px;">
+          <button id="ffiAddSubmit" onclick="ffiAddItem()">Add to Closet</button>
+          <button onclick="ffiCloseAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;padding:10px 24px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2272,6 +2363,119 @@ async function refreshForYou(){
 }
 
 function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ─── FITFORIT (CLOSET & OUTFIT BUILDER) ──────────────────
+var ffiCurrentCat='all', ffiCurrentTab='closet', ffiBuilderCat='tops';
+var ffiOutfitPicks={tops:null,bottoms:null,dresses:null,outerwear:null,shoes:null,bags:null,accessories:null};
+var FFI_CATS=['all','tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
+
+function ffiGetCloset(){try{return JSON.parse(localStorage.getItem('stuflover_closet')||'[]');}catch(e){return[];}}
+function ffiSaveCloset(items){localStorage.setItem('stuflover_closet',JSON.stringify(items));}
+
+function ffiApplyStyles(){
+  var pal=searchPal; if(!pal) return;
+  var ab=document.getElementById('ffiAddItemBtn'); if(ab){ab.style.background=pal.ac;ab.style.color=pal.bg;}
+  var as=document.getElementById('ffiAddSubmit'); if(as){as.style.background=pal.ac;as.style.color=pal.bg;as.style.padding='10px 24px';as.style.borderRadius='8px';as.style.border='none';as.style.fontFamily="'Barlow Condensed',sans-serif";as.style.fontWeight='900';as.style.fontSize='0.82rem';as.style.letterSpacing='2px';as.style.textTransform='uppercase';as.style.cursor='pointer';}
+  var sb=document.getElementById('ffiSuggestBtn'); if(sb){sb.style.background=pal.ac;sb.style.color=pal.bg;}
+  var mb=document.getElementById('ffiAddModalBox'); if(mb){mb.style.background=pal.bg;mb.style.color=pal.tx;}
+  document.querySelectorAll('.ffi-tab').forEach(function(t){t.style.color=pal.tx;});
+}
+
+function ffiSwitchTab(tab){
+  ffiCurrentTab=tab;
+  var pal=searchPal;
+  document.getElementById('ffiTabCloset').classList.toggle('on',tab==='closet');
+  document.getElementById('ffiTabBuilder').classList.toggle('on',tab==='builder');
+  document.getElementById('ffiClosetView').style.display=tab==='closet'?'block':'none';
+  document.getElementById('ffiBuilderView').style.display=tab==='builder'?'block':'none';
+  if(tab==='builder')ffiRenderBuilder();
+}
+
+function ffiRenderCloset(){
+  var pal=searchPal; if(!pal) return;
+  var items=ffiGetCloset();
+  var filtered=ffiCurrentCat==='all'?items:items.filter(function(i){return i.cat===ffiCurrentCat;});
+  document.getElementById('ffiClosetCount').textContent=items.length+' item'+(items.length!==1?'s':'');
+  var catsHtml='';
+  FFI_CATS.forEach(function(c){
+    var on=c===ffiCurrentCat?' on':'';
+    catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiCurrentCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiFilterCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('ffiClosetCats').innerHTML=catsHtml;
+  var grid=document.getElementById('ffiClosetGrid');
+  if(filtered.length===0){grid.innerHTML='<div class="ffi-grid-empty">'+(items.length===0?'Your closet is empty — add items to get started!':'No items in this category')+'</div>';return;}
+  grid.innerHTML='';
+  filtered.forEach(function(item){
+    var idx=items.indexOf(item);
+    var card=document.createElement('div');card.className='ffi-grid-item';card.style.background=pal.tx+'06';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="" onerror="this.style.background=\'rgba(128,128,128,0.1)\'"/><div class="ffi-grid-item-info" style="color:'+pal.tx+'"><div class="ffi-grid-item-name">'+escHtml(item.name)+'</div><div class="ffi-grid-item-cat">'+escHtml(item.cat)+'</div></div><button class="ffi-grid-item-del" onclick="ffiDeleteItem(event,'+idx+')">x</button>';
+    grid.appendChild(card);
+  });
+}
+function ffiFilterCat(c){ffiCurrentCat=c;ffiRenderCloset();}
+function ffiDeleteItem(e,idx){e.stopPropagation();var items=ffiGetCloset();items.splice(idx,1);ffiSaveCloset(items);ffiRenderCloset();}
+
+function ffiOpenAddModal(){document.getElementById('ffiAddModal').classList.add('open');document.getElementById('ffiAddUrl').value='';document.getElementById('ffiAddName').value='';document.getElementById('ffiAddCat').value='';document.getElementById('ffiAddErr').textContent='';document.getElementById('ffiAddPreview').style.display='none';setTimeout(function(){document.getElementById('ffiAddUrl').focus();},100);}
+function ffiCloseAddModal(){document.getElementById('ffiAddModal').classList.remove('open');}
+function ffiPreviewAdd(){var url=document.getElementById('ffiAddUrl').value.trim();var p=document.getElementById('ffiAddPreview');if(url&&url.match(/^https?:\/\//)){p.src=url;p.style.display='block';p.onerror=function(){p.style.display='none';};}else{p.style.display='none';}}
+function ffiAddItem(){
+  var url=document.getElementById('ffiAddUrl').value.trim(),name=document.getElementById('ffiAddName').value.trim(),cat=document.getElementById('ffiAddCat').value,err=document.getElementById('ffiAddErr');
+  if(!url){err.textContent='Paste a photo URL';err.style.color='#c44';return;}
+  if(!name){err.textContent='Give it a name';err.style.color='#c44';return;}
+  if(!cat){err.textContent='Pick a category';err.style.color='#c44';return;}
+  var items=ffiGetCloset();items.push({url:url,name:name,cat:cat,added:Date.now()});ffiSaveCloset(items);ffiCloseAddModal();ffiRenderCloset();
+}
+
+function ffiRenderBuilder(){
+  var pal=searchPal; if(!pal) return;
+  var preview=document.getElementById('ffiBuilderPreview');
+  var slots=['tops','bottoms','shoes','outerwear','accessories'];
+  preview.innerHTML='';
+  slots.forEach(function(cat){
+    var pick=ffiOutfitPicks[cat];var slot=document.createElement('div');slot.className='ffi-builder-slot';
+    if(pick){slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt=""/><div class="ffi-builder-slot-label">'+cat+'</div>';}
+    else{slot.innerHTML='<div class="ffi-builder-slot-empty">'+cat+'</div><div class="ffi-builder-slot-label">'+cat+'</div>';}
+    preview.appendChild(slot);
+  });
+  var catsHtml='';
+  ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'].forEach(function(c){
+    var on=c===ffiBuilderCat?' on':'';
+    catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiBuilderCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiPickBuilderCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('ffiBuilderCats').innerHTML=catsHtml;
+  var items=ffiGetCloset().filter(function(i){return i.cat===ffiBuilderCat;});
+  var grid=document.getElementById('ffiBuilderItems');grid.innerHTML='';
+  if(items.length===0){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;opacity:0.3;font-style:italic;">No '+ffiBuilderCat+' in your closet</div>';return;}
+  items.forEach(function(item){
+    var isPicked=ffiOutfitPicks[ffiBuilderCat]&&ffiOutfitPicks[ffiBuilderCat].url===item.url;
+    var card=document.createElement('div');card.className='ffi-builder-item'+(isPicked?' picked':'');card.style.borderColor=isPicked?pal.ac:'transparent';card.style.background=pal.tx+'06';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt=""/>';
+    card.onclick=function(){if(isPicked){ffiOutfitPicks[ffiBuilderCat]=null;}else{ffiOutfitPicks[ffiBuilderCat]=item;}ffiRenderBuilder();};
+    grid.appendChild(card);
+  });
+}
+function ffiPickBuilderCat(c){ffiBuilderCat=c;ffiRenderBuilder();}
+function ffiClearOutfit(){for(var k in ffiOutfitPicks)ffiOutfitPicks[k]=null;var r=document.getElementById('ffiSuggestResult');if(r)r.style.display='none';ffiRenderBuilder();}
+
+async function ffiAiSuggest(){
+  var items=ffiGetCloset();if(items.length<3){alert('Add at least 3 items first!');return;}
+  var btn=document.getElementById('ffiSuggestBtn');btn.disabled=true;btn.textContent='Thinking...';
+  var closetDesc=items.map(function(i){return i.cat+': '+i.name;}).join('\n');
+  var aeName=Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];aeName=aeName?aeName[0]:'casual';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'You are a personal stylist. The user has a '+aeName+' aesthetic. Given their closet items, suggest ONE complete outfit combination. Be specific — name the exact items from their list. Explain why it works in 1-2 sentences. Keep it fun and encouraging.',messages:[{role:'user',content:'Here is everything in my closet:\n'+closetDesc+'\n\nSuggest a complete outfit from these items!'}]})});
+    var data=await res.json();var text=(data.content&&data.content[0]&&data.content[0].text)||'Could not generate suggestion.';
+    var result=document.getElementById('ffiSuggestResult');result.textContent=text;result.style.display='block';result.style.background=searchPal.ac+'12';result.style.color=searchPal.tx;
+  }catch(e){}
+  btn.disabled=false;btn.textContent='AI Suggest Outfit';
+}
+
+function openFitforIt(){
+  ffiApplyStyles();
+  ffiCurrentTab='closet';
+  ffiSwitchTab('closet');
+  ffiRenderCloset();
+}
 
 // ─── FLOVEEHUB PERSONALITY PER AESTHETIC ──────────────────
 var FLOVEE_VIBES = {
@@ -5348,7 +5552,6 @@ function restoreMessages(secId, messages, pal){
 function openSection(id){
   // Redirect to dedicated pages
   if(id === 'beyou'){ window.location.href = '/beyou.html'; return; }
-  if(id === 'fitforit'){ window.location.href = '/fitforit.html'; return; }
   const sec = SECTIONS.find(s=>s.id===id);
   if(!sec) return;
   currentSection = sec;
@@ -5382,6 +5585,7 @@ function openSection(id){
   document.getElementById('groupsView').classList.remove('active');
   document.getElementById('readitView').style.display = 'none';
   document.getElementById('readitView').classList.remove('active');
+  document.getElementById('fitforitView').style.display = 'none';
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -5420,6 +5624,23 @@ function openSection(id){
     document.getElementById('readitView').style.display = 'flex';
     document.getElementById('readitView').classList.add('active');
     loadRiFeed();
+    return;
+  } else if(sec.id === 'fitforit'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('cardGameView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'none';
+    document.getElementById('readitView').style.display = 'none';
+    document.getElementById('fitforitView').style.display = 'block';
+    openFitforIt();
     return;
   } else if(sec.id === 'floveegroup'){
     shopBar.style.display = 'none';
