@@ -1996,10 +1996,12 @@ var _sb = {
 
 // ── Server persistence ──
 function sbSave(){
-  if(!_sb.cache) return;
+  if(!_sb.cache) return Promise.resolve();
   var h = _sb.auth();
-  _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}).catch(function(){});
-  _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})}).catch(function(){});
+  return Promise.all([
+    _sb.fetch.call(window, _sb.api()+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
+    _sb.fetch.call(window, _sb.api()+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})})
+  ]).catch(function(e){ console.error('sbSave failed:', e); });
 }
 
 async function sbLoad(){
@@ -2218,7 +2220,7 @@ async function loadScrapbook(){
   try{
     _sb.cache = await sbGenerate();
     _sb.positions = {};
-    sbSave();
+    await sbSave();
     sbRender();
   }catch(e){
     console.error('Scrapbook generation failed:', e);
@@ -2241,7 +2243,7 @@ async function refreshForYou(){
   try{
     _sb.cache = await sbGenerate();
     _sb.positions = {};
-    sbSave();
+    await sbSave();
     sbRender();
   }catch(e){
     console.error('Scrapbook refresh failed:', e);
