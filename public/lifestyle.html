@@ -696,7 +696,7 @@
     .fr-item-name{font-weight:600;}
     .fr-item-pending{font-size:0.65rem;padding:2px 8px;border-radius:10px;opacity:0.7;font-weight:600;white-space:nowrap;}
     .fr-item-unread{font-size:0.6rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto;flex-shrink:0;}
-    .fr-chat{flex:1;display:flex;flex-direction:column;}
+    .fr-chat{flex:1;display:flex;flex-direction:column;min-height:0;}
     .fr-chat-header{padding:14px 20px;border-bottom:1px solid rgba(128,128,128,0.06);font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:10px;}
     .fr-chat-header:hover{opacity:0.7;}
     .fr-profile-panel{display:none;flex-direction:column;align-items:center;gap:16px;padding:40px 20px;flex:1;}
@@ -713,7 +713,7 @@
     .fr-msg.me{align-self:flex-end;border-bottom-right-radius:4px;}
     .fr-msg.them{align-self:flex-start;border-bottom-left-radius:4px;}
     .fr-msg-time{font-size:0.6rem;opacity:0.3;margin-top:3px;}
-    .fr-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(128,128,128,0.06);}
+    .fr-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(128,128,128,0.06);flex-shrink:0;}
     .fr-input{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;}
     .fr-input:focus{border-color:rgba(128,128,128,0.3);}
     .fr-send{padding:10px 20px;border:none;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
@@ -4538,6 +4538,11 @@ function frHeaders(){
 
 async function openFriendsView(){
   var pal = searchPal;
+  // Hide settings button so it doesn't overlap the send button
+  var csBtn = document.getElementById('cursorSettingsBtn');
+  if(csBtn) csBtn.style.display = 'none';
+  var csPanel = document.getElementById('cursorPanel');
+  if(csPanel) csPanel.style.display = 'none';
   document.getElementById('frSidebar').style.background = pal.bg;
   document.getElementById('frSidebar').style.color = pal.tx;
   document.getElementById('frChat').style.background = pal.bg;
@@ -5794,6 +5799,9 @@ function doShopSearch(){
 function goHome(){
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('sectionView').style.display = 'none';
+  // Restore settings button
+  var csBtn = document.getElementById('cursorSettingsBtn');
+  if(csBtn) csBtn.style.display = '';
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
   document.getElementById('dtiView').style.display = 'none';
