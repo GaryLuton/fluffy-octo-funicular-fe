@@ -33,6 +33,10 @@
     .nav-links{display:flex;gap:8px;}
     .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
     .nav-btn:hover{opacity:0.6;}
+    .sub-nav{position:fixed;top:52px;width:100%;z-index:99;display:flex;align-items:center;gap:16px;padding:14px 40px;border-bottom:1px solid rgba(128,128,128,0.08);background:rgba(128,128,128,0.04);backdrop-filter:blur(16px);}
+    .sub-nav-back{font-size:0.78rem;letter-spacing:3px;text-decoration:none;background:transparent;border:1.5px solid rgba(128,128,128,0.18);border-radius:4px;padding:8px 18px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:inherit;transition:opacity 0.2s;}
+    .sub-nav-back:hover{opacity:0.55;}
+    .sub-nav-title{font-size:1.1rem;opacity:0.7;}
 
     /* ── MODE SELECTOR (4. Glass-morphism) ── */
     .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:6px;border-radius:30px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.12);transition:opacity 0.8s;}
@@ -172,11 +176,14 @@
   <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
-    <a class="nav-btn bc" href="lifestyle.html">← Back</a>
     <a class="nav-btn bc" href="account.html">Account</a>
     <a class="nav-btn bc" href="index.html">Home</a>
   </div>
 </nav>
+<div class="sub-nav">
+  <a class="sub-nav-back bc" href="lifestyle.html">← Back</a>
+  <span class="sub-nav-title bc">BeYou</span>
+</div>
 
 <!-- BREATHE -->
 <div class="view active" id="breatheView">
