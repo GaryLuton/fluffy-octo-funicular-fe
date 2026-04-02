@@ -2030,15 +2030,12 @@ function buildPage(){
   var fyBtn = document.getElementById('foryouRefresh');
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
-  // Load For You recommendations
-  try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
-  // Safety net — if scrapbook still hasn't rendered after 2s, retry
-  setTimeout(function(){
-    var b = document.getElementById('recBoard');
-    if(b && !b.querySelector('.sb-piece') && forYouCache && searchPal){
-      try{ renderRecs(forYouCache); }catch(e){ console.error('Safety renderRecs failed:', e); }
-    }
-  }, 2000);
+  // Load scrapbook from server, then render
+  loadScrapbookFromServer().then(function(){
+    try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
+  }).catch(function(){
+    try{ loadForYou(); }catch(e){ console.error('loadForYou error:', e); }
+  });
 
   // Viral decorations
   initSparkleTrail();
@@ -2054,7 +2051,34 @@ function buildPage(){
 }
 
 // ─── FOR YOU RECOMMENDATIONS ─────────────────────────────
-var forYouCache = (function(){try{return JSON.parse(localStorage.getItem('stuflover_foryou_cache'));}catch(e){return null;}})();
+var forYouCache = null;
+
+function sbApiBase(){ return (window.STUFLOVER_API_URL||''); }
+function sbAuthHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; }
+var _origF = window._origFetch || window.fetch;
+
+function saveScrapbookToServer(){
+  if(!forYouCache) return;
+  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:forYouCache})}).catch(function(){});
+  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:sbSavedPositions})}).catch(function(){});
+}
+
+async function loadScrapbookFromServer(){
+  try{
+    var res = await _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{headers:sbAuthHeaders()});
+    var data = await res.json();
+    if(data.data && Array.isArray(data.data) && data.data.length > 0){
+      forYouCache = data.data;
+    }
+  }catch(e){}
+  try{
+    var res2 = await _origF.call(window, sbApiBase()+'/api/data/sb_positions',{headers:sbAuthHeaders()});
+    var data2 = await res2.json();
+    if(data2.data && typeof data2.data === 'object'){
+      sbSavedPositions = data2.data;
+    }
+  }catch(e){}
+}
 
 function buildRecProfile(){
   var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
@@ -2078,9 +2102,9 @@ function buildRecProfile(){
 function refreshForYou(){
   forYouCache = null;
   _forYouFetchAttempt = 0;
-  localStorage.removeItem('stuflover_foryou_cache');
   sbSavedPositions = {};
-  localStorage.removeItem('stuflover_sb_positions');
+  _origF.call(window, sbApiBase()+'/api/data/foryou_cache',{method:'DELETE',headers:sbAuthHeaders()}).catch(function(){});
+  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'DELETE',headers:sbAuthHeaders()}).catch(function(){});
   loadForYou();
 }
 
@@ -2134,7 +2158,7 @@ async function loadForYou(){
 
     _forYouFetchAttempt = 0;
     forYouCache = recs;
-    try{localStorage.setItem('stuflover_foryou_cache',JSON.stringify(recs));}catch(e){}
+    saveScrapbookToServer();
     renderRecs(recs);
 
   }catch(e){
@@ -2419,10 +2443,10 @@ function renderRecs(recs){
 }
 
 // ─── SCRAPBOOK DRAG ──────────────────────────────────────
-var sbSavedPositions = (function(){try{return JSON.parse(localStorage.getItem('stuflover_sb_positions'))||{};}catch(e){return {};}})();
+var sbSavedPositions = {};
 
 function saveScrapbookPositions(){
-  try{localStorage.setItem('stuflover_sb_positions',JSON.stringify(sbSavedPositions));}catch(e){}
+  _origF.call(window, sbApiBase()+'/api/data/sb_positions',{method:'PUT',headers:sbAuthHeaders(),body:JSON.stringify({value:sbSavedPositions})}).catch(function(){});
 }
 
 var _sbDragInit = false;
