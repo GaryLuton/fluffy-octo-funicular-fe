@@ -2031,6 +2031,8 @@ function buildPage(){
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
   // Load scrapbook from server, then render
+  _forYouRetries = 0;
+  _forYouFetchAttempt = 0;
   var recB = document.getElementById('recBoard');
   if(recB) recB.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Loading your scrapbook...</div>';
   loadScrapbookFromServer().then(function(){
@@ -5876,6 +5878,11 @@ function goHome(){
   currentHubGame=null;
   document.getElementById('chatMessages').innerHTML='';
   document.getElementById('chatMessages2').innerHTML='';
+  // Re-render scrapbook if cards are missing from DOM but cache exists
+  var recB = document.getElementById('recBoard');
+  if(recB && !recB.querySelector('.sb-piece') && forYouCache){
+    try{ renderRecs(forYouCache); }catch(e){}
+  }
 }
 
 function buildSystemPrompt(sec){
