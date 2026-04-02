@@ -505,6 +505,78 @@ app.post('/api/groups/:id/leave', auth, (req, res) => {
   }
 });
 
+// ─── Group Posts ───
+app.get('/api/groups/:id/posts', auth, (req, res) => {
+  try {
+    const posts = stmts.getGroupPosts.all(parseInt(req.params.id));
+    res.json({ posts });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/groups/:id/posts', auth, (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const { text } = req.body;
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Text required' });
+    if (!isCleanText(text)) return res.status(400).json({ error: 'Please keep posts appropriate' });
+    // Check membership
+    const members = stmts.getGroupMembers.all(groupId);
+    if (!members.some(m => m.id === req.user.id)) return res.status(403).json({ error: 'Must be a member to post' });
+    stmts.createGroupPost.run(groupId, req.user.id, text.trim().substring(0, 500));
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/groups/:id/posts/:postId', auth, (req, res) => {
+  try {
+    stmts.deleteGroupPost.run(parseInt(req.params.postId), req.user.id);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ─── Group Store ───
+app.get('/api/groups/:id/store', auth, (req, res) => {
+  try {
+    const items = stmts.getStoreItems.all(parseInt(req.params.id));
+    res.json({ items });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.post('/api/groups/:id/store', auth, (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const group = stmts.getGroup.get(groupId);
+    if (!group || group.owner_id !== req.user.id) return res.status(403).json({ error: 'Only the group owner can add store items' });
+    const { name, description, image_url, price, link } = req.body;
+    if (!name) return res.status(400).json({ error: 'Item name required' });
+    stmts.createStoreItem.run(groupId, name.trim(), (description||'').substring(0,200), image_url||'', price||'', link||'');
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+app.delete('/api/groups/:id/store/:itemId', auth, (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const group = stmts.getGroup.get(groupId);
+    if (!group || group.owner_id !== req.user.id) return res.status(403).json({ error: 'Only the group owner can remove items' });
+    stmts.deleteStoreItem.run(parseInt(req.params.itemId), groupId);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ─── Group About (update description) ───
+app.put('/api/groups/:id/about', auth, (req, res) => {
+  try {
+    const groupId = parseInt(req.params.id);
+    const group = stmts.getGroup.get(groupId);
+    if (!group || group.owner_id !== req.user.id) return res.status(403).json({ error: 'Only the group owner can edit the about page' });
+    const { description } = req.body;
+    if (description && !isCleanText(description)) return res.status(400).json({ error: 'Please keep descriptions appropriate' });
+    stmts.updateGroupDescription.run(groupId, (description||'').substring(0, 1000));
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
 // ─── ReadIt (Book posts) ───
 
 app.post('/api/books/posts', auth, (req, res) => {

@@ -624,6 +624,46 @@
     .fg-modal-btns{display:flex;gap:8px;}
     .fg-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
+    /* ── GROUP DETAIL VIEW ── */
+    #fgDetailView{display:none;flex:1;flex-direction:column;overflow:hidden;}
+    #fgDetailView.active{display:flex;}
+    .fgd-header{padding:18px 24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(128,128,128,0.06);}
+    .fgd-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#fff;flex-shrink:0;}
+    .fgd-info{flex:1;min-width:0;}
+    .fgd-name{font-size:1.1rem;font-weight:700;}
+    .fgd-meta{font-size:0.68rem;opacity:0.4;margin-top:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;}
+    .fgd-join-btn{padding:8px 20px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;}
+    .fgd-tabs{display:flex;gap:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+    .fgd-tab{flex:1;padding:10px 0;text-align:center;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:none;background:transparent;color:inherit;opacity:0.4;transition:all 0.15s;border-bottom:2px solid transparent;}
+    .fgd-tab.on{opacity:1;}
+    .fgd-content{flex:1;overflow-y:auto;padding:16px 24px;}
+    .fgd-about-text{font-size:0.92rem;line-height:1.7;white-space:pre-wrap;opacity:0.7;}
+    .fgd-about-edit{width:100%;min-height:120px;padding:12px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.15);font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;background:transparent;outline:none;resize:vertical;margin-bottom:10px;}
+    .fgd-post{padding:14px 0;border-bottom:1px solid rgba(128,128,128,0.04);}
+    .fgd-post-user{font-weight:700;font-size:0.85rem;}
+    .fgd-post-text{font-size:0.88rem;line-height:1.6;margin-top:4px;opacity:0.75;}
+    .fgd-post-time{font-size:0.62rem;opacity:0.3;margin-top:4px;}
+    .fgd-post-del{font-size:0.6rem;opacity:0.3;cursor:pointer;border:none;background:transparent;color:inherit;margin-left:8px;}
+    .fgd-post-del:hover{opacity:0.7;}
+    .fgd-post-input{display:flex;gap:8px;margin-bottom:16px;}
+    .fgd-post-input input{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:inherit;outline:none;}
+    .fgd-post-input button{padding:8px 20px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+    .fgd-store-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .fgd-store-item{border-radius:12px;overflow:hidden;padding:14px;transition:transform 0.15s;}
+    .fgd-store-item:hover{transform:translateY(-3px);}
+    .fgd-store-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;margin-bottom:8px;background:rgba(128,128,128,0.06);}
+    .fgd-store-name{font-size:0.88rem;font-weight:700;}
+    .fgd-store-price{font-size:0.78rem;opacity:0.5;margin-top:2px;}
+    .fgd-store-desc{font-size:0.75rem;opacity:0.4;margin-top:4px;line-height:1.4;}
+    .fgd-store-link{display:inline-block;margin-top:6px;font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-decoration:none;opacity:0.6;}
+    .fgd-store-link:hover{opacity:1;}
+    .fgd-store-del{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.4);color:#fff;border:none;cursor:pointer;font-size:0.6rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;}
+    .fgd-store-item:hover .fgd-store-del{opacity:1;}
+    .fgd-empty{text-align:center;padding:40px;opacity:0.3;font-style:italic;}
+    .fgd-add-item{margin-bottom:16px;}
+    .fgd-add-item input{width:100%;padding:10px 14px;border:1.5px solid rgba(128,128,128,0.12);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;color:inherit;outline:none;background:transparent;margin-bottom:8px;}
+    @media(max-width:768px){.fgd-store-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.fgd-content{padding:14px 16px;}}
+
     /* ── STUFLOVER DAILY (Trending/Notifications) ── */
     #dailyView{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #dailyView.active{display:flex;}
@@ -1087,6 +1127,17 @@
         <div class="profile-section-title">Decorations</div>
         <div class="profile-deco-grid" id="profileDecoGrid"></div>
       </div>
+    </div>
+
+    <!-- FloveeGroup Detail View -->
+    <div id="fgDetailView">
+      <div class="fgd-header" id="fgdHeader"></div>
+      <div class="fgd-tabs" id="fgdTabs">
+        <button class="fgd-tab on" data-tab="about" onclick="fgdSwitchTab('about')">About</button>
+        <button class="fgd-tab" data-tab="posts" onclick="fgdSwitchTab('posts')">Posts</button>
+        <button class="fgd-tab" data-tab="store" onclick="fgdSwitchTab('store')">Store</button>
+      </div>
+      <div class="fgd-content" id="fgdContent"></div>
     </div>
 
     <!-- ReadIt Book Community -->
@@ -4298,6 +4349,8 @@ async function loadGroups(tab){
       var card = document.createElement('div');
       card.className = 'fg-card';
       card.style.background = pal.ac+'06';
+      card.style.cursor = 'pointer';
+      card.onclick = function(e){ if(!e.target.closest('.fg-card-btn')) openGroupDetail(g.id); };
       var iconBg = 'hsl('+(hues[i%hues.length])+',50%,55%)';
       var initial = g.name.charAt(0).toUpperCase();
       var btnClass = g.joined ? 'fg-card-btn joined' : 'fg-card-btn';
@@ -4350,6 +4403,223 @@ async function createGroup(){
     closeFgModal();
     loadGroups(fgTab);
   }catch(e){err.textContent='Could not create group';err.style.color='#c44';}
+}
+
+// ─── GROUP DETAIL VIEW ──────────────────────────────────
+var fgdGroup = null;
+var fgdTab = 'about';
+var fgdMembers = [];
+
+async function openGroupDetail(groupId){
+  var pal = searchPal;
+  // Update section nav to show back to groups
+  document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / ...';
+  // Hide group list, show detail
+  document.getElementById('groupsView').style.display = 'none';
+  var dv = document.getElementById('fgDetailView');
+  dv.style.display = 'flex';
+  dv.classList.add('active');
+  dv.style.background = pal.bg;
+  dv.style.color = pal.tx;
+
+  try{
+    var res = await fgFetch('/api/groups/'+groupId,{headers:fgHeaders()});
+    var data = await res.json();
+    fgdGroup = data.group;
+    fgdMembers = data.members || [];
+  }catch(e){ return; }
+
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  var initial = fgdGroup.name.charAt(0).toUpperCase();
+
+  // Update section nav
+  document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / '+escHtml(fgdGroup.name);
+
+  // Render header
+  var header = document.getElementById('fgdHeader');
+  var joinBtn = fgdGroup.joined
+    ? '<button class="fgd-join-btn" style="background:transparent;border:1.5px solid '+pal.tx+'30;color:'+pal.tx+'" onclick="fgdLeave()">Joined</button>'
+    : '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdJoin()">Join</button>';
+  header.innerHTML =
+    '<div class="fgd-icon" style="background:'+pal.ac+'">'+initial+'</div>'+
+    '<div class="fgd-info"><div class="fgd-name">'+escHtml(fgdGroup.name)+'</div>'+
+    '<div class="fgd-meta">'+fgdGroup.member_count+' members · by '+escHtml(fgdGroup.owner_name)+'</div></div>'+
+    joinBtn;
+
+  // Style tabs
+  document.querySelectorAll('.fgd-tab').forEach(function(t){ t.style.color = pal.tx; });
+  fgdTab = 'about';
+  fgdSwitchTab('about');
+}
+
+function fgdSwitchTab(tab){
+  fgdTab = tab;
+  var pal = searchPal;
+  document.querySelectorAll('.fgd-tab').forEach(function(t){
+    t.classList.toggle('on', t.dataset.tab === tab);
+    t.style.borderBottomColor = t.dataset.tab === tab ? pal.ac : 'transparent';
+  });
+  if(tab === 'about') fgdRenderAbout();
+  else if(tab === 'posts') fgdRenderPosts();
+  else if(tab === 'store') fgdRenderStore();
+}
+
+function fgdRenderAbout(){
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  var desc = fgdGroup.description || 'No description yet.';
+
+  var membersHtml = fgdMembers.map(function(m){
+    return '<span style="display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.75rem;background:'+pal.ac+'12;margin:3px;">'+escHtml(m.username)+'</span>';
+  }).join('');
+
+  if(isOwner){
+    content.innerHTML =
+      '<div style="margin-bottom:16px;"><div class="fg-title bc" style="margin-bottom:8px;">Description</div>'+
+      '<textarea class="fgd-about-edit" id="fgdAboutText">'+escHtml(desc)+'</textarea>'+
+      '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdSaveAbout()">Save</button></div>'+
+      '<div class="fg-title bc" style="margin-bottom:8px;">Members ('+fgdMembers.length+')</div>'+
+      '<div>'+membersHtml+'</div>';
+  } else {
+    content.innerHTML =
+      '<div style="margin-bottom:16px;"><div class="fg-title bc" style="margin-bottom:8px;">Description</div>'+
+      '<div class="fgd-about-text">'+escHtml(desc)+'</div></div>'+
+      '<div class="fg-title bc" style="margin-bottom:8px;">Members ('+fgdMembers.length+')</div>'+
+      '<div>'+membersHtml+'</div>';
+  }
+}
+
+async function fgdSaveAbout(){
+  var text = document.getElementById('fgdAboutText').value.trim();
+  try{
+    await fgFetch('/api/groups/'+fgdGroup.id+'/about',{method:'PUT',headers:fgHeaders(),body:JSON.stringify({description:text})});
+    fgdGroup.description = text;
+    fgdRenderAbout();
+  }catch(e){}
+}
+
+async function fgdRenderPosts(){
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var myId = user ? parseInt(user.id) : 0;
+
+  var inputHtml = fgdGroup.joined
+    ? '<div class="fgd-post-input"><input id="fgdPostInput" placeholder="Write something..." maxlength="500" onkeydown="if(event.key===\'Enter\')fgdPost()"/><button style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdPost()">Post</button></div>'
+    : '<div style="text-align:center;padding:12px;opacity:0.4;font-size:0.82rem;">Join this group to post</div>';
+
+  content.innerHTML = inputHtml + '<div id="fgdPostsList"><div class="fgd-empty">Loading...</div></div>';
+
+  try{
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{headers:fgHeaders()});
+    var data = await res.json();
+    var posts = data.posts || [];
+    var list = document.getElementById('fgdPostsList');
+    if(posts.length === 0){ list.innerHTML = '<div class="fgd-empty">No posts yet</div>'; return; }
+    list.innerHTML = posts.map(function(p){
+      var time = new Date(p.created_at+'Z');
+      var ts = time.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+time.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      var del = (p.username === (user&&user.username)) ? '<button class="fgd-post-del" onclick="fgdDeletePost('+p.id+')">delete</button>' : '';
+      return '<div class="fgd-post"><div class="fgd-post-user" style="color:'+pal.ac+'">'+escHtml(p.username)+'</div><div class="fgd-post-text">'+escHtml(p.text)+'</div><div class="fgd-post-time">'+ts+del+'</div></div>';
+    }).join('');
+  }catch(e){ document.getElementById('fgdPostsList').innerHTML = '<div class="fgd-empty">Could not load posts</div>'; }
+}
+
+async function fgdPost(){
+  var input = document.getElementById('fgdPostInput');
+  var text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{method:'POST',headers:fgHeaders(),body:JSON.stringify({text:text})});
+    var data = await res.json();
+    if(data.error){ alert(data.error); return; }
+    fgdRenderPosts();
+  }catch(e){}
+}
+
+async function fgdDeletePost(postId){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/posts/'+postId,{method:'DELETE',headers:fgHeaders()}); }catch(e){}
+  fgdRenderPosts();
+}
+
+async function fgdRenderStore(){
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+
+  var addHtml = isOwner
+    ? '<div class="fgd-add-item"><div class="fg-title bc" style="margin-bottom:8px;">Add Item</div>'+
+      '<input id="fgdStoreName" placeholder="Item name..."/>'+
+      '<input id="fgdStorePrice" placeholder="Price (e.g. $12.99)..."/>'+
+      '<input id="fgdStoreImg" placeholder="Image URL (optional)..."/>'+
+      '<input id="fgdStoreLink" placeholder="Link to buy (optional)..."/>'+
+      '<input id="fgdStoreDesc" placeholder="Description (optional)..."/>'+
+      '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdAddStoreItem()">Add to Store</button></div>'
+    : '';
+
+  content.innerHTML = addHtml + '<div id="fgdStoreGrid" class="fgd-store-grid"><div class="fgd-empty" style="grid-column:1/-1;">Loading...</div></div>';
+
+  try{
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/store',{headers:fgHeaders()});
+    var data = await res.json();
+    var items = data.items || [];
+    var grid = document.getElementById('fgdStoreGrid');
+    if(items.length === 0){ grid.innerHTML = '<div class="fgd-empty" style="grid-column:1/-1;">No items in store yet</div>'; return; }
+    grid.innerHTML = items.map(function(item){
+      var img = item.image_url ? '<img class="fgd-store-img" src="'+escHtml(item.image_url)+'" onerror="this.style.display=\'none\'"/>' : '';
+      var link = item.link ? '<a class="fgd-store-link" href="'+escHtml(item.link)+'" target="_blank" style="color:'+pal.ac+'">Buy Now</a>' : '';
+      var del = isOwner ? '<button class="fgd-store-del" onclick="fgdDeleteStoreItem('+item.id+')">x</button>' : '';
+      return '<div class="fgd-store-item" style="background:'+pal.ac+'08;position:relative;">'+img+
+        '<div class="fgd-store-name">'+escHtml(item.name)+'</div>'+
+        (item.price ? '<div class="fgd-store-price">'+escHtml(item.price)+'</div>' : '')+
+        (item.description ? '<div class="fgd-store-desc">'+escHtml(item.description)+'</div>' : '')+
+        link+del+'</div>';
+    }).join('');
+  }catch(e){ document.getElementById('fgdStoreGrid').innerHTML = '<div class="fgd-empty" style="grid-column:1/-1;">Could not load store</div>'; }
+}
+
+async function fgdAddStoreItem(){
+  var name = document.getElementById('fgdStoreName').value.trim();
+  if(!name){ alert('Item name required'); return; }
+  var body = {
+    name: name,
+    price: document.getElementById('fgdStorePrice').value.trim(),
+    image_url: document.getElementById('fgdStoreImg').value.trim(),
+    link: document.getElementById('fgdStoreLink').value.trim(),
+    description: document.getElementById('fgdStoreDesc').value.trim()
+  };
+  try{
+    await fgFetch('/api/groups/'+fgdGroup.id+'/store',{method:'POST',headers:fgHeaders(),body:JSON.stringify(body)});
+    fgdRenderStore();
+  }catch(e){}
+}
+
+async function fgdDeleteStoreItem(itemId){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/store/'+itemId,{method:'DELETE',headers:fgHeaders()}); }catch(e){}
+  fgdRenderStore();
+}
+
+async function fgdJoin(){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/join',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  openGroupDetail(fgdGroup.id);
+}
+
+async function fgdLeave(){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/leave',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  openGroupDetail(fgdGroup.id);
+}
+
+function fgdBackToList(){
+  document.getElementById('fgDetailView').style.display = 'none';
+  document.getElementById('fgDetailView').classList.remove('active');
+  document.getElementById('groupsView').style.display = 'flex';
+  document.getElementById('groupsView').classList.add('active');
+  loadGroups(fgTab);
 }
 
 // ─── STUFLOVER DAILY (Trending notifications) ─────────────
@@ -5635,6 +5905,8 @@ function openSection(id){
   document.getElementById('dailyView').classList.remove('active');
   document.getElementById('groupsView').style.display = 'none';
   document.getElementById('groupsView').classList.remove('active');
+  document.getElementById('fgDetailView').style.display = 'none';
+  document.getElementById('fgDetailView').classList.remove('active');
   document.getElementById('readitView').style.display = 'none';
   document.getElementById('readitView').classList.remove('active');
   document.getElementById('fitforitView').style.display = 'none';
