@@ -68,23 +68,13 @@ function dti3DInitScene() {
   var scene = new THREE.Scene();
   dti3D.scene = scene;
 
-  // Gradient background
-  var canvas2d = document.createElement('canvas');
-  canvas2d.width = 2; canvas2d.height = 256;
-  var ctx = canvas2d.getContext('2d');
-  var grad = ctx.createLinearGradient(0, 0, 0, 256);
-  grad.addColorStop(0, '#f5f0e8');
-  grad.addColorStop(0.5, '#efe8dd');
-  grad.addColorStop(1, '#e8e0d4');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 2, 256);
-  var bgTexture = new THREE.CanvasTexture(canvas2d);
-  scene.background = bgTexture;
+  // Background color — soft cream matching page theme
+  scene.background = new THREE.Color('#f0ebe3');
 
   // Camera — slightly above eye level, 3/4 angle
-  var camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 100);
-  camera.position.set(0, 0.5, 5.5);
-  camera.lookAt(0, 0.3, 0);
+  var camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100);
+  camera.position.set(0, 0.4, 4.5);
+  camera.lookAt(0, 0.2, 0);
   dti3D.camera = camera;
 
   // Renderer
@@ -92,8 +82,12 @@ function dti3DInitScene() {
   renderer.setSize(w, h);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMappingExposure = 1.1;
+  if (renderer.outputColorSpace !== undefined) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  } else if (renderer.outputEncoding !== undefined) {
+    renderer.outputEncoding = THREE.sRGBEncoding;
+  }
   container.appendChild(renderer.domElement);
   dti3D.renderer = renderer;
 
@@ -133,7 +127,7 @@ function dti3DInitScene() {
   controls.dampingFactor = 0.05;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.0;
-  controls.target.set(0, 0.3, 0);
+  controls.target.set(0, 0.2, 0);
   dti3D.controls = controls;
 
   // Build avatar
@@ -305,15 +299,28 @@ function dti3DTorsoGeometry() {
   return geo;
 }
 
-// ── Round vertices helper (for BoxGeometry) ──
-function dti3DRoundVertices(geo, radius) {
+// ── Round vertices helper (for BoxGeometry → rounded box) ──
+function dti3DRoundVertices(geo, factor) {
+  // Blend each vertex toward a normalized (spherical) version
   var pos = geo.attributes.position;
   var v = new THREE.Vector3();
+  var n = new THREE.Vector3();
+  // Compute bounding box to get half-extents
+  geo.computeBoundingBox();
+  var bb = geo.boundingBox;
+  var hx = (bb.max.x - bb.min.x) / 2;
+  var hy = (bb.max.y - bb.min.y) / 2;
+  var hz = (bb.max.z - bb.min.z) / 2;
+  var maxR = Math.max(hx, hy, hz);
   for (var i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i);
-    var len = v.length();
-    if (len > 0) {
-      v.normalize().multiplyScalar(len * (1 - radius) + radius * Math.sqrt(len));
+    // Get the spherical target at same "radius" as distance from center
+    n.copy(v);
+    var len = n.length();
+    if (len > 0.0001) {
+      n.normalize().multiplyScalar(maxR * 0.85);
+      // Lerp toward sphere
+      v.lerp(n, factor);
     }
     pos.setXYZ(i, v.x, v.y, v.z);
   }
