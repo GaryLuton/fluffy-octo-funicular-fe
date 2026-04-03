@@ -14,29 +14,27 @@ function dti3DMaterial(hex, style) {
   var c = dti3DColor(hex);
   var p = { color: c, roughness: 0.6, metalness: 0, side: THREE.DoubleSide };
   // Style-based fabric properties
-  if (style === 'glam' || style === 'coquette' || style === 'romantic') { p.roughness = 0.18; p.metalness = 0.05; p.sheen = 0.6; p.sheenColor = c.clone().lerp(new THREE.Color(0xffffff), 0.4); }
-  else if (style === 'grunge' || style === 'casual' || style === 'street') { p.roughness = 0.88; p.sheen = 0.1; }
-  else if (style === 'goth' || style === 'dark' || style === 'edgy') { p.roughness = 0.3; p.metalness = 0.03; p.sheen = 0.4; p.sheenColor = c.clone().lerp(new THREE.Color(0x8888ff), 0.2); }
-  else if (style === 'cottage' || style === 'soft' || style === 'fairy') { p.roughness = 0.92; p.sheen = 0.15; }
-  else if (style === 'old money' || style === 'clean' || style === 'french') { p.roughness = 0.45; p.metalness = 0.01; p.sheen = 0.3; }
-  else if (style === 'western' || style === 'autumn') { p.roughness = 0.4; p.metalness = 0.02; p.sheen = 0.2; }
-  else { p.sheen = 0.15; }
+  // In r128, sheen must be a THREE.Color (not a float), and sheenColor does not exist
+  if (style === 'glam' || style === 'coquette' || style === 'romantic') { p.roughness = 0.18; p.metalness = 0.05; p.sheen = c.clone().lerp(new THREE.Color(0xffffff), 0.5); }
+  else if (style === 'grunge' || style === 'casual' || style === 'street') { p.roughness = 0.88; p.sheen = c.clone().lerp(new THREE.Color(0x444444), 0.8); }
+  else if (style === 'goth' || style === 'dark' || style === 'edgy') { p.roughness = 0.3; p.metalness = 0.03; p.sheen = c.clone().lerp(new THREE.Color(0x8888ff), 0.3); }
+  else if (style === 'cottage' || style === 'soft' || style === 'fairy') { p.roughness = 0.92; p.sheen = c.clone().lerp(new THREE.Color(0xffeedd), 0.15); }
+  else if (style === 'old money' || style === 'clean' || style === 'french') { p.roughness = 0.45; p.metalness = 0.01; p.sheen = c.clone().lerp(new THREE.Color(0xffffff), 0.3); }
+  else if (style === 'western' || style === 'autumn') { p.roughness = 0.4; p.metalness = 0.02; p.sheen = c.clone().lerp(new THREE.Color(0xddccaa), 0.2); }
+  else { p.sheen = c.clone().lerp(new THREE.Color(0xffffff), 0.1); }
   if (THREE.MeshPhysicalMaterial) return new THREE.MeshPhysicalMaterial(p);
-  // Fallback: strip sheen props for MeshStandardMaterial
-  delete p.sheen; delete p.sheenColor; delete p.clearcoat;
+  delete p.sheen; delete p.clearcoat;
   return new THREE.MeshStandardMaterial(p);
 }
 
 function dti3DSkinMat(hex) {
-  // Use MeshPhysicalMaterial if available (r128+) for realistic skin
   if (THREE.MeshPhysicalMaterial) {
     var c = dti3DColor(hex);
     return new THREE.MeshPhysicalMaterial({
       color: c,
       roughness: 0.6,
       metalness: 0.0,
-      sheen: 0.3,
-      sheenColor: c.clone().lerp(new THREE.Color(0xff8866), 0.15),
+      sheen: c.clone().lerp(new THREE.Color(0xff8866), 0.2),
       clearcoat: 0.04,
       side: THREE.DoubleSide
     });
@@ -105,7 +103,7 @@ function dti3DInitScene() {
   dti3D.camera = camera;
 
   var renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(w, h);
+  renderer.setSize(w, h, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -114,6 +112,9 @@ function dti3DInitScene() {
   if (renderer.outputColorSpace !== undefined) renderer.outputColorSpace = THREE.SRGBColorSpace;
   else if (renderer.outputEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
   container.appendChild(renderer.domElement);
+  // Let CSS control canvas display size, not inline styles
+  renderer.domElement.style.width = '';
+  renderer.domElement.style.height = '';
   dti3D.renderer = renderer;
 
   // Lighting — studio setup for realistic skin
@@ -174,8 +175,14 @@ function dti3DInitScene() {
   dti3DAnimate();
 
   new ResizeObserver(function() {
-    var ww = container.clientWidth, hh = container.clientHeight;
-    if (ww > 0 && hh > 0) { camera.aspect = ww / hh; camera.updateProjectionMatrix(); renderer.setSize(ww, hh); }
+    var ww = container.offsetWidth, hh = container.offsetHeight;
+    if (ww > 0 && hh > 0) {
+      renderer.setSize(ww, hh, false);
+      renderer.domElement.style.width = '';
+      renderer.domElement.style.height = '';
+      camera.aspect = ww / hh;
+      camera.updateProjectionMatrix();
+    }
   }).observe(container);
 }
 
@@ -375,7 +382,7 @@ function dti3DUpdateSkin(tone) {
   var c = dti3DColor(tone.base);
   dti3D.bodyParts.forEach(function(m) {
     m.material.color.copy(c);
-    if (m.material.sheenColor) m.material.sheenColor.copy(c.clone().lerp(new THREE.Color(0xff8866), 0.15));
+    if (m.material.sheen && m.material.sheen.isColor) m.material.sheen.copy(c.clone().lerp(new THREE.Color(0xff8866), 0.2));
     m.material.needsUpdate = true;
   });
 }
@@ -820,27 +827,25 @@ DTI_3D.top_offsh = function(c, s) {
 // Hips start at y~0.18, knees y~-0.42, ankles y~-0.97
 
 DTI_3D.bottom_skirt = function(c, s) {
-  // A-line midi skirt — waistband, flared cone to below knee, pleat details
+  // A-line midi skirt — waistband at waist, flared to below knee
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Flared skirt body — wide cone
+  // Flared skirt: waist(y=0.2) to below-knee(y=-0.5), wider at bottom
   var skirtGeo = dti3DLathe([
-    [0.24, 0.48],[0.245, 0.44],[0.25, 0.36],[0.26, 0.28],
-    [0.28, 0.2],[0.3, 0.12],[0.34, 0.04],[0.38, 0.0],
+    [0.24, 0.7],[0.245, 0.6],[0.26, 0.48],[0.28, 0.36],
+    [0.3, 0.24],[0.34, 0.12],[0.38, 0.0],
   ], 28);
-  skirtGeo.scale(1, 1, 1);
   var skirt = new THREE.Mesh(skirtGeo, m);
-  skirt.position.set(0, -0.12, 0); g.add(skirt);
-  // Waistband — snug ring at top
+  skirt.position.set(0, -0.5, 0); g.add(skirt);
+  // Waistband
   var wbMat = dti3DMaterial(dtiShade(c, -18), s);
-  var wb = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.022, 8, 24), wbMat);
+  var wb = new THREE.Mesh(new THREE.TorusGeometry(0.245, 0.024, 8, 24), wbMat);
   wb.position.set(0, 0.2, 0); wb.rotation.x = Math.PI/2; g.add(wb);
   // Pleat fold lines
   var pleatMat = dti3DMaterial(dtiShade(c, -12), s);
   for (var i = 0; i < 8; i++) {
     var ang = (i/8)*Math.PI*2;
-    var r1 = 0.24, r2 = 0.38;
-    var pleat = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.6, 4), pleatMat);
-    pleat.position.set(Math.sin(ang)*(r1+r2)/2, -0.08, Math.cos(ang)*(r1+r2)/2);
+    var pleat = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.65, 4), pleatMat);
+    pleat.position.set(Math.sin(ang)*0.3, -0.15, Math.cos(ang)*0.3);
     g.add(pleat);
   }
   // Belt buckle
@@ -855,13 +860,13 @@ DTI_3D.bottom_skirt = function(c, s) {
 DTI_3D.bottom_mini = function(c, s) {
   // Pleated mini skirt — short, flared, with visible pleats
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Short flared skirt
+  // Short flared skirt — waist to mid-thigh
   var skirtGeo = dti3DLathe([
-    [0.24, 0.24],[0.245, 0.2],[0.26, 0.14],[0.28, 0.08],
-    [0.3, 0.04],[0.32, 0.0],
+    [0.24, 0.36],[0.25, 0.28],[0.27, 0.2],[0.3, 0.1],
+    [0.32, 0.04],[0.34, 0.0],
   ], 28);
   var skirt = new THREE.Mesh(skirtGeo, m);
-  skirt.position.set(0, -0.02, 0); g.add(skirt);
+  skirt.position.set(0, -0.18, 0); g.add(skirt);
   // Waistband
   var wbMat = dti3DMaterial(dtiShade(c, -18), s);
   var wb = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.022, 8, 24), wbMat);
@@ -892,10 +897,10 @@ DTI_3D.bottom_pants = function(c, s) {
     [0.13, -0.04],[0.001, -0.05],
   ], 22);
   g.add(new THREE.Mesh(hipGeo, m)).position.set(0, 0.12, 0);
-  // Left leg — fitted, tapered
-  var legGeo = dti3DTaperedLimb(0.1, 0.06, 0.95, 16);
-  g.add(new THREE.Mesh(legGeo, m)).position.set(-0.12, -0.36, 0);
-  g.add(new THREE.Mesh(legGeo.clone(), m)).position.set(0.12, -0.36, 0);
+  // Legs — fitted, tapered from thigh to ankle (y: 0.1 to -0.85)
+  var legGeo = dti3DTaperedLimb(0.1, 0.055, 1.0, 16);
+  g.add(new THREE.Mesh(legGeo, m)).position.set(-0.12, -0.4, 0);
+  g.add(new THREE.Mesh(legGeo.clone(), m)).position.set(0.12, -0.4, 0);
   // Waistband
   var wbMat = dti3DMaterial(dtiShade(c, -15), s);
   var wb = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.024, 8, 24), wbMat);
@@ -931,10 +936,10 @@ DTI_3D.bottom_wide = function(c, s) {
     [0.13, -0.04],[0.001, -0.05],
   ], 22);
   g.add(new THREE.Mesh(hipGeo, m)).position.set(0, 0.12, 0);
-  // Wide legs — flared cylinders
-  var wideGeo = dti3DTaperedLimb(0.1, 0.14, 0.95, 18);
-  g.add(new THREE.Mesh(wideGeo, m)).position.set(-0.12, -0.36, 0);
-  g.add(new THREE.Mesh(wideGeo.clone(), m)).position.set(0.12, -0.36, 0);
+  // Wide legs — flared from thigh to ankle
+  var wideGeo = dti3DTaperedLimb(0.1, 0.15, 1.0, 18);
+  g.add(new THREE.Mesh(wideGeo, m)).position.set(-0.12, -0.4, 0);
+  g.add(new THREE.Mesh(wideGeo.clone(), m)).position.set(0.12, -0.4, 0);
   // Waistband
   var wbMat = dti3DMaterial(dtiShade(c, -15), s);
   var wb = new THREE.Mesh(new THREE.TorusGeometry(0.235, 0.024, 8, 24), wbMat);
@@ -1108,22 +1113,22 @@ DTI_3D.shoes_flats = function(c, s) {
 DTI_3D.acc_necklace = function(c, s) {
   // Pendant necklace — chain draping around neck with hanging pendant
   var g = new THREE.Group(), m = dti3DMaterial(c, s || 'boho');
-  // Chain — arc torus around front of neck
+  // Chain — arc torus around front of neck/upper chest
   var chainGeo = new THREE.TorusGeometry(0.13, 0.005, 8, 28, Math.PI*0.85);
   var chain = new THREE.Mesh(chainGeo, m);
-  chain.position.set(0, 1.06, 0.06); chain.rotation.set(-0.15, 0, 0); g.add(chain);
-  // Pendant — larger gem/circle
+  chain.position.set(0, 1.14, 0.06); chain.rotation.set(-0.15, 0, 0); g.add(chain);
+  // Pendant
   var pendMat = dti3DMaterial(dtiShade(c, 25), s || 'boho');
   var pend = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 8), pendMat);
-  pend.position.set(0, 0.93, 0.16); g.add(pend);
+  pend.position.set(0, 1.01, 0.18); g.add(pend);
   // Pendant highlight
   var hiMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.4 });
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), hiMat)).position.set(0, 0.935, 0.18);
-  // Small chain beads
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), hiMat)).position.set(0, 1.015, 0.2);
+  // Small chain beads along chain arc
   var beadGeo = new THREE.SphereGeometry(0.006, 6, 4);
   for (var bi = 0; bi < 5; bi++) {
     var ang = -Math.PI*0.3 + (bi/4)*Math.PI*0.6;
-    g.add(new THREE.Mesh(beadGeo, m)).position.set(Math.sin(ang)*0.13, 1.06 + Math.cos(ang)*0.13 - 0.13, 0.08);
+    g.add(new THREE.Mesh(beadGeo, m)).position.set(Math.sin(ang)*0.13, 1.14 + Math.cos(ang)*0.13 - 0.13, 0.08);
   }
   return g;
 };

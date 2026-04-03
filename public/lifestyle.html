@@ -204,7 +204,7 @@
     .dti-top{display:flex;flex:1;overflow:hidden;}
 
     /* Avatar panel — 3D figure */
-    .dti-avatar-panel{flex:0 0 320px;display:flex;flex-direction:column;align-items:center;padding:16px 12px;position:relative;overflow:hidden;}
+    .dti-avatar-panel{flex:0 0 320px;display:flex;flex-direction:column;align-items:center;padding:16px 12px;position:relative;overflow:hidden;min-height:400px;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
     .dti-figure-wrap{position:relative;width:100%;flex:1 1 0%;min-height:0;margin:0 auto;}
     .dti-figure-wrap canvas{width:100%!important;height:100%!important;display:block;border-radius:12px;}
@@ -237,7 +237,7 @@
     .dti-item:hover{transform:translateY(-2px);}
     .dti-item.picked{border-style:solid;}
     .dti-item.picked::after{content:'\2713';position:absolute;top:4px;right:6px;font-size:0.6rem;font-weight:900;}
-    .dti-item-swatch{width:56px;height:72px;border-radius:8px;border:2px solid rgba(128,128,128,0.08);position:relative;overflow:hidden;background:rgba(128,128,128,0.03);}
+    .dti-item-swatch{width:64px;height:80px;border-radius:8px;border:2px solid rgba(128,128,128,0.08);position:relative;overflow:hidden;background:rgba(128,128,128,0.03);}
     .dti-item-swatch svg{position:absolute;inset:0;width:100%;height:100%;}
     .dti-item-swatch-inner{position:absolute;inset:0;}
     .dti-item-swatch-pattern{position:absolute;inset:0;opacity:0.3;}
@@ -3627,6 +3627,37 @@ var DTI_SVG = {
     '<circle cx="81" cy="170" r="1.5" fill="'+lt+'" opacity="0.2"/>';},
 };
 
+// Per-item SVG viewBox for swatch silhouette previews
+var DTI_VIEWBOXES = {
+  hair:         '30 -8 100 196',
+  hair_short:   '36 -8 92 98',
+  hair_bun:     '38 -24 84 90',
+  hair_long:    '28 -8 104 198',
+  hair_braids:  '38 -8 84 182',
+  hair_ponytail:'46 -8 68 190',
+  hair_spacebuns:'42 -18 76 80',
+  hair_wolfcut: '36 -8 88 126',
+  hair_curls:   '24 -8 112 198',
+  hair_ribbon:  '30 -8 100 168',
+  top_fitted:   '22 58 116 128',
+  top_crop:     '24 60 112 68',
+  top_oversized:'10 52 140 132',
+  top_offsh:    '30 60 100 122',
+  bottom_skirt: '28 156 104 205',
+  bottom_mini:  '36 156 88 106',
+  bottom_pants: '44 156 72 210',
+  bottom_wide:  '24 156 112 214',
+  shoes_boots:  '40 274 80 106',
+  shoes_heels:  '40 324 80 62',
+  shoes_sneakers:'32 326 96 58',
+  shoes_flats:  '36 338 88 48',
+  acc_necklace: '54 56 52 50',
+  acc_bag:      '108 100 48 60',
+  acc_hat:      '46 -14 68 32',
+  acc_belt:     '44 150 72 44',
+  acc_earrings: '46 26 68 32'
+};
+
 var DTI_WARDROBES = {
   hair:[
     {name:'Sleek Straight',color:'#2a1a0a',style:'clean',svg:'hair'},
@@ -3864,17 +3895,11 @@ function dtiRenderItems(cat){
     div.style.background = isPicked ? pal.ac+'14' : pal.tx+'06';
     div.style.borderColor = isPicked ? pal.ac : 'transparent';
     div.style.color = pal.tx;
-    // Build SVG silhouette preview if available
+    // Build SVG silhouette preview with per-item viewBox
     var svgPreview = '';
     if(DTI_SVG[item.svg]){
-      // Choose viewBox per category for best framing
-      var vb = '0 0 160 400';
-      if(cat==='shoes') vb = '40 330 90 50';
-      else if(cat==='bottoms') vb = '30 160 110 200';
-      else if(cat==='tops') vb = '20 60 130 130';
-      else if(cat==='accessories') vb = '40 0 90 180';
-      else if(cat==='hair') vb = '40 -20 90 100';
-      svgPreview = '<svg viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85">'+DTI_SVG[item.svg](item.color)+'</svg>';
+      var vb = (DTI_VIEWBOXES && DTI_VIEWBOXES[item.svg]) || '15 55 130 135';
+      svgPreview = '<svg viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85" preserveAspectRatio="xMidYMid meet">'+DTI_SVG[item.svg](item.color)+'</svg>';
     }
     div.innerHTML =
       '<div class="dti-item-swatch" style="border-color:'+pal.tx+'10">'+
