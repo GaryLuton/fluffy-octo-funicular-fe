@@ -11,17 +11,36 @@ var dti3D = {
 function dti3DColor(hex) { return new THREE.Color(hex); }
 
 function dti3DMaterial(hex, style) {
-  var p = { color: dti3DColor(hex), roughness: 0.6, metalness: 0, side: THREE.DoubleSide };
-  if (style === 'glam' || style === 'coquette' || style === 'romantic') { p.roughness = 0.18; p.metalness = 0.05; }
-  else if (style === 'grunge' || style === 'casual' || style === 'street') { p.roughness = 0.85; }
-  else if (style === 'goth' || style === 'dark' || style === 'edgy') { p.roughness = 0.3; p.metalness = 0.03; }
-  else if (style === 'cottage' || style === 'soft' || style === 'fairy') { p.roughness = 0.92; }
-  else if (style === 'old money' || style === 'clean' || style === 'french') { p.roughness = 0.45; p.metalness = 0.01; }
-  else if (style === 'western' || style === 'autumn') { p.roughness = 0.4; p.metalness = 0.02; }
+  var c = dti3DColor(hex);
+  var p = { color: c, roughness: 0.6, metalness: 0, side: THREE.DoubleSide };
+  // Style-based fabric properties
+  if (style === 'glam' || style === 'coquette' || style === 'romantic') { p.roughness = 0.18; p.metalness = 0.05; p.sheen = 0.6; p.sheenColor = c.clone().lerp(new THREE.Color(0xffffff), 0.4); }
+  else if (style === 'grunge' || style === 'casual' || style === 'street') { p.roughness = 0.88; p.sheen = 0.1; }
+  else if (style === 'goth' || style === 'dark' || style === 'edgy') { p.roughness = 0.3; p.metalness = 0.03; p.sheen = 0.4; p.sheenColor = c.clone().lerp(new THREE.Color(0x8888ff), 0.2); }
+  else if (style === 'cottage' || style === 'soft' || style === 'fairy') { p.roughness = 0.92; p.sheen = 0.15; }
+  else if (style === 'old money' || style === 'clean' || style === 'french') { p.roughness = 0.45; p.metalness = 0.01; p.sheen = 0.3; }
+  else if (style === 'western' || style === 'autumn') { p.roughness = 0.4; p.metalness = 0.02; p.sheen = 0.2; }
+  else { p.sheen = 0.15; }
+  if (THREE.MeshPhysicalMaterial) return new THREE.MeshPhysicalMaterial(p);
+  // Fallback: strip sheen props for MeshStandardMaterial
+  delete p.sheen; delete p.sheenColor; delete p.clearcoat;
   return new THREE.MeshStandardMaterial(p);
 }
 
 function dti3DSkinMat(hex) {
+  // Use MeshPhysicalMaterial if available (r128+) for realistic skin
+  if (THREE.MeshPhysicalMaterial) {
+    var c = dti3DColor(hex);
+    return new THREE.MeshPhysicalMaterial({
+      color: c,
+      roughness: 0.6,
+      metalness: 0.0,
+      sheen: 0.3,
+      sheenColor: c.clone().lerp(new THREE.Color(0xff8866), 0.15),
+      clearcoat: 0.04,
+      side: THREE.DoubleSide
+    });
+  }
   return new THREE.MeshStandardMaterial({ color: dti3DColor(hex), roughness: 0.55, metalness: 0, side: THREE.DoubleSide });
 }
 
@@ -51,6 +70,19 @@ function dti3DTaperedLimb(rTop, rBot, height, segs) {
   return new THREE.CylinderGeometry(rTop, rBot, height, segs || 16);
 }
 
+// Create a garment profile by scaling body profile outward by a factor
+// bodyProfile: [[r,y],...], scaleFactor: 1.03 = 3% larger
+function dti3DGarmentProfile(bodyProfile, scaleFactor) {
+  return bodyProfile.map(function(p) { return [p[0] * scaleFactor, p[1]]; });
+}
+
+// Body torso profile (reference for clothing generation)
+var DTI_BODY_TORSO = [
+  [0.001, 0.72],[0.08, 0.7],[0.18, 0.66],[0.25, 0.58],
+  [0.265, 0.52],[0.24, 0.44],[0.19, 0.36],[0.17, 0.32],
+  [0.18, 0.26],[0.23, 0.18],[0.235, 0.12],[0.22, 0.06],[0.2, 0.0],
+];
+
 // ── Scene Init ──
 function dti3DInitScene() {
   var container = document.getElementById('dti3DContainer');
@@ -60,50 +92,64 @@ function dti3DInitScene() {
     dti3D.renderer.dispose();
     container.innerHTML = '';
   }
-  var w = container.clientWidth || 300, h = container.clientHeight || 450;
+  var w = container.clientWidth || 300, h = container.clientHeight || 520;
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color('#f0ebe3');
   dti3D.scene = scene;
 
-  var camera = new THREE.PerspectiveCamera(30, w / h, 0.1, 100);
-  camera.position.set(0.6, 0.6, 5.0);
-  camera.lookAt(0, 0.2, 0);
+  // Camera centered on avatar, FOV wide enough to see head-to-toe
+  var camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+  camera.position.set(0, 0.1, 4.2);
+  camera.lookAt(0, 0, 0);
   dti3D.camera = camera;
 
   var renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   if (renderer.outputColorSpace !== undefined) renderer.outputColorSpace = THREE.SRGBColorSpace;
   else if (renderer.outputEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
   container.appendChild(renderer.domElement);
   dti3D.renderer = renderer;
 
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-  var key = new THREE.DirectionalLight(0xfff5e0, 1.0);
-  key.position.set(-3, 4, 3);
+  // Lighting — studio setup for realistic skin
+  // Warm ambient fill
+  scene.add(new THREE.AmbientLight(0xfff5f0, 0.55));
+  // Key light: front-top-left, warm, casts shadows
+  var key = new THREE.DirectionalLight(0xffe8d6, 1.6);
+  key.position.set(-2, 4, 5);
+  key.castShadow = true;
+  key.shadow.mapSize.width = 1024;
+  key.shadow.mapSize.height = 1024;
+  key.shadow.camera.near = 0.5;
+  key.shadow.camera.far = 15;
+  key.shadow.radius = 4;
   scene.add(key);
-  var fill = new THREE.DirectionalLight(0xd0e0ff, 0.35);
-  fill.position.set(3, -1, 2);
-  scene.add(fill);
-  var rim = new THREE.PointLight(0xffeedd, 0.5, 12);
-  rim.position.set(0, 2, -4);
+  // Rim/back light: cool, creates depth
+  var rim = new THREE.DirectionalLight(0xd0e8ff, 0.7);
+  rim.position.set(3, 2, -4);
   scene.add(rim);
-  // Soft light from below to prevent harsh under-shadows
-  var bounce = new THREE.DirectionalLight(0xffe8d0, 0.15);
-  bounce.position.set(0, -3, 1);
+  // Soft bounce from below to fill shadows
+  var bounce = new THREE.PointLight(0xfff0e8, 0.35, 10);
+  bounce.position.set(0, -2, 2);
   scene.add(bounce);
+  // Subtle fill from opposite side
+  var fill = new THREE.DirectionalLight(0xffe0d0, 0.25);
+  fill.position.set(2, 0, 3);
+  scene.add(fill);
 
   // Ground shadow disc
   var gnd = new THREE.Mesh(
-    new THREE.CircleGeometry(0.7, 32),
-    new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.08, roughness: 1 })
+    new THREE.CircleGeometry(0.8, 32),
+    new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.1, roughness: 1 })
   );
   gnd.rotation.x = -Math.PI / 2;
-  gnd.position.y = -1.78;
+  gnd.position.y = -1.15;
+  gnd.receiveShadow = true;
   scene.add(gnd);
 
   // Controls
@@ -116,10 +162,12 @@ function dti3DInitScene() {
   c.dampingFactor = 0.05;
   c.autoRotate = true;
   c.autoRotateSpeed = 0.8;
-  c.target.set(0, 0.2, 0);
+  c.target.set(0, 0, 0);
   dti3D.controls = c;
 
   dti3DBuildBody();
+  // Enable shadows on all avatar parts
+  dti3D.avatarGroup.traverse(function(o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   dti3D.clothingGroup = new THREE.Group();
   dti3D.avatarGroup.add(dti3D.clothingGroup);
   dti3D.breathTime = 0;
@@ -325,7 +373,11 @@ function dti3DRunwaySpin() { dti3D.runwaySpin = true; dti3D.runwayStart = Date.n
 
 function dti3DUpdateSkin(tone) {
   var c = dti3DColor(tone.base);
-  dti3D.bodyParts.forEach(function(m) { m.material.color.copy(c); m.material.needsUpdate = true; });
+  dti3D.bodyParts.forEach(function(m) {
+    m.material.color.copy(c);
+    if (m.material.sheenColor) m.material.sheenColor.copy(c.clone().lerp(new THREE.Color(0xff8866), 0.15));
+    m.material.needsUpdate = true;
+  });
 }
 
 function dti3DClearClothing() {
@@ -344,7 +396,7 @@ function dti3DAddClothing(key, color, style) {
   if (!DTI_3D[key]) return;
   var grp = DTI_3D[key](color, style);
   if (!grp) return;
-  grp.traverse(function(o) { if (o.material) { o.material.transparent = true; o.material.opacity = 0; } });
+  grp.traverse(function(o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } if (o.material) { o.material.transparent = true; o.material.opacity = 0; } });
   dti3D.clothingGroup.add(grp);
   var t0 = Date.now();
   (function tick() {
@@ -632,12 +684,8 @@ DTI_3D.hair_ribbon = function(c, s) {
 DTI_3D.top_fitted = function(c, s) {
   // Fitted top — body-hugging, short sleeves, V-neckline, button detail
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Main body shell — LatheGeo hugging torso tightly
-  var bodyGeo = dti3DLathe([
-    [0.001, 0.72],[0.09, 0.69],[0.19, 0.65],[0.26, 0.56],
-    [0.275, 0.5],[0.255, 0.42],[0.2, 0.34],[0.18, 0.3],
-    [0.19, 0.24],[0.235, 0.16],[0.24, 0.1],[0.23, 0.04],[0.21, 0.0],
-  ], 28);
+  // Main body shell — 3% scaled-out from torso for snug fit
+  var bodyGeo = dti3DLathe(dti3DGarmentProfile(DTI_BODY_TORSO, 1.035), 28);
   var body = new THREE.Mesh(bodyGeo, m);
   body.position.set(0, 0.42, 0); g.add(body);
   // Short sleeves — rounded tubes
@@ -672,11 +720,9 @@ DTI_3D.top_fitted = function(c, s) {
 DTI_3D.top_crop = function(c, s) {
   // Crop top — stops at midriff, gathered/ruched, puff sleeves, tiny bow
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Short body — only covers ribcage/bust
-  var bodyGeo = dti3DLathe([
-    [0.001, 0.4],[0.09, 0.38],[0.19, 0.34],[0.26, 0.26],
-    [0.275, 0.2],[0.265, 0.14],[0.24, 0.08],[0.2, 0.02],[0.18, 0.0],
-  ], 26);
+  // Short body — only upper torso portion, 4% scaled out
+  var cropProfile = dti3DGarmentProfile(DTI_BODY_TORSO.slice(0, 8), 1.04);
+  var bodyGeo = dti3DLathe(cropProfile, 26);
   var body = new THREE.Mesh(bodyGeo, m);
   body.position.set(0, 0.68, 0); g.add(body);
   // Puff sleeves — big round
@@ -704,12 +750,8 @@ DTI_3D.top_crop = function(c, s) {
 DTI_3D.top_oversized = function(c, s) {
   // Oversized hoodie — big boxy silhouette, baggy sleeves, hood, kangaroo pocket
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Big boxy body — significantly wider/longer than torso
-  var bodyGeo = dti3DLathe([
-    [0.001, 0.76],[0.1, 0.73],[0.22, 0.68],[0.3, 0.58],
-    [0.32, 0.5],[0.3, 0.4],[0.28, 0.3],[0.27, 0.2],
-    [0.27, 0.1],[0.28, 0.04],[0.27, 0.0],
-  ], 28);
+  // Big boxy body — 15% scaled out from torso for baggy look
+  var bodyGeo = dti3DLathe(dti3DGarmentProfile(DTI_BODY_TORSO, 1.15), 28);
   var body = new THREE.Mesh(bodyGeo, m);
   body.position.set(0, 0.38, 0); g.add(body);
   // Baggy long sleeves — wider cylinders
@@ -747,11 +789,9 @@ DTI_3D.top_oversized = function(c, s) {
 DTI_3D.top_offsh = function(c, s) {
   // Off-shoulder with ruffle — exposed shoulders, wavy neckline, body-hugging
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Body — starts lower than shoulders
-  var bodyGeo = dti3DLathe([
-    [0.19, 0.48],[0.255, 0.42],[0.265, 0.36],[0.245, 0.28],
-    [0.2, 0.22],[0.18, 0.18],[0.19, 0.12],[0.235, 0.04],[0.24, 0.0],
-  ], 26);
+  // Body — starts at bust level (skipping shoulders), 3.5% scaled out
+  var offProfile = dti3DGarmentProfile(DTI_BODY_TORSO.slice(3), 1.035);
+  var bodyGeo = dti3DLathe(offProfile, 26);
   var body = new THREE.Mesh(bodyGeo, m);
   body.position.set(0, 0.42, 0); g.add(body);
   // Ruffle neckline — wavy torus
