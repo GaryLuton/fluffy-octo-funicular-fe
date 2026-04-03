@@ -1252,8 +1252,8 @@
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="/dti3d.js"></script>
 <script>
 
@@ -3762,8 +3762,11 @@ function dtiInit(){
 
   // Initialize 3D scene (creates scene if first time, or clears clothing)
   if (!dti3D.scene) {
-    // Delay slightly to ensure container is visible and has dimensions
-    setTimeout(function(){ dti3DInitScene(); dtiSetSkin(dtiState.skinIdx); }, 50);
+    // Delay to ensure container is visible and has dimensions
+    setTimeout(function(){
+      dti3DInitScene();
+      dtiSetSkin(dtiState.skinIdx);
+    }, 200);
   } else {
     dti3DClearClothing();
   }
