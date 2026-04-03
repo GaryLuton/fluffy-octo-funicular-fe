@@ -203,10 +203,10 @@
     #dtiView.active{display:flex;}
     .dti-top{display:flex;flex:1;overflow:hidden;}
 
-    /* Avatar panel — SVG figure */
-    .dti-avatar-panel{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;padding:20px 16px;position:relative;overflow:hidden;}
+    /* Avatar panel — 3D figure */
+    .dti-avatar-panel{flex:0 0 320px;display:flex;flex-direction:column;align-items:center;padding:16px 12px;position:relative;overflow:hidden;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
-    .dti-figure-wrap{position:relative;width:300px;height:450px;margin:0 auto;}
+    .dti-figure-wrap{position:relative;width:100%;flex:1 1 0%;min-height:0;margin:0 auto;}
     .dti-figure-wrap canvas{width:100%!important;height:100%!important;display:block;border-radius:12px;}
     .dti-skin-row{display:flex;gap:6px;justify-content:center;margin-top:10px;}
     .dti-skin-btn{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.15s;padding:0;background:none;}
@@ -237,7 +237,8 @@
     .dti-item:hover{transform:translateY(-2px);}
     .dti-item.picked{border-style:solid;}
     .dti-item.picked::after{content:'\2713';position:absolute;top:4px;right:6px;font-size:0.6rem;font-weight:900;}
-    .dti-item-swatch{width:32px;height:32px;border-radius:6px;border:2px solid rgba(128,128,128,0.08);position:relative;overflow:hidden;}
+    .dti-item-swatch{width:56px;height:72px;border-radius:8px;border:2px solid rgba(128,128,128,0.08);position:relative;overflow:hidden;background:rgba(128,128,128,0.03);}
+    .dti-item-swatch svg{position:absolute;inset:0;width:100%;height:100%;}
     .dti-item-swatch-inner{position:absolute;inset:0;}
     .dti-item-swatch-pattern{position:absolute;inset:0;opacity:0.3;}
     .dti-item-name{font-size:0.72rem;font-weight:600;line-height:1.3;}
@@ -268,7 +269,7 @@
     @media(max-width:768px){
       .dti-top{flex-direction:column;}
       .dti-avatar-panel{flex:0 0 auto;padding:12px;flex-direction:row;gap:12px;}
-      .dti-figure-wrap{width:160px;height:220px;}
+      .dti-figure-wrap{width:100%;min-height:200px;flex:1;}
       .dti-outfit-label{text-align:left;}
       .dti-items{grid-template-columns:repeat(2,1fr);}
     }
@@ -3863,9 +3864,22 @@ function dtiRenderItems(cat){
     div.style.background = isPicked ? pal.ac+'14' : pal.tx+'06';
     div.style.borderColor = isPicked ? pal.ac : 'transparent';
     div.style.color = pal.tx;
+    // Build SVG silhouette preview if available
+    var svgPreview = '';
+    if(DTI_SVG[item.svg]){
+      // Choose viewBox per category for best framing
+      var vb = '0 0 160 400';
+      if(cat==='shoes') vb = '40 330 90 50';
+      else if(cat==='bottoms') vb = '30 160 110 200';
+      else if(cat==='tops') vb = '20 60 130 130';
+      else if(cat==='accessories') vb = '40 0 90 180';
+      else if(cat==='hair') vb = '40 -20 90 100';
+      svgPreview = '<svg viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85">'+DTI_SVG[item.svg](item.color)+'</svg>';
+    }
     div.innerHTML =
-      '<div class="dti-item-swatch" style="background:'+item.color+'20;border-color:'+pal.tx+'10">'+
-        '<div class="dti-item-swatch-inner" style="background:'+item.color+'"></div>'+
+      '<div class="dti-item-swatch" style="border-color:'+pal.tx+'10">'+
+        svgPreview+
+        (svgPreview ? '' : '<div class="dti-item-swatch-inner" style="background:'+item.color+'"></div>')+
       '</div>'+
       '<div class="dti-item-name">'+item.name+'</div>'+
       '<div class="dti-item-style">'+item.style+'</div>';
