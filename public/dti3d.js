@@ -28,18 +28,21 @@ function dti3DMaterial(hex, style) {
 }
 
 function dti3DSkinMat(hex) {
+  var c = dti3DColor(hex);
   if (THREE.MeshPhysicalMaterial) {
-    var c = dti3DColor(hex);
     return new THREE.MeshPhysicalMaterial({
       color: c,
-      roughness: 0.6,
+      roughness: 0.55,
       metalness: 0.0,
-      sheen: c.clone().lerp(new THREE.Color(0xff8866), 0.2),
-      clearcoat: 0.04,
-      side: THREE.DoubleSide
+      sheen: c.clone().lerp(new THREE.Color(0xff8866), 0.25),
+      clearcoat: 0.06,
+      clearcoatRoughness: 0.4,
+      side: THREE.DoubleSide,
+      emissive: c.clone().lerp(new THREE.Color(0xff6644), 0.5),
+      emissiveIntensity: 0.02,
     });
   }
-  return new THREE.MeshStandardMaterial({ color: dti3DColor(hex), roughness: 0.55, metalness: 0, side: THREE.DoubleSide });
+  return new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, metalness: 0, side: THREE.DoubleSide });
 }
 
 // Make a smooth body-of-revolution from a profile [ [radius, y], ... ]
@@ -65,7 +68,20 @@ function dti3DCapsule(radius, height, segs) {
 
 // Tapered limb: cylinder wider at top than bottom
 function dti3DTaperedLimb(rTop, rBot, height, segs) {
-  return new THREE.CylinderGeometry(rTop, rBot, height, segs || 16);
+  return new THREE.CylinderGeometry(rTop, rBot, height, segs || 20);
+}
+
+// Organic limb with slight muscle swell in the middle
+function dti3DOrganicLimb(rTop, rBot, height, segs) {
+  var mid = (rTop + rBot) / 2 * 1.08;
+  var pts = [
+    new THREE.Vector2(rTop, height/2),
+    new THREE.Vector2(rTop * 1.02, height/4),
+    new THREE.Vector2(mid, 0),
+    new THREE.Vector2(rBot * 1.02, -height/4),
+    new THREE.Vector2(rBot, -height/2),
+  ];
+  return new THREE.LatheGeometry(pts, segs || 20);
 }
 
 // Create a garment profile by scaling body profile outward by a factor
@@ -78,7 +94,9 @@ function dti3DGarmentProfile(bodyProfile, scaleFactor) {
 var DTI_BODY_TORSO = [
   [0.001, 0.72],[0.08, 0.7],[0.18, 0.66],[0.25, 0.58],
   [0.265, 0.52],[0.24, 0.44],[0.19, 0.36],[0.17, 0.32],
-  [0.18, 0.26],[0.23, 0.18],[0.235, 0.12],[0.22, 0.06],[0.2, 0.0],
+  [0.18, 0.26],[0.23, 0.18],[0.235, 0.12],
+  [0.22, 0.06],[0.21, 0.0],[0.19, -0.06],
+  [0.16, -0.12],[0.12, -0.16],[0.001, -0.18],
 ];
 
 // ── Scene Init ──
@@ -97,9 +115,9 @@ function dti3DInitScene() {
   dti3D.scene = scene;
 
   // Camera centered on avatar, FOV wide enough to see head-to-toe
-  var camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
-  camera.position.set(0, 0.1, 4.2);
-  camera.lookAt(0, 0, 0);
+  var camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 100);
+  camera.position.set(0, 0.35, 3.8);
+  camera.lookAt(0, 0.35, 0);
   dti3D.camera = camera;
 
   var renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -118,8 +136,11 @@ function dti3DInitScene() {
   dti3D.renderer = renderer;
 
   // Lighting — studio setup for realistic skin
-  // Warm ambient fill
-  scene.add(new THREE.AmbientLight(0xfff5f0, 0.55));
+  // Hemisphere light for natural ambient
+  var hemi = new THREE.HemisphereLight(0xfff8f0, 0xc8b8a8, 0.5);
+  scene.add(hemi);
+  // Dim ambient for base fill
+  scene.add(new THREE.AmbientLight(0xfff5f0, 0.15));
   // Key light: front-top-left, warm, casts shadows
   var key = new THREE.DirectionalLight(0xffe8d6, 1.6);
   key.position.set(-2, 4, 5);
@@ -149,7 +170,7 @@ function dti3DInitScene() {
     new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.1, roughness: 1 })
   );
   gnd.rotation.x = -Math.PI / 2;
-  gnd.position.y = -1.15;
+  gnd.position.y = -1.12;
   gnd.receiveShadow = true;
   scene.add(gnd);
 
@@ -163,7 +184,7 @@ function dti3DInitScene() {
   c.dampingFactor = 0.05;
   c.autoRotate = true;
   c.autoRotateSpeed = 0.8;
-  c.target.set(0, 0, 0);
+  c.target.set(0, 0.35, 0);
   dti3D.controls = c;
 
   dti3DBuildBody();
@@ -195,7 +216,7 @@ function dti3DBuildBody() {
   var skinHex = '#b88a60';
   var skin = dti3DSkinMat(skinHex);
   var darkSkin = new THREE.MeshStandardMaterial({ color: new THREE.Color(skinHex).offsetHSL(0, 0, -0.05), roughness: 0.6 });
-  var uwMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, side: THREE.DoubleSide });
+  var uwMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
 
   function add(geo, mat2, px, py, pz, rx, ry, rz, sx, sy, sz) {
     var m = new THREE.Mesh(geo, mat2);
@@ -208,7 +229,7 @@ function dti3DBuildBody() {
   }
 
   // ── HEAD ── smooth sphere, slightly taller than wide
-  add(new THREE.SphereGeometry(0.24, 24, 20), skin, 0, 1.52, 0, 0, 0, 0, 1, 1.1, 0.95);
+  add(new THREE.SphereGeometry(0.24, 32, 28), skin, 0, 1.52, 0, 0, 0, 0, 1, 1.1, 0.95);
 
   // Jaw — subtle widening at bottom of head
   add(new THREE.SphereGeometry(0.17, 16, 12, 0, Math.PI * 2, Math.PI * 0.4, Math.PI * 0.4), skin, 0, 1.42, 0.02, 0, 0, 0, 1.1, 0.7, 0.9);
@@ -264,7 +285,9 @@ function dti3DBuildBody() {
   add(new THREE.SphereGeometry(0.05, 8, 8), blush, 0.14, 1.5, 0.16, 0, 0, 0, 1.2, 0.7, 0.4);
 
   // ── NECK ── tapered cylinder
-  add(dti3DTaperedLimb(0.075, 0.085, 0.18, 16), skin, 0, 1.24, 0);
+  add(dti3DTaperedLimb(0.075, 0.085, 0.24, 20), skin, 0, 1.24, 0);
+  // Collar sphere bridging neck-torso seam
+  add(new THREE.SphereGeometry(0.1, 16, 12), skin, 0, 1.14, 0, 0, 0, 0, 1.2, 0.6, 1.0);
 
   // ── TORSO ── LatheGeometry hourglass
   var torso = dti3DLathe([
@@ -281,14 +304,14 @@ function dti3DBuildBody() {
     [0.235, 0.12],
     [0.22, 0.06],
     [0.2, 0.0],    // bottom
-  ], 32);
+  ], 48);
   var torsoMesh = add(torso, skin, 0, 0.42, 0);
 
   // ── DEFAULT UNDERWEAR ──
   // Sports bra
   var braLathe = dti3DLathe([
-    [0.2, 0.14], [0.258, 0.1], [0.27, 0.04], [0.265, -0.01],
-    [0.25, -0.06], [0.22, -0.1], [0.2, -0.12],
+    [0.203, 0.14], [0.262, 0.1], [0.274, 0.04], [0.269, -0.01],
+    [0.254, -0.06], [0.223, -0.1], [0.203, -0.12],
   ], 24);
   add(braLathe, uwMat, 0, 0.92, 0);
   // Bra straps
@@ -296,8 +319,8 @@ function dti3DBuildBody() {
   add(new THREE.CylinderGeometry(0.012, 0.012, 0.2, 6), uwMat, 0.14, 1.1, 0.04, 0.15, 0, -0.12);
   // Shorts
   var shortsLathe = dti3DLathe([
-    [0.235, 0.06], [0.24, 0.02], [0.235, -0.02],
-    [0.22, -0.06], [0.16, -0.1],
+    [0.239, 0.06], [0.244, 0.02], [0.239, -0.02],
+    [0.223, -0.06], [0.162, -0.1],
   ], 24);
   add(shortsLathe, uwMat, 0, 0.22, 0);
   // Inner short legs
@@ -306,54 +329,62 @@ function dti3DBuildBody() {
 
   // ── ARMS ── smooth tapered with sphere joints
   // Shoulders
-  add(new THREE.SphereGeometry(0.08, 14, 10), skin, -0.3, 0.96, 0);
-  add(new THREE.SphereGeometry(0.08, 14, 10), skin, 0.3, 0.96, 0);
-  // Upper arms
-  add(dti3DTaperedLimb(0.065, 0.055, 0.34, 14), skin, -0.32, 0.76, 0, 0, 0, 0.06);
-  add(dti3DTaperedLimb(0.065, 0.055, 0.34, 14), skin, 0.32, 0.76, 0, 0, 0, -0.06);
+  add(new THREE.SphereGeometry(0.095, 16, 14), skin, -0.3, 0.96, 0);
+  add(new THREE.SphereGeometry(0.095, 16, 14), skin, 0.3, 0.96, 0);
+  // Upper arms — organic taper
+  add(dti3DOrganicLimb(0.065, 0.055, 0.34, 20), skin, -0.32, 0.78, 0, 0, 0, 0.06);
+  add(dti3DOrganicLimb(0.065, 0.055, 0.34, 20), skin, 0.32, 0.78, 0, 0, 0, -0.06);
   // Elbows
-  add(new THREE.SphereGeometry(0.052, 10, 8), skin, -0.34, 0.56, 0.01);
-  add(new THREE.SphereGeometry(0.052, 10, 8), skin, 0.34, 0.56, 0.01);
-  // Forearms
-  add(dti3DTaperedLimb(0.05, 0.038, 0.34, 14), skin, -0.35, 0.36, 0.03, 0.08, 0, 0.04);
-  add(dti3DTaperedLimb(0.05, 0.038, 0.34, 14), skin, 0.35, 0.36, 0.03, 0.08, 0, -0.04);
+  add(new THREE.SphereGeometry(0.06, 16, 14), skin, -0.34, 0.56, 0.01);
+  add(new THREE.SphereGeometry(0.06, 16, 14), skin, 0.34, 0.56, 0.01);
+  // Forearms — organic taper
+  add(dti3DOrganicLimb(0.05, 0.038, 0.34, 20), skin, -0.35, 0.36, 0.03, 0.08, 0, 0.04);
+  add(dti3DOrganicLimb(0.05, 0.038, 0.34, 20), skin, 0.35, 0.36, 0.03, 0.08, 0, -0.04);
   // Wrists
-  add(new THREE.SphereGeometry(0.035, 8, 8), skin, -0.36, 0.17, 0.05);
-  add(new THREE.SphereGeometry(0.035, 8, 8), skin, 0.36, 0.17, 0.05);
-  // Hands — slightly flattened spheres
-  add(new THREE.SphereGeometry(0.04, 10, 8), skin, -0.37, 0.1, 0.06, 0, 0, 0, 0.8, 1, 0.5);
-  add(new THREE.SphereGeometry(0.04, 10, 8), skin, 0.37, 0.1, 0.06, 0, 0, 0, 0.8, 1, 0.5);
-  // Fingers (simplified — three tiny cylinders per hand)
-  var fingerGeo = new THREE.CylinderGeometry(0.008, 0.006, 0.05, 6);
+  add(new THREE.SphereGeometry(0.035, 12, 10), skin, -0.36, 0.17, 0.05);
+  add(new THREE.SphereGeometry(0.035, 12, 10), skin, 0.36, 0.17, 0.05);
+  // ── HANDS ── properly proportioned
+  // Palm — wider, flatter
+  add(new THREE.SphereGeometry(0.055, 12, 10), skin, -0.37, 0.12, 0.06, 0, 0, 0, 0.65, 0.9, 0.4);
+  add(new THREE.SphereGeometry(0.055, 12, 10), skin, 0.37, 0.12, 0.06, 0, 0, 0, 0.65, 0.9, 0.4);
+  // Fingers — 4 per hand, longer and properly spaced
+  var fingerGeo = new THREE.CylinderGeometry(0.01, 0.008, 0.07, 6);
   [-0.37, 0.37].forEach(function(hx) {
     var sign = hx < 0 ? -1 : 1;
-    for (var fi = 0; fi < 3; fi++) {
-      add(fingerGeo, skin, hx + sign * (-0.015 + fi * 0.015), 0.065, 0.06 + fi * 0.005, 0.1, 0, 0);
+    for (var fi = 0; fi < 4; fi++) {
+      var spread = (-0.02 + fi * 0.013);
+      add(fingerGeo, skin, hx + sign * spread, 0.08, 0.06 + fi * 0.003, 0.15, 0, 0);
+      // Fingertip spheres
+      add(new THREE.SphereGeometry(0.009, 6, 4), skin, hx + sign * spread, 0.008 + 0.035, 0.065 + fi * 0.003);
     }
+    // Thumb — shorter, angled outward
+    add(new THREE.CylinderGeometry(0.012, 0.009, 0.055, 6), skin, hx + sign * 0.03, 0.12, 0.08, 0.4, 0, sign * 0.5);
   });
 
   // ── LEGS ──
-  // Hips — smooth spheres
-  add(new THREE.SphereGeometry(0.1, 14, 10), skin, -0.12, 0.15, 0);
-  add(new THREE.SphereGeometry(0.1, 14, 10), skin, 0.12, 0.15, 0);
-  // Thighs
-  add(dti3DTaperedLimb(0.095, 0.075, 0.48, 16), skin, -0.12, -0.14, 0);
-  add(dti3DTaperedLimb(0.095, 0.075, 0.48, 16), skin, 0.12, -0.14, 0);
-  // Knees
-  add(new THREE.SphereGeometry(0.065, 10, 10), skin, -0.12, -0.42, 0);
-  add(new THREE.SphereGeometry(0.065, 10, 10), skin, 0.12, -0.42, 0);
-  // Calves
-  add(dti3DTaperedLimb(0.065, 0.045, 0.5, 16), skin, -0.12, -0.7, 0);
-  add(dti3DTaperedLimb(0.065, 0.045, 0.5, 16), skin, 0.12, -0.7, 0);
-  // Ankles
-  add(new THREE.SphereGeometry(0.04, 8, 8), skin, -0.12, -0.97, 0);
-  add(new THREE.SphereGeometry(0.04, 8, 8), skin, 0.12, -0.97, 0);
-  // Feet — elongated rounded shapes
+  // Hips — smooth spheres (larger for overlap)
+  add(new THREE.SphereGeometry(0.12, 16, 14), skin, -0.12, 0.15, 0);
+  add(new THREE.SphereGeometry(0.12, 16, 14), skin, 0.12, 0.15, 0);
+  // Thighs — organic taper
+  add(dti3DOrganicLimb(0.095, 0.075, 0.48, 24), skin, -0.12, -0.14, 0);
+  add(dti3DOrganicLimb(0.095, 0.075, 0.48, 24), skin, 0.12, -0.14, 0);
+  // Knees (larger for overlap)
+  add(new THREE.SphereGeometry(0.075, 16, 14), skin, -0.12, -0.42, 0);
+  add(new THREE.SphereGeometry(0.075, 16, 14), skin, 0.12, -0.42, 0);
+  // Calves — organic taper
+  add(dti3DOrganicLimb(0.065, 0.045, 0.5, 24), skin, -0.12, -0.7, 0);
+  add(dti3DOrganicLimb(0.065, 0.045, 0.5, 24), skin, 0.12, -0.7, 0);
+  // Ankles (larger for overlap)
+  add(new THREE.SphereGeometry(0.05, 12, 10), skin, -0.12, -0.99, 0);
+  add(new THREE.SphereGeometry(0.05, 12, 10), skin, 0.12, -0.99, 0);
+  // Feet — longer, flatter, with toe and heel shape
   var footLathe = dti3DLathe([
-    [0.001, 0.1], [0.035, 0.08], [0.05, 0.04], [0.055, 0], [0.05, -0.03], [0.03, -0.05], [0.001, -0.06]
-  ], 12);
-  add(footLathe, skin, -0.12, -1.04, 0.06, Math.PI / 2, 0, 0, 1.1, 1.8, 0.8);
-  add(footLathe, skin, 0.12, -1.04, 0.06, Math.PI / 2, 0, 0, 1.1, 1.8, 0.8);
+    [0.001, 0.14], [0.03, 0.12], [0.045, 0.08], [0.04, 0.04],
+    [0.035, 0.0], [0.045, -0.04], [0.05, -0.08],
+    [0.04, -0.1], [0.025, -0.11], [0.001, -0.12],
+  ], 14);
+  add(footLathe, skin, -0.12, -1.03, 0.04, Math.PI / 2, 0, 0, 1.0, 1.5, 0.65);
+  add(footLathe, skin, 0.12, -1.03, 0.04, Math.PI / 2, 0, 0, 1.0, 1.5, 0.65);
 
   dti3D.avatarGroup = g;
   dti3D.scene.add(g);
