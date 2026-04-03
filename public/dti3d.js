@@ -303,7 +303,11 @@ function dti3DBuildBody() {
     [0.23, 0.18],  // hips (widest)
     [0.235, 0.12],
     [0.22, 0.06],
-    [0.2, 0.0],    // bottom
+    [0.21, 0.0],
+    [0.19, -0.06],
+    [0.16, -0.12],
+    [0.12, -0.16],
+    [0.001, -0.18], // extends down to overlap hips
   ], 48);
   var torsoMesh = add(torso, skin, 0, 0.42, 0);
 
@@ -314,9 +318,9 @@ function dti3DBuildBody() {
     [0.254, -0.06], [0.223, -0.1], [0.203, -0.12],
   ], 24);
   add(braLathe, uwMat, 0, 0.92, 0);
-  // Bra straps
-  add(new THREE.CylinderGeometry(0.012, 0.012, 0.2, 6), uwMat, -0.14, 1.1, 0.04, 0.15, 0, 0.12);
-  add(new THREE.CylinderGeometry(0.012, 0.012, 0.2, 6), uwMat, 0.14, 1.1, 0.04, 0.15, 0, -0.12);
+  // Bra straps — drape from shoulders down to bra cups
+  add(new THREE.CylinderGeometry(0.012, 0.012, 0.25, 6), uwMat, -0.14, 1.05, 0.06, 0.45, 0, -0.12);
+  add(new THREE.CylinderGeometry(0.012, 0.012, 0.25, 6), uwMat, 0.14, 1.05, 0.06, 0.45, 0, 0.12);
   // Shorts
   var shortsLathe = dti3DLathe([
     [0.239, 0.06], [0.244, 0.02], [0.239, -0.02],
@@ -341,24 +345,24 @@ function dti3DBuildBody() {
   add(dti3DOrganicLimb(0.05, 0.038, 0.34, 20), skin, -0.35, 0.36, 0.03, 0.08, 0, 0.04);
   add(dti3DOrganicLimb(0.05, 0.038, 0.34, 20), skin, 0.35, 0.36, 0.03, 0.08, 0, -0.04);
   // Wrists
-  add(new THREE.SphereGeometry(0.035, 12, 10), skin, -0.36, 0.17, 0.05);
-  add(new THREE.SphereGeometry(0.035, 12, 10), skin, 0.36, 0.17, 0.05);
+  add(new THREE.SphereGeometry(0.04, 12, 10), skin, -0.36, 0.17, 0.05);
+  add(new THREE.SphereGeometry(0.04, 12, 10), skin, 0.36, 0.17, 0.05);
   // ── HANDS ── properly proportioned
   // Palm — wider, flatter
-  add(new THREE.SphereGeometry(0.055, 12, 10), skin, -0.37, 0.12, 0.06, 0, 0, 0, 0.65, 0.9, 0.4);
-  add(new THREE.SphereGeometry(0.055, 12, 10), skin, 0.37, 0.12, 0.06, 0, 0, 0, 0.65, 0.9, 0.4);
+  add(new THREE.SphereGeometry(0.078, 12, 10), skin, -0.37, 0.12, 0.06, 0, 0, 0, 0.85, 1.1, 0.55);
+  add(new THREE.SphereGeometry(0.078, 12, 10), skin, 0.37, 0.12, 0.06, 0, 0, 0, 0.85, 1.1, 0.55);
   // Fingers — 4 per hand, longer and properly spaced
-  var fingerGeo = new THREE.CylinderGeometry(0.01, 0.008, 0.07, 6);
+  var fingerGeo = new THREE.CylinderGeometry(0.013, 0.011, 0.09, 6);
   [-0.37, 0.37].forEach(function(hx) {
     var sign = hx < 0 ? -1 : 1;
     for (var fi = 0; fi < 4; fi++) {
-      var spread = (-0.02 + fi * 0.013);
-      add(fingerGeo, skin, hx + sign * spread, 0.08, 0.06 + fi * 0.003, 0.15, 0, 0);
+      var spread = (-0.025 + fi * 0.017);
+      add(fingerGeo, skin, hx + sign * spread, 0.055, 0.06 + fi * 0.004, 0.15, 0, 0);
       // Fingertip spheres
-      add(new THREE.SphereGeometry(0.009, 6, 4), skin, hx + sign * spread, 0.008 + 0.035, 0.065 + fi * 0.003);
+      add(new THREE.SphereGeometry(0.012, 6, 4), skin, hx + sign * spread, 0.007, 0.065 + fi * 0.004);
     }
     // Thumb — shorter, angled outward
-    add(new THREE.CylinderGeometry(0.012, 0.009, 0.055, 6), skin, hx + sign * 0.03, 0.12, 0.08, 0.4, 0, sign * 0.5);
+    add(new THREE.CylinderGeometry(0.015, 0.012, 0.07, 6), skin, hx + sign * 0.04, 0.12, 0.09, 0.4, 0, sign * 0.5);
   });
 
   // ── LEGS ──
