@@ -206,8 +206,8 @@
     /* Avatar panel — SVG figure */
     .dti-avatar-panel{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;padding:20px 16px;position:relative;overflow:hidden;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
-    .dti-figure-wrap{position:relative;width:160px;height:400px;margin:0 auto;}
-    .dti-figure{width:100%;height:100%;}
+    .dti-figure-wrap{position:relative;width:300px;height:450px;margin:0 auto;}
+    .dti-figure-wrap canvas{width:100%!important;height:100%!important;display:block;border-radius:12px;}
     .dti-skin-row{display:flex;gap:6px;justify-content:center;margin-top:10px;}
     .dti-skin-btn{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.15s;padding:0;background:none;}
     .dti-skin-btn:hover{transform:scale(1.15);}
@@ -268,7 +268,7 @@
     @media(max-width:768px){
       .dti-top{flex-direction:column;}
       .dti-avatar-panel{flex:0 0 auto;padding:12px;flex-direction:row;gap:12px;}
-      .dti-figure-wrap{width:90px;height:180px;}
+      .dti-figure-wrap{width:160px;height:220px;}
       .dti-outfit-label{text-align:left;}
       .dti-items{grid-template-columns:repeat(2,1fr);}
     }
@@ -931,103 +931,7 @@
     <div id="dtiView">
       <div class="dti-top" id="dtiGame">
         <div class="dti-avatar-panel" id="dtiAvatarPanel">
-          <div class="dti-figure-wrap">
-            <svg class="dti-figure" id="dtiFigure" viewBox="0 0 160 400" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="skinGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#908070"/>
-                  <stop offset="45%" stop-color="#a89888"/>
-                  <stop offset="100%" stop-color="#887868"/>
-                </linearGradient>
-                <linearGradient id="skinGradV" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#a09080"/>
-                  <stop offset="100%" stop-color="#988878"/>
-                </linearGradient>
-              </defs>
-
-
-
-              <!-- Floor shadow -->
-              <ellipse cx="80" cy="374" rx="20" ry="3" fill="#000" opacity="0.06"/>
-              <ellipse cx="80" cy="374" rx="12" ry="2" fill="#000" opacity="0.04"/>
-
-              <!-- === BODY === -->
-              <!-- Left leg — smooth taper to ankle -->
-              <path d="M67 190 Q66 220 65 260 Q64 300 63 330 Q63 345 64 350 Q64 356 70 356 L76 356 Q79 356 79 350 Q79 340 80 300 L80 198" fill="url(#skinGrad)"/>
-              <!-- Right leg -->
-              <path d="M80 198 Q81 260 81 300 Q81 340 81 350 Q81 356 84 356 L90 356 Q96 356 97 350 Q97 345 96 330 Q95 300 94 260 Q94 220 93 190" fill="url(#skinGrad)"/>
-              <!-- Thigh inner shadow -->
-              <path d="M76 195 Q78 220 79 260" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
-              <path d="M84 195 Q82 220 81 260" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
-              <!-- Knee soft curve -->
-              <path d="M68 265 Q72 268 76 265" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.04"/>
-              <path d="M84 265 Q88 268 92 265" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.04"/>
-              <!-- Shin highlight -->
-              <path d="M71 270 L70 340" stroke="#b8a898" stroke-width="1.5" fill="none" opacity="0.05"/>
-              <path d="M89 270 L90 340" stroke="#b8a898" stroke-width="1.5" fill="none" opacity="0.05"/>
-
-              <!-- Torso — soft hourglass, cute proportions -->
-              <path d="M54 78 Q52 74 56 72 L104 72 Q108 74 106 78 L104 98 Q100 112 95 116 Q92 120 90 140 Q88 160 88 170 Q90 182 98 190 L62 190 Q70 182 72 170 Q72 160 70 140 Q68 120 65 116 Q60 112 56 98 Z" fill="url(#skinGrad)"/>
-              <!-- Center highlight — gives 3D roundness -->
-              <path d="M76 78 Q80 80 84 78 L82 98 Q81 112 80 118 Q80 140 80 170 Q80 182 82 190 L78 190 Q80 182 80 170 Q80 140 80 118 Q79 112 78 98 Z" fill="#c0b0a0" opacity="0.08"/>
-              <!-- Waist curve accents -->
-              <path d="M54 78 L56 98 Q60 112 65 116" stroke="#887868" stroke-width="0.8" fill="none" opacity="0.06"/>
-              <path d="M106 78 L104 98 Q100 112 95 116" stroke="#887868" stroke-width="0.8" fill="none" opacity="0.06"/>
-              <!-- Collarbone -->
-              <path d="M58 74 Q70 78 80 76 Q90 78 102 74" stroke="#988878" stroke-width="0.5" fill="none" opacity="0.06"/>
-
-              <!-- Arms — slim, slightly curved, relaxed -->
-              <path d="M54 76 Q46 74 42 78 Q36 86 36 100 Q36 120 37 140 L38 158 Q38 166 42 164 L44 157 Q46 136 48 110 Q50 90 54 82" fill="url(#skinGradV)"/>
-              <path d="M106 76 Q114 74 118 78 Q124 86 124 100 Q124 120 123 140 L122 158 Q122 166 118 164 L116 157 Q114 136 112 110 Q110 90 106 82" fill="url(#skinGradV)"/>
-              <!-- Arm inner shadow -->
-              <path d="M42 78 Q36 86 36 100 Q36 120 37 140" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
-              <path d="M118 78 Q124 86 124 100 Q124 120 123 140" stroke="#887868" stroke-width="0.6" fill="none" opacity="0.06"/>
-              <!-- Hands — small, dainty -->
-              <ellipse cx="41" cy="165" rx="4.5" ry="5.5" fill="url(#skinGradV)"/>
-              <ellipse cx="119" cy="165" rx="4.5" ry="5.5" fill="url(#skinGradV)"/>
-
-              <!-- Neck — thin, elegant -->
-              <path d="M76 54 Q76 50 77 48 L83 48 Q84 50 84 54 L84 72 L76 72 Z" fill="url(#skinGradV)"/>
-              <!-- Neck shadow at base -->
-              <path d="M76 70 Q80 72 84 70" stroke="#887868" stroke-width="0.4" fill="none" opacity="0.05"/>
-
-              <!-- DEFAULT UNDERWEAR -->
-              <!-- Sports bra -->
-              <path d="M58 78 Q56 76 60 74 L100 74 Q104 76 102 78 L102 98 Q102 102 98 102 L62 102 Q58 102 58 98 Z" fill="#2a2a2a"/>
-              <path d="M58 80 L102 80" stroke="#3a3a3a" stroke-width="0.4" opacity="0.3"/>
-              <path d="M80 74 L80 102" stroke="#3a3a3a" stroke-width="0.3" opacity="0.1"/>
-              <!-- Straps -->
-              <path d="M66 74 Q67 64 68 56" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round"/>
-              <path d="M94 74 Q93 64 92 56" stroke="#2a2a2a" stroke-width="2" stroke-linecap="round"/>
-              <!-- Shorts -->
-              <path d="M66 168 Q64 180 63 196 Q63 200 68 200 L78 200 Q80 200 80 196 L80 176" fill="#2a2a2a"/>
-              <path d="M80 176 Q80 190 80 196 Q80 200 82 200 L92 200 Q97 200 97 196 Q96 180 94 168" fill="#2a2a2a"/>
-              <path d="M66 168 Q80 172 94 168" stroke="#1a1a1a" stroke-width="0.4" opacity="0.2"/>
-
-              <!-- Clothing layers (render ON TOP of body) -->
-              <g id="dtiLayerBottom"></g>
-              <g id="dtiLayerShoes"></g>
-              <g id="dtiLayerTop"></g>
-              <g id="dtiLayerAcc"></g>
-              <g id="dtiLayerHairBack"></g>
-
-              <!-- HEAD — cute rounded block -->
-              <path d="M62 10 Q62 4 68 4 L92 4 Q98 4 98 10 L98 50 Q98 58 92 58 L68 58 Q62 58 62 50 Z" fill="url(#skinGradV)"/>
-              <!-- 3D side shading -->
-              <path d="M62 10 Q62 4 68 4 L72 4 L72 58 L68 58 Q62 58 62 50 Z" fill="#887868" opacity="0.06"/>
-              <path d="M88 4 L92 4 Q98 4 98 10 L98 50 Q98 58 92 58 L88 58 Z" fill="#887868" opacity="0.06"/>
-              <!-- Top highlight -->
-              <path d="M70 4 Q80 2 90 4 L90 8 Q80 6 70 8 Z" fill="#c0b0a0" opacity="0.06"/>
-              <!-- Chin roundness -->
-              <path d="M68 54 Q80 60 92 54" stroke="#988878" stroke-width="0.5" fill="none" opacity="0.04"/>
-              <!-- Subtle cheek blush -->
-              <ellipse cx="67" cy="38" rx="4" ry="3" fill="#c8a090" opacity="0.04"/>
-              <ellipse cx="93" cy="38" rx="4" ry="3" fill="#c8a090" opacity="0.04"/>
-
-              <!-- Hair front layer -->
-              <g id="dtiLayerHair"></g>
-            </svg>
-          </div>
+          <div class="dti-figure-wrap" id="dti3DContainer"></div>
           <div class="dti-skin-row" id="dtiSkinRow"></div>
           <div class="dti-outfit-label" id="dtiOutfitSummary"></div>
         </div>
@@ -1348,6 +1252,9 @@
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="/dti3d.js"></script>
 <script>
 
 // ─── ALL DATA + QUIZ JS (preserved from original) ────────
@@ -3179,10 +3086,10 @@ var DTI_THEMES = [
   'Paris in Autumn','Sleepover Chic','Movie Premiere','Bookshop Date','Sunset Picnic'
 ];
 
-// Helper: darken/lighten for shading
+// Helper: darken/lighten for shading (kept for swatch previews)
 function dtiShade(hex,amt){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});var r=Math.max(0,Math.min(255,c[0]+amt)),g=Math.max(0,Math.min(255,c[1]+amt)),b=Math.max(0,Math.min(255,c[2]+amt));return'#'+(r<16?'0':'')+r.toString(16)+(g<16?'0':'')+g.toString(16)+(b<16?'0':'')+b.toString(16);}catch(e){return hex;}}
 
-// SVG clothing shapes — detailed with shading, folds, highlights
+// SVG clothing shapes kept for swatch mini-previews in item grid
 var DTI_SVG = {
   // ── HAIR ── DTI style: layered, flowing strands, curtain bangs, sits on block head
   // Head rect at x=62-98, y=4-58. Neck y=58-72. Shoulders y=72.
@@ -3822,18 +3729,9 @@ var DTI_TOTAL_TIME = 90;
 function dtiSetSkin(idx){
   dtiState.skinIdx = idx;
   var s = DTI_SKIN_TONES[idx];
-  // Update horizontal body gradient (3 stops: dark-light-dark for 3D look)
-  var stops = document.querySelectorAll('#skinGrad stop');
-  if(stops.length>=3){
-    stops[0].setAttribute('stop-color',s.lo);
-    stops[1].setAttribute('stop-color',s.hi);
-    stops[2].setAttribute('stop-color',s.lo);
-  }
-  // Update vertical gradient (arms, neck, head)
-  var vstops = document.querySelectorAll('#skinGradV stop');
-  if(vstops.length>=2){
-    vstops[0].setAttribute('stop-color',s.hi);
-    vstops[1].setAttribute('stop-color',s.base);
+  // Update 3D avatar skin color
+  if (dti3D.scene) {
+    dti3DUpdateSkin(s);
   }
   // Update skin row buttons
   document.querySelectorAll('.dti-skin-btn').forEach(function(b,i){
@@ -3862,10 +3760,13 @@ function dtiInit(){
   dtiRenderSkinPicker();
   dtiSetSkin(dtiState.skinIdx);
 
-  // Clear clothing layers
-  ['dtiLayerHair','dtiLayerHairBack','dtiLayerTop','dtiLayerBottom','dtiLayerShoes','dtiLayerAcc'].forEach(function(id){
-    document.getElementById(id).innerHTML = '';
-  });
+  // Initialize 3D scene (creates scene if first time, or clears clothing)
+  if (!dti3D.scene) {
+    // Delay slightly to ensure container is visible and has dimensions
+    setTimeout(function(){ dti3DInitScene(); dtiSetSkin(dtiState.skinIdx); }, 50);
+  } else {
+    dti3DClearClothing();
+  }
 
   // Style panels
   document.getElementById('dtiAvatarPanel').style.background = pal.bg;
@@ -3959,11 +3860,6 @@ function dtiRenderItems(cat){
     div.style.background = isPicked ? pal.ac+'14' : pal.tx+'06';
     div.style.borderColor = isPicked ? pal.ac : 'transparent';
     div.style.color = pal.tx;
-    // Swatch with mini SVG preview
-    var miniSvg = '';
-    if(DTI_SVG[item.svg]){
-      miniSvg = '<svg viewBox="0 0 160 310" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.6">'+DTI_SVG[item.svg](item.color)+'</svg>';
-    }
     div.innerHTML =
       '<div class="dti-item-swatch" style="background:'+item.color+'20;border-color:'+pal.tx+'10">'+
         '<div class="dti-item-swatch-inner" style="background:'+item.color+'"></div>'+
@@ -3982,28 +3878,16 @@ function dtiRenderItems(cat){
 }
 
 function dtiUpdateFigure(){
-  var layerMap = {tops:'dtiLayerTop',bottoms:'dtiLayerBottom',shoes:'dtiLayerShoes',accessories:'dtiLayerAcc'};
-  for(var cat in layerMap){
-    var layer = document.getElementById(layerMap[cat]);
+  // 3D clothing update
+  if (!dti3D.scene || !dti3D.clothingGroup) return;
+  dti3DClearClothing();
+  var cats = ['hair','tops','bottoms','shoes','accessories'];
+  cats.forEach(function(cat){
     var pick = dtiState.picks[cat];
-    if(pick && DTI_SVG[pick.svg]){
-      layer.innerHTML = DTI_SVG[pick.svg](pick.color);
-    } else {
-      layer.innerHTML = '';
+    if(pick && DTI_3D[pick.svg]){
+      dti3DAddClothing(pick.svg, pick.color, pick.style);
     }
-  }
-  // Hair in both layers: back (behind head for flowing hair) + front (bangs over face)
-  var hp = dtiState.picks.hair;
-  var bk = document.getElementById('dtiLayerHairBack');
-  var fr = document.getElementById('dtiLayerHair');
-  if(hp && DTI_SVG[hp.svg]){
-    var svg = DTI_SVG[hp.svg](hp.color);
-    bk.innerHTML = svg;
-    fr.innerHTML = svg;
-  } else {
-    bk.innerHTML = '';
-    fr.innerHTML = '';
-  }
+  });
 }
 
 function dtiUpdateSummary(){
@@ -4051,6 +3935,9 @@ async function dtiSubmit(){
   var pal = searchPal;
   document.getElementById('dtiSubmitBtn').disabled = true;
   document.getElementById('dtiSubmitBtn').textContent = 'Judging...';
+
+  // Trigger 3D runway spin
+  if (typeof dti3DRunwaySpin === 'function') dti3DRunwaySpin();
 
   var fName = getFloveeName();
   var aeName = resolveAeName();
