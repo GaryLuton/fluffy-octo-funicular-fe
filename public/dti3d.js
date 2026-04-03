@@ -455,269 +455,317 @@ var DTI_3D = {};
 
 // ── HAIR ──
 // Head center: y=1.52, radius ~0.24. Top of skull ~1.76
+// Eyes: y≈1.55. Eyebrows: y≈1.58. Hairline: y≈1.68
+// Body bounds: torso x≈±0.22, arms x≈±0.35, torso front z≈0.14, back z≈-0.14
+
+// Helper: finalize hair group with render ordering and FrontSide
+function dti3DHairFinalize(grp) {
+  grp.renderOrder = 2;
+  grp.traverse(function(o) {
+    if (o.isMesh) {
+      o.renderOrder = 2;
+      if (o.material) {
+        o.material.side = THREE.FrontSide;
+        o.material.depthWrite = true;
+        o.material.polygonOffset = true;
+        o.material.polygonOffsetFactor = -1;
+        o.material.polygonOffsetUnits = -1;
+      }
+    }
+  });
+  return grp;
+}
 
 DTI_3D.hair = function(c, s) {
   // Straight with curtain bangs — smooth cap, side curtains, back panel
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  // Smooth hair cap
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 20, 14, 0, Math.PI*2, 0, Math.PI*0.52), m);
+  // Smooth hair cap — higher segments for smoothness
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 18, 0, Math.PI*2, 0, Math.PI*0.52), m);
   cap.position.set(0, 1.56, -0.01); cap.scale.set(1.02, 1.02, 0.98); g.add(cap);
-  // Left side curtain — long panel
-  var sideL = dti3DLathe([[0.001,0.35],[0.04,0.32],[0.055,0.2],[0.05,0],[0.04,-0.2],[0.025,-0.35],[0.001,-0.38]], 10);
-  var sL = new THREE.Mesh(sideL, m);
-  sL.position.set(-0.24, 1.1, 0.03); sL.rotation.z = 0.06; g.add(sL);
-  // Right side
-  var sR = new THREE.Mesh(sideL.clone(), m);
-  sR.position.set(0.24, 1.1, 0.03); sR.rotation.z = -0.06; g.add(sR);
-  // Back hair — thick slab
-  var backGeo = dti3DLathe([[0.001,0.4],[0.22,0.36],[0.24,0.2],[0.23,0],[0.22,-0.2],[0.21,-0.35],[0.18,-0.4]], 20);
+  // Left side curtain — outside arm width, flowing taper
+  var sideGeo = dti3DLathe([[0.001,0.35],[0.04,0.32],[0.05,0.2],[0.048,0],[0.04,-0.2],[0.025,-0.35],[0.001,-0.38]], 14);
+  var sL = new THREE.Mesh(sideGeo, m);
+  sL.position.set(-0.29, 1.1, 0.08); sL.rotation.z = 0.06; g.add(sL);
+  var sR = new THREE.Mesh(sideGeo.clone(), m);
+  sR.position.set(0.29, 1.1, 0.08); sR.rotation.z = -0.06; g.add(sR);
+  // Back hair — behind torso
+  var backGeo = dti3DLathe([[0.001,0.4],[0.22,0.36],[0.24,0.2],[0.23,0],[0.22,-0.2],[0.21,-0.35],[0.18,-0.4]], 22);
   var bk = new THREE.Mesh(backGeo, m);
-  bk.position.set(0, 1.08, -0.12); bk.scale.set(1, 1, 0.35); g.add(bk);
-  // Curtain bangs — two curved pieces framing face
-  var bangGeo = new THREE.SphereGeometry(0.08, 10, 8, 0, Math.PI, 0, Math.PI*0.5);
-  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.13, 1.58, 0.18); bL.rotation.set(0.4, 0.3, 0.2); bL.scale.set(1.3, 1, 0.5); g.add(bL);
-  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.13, 1.58, 0.18); bR.rotation.set(0.4, -0.3, -0.2); bR.scale.set(1.3, 1, 0.5); g.add(bR);
-  return g;
+  bk.position.set(0, 1.08, -0.18); bk.scale.set(1, 1, 0.35); g.add(bk);
+  // Curtain bangs — framing sides of face, above eyebrows (y≥1.58)
+  var bangGeo = new THREE.SphereGeometry(0.07, 14, 10, 0, Math.PI, 0, Math.PI*0.4);
+  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.15, 1.64, 0.19); bL.rotation.set(0.3, 0.3, 0.15); bL.scale.set(1.2, 0.7, 0.35); g.add(bL);
+  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.15, 1.64, 0.19); bR.rotation.set(0.3, -0.3, -0.15); bR.scale.set(1.2, 0.7, 0.35); g.add(bR);
+  // Highlight layer — thin lighter mesh for shine
+  var hm = dti3DMaterial(dtiShade(c, 20), s);
+  var hl = new THREE.Mesh(new THREE.SphereGeometry(0.265, 20, 12, 0, Math.PI*2, 0, Math.PI*0.35), hm);
+  hl.position.set(0, 1.58, 0.02); hl.scale.set(1.03, 1, 0.6); g.add(hl);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_short = function(c, s) {
   // Short bob — cap with chin-length sides, no long back
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 20, 14, 0, Math.PI*2, 0, Math.PI*0.55), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 18, 0, Math.PI*2, 0, Math.PI*0.55), m);
   cap.position.set(0, 1.55, -0.01); cap.scale.set(1.04, 1, 1); g.add(cap);
-  // Short sides — end at jaw
-  var sidePts = [[0.001,0.18],[0.045,0.15],[0.06,0.05],[0.055,-0.05],[0.04,-0.12],[0.02,-0.16],[0.001,-0.18]];
-  var sGeo = dti3DLathe(sidePts, 10);
-  var sL = new THREE.Mesh(sGeo, m); sL.position.set(-0.24, 1.3, 0.02); g.add(sL);
-  var sR = new THREE.Mesh(sGeo.clone(), m); sR.position.set(0.24, 1.3, 0.02); g.add(sR);
-  // Short back
-  var bk = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 10, 0, Math.PI*2, 0, Math.PI*0.6), m);
-  bk.position.set(0, 1.5, -0.08); bk.scale.set(1, 0.7, 0.6); g.add(bk);
-  // Bangs — fringe across forehead
-  var fringeGeo = new THREE.SphereGeometry(0.15, 14, 8, 0, Math.PI, 0, Math.PI*0.3);
+  // Short sides — outside arms, end at jaw
+  var sidePts = [[0.001,0.18],[0.045,0.15],[0.055,0.05],[0.05,-0.05],[0.04,-0.12],[0.02,-0.16],[0.001,-0.18]];
+  var sGeo = dti3DLathe(sidePts, 14);
+  var sL = new THREE.Mesh(sGeo, m); sL.position.set(-0.29, 1.3, 0.06); g.add(sL);
+  var sR = new THREE.Mesh(sGeo.clone(), m); sR.position.set(0.29, 1.3, 0.06); g.add(sR);
+  // Short back — behind torso
+  var bk = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 14, 0, Math.PI*2, 0, Math.PI*0.6), m);
+  bk.position.set(0, 1.5, -0.1); bk.scale.set(1, 0.7, 0.6); g.add(bk);
+  // Bangs — thin fringe arc above eyebrows (y≥1.58)
+  var fringeGeo = new THREE.SphereGeometry(0.14, 18, 10, 0, Math.PI, 0, Math.PI*0.25);
   var fringe = new THREE.Mesh(fringeGeo, m);
-  fringe.position.set(0, 1.64, 0.15); fringe.rotation.x = 0.5; fringe.scale.set(1.5, 0.6, 0.5); g.add(fringe);
-  return g;
+  fringe.position.set(0, 1.66, 0.17); fringe.rotation.x = 0.35; fringe.scale.set(1.5, 0.5, 0.15); g.add(fringe);
+  // Highlight
+  var hm = dti3DMaterial(dtiShade(c, 20), s);
+  var hl = new THREE.Mesh(new THREE.SphereGeometry(0.265, 18, 12, 0, Math.PI*2, 0, Math.PI*0.35), hm);
+  hl.position.set(0, 1.58, 0.02); hl.scale.set(1.04, 1, 0.6); g.add(hl);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_bun = function(c, s) {
   // High messy bun — tight cap, big bun sphere on top, tendrils
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.26, 18, 14, 0, Math.PI*2, 0, Math.PI*0.5), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.26, 24, 16, 0, Math.PI*2, 0, Math.PI*0.5), m);
   cap.position.set(0, 1.55, 0); g.add(cap);
-  // Big messy bun
-  var bun = new THREE.Mesh(new THREE.SphereGeometry(0.15, 14, 12), m);
+  // Big messy bun — organic with overlapping spheres
+  var bun = new THREE.Mesh(new THREE.SphereGeometry(0.14, 18, 14), m);
   bun.position.set(0, 1.84, -0.05); bun.scale.set(1, 0.85, 0.95); g.add(bun);
-  // Messy wisps on bun
-  var wisp = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), m);
-  wisp.position.set(0.08, 1.9, 0.02); g.add(wisp);
-  var wisp2 = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), m);
-  wisp2.position.set(-0.06, 1.88, -0.08); g.add(wisp2);
+  // Messy wisps on bun for texture
+  var wisp = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 8), m);
+  wisp.position.set(0.08, 1.9, 0.02); wisp.scale.set(1, 0.8, 0.9); g.add(wisp);
+  var wisp2 = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 8), m);
+  wisp2.position.set(-0.06, 1.88, -0.08); wisp2.scale.set(0.9, 0.7, 1); g.add(wisp2);
+  var wisp3 = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), m);
+  wisp3.position.set(-0.02, 1.92, 0.04); g.add(wisp3);
   // Hair tie
-  var tie = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.015, 8, 16), dti3DMaterial(dtiShade(c,-50), s));
+  var tie = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.015, 10, 18), dti3DMaterial(dtiShade(c,-50), s));
   tie.position.set(0, 1.76, -0.02); tie.rotation.x = Math.PI/3; g.add(tie);
-  // Face framing tendrils — thin wavy strands
-  var tGeo = dti3DLathe([[0.001,0.14],[0.015,0.1],[0.018,0],[0.015,-0.1],[0.01,-0.15],[0.001,-0.16]], 6);
-  var tL = new THREE.Mesh(tGeo, m); tL.position.set(-0.21, 1.36, 0.12); tL.rotation.z = 0.15; g.add(tL);
-  var tR = new THREE.Mesh(tGeo.clone(), m); tR.position.set(0.21, 1.36, 0.12); tR.rotation.z = -0.15; g.add(tR);
-  return g;
+  // Face framing tendrils — thin strands at sides, not over face
+  var tGeo = dti3DLathe([[0.001,0.12],[0.013,0.08],[0.015,0],[0.012,-0.08],[0.008,-0.12],[0.001,-0.14]], 8);
+  var tL = new THREE.Mesh(tGeo, m); tL.position.set(-0.24, 1.38, 0.1); tL.rotation.z = 0.12; g.add(tL);
+  var tR = new THREE.Mesh(tGeo.clone(), m); tR.position.set(0.24, 1.38, 0.1); tR.rotation.z = -0.12; g.add(tR);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_long = function(c, s) {
   // Long flowing waves past waist — big volume, thick
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.28, 20, 14, 0, Math.PI*2, 0, Math.PI*0.52), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.28, 24, 18, 0, Math.PI*2, 0, Math.PI*0.52), m);
   cap.position.set(0, 1.56, -0.01); cap.scale.set(1.03, 1.02, 1); g.add(cap);
-  // Very long side hair (reaching y~0.1, mid-torso)
-  var longSide = dti3DLathe([[0.001,0.55],[0.055,0.5],[0.07,0.3],[0.065,0],[0.06,-0.3],[0.05,-0.55],[0.035,-0.6],[0.001,-0.62]], 10);
-  var sL = new THREE.Mesh(longSide, m); sL.position.set(-0.26, 0.85, 0); g.add(sL);
-  var sR = new THREE.Mesh(longSide.clone(), m); sR.position.set(0.26, 0.85, 0); g.add(sR);
-  // Long thick back
-  var backPts = [[0.001,0.6],[0.23,0.55],[0.26,0.3],[0.25,0],[0.24,-0.3],[0.22,-0.55],[0.18,-0.62],[0.001,-0.65]];
-  var bkGeo = dti3DLathe(backPts, 22);
-  var bk = new THREE.Mesh(bkGeo, m); bk.position.set(0, 0.85, -0.14); bk.scale.set(1, 1, 0.4); g.add(bk);
-  // Curtain bangs
-  var bangGeo = new THREE.SphereGeometry(0.08, 10, 8, 0, Math.PI, 0, Math.PI*0.5);
-  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.13, 1.58, 0.18); bL.rotation.set(0.4, 0.3, 0.2); bL.scale.set(1.3, 1, 0.5); g.add(bL);
-  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.13, 1.58, 0.18); bR.rotation.set(0.4, -0.3, -0.2); bR.scale.set(1.3, 1, 0.5); g.add(bR);
-  // Wavy ends — clusters of spheres at bottom
-  [-0.2, -0.06, 0.06, 0.2].forEach(function(x) {
-    var wave = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 6), m);
-    wave.position.set(x, 0.22 + Math.random()*0.04, -0.1 - Math.abs(x)*0.3);
-    wave.scale.set(1.2, 0.6, 1); g.add(wave);
+  // Long side hair — outside arms, gradually moving outward and back as it descends
+  var longSide = dti3DLathe([[0.001,0.55],[0.05,0.5],[0.065,0.3],[0.06,0],[0.055,-0.3],[0.045,-0.55],[0.03,-0.6],[0.001,-0.62]], 14);
+  var sL = new THREE.Mesh(longSide, m); sL.position.set(-0.30, 0.85, 0.06); g.add(sL);
+  var sR = new THREE.Mesh(longSide.clone(), m); sR.position.set(0.30, 0.85, 0.06); g.add(sR);
+  // Long thick back — behind torso
+  var backPts = [[0.001,0.6],[0.22,0.55],[0.25,0.3],[0.24,0],[0.23,-0.3],[0.21,-0.55],[0.17,-0.62],[0.001,-0.65]];
+  var bkGeo = dti3DLathe(backPts, 24);
+  var bk = new THREE.Mesh(bkGeo, m); bk.position.set(0, 0.85, -0.18); bk.scale.set(1, 1, 0.4); g.add(bk);
+  // Curtain bangs — above eyebrows
+  var bangGeo = new THREE.SphereGeometry(0.07, 14, 10, 0, Math.PI, 0, Math.PI*0.4);
+  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.15, 1.64, 0.19); bL.rotation.set(0.3, 0.3, 0.15); bL.scale.set(1.2, 0.7, 0.35); g.add(bL);
+  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.15, 1.64, 0.19); bR.rotation.set(0.3, -0.3, -0.15); bR.scale.set(1.2, 0.7, 0.35); g.add(bR);
+  // Wavy ends — organic clusters at bottom, behind torso
+  [-0.22, -0.08, 0.08, 0.22].forEach(function(x) {
+    var wave = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 8), m);
+    wave.position.set(x, 0.24, -0.16 - Math.abs(x)*0.2);
+    wave.scale.set(1.1, 0.6, 0.9); g.add(wave);
   });
-  return g;
+  // Highlight
+  var hm = dti3DMaterial(dtiShade(c, 20), s);
+  var hl = new THREE.Mesh(new THREE.SphereGeometry(0.27, 18, 12, 0, Math.PI*2, 0, Math.PI*0.35), hm);
+  hl.position.set(0, 1.58, 0.02); hl.scale.set(1.04, 1, 0.6); g.add(hl);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_braids = function(c, s) {
   // Twin braids — tight cap with center part, braided chain segments
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.26, 18, 14, 0, Math.PI*2, 0, Math.PI*0.5), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.26, 24, 16, 0, Math.PI*2, 0, Math.PI*0.5), m);
   cap.position.set(0, 1.55, 0); g.add(cap);
   // Center part line
   var partMat = dti3DMaterial(dtiShade(c, -30), s);
-  var part = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.2, 4), partMat);
+  var part = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.2, 6), partMat);
   part.position.set(0, 1.72, 0.08); part.rotation.x = Math.PI/3; g.add(part);
-  // Braid segments — alternating slightly offset spheroids
-  var segGeo = new THREE.SphereGeometry(0.045, 8, 6);
+  // Braid segments — alternating ellipsoids with rotation, outside arm bounds
+  var segGeo = new THREE.SphereGeometry(0.04, 12, 8);
+  var darkM = dti3DMaterial(dtiShade(c, -15), s);
   for (var i = 0; i < 10; i++) {
     var y = 1.35 - i * 0.11;
-    var wobble = (i % 2 === 0) ? 0.015 : -0.015;
-    var scaleX = 0.9 + (i % 2) * 0.2;
-    // Left
-    var sL = new THREE.Mesh(segGeo, m);
-    sL.position.set(-0.2 + wobble, y, 0.04); sL.scale.set(scaleX, 0.7, 0.8); g.add(sL);
-    // Right
-    var sR = new THREE.Mesh(segGeo.clone(), m);
-    sR.position.set(0.2 - wobble, y, 0.04); sR.scale.set(scaleX, 0.7, 0.8); g.add(sR);
+    var wobble = (i % 2 === 0) ? 0.012 : -0.012;
+    var scaleX = 0.85 + (i % 2) * 0.25;
+    var segMat = (i % 2 === 0) ? m : darkM;
+    // Braids at x=±0.29, clear of arms
+    var sL = new THREE.Mesh(segGeo, segMat);
+    sL.position.set(-0.29 + wobble, y, 0.08); sL.scale.set(scaleX, 0.65, 0.75);
+    sL.rotation.y = (i % 2) * 0.3; g.add(sL);
+    var sR = new THREE.Mesh(segGeo.clone(), segMat);
+    sR.position.set(0.29 - wobble, y, 0.08); sR.scale.set(scaleX, 0.65, 0.75);
+    sR.rotation.y = -(i % 2) * 0.3; g.add(sR);
   }
   // Braid ties at ends
   var tieMat = dti3DMaterial(dtiShade(c, -40), s);
-  var tieGeo = new THREE.TorusGeometry(0.03, 0.012, 6, 10);
-  var tieL = new THREE.Mesh(tieGeo, tieMat); tieL.position.set(-0.2, 0.26, 0.04); g.add(tieL);
-  var tieR = new THREE.Mesh(tieGeo.clone(), tieMat); tieR.position.set(0.2, 0.26, 0.04); g.add(tieR);
-  return g;
+  var tieGeo = new THREE.TorusGeometry(0.03, 0.012, 8, 12);
+  var tieL = new THREE.Mesh(tieGeo, tieMat); tieL.position.set(-0.29, 0.26, 0.08); g.add(tieL);
+  var tieR = new THREE.Mesh(tieGeo.clone(), tieMat); tieR.position.set(0.29, 0.26, 0.08); g.add(tieR);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_ponytail = function(c, s) {
   // High ponytail — slicked back tight cap, long tail curving down back
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
   // Tight slicked cap
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.265, 18, 14, 0, Math.PI*2, 0, Math.PI*0.52), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.265, 24, 16, 0, Math.PI*2, 0, Math.PI*0.52), m);
   cap.position.set(0, 1.54, 0); g.add(cap);
   // Hair tie at crown
-  var tie = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 8, 14), dti3DMaterial(dtiShade(c,-50), s));
+  var tie = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 10, 16), dti3DMaterial(dtiShade(c,-50), s));
   tie.position.set(0, 1.76, -0.06); tie.rotation.x = Math.PI/5; g.add(tie);
-  // Ponytail — thick tapered cylinder hanging down back
-  var tailGeo = dti3DTaperedLimb(0.07, 0.035, 0.85, 12);
+  // Ponytail — organic tapered shape hanging behind torso (z≤-0.18)
+  var tailGeo = dti3DLathe([[0.001,0.42],[0.065,0.38],[0.07,0.2],[0.06,0],[0.05,-0.2],[0.035,-0.38],[0.02,-0.42],[0.001,-0.44]], 16);
   var tail = new THREE.Mesh(tailGeo, m);
-  tail.position.set(0, 1.25, -0.2); tail.rotation.x = 0.15; g.add(tail);
-  // Tail end wisp
-  var wisp = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), m);
-  wisp.position.set(0, 0.82, -0.16); wisp.scale.set(1, 0.6, 0.8); g.add(wisp);
-  return g;
+  tail.position.set(0, 1.25, -0.2); g.add(tail);
+  // Tail end wisp — behind torso
+  var wisp = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 8), m);
+  wisp.position.set(0, 0.78, -0.2); wisp.scale.set(1, 0.6, 0.8); g.add(wisp);
+  // Volume poof at tie point
+  var poof = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 10), m);
+  poof.position.set(0, 1.76, -0.08); poof.scale.set(1, 0.6, 0.8); g.add(poof);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_spacebuns = function(c, s) {
   // Space buns — two prominent spheres on top, cap underneath
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.265, 18, 14, 0, Math.PI*2, 0, Math.PI*0.5), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.265, 24, 16, 0, Math.PI*2, 0, Math.PI*0.5), m);
   cap.position.set(0, 1.55, 0); g.add(cap);
-  // Left bun — bigger and prominent
-  var bunL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), m);
+  // Left bun — with organic texture
+  var bunL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), m);
   bunL.position.set(-0.17, 1.78, 0.02); g.add(bunL);
+  var bunLw = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), m);
+  bunLw.position.set(-0.14, 1.84, 0.06); g.add(bunLw);
   // Right bun
-  var bunR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), m);
+  var bunR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), m);
   bunR.position.set(0.17, 1.78, 0.02); g.add(bunR);
+  var bunRw = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), m);
+  bunRw.position.set(0.14, 1.84, 0.06); g.add(bunRw);
   // Center part
   var pMat = dti3DMaterial(dtiShade(c, -25), s);
-  var pLine = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.18, 4), pMat);
+  var pLine = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.18, 6), pMat);
   pLine.position.set(0, 1.72, 0.1); pLine.rotation.x = Math.PI/3; g.add(pLine);
-  // Loose face-framing strands
-  var strand = dti3DLathe([[0.001,0.12],[0.014,0.08],[0.016,0],[0.012,-0.1],[0.001,-0.14]], 6);
-  var stL = new THREE.Mesh(strand, m); stL.position.set(-0.2, 1.36, 0.14); stL.rotation.z = 0.12; g.add(stL);
-  var stR = new THREE.Mesh(strand.clone(), m); stR.position.set(0.2, 1.36, 0.14); stR.rotation.z = -0.12; g.add(stR);
-  return g;
+  // Loose face-framing strands — at sides, not covering face
+  var strand = dti3DLathe([[0.001,0.1],[0.012,0.06],[0.014,0],[0.01,-0.08],[0.001,-0.12]], 8);
+  var stL = new THREE.Mesh(strand, m); stL.position.set(-0.24, 1.4, 0.1); stL.rotation.z = 0.1; g.add(stL);
+  var stR = new THREE.Mesh(strand.clone(), m); stR.position.set(0.24, 1.4, 0.1); stR.rotation.z = -0.1; g.add(stR);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_wolfcut = function(c, s) {
   // Wolf cut — big volume on top, shaggy choppy layers, mullet-ish back
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
   // Extra big voluminous cap
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.3, 20, 14, 0, Math.PI*2, 0, Math.PI*0.55), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 16, 0, Math.PI*2, 0, Math.PI*0.55), m);
   cap.position.set(0, 1.56, 0); cap.scale.set(1.06, 1.05, 1.02); g.add(cap);
-  // Shaggy side layers — medium, with choppy texture (multiple overlapping pieces)
+  // Shaggy side layers — outside arms, choppy overlapping
+  var darkM = dti3DMaterial(dtiShade(c, -12), s);
   for (var si = 0; si < 5; si++) {
     var yOff = si * 0.09;
-    var xSpread = 0.26 + Math.sin(si*1.7)*0.02;
-    var shag = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), m);
-    shag.position.set(-xSpread, 1.28 - yOff, 0.02 + si*0.01); shag.scale.set(1.2, 0.65, 0.9); g.add(shag);
-    var shag2 = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), m);
-    shag2.position.set(xSpread, 1.28 - yOff, 0.02 + si*0.01); shag2.scale.set(1.2, 0.65, 0.9); g.add(shag2);
+    var xSpread = 0.30 + Math.sin(si*1.7)*0.02;
+    var zDrift = 0.06 - si * 0.02; // gradually drift backward as descending
+    var shagMat = (si % 2 === 0) ? m : darkM;
+    var shag = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 8), shagMat);
+    shag.position.set(-xSpread, 1.28 - yOff, zDrift); shag.scale.set(1.1, 0.6, 0.85); g.add(shag);
+    var shag2 = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 8), shagMat);
+    shag2.position.set(xSpread, 1.28 - yOff, zDrift); shag2.scale.set(1.1, 0.6, 0.85); g.add(shag2);
   }
-  // Choppy back layers
+  // Choppy back layers — behind torso
   for (var bi = 0; bi < 4; bi++) {
-    var bShag = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), m);
+    var bShag = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), (bi % 2 === 0) ? m : darkM);
     bShag.position.set(-0.1 + bi*0.07, 1.18 - bi*0.08, -0.18 - bi*0.01);
-    bShag.scale.set(1.3, 0.6, 0.8); g.add(bShag);
+    bShag.scale.set(1.2, 0.55, 0.75); g.add(bShag);
   }
-  // Big curtain bangs
-  var bangGeo = new THREE.SphereGeometry(0.09, 10, 8, 0, Math.PI, 0, Math.PI*0.45);
-  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.14, 1.6, 0.18); bL.rotation.set(0.45, 0.25, 0.15); bL.scale.set(1.4, 0.9, 0.5); g.add(bL);
-  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.14, 1.6, 0.18); bR.rotation.set(0.45, -0.25, -0.15); bR.scale.set(1.4, 0.9, 0.5); g.add(bR);
-  return g;
+  // Curtain bangs — above eyebrows, thin flat arcs at sides
+  var bangGeo = new THREE.SphereGeometry(0.08, 14, 10, 0, Math.PI, 0, Math.PI*0.35);
+  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.15, 1.65, 0.19); bL.rotation.set(0.3, 0.25, 0.12); bL.scale.set(1.3, 0.65, 0.3); g.add(bL);
+  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.15, 1.65, 0.19); bR.rotation.set(0.3, -0.25, -0.12); bR.scale.set(1.3, 0.65, 0.3); g.add(bR);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_curls = function(c, s) {
-  // Long bouncy curls — lots of overlapping sphere clusters for curl texture
+  // Long bouncy curls — overlapping sphere clusters for curl texture
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
+  var darkM = dti3DMaterial(dtiShade(c, -10), s);
   // Voluminous cap
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.29, 20, 14, 0, Math.PI*2, 0, Math.PI*0.54), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.29, 24, 16, 0, Math.PI*2, 0, Math.PI*0.54), m);
   cap.position.set(0, 1.56, -0.01); cap.scale.set(1.06, 1.02, 1.02); g.add(cap);
-  // Curls — scattered sphere clusters down sides and back
-  var curlGeo = new THREE.SphereGeometry(0.05, 8, 6);
+  // Curls — outside arms (x≥±0.29), back behind torso (z≤-0.16)
+  var curlSizes = [0.05, 0.06, 0.045, 0.055, 0.048];
   var curlPositions = [
-    // Left side
-    [-0.28,1.32,0.04],[-0.3,1.18,0.06],[-0.28,1.04,0.04],[-0.26,0.9,0.06],
-    [-0.28,0.76,0.04],[-0.26,0.62,0.06],[-0.24,0.48,0.04],[-0.22,0.36,0.06],
+    // Left side — outside arms
+    [-0.30,1.32,0.08],[-0.32,1.18,0.06],[-0.30,1.04,0.04],[-0.31,0.9,0.02],
+    [-0.30,0.76,0.0],[-0.29,0.62,-0.02],[-0.29,0.48,-0.04],[-0.28,0.36,-0.06],
     // Right side
-    [0.28,1.32,0.04],[0.3,1.18,0.06],[0.28,1.04,0.04],[0.26,0.9,0.06],
-    [0.28,0.76,0.04],[0.26,0.62,0.06],[0.24,0.48,0.04],[0.22,0.36,0.06],
-    // Back
+    [0.30,1.32,0.08],[0.32,1.18,0.06],[0.30,1.04,0.04],[0.31,0.9,0.02],
+    [0.30,0.76,0.0],[0.29,0.62,-0.02],[0.29,0.48,-0.04],[0.28,0.36,-0.06],
+    // Back — behind torso
     [-0.16,1.1,-0.2],[0,1.05,-0.22],[0.16,1.1,-0.2],
-    [-0.12,0.85,-0.18],[0.12,0.85,-0.18],[0,0.75,-0.2],
-    [-0.14,0.55,-0.16],[0.14,0.55,-0.16],[0,0.45,-0.18],
+    [-0.12,0.85,-0.2],[0.12,0.85,-0.2],[0,0.75,-0.22],
+    [-0.14,0.55,-0.18],[0.14,0.55,-0.18],[0,0.45,-0.2],
   ];
-  curlPositions.forEach(function(p) {
-    var curl = new THREE.Mesh(curlGeo, m);
+  curlPositions.forEach(function(p, idx) {
+    var r = curlSizes[idx % curlSizes.length];
+    var curl = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 8), (idx % 3 === 0) ? darkM : m);
     curl.position.set(p[0], p[1], p[2]);
-    // Vary scale for organic look
-    var sx = 0.9 + Math.abs(Math.sin(p[0]*20))*0.5;
-    var sy = 0.7 + Math.abs(Math.cos(p[1]*15))*0.5;
-    curl.scale.set(sx, sy, 0.9); g.add(curl);
+    var sx = 0.85 + Math.abs(Math.sin(p[0]*20))*0.4;
+    var sy = 0.7 + Math.abs(Math.cos(p[1]*15))*0.45;
+    curl.scale.set(sx, sy, 0.85); g.add(curl);
   });
-  // Bangs
-  var bangGeo = new THREE.SphereGeometry(0.07, 10, 8, 0, Math.PI, 0, Math.PI*0.5);
-  g.add(new THREE.Mesh(bangGeo, m)).position.set(-0.12, 1.58, 0.19);
-  g.children[g.children.length-1].rotation.set(0.4, 0.3, 0.15);
-  g.children[g.children.length-1].scale.set(1.2, 0.9, 0.5);
-  g.add(new THREE.Mesh(bangGeo.clone(), m)).position.set(0.12, 1.58, 0.19);
-  g.children[g.children.length-1].rotation.set(0.4, -0.3, -0.15);
-  g.children[g.children.length-1].scale.set(1.2, 0.9, 0.5);
-  return g;
+  // Bangs — above eyebrows, thin arcs at sides
+  var bangGeo = new THREE.SphereGeometry(0.06, 14, 10, 0, Math.PI, 0, Math.PI*0.35);
+  var bL = new THREE.Mesh(bangGeo, m); bL.position.set(-0.14, 1.64, 0.19);
+  bL.rotation.set(0.3, 0.3, 0.12); bL.scale.set(1.1, 0.65, 0.35); g.add(bL);
+  var bR = new THREE.Mesh(bangGeo.clone(), m); bR.position.set(0.14, 1.64, 0.19);
+  bR.rotation.set(0.3, -0.3, -0.12); bR.scale.set(1.1, 0.65, 0.35); g.add(bR);
+  return dti3DHairFinalize(g);
 };
 
 DTI_3D.hair_ribbon = function(c, s) {
   // Long straight with big coquette ribbon bow
   var g = new THREE.Group(), m = dti3DMaterial(c, s);
   // Same base as hair straight
-  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 20, 14, 0, Math.PI*2, 0, Math.PI*0.52), m);
+  var cap = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 18, 0, Math.PI*2, 0, Math.PI*0.52), m);
   cap.position.set(0, 1.56, -0.01); cap.scale.set(1.02, 1.02, 0.98); g.add(cap);
-  // Side hair
-  var sideGeo = dti3DLathe([[0.001,0.35],[0.04,0.32],[0.055,0.2],[0.05,0],[0.04,-0.2],[0.025,-0.35],[0.001,-0.38]], 10);
-  g.add(new THREE.Mesh(sideGeo, m)).position.set(-0.24, 1.1, 0.03);
-  g.add(new THREE.Mesh(sideGeo.clone(), m)).position.set(0.24, 1.1, 0.03);
-  // Back
-  var bkGeo = dti3DLathe([[0.001,0.4],[0.22,0.36],[0.24,0.2],[0.23,0],[0.22,-0.2],[0.21,-0.35],[0.18,-0.4]], 20);
-  g.add(new THREE.Mesh(bkGeo, m)).position.set(0, 1.08, -0.12);
-  g.children[g.children.length-1].scale.set(1, 1, 0.35);
+  // Side hair — outside arms
+  var sideGeo = dti3DLathe([[0.001,0.35],[0.04,0.32],[0.05,0.2],[0.048,0],[0.04,-0.2],[0.025,-0.35],[0.001,-0.38]], 14);
+  var sL = new THREE.Mesh(sideGeo, m); sL.position.set(-0.29, 1.1, 0.08); g.add(sL);
+  var sR = new THREE.Mesh(sideGeo.clone(), m); sR.position.set(0.29, 1.1, 0.08); g.add(sR);
+  // Back — behind torso
+  var bkGeo = dti3DLathe([[0.001,0.4],[0.22,0.36],[0.24,0.2],[0.23,0],[0.22,-0.2],[0.21,-0.35],[0.18,-0.4]], 22);
+  var bk = new THREE.Mesh(bkGeo, m); bk.position.set(0, 1.08, -0.18); bk.scale.set(1, 1, 0.35); g.add(bk);
   // BIG RIBBON BOW — signature coquette
-  var ribbonMat = new THREE.MeshStandardMaterial({ color: 0xe8829a, roughness: 0.25, metalness: 0.03, side: THREE.DoubleSide });
-  // Left bow loop — larger, flatter oval
-  var loopGeo = new THREE.SphereGeometry(0.1, 12, 8);
+  var ribbonMat = new THREE.MeshStandardMaterial({ color: 0xe8829a, roughness: 0.25, metalness: 0.03, side: THREE.FrontSide });
+  // Bow loops — larger, flatter ovals
+  var loopGeo = new THREE.SphereGeometry(0.1, 14, 10);
   var loopL = new THREE.Mesh(loopGeo, ribbonMat);
   loopL.position.set(-0.13, 1.78, 0.04); loopL.scale.set(1.5, 0.65, 0.45); g.add(loopL);
   var loopR = new THREE.Mesh(loopGeo.clone(), ribbonMat);
   loopR.position.set(0.13, 1.78, 0.04); loopR.scale.set(1.5, 0.65, 0.45); g.add(loopR);
   // Knot center
-  var knot = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8),
+  var knot = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8),
     new THREE.MeshStandardMaterial({ color: 0xd06880, roughness: 0.25 }));
   knot.position.set(0, 1.78, 0.06); g.add(knot);
   // Ribbon tails hanging down
-  var tailGeo = dti3DLathe([[0.001,0.1],[0.02,0.06],[0.025,0],[0.02,-0.06],[0.015,-0.1],[0.001,-0.12]], 6);
+  var tailGeo = dti3DLathe([[0.001,0.1],[0.02,0.06],[0.025,0],[0.02,-0.06],[0.015,-0.1],[0.001,-0.12]], 8);
   var tailL = new THREE.Mesh(tailGeo, ribbonMat); tailL.position.set(-0.06, 1.65, 0.06); tailL.rotation.z = 0.25; g.add(tailL);
   var tailR = new THREE.Mesh(tailGeo.clone(), ribbonMat); tailR.position.set(0.06, 1.65, 0.06); tailR.rotation.z = -0.25; g.add(tailR);
-  return g;
+  // Highlight
+  var hm = dti3DMaterial(dtiShade(c, 20), s);
+  var hl = new THREE.Mesh(new THREE.SphereGeometry(0.265, 18, 12, 0, Math.PI*2, 0, Math.PI*0.35), hm);
+  hl.position.set(0, 1.58, 0.02); hl.scale.set(1.03, 1, 0.6); g.add(hl);
+  return dti3DHairFinalize(g);
 };
 
 // ── TOPS ──
