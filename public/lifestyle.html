@@ -203,7 +203,7 @@
     #dtiView.active{display:flex;}
     .dti-top{display:flex;flex:1;overflow:hidden;}
 
-    /* Avatar panel — 3D figure */
+    /* Avatar panel */
     .dti-avatar-panel{flex:0 0 320px;display:flex;flex-direction:column;align-items:center;padding:16px 12px;position:relative;overflow:hidden;min-height:400px;}
     .dti-avatar-panel::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:12px;border-radius:50%;filter:blur(8px);opacity:0.1;background:currentColor;}
     .dti-figure-wrap{position:relative;width:100%;flex:1 1 auto;min-height:300px;margin:0 auto;}
@@ -267,11 +267,14 @@
     .dti-next:hover{opacity:0.85;}
 
     @media(max-width:768px){
-      .dti-top{flex-direction:column;}
-      .dti-avatar-panel{flex:0 0 auto;padding:12px;flex-direction:column;gap:8px;min-height:320px;}
-      .dti-figure-wrap{width:100%;min-height:280px;height:280px;flex:none;}
+      #dtiView{overflow:visible;overflow-y:auto;}
+      .dti-top{flex-direction:column;overflow:visible;overflow-y:auto;flex:none;}
+      .dti-avatar-panel{flex:none;padding:12px;flex-direction:column;gap:8px;min-height:auto;height:auto;}
+      .dti-figure-wrap{width:100%;min-height:320px;height:320px;flex:none;}
+      .dti-wardrobe{flex:none;border-left:none;border-top:1px solid rgba(128,128,128,0.08);}
+      .dti-items{grid-template-columns:repeat(3,1fr);overflow-y:auto;max-height:260px;}
       .dti-outfit-label{text-align:left;}
-      .dti-items{grid-template-columns:repeat(2,1fr);}
+      .dti-bottom{position:sticky;bottom:0;z-index:10;}
     }
 
     /* ── CUSTOM EMOJI PICKER ── */
