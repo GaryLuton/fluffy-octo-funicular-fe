@@ -132,27 +132,37 @@ function dti2DInitScene() {
   }
 
   var canvas = document.createElement('canvas');
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.borderRadius = '12px';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
   container.appendChild(canvas);
 
-  var rect = container.getBoundingClientRect();
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var w = rect.width;
-  var h = rect.height;
+  // Get actual rendered size — use offsetWidth/Height as fallback
+  var w = container.offsetWidth || container.clientWidth || 0;
+  var h = container.offsetHeight || container.clientHeight || 0;
 
   // If container has no dimensions yet, retry after layout settles
-  if (!w || !h) {
-    container.removeChild(canvas);
-    setTimeout(dti2DInitScene, 300);
+  if (w < 10 || h < 10) {
+    // Don't remove canvas — leave it so container has a child that can size
+    setTimeout(function() {
+      var w2 = container.offsetWidth || container.clientWidth || 0;
+      var h2 = container.offsetHeight || container.clientHeight || 0;
+      // Use fallback dimensions if still no size
+      if (w2 < 10) w2 = 300;
+      if (h2 < 10) h2 = 400;
+      dti2DFinishInit(canvas, container, w2, h2);
+    }, 500);
     return;
   }
+
+  dti2DFinishInit(canvas, container, w, h);
+}
+
+function dti2DFinishInit(canvas, container, w, h) {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = w * dpr;
   canvas.height = h * dpr;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
 
   var ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
@@ -173,23 +183,22 @@ function dti2DInitScene() {
   }
 
   // Resize observer
-  new ResizeObserver(function() {
-    var r2 = container.getBoundingClientRect();
-    var nw = r2.width || 300, nh = r2.height || 520;
-    if (nw > 0 && nh > 0 && (Math.abs(nw - dti2D.width) > 2 || Math.abs(nh - dti2D.height) > 2)) {
+  var resizeObserver = new ResizeObserver(function() {
+    var nw = container.offsetWidth || container.clientWidth;
+    var nh = container.offsetHeight || container.clientHeight;
+    if (nw > 10 && nh > 10 && (Math.abs(nw - dti2D.width) > 2 || Math.abs(nh - dti2D.height) > 2)) {
       var dp = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = nw * dp;
       canvas.height = nh * dp;
-      canvas.style.width = nw + 'px';
-      canvas.style.height = nh + 'px';
       ctx.setTransform(dp, 0, 0, dp, 0, 0);
       dti2D.width = nw;
       dti2D.height = nh;
     }
-  }).observe(container);
+  });
+  resizeObserver.observe(container);
 
-  // Start animation loop
-  dti2DAnimate();
+  // Start animation loop (only if not already running)
+  if (!dti2D.animFrameId) dti2DAnimate();
 }
 
 // ── Draw Body ──
