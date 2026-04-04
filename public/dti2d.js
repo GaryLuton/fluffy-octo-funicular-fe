@@ -61,15 +61,15 @@ function dti2DRoundRect(ctx, x, y, w, h, r) {
 
 // ── Body Metrics ──
 // Computes key body landmark coordinates scaled to canvas size
-// Fashion croquis: ~8.5 head-tall figure
+// 7.5-head figure for realistic proportions that fill mobile canvas
 function dti2DComputeBodyMetrics(w, h, breathOffset) {
-  var s = Math.min(w / 320, h / 580);
+  var s = Math.min(w / 320, h / 520);
   var cx = w / 2;
   var bo = breathOffset || 0;
 
-  // Head unit = total height / 8.5
-  var hu = (h * 0.88) / 8.5;
-  var topY = h * 0.04;
+  // Head unit = total height / 7.5 (using 92% of canvas)
+  var hu = (h * 0.92) / 7.5;
+  var topY = h * 0.03;
 
   var m = {
     s: s,
@@ -77,45 +77,45 @@ function dti2DComputeBodyMetrics(w, h, breathOffset) {
     hu: hu,
     // Head
     headCY: topY + hu * 0.5,
-    headRX: hu * 0.38,
-    headRY: hu * 0.48,
+    headRX: hu * 0.42,
+    headRY: hu * 0.5,
     // Neck
     neckTop: topY + hu * 0.95,
-    neckBot: topY + hu * 1.2,
+    neckBot: topY + hu * 1.15,
     neckW: hu * 0.18,
     // Shoulders
-    shoulderY: topY + hu * 1.35 + bo * 0.3,
-    shoulderW: hu * 0.95,
+    shoulderY: topY + hu * 1.3 + bo * 0.3,
+    shoulderW: hu * 1.0,
     // Bust
-    bustY: topY + hu * 1.8,
-    bustW: hu * 0.85,
+    bustY: topY + hu * 1.7,
+    bustW: hu * 0.9,
     // Waist
-    waistY: topY + hu * 2.6 + bo * 0.5,
-    waistW: hu * 0.48,
+    waistY: topY + hu * 2.4 + bo * 0.5,
+    waistW: hu * 0.52,
     // Hip
-    hipY: topY + hu * 3.2,
-    hipW: hu * 0.82,
+    hipY: topY + hu * 2.9,
+    hipW: hu * 0.88,
     // Crotch
-    crotchY: topY + hu * 3.8,
+    crotchY: topY + hu * 3.4,
     // Knee
-    kneeY: topY + hu * 5.4,
-    kneeW: hu * 0.22,
+    kneeY: topY + hu * 4.8,
+    kneeW: hu * 0.24,
     // Ankle
-    ankleY: topY + hu * 7.2,
-    ankleW: hu * 0.14,
+    ankleY: topY + hu * 6.4,
+    ankleW: hu * 0.15,
     // Foot
-    footY: topY + hu * 7.6,
-    footW: hu * 0.28,
-    footH: hu * 0.2,
+    footY: topY + hu * 6.8,
+    footW: hu * 0.3,
+    footH: hu * 0.22,
     // Arms
-    armOuterX: hu * 0.52,  // offset from cx
-    elbowY: topY + hu * 2.8,
-    wristY: topY + hu * 3.6,
-    handY: topY + hu * 3.9,
-    handW: hu * 0.15,
+    armOuterX: hu * 0.55,  // offset from cx
+    elbowY: topY + hu * 2.5,
+    wristY: topY + hu * 3.2,
+    handY: topY + hu * 3.5,
+    handW: hu * 0.16,
     // Misc
     topY: topY,
-    botY: topY + hu * 8.0
+    botY: topY + hu * 7.1
   };
   return m;
 }
@@ -161,8 +161,12 @@ function dti2DInitScene() {
 
 function dti2DFinishInit(canvas, container, w, h) {
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
+  // Set canvas internal resolution
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  // Let CSS control display size — do NOT set style.width/height in px
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
 
   var ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
@@ -171,6 +175,7 @@ function dti2DFinishInit(canvas, container, w, h) {
   dti2D.ctx = ctx;
   dti2D.width = w;
   dti2D.height = h;
+  dti2D.dpr = dpr;
   dti2D.scale = dpr;
   dti2D.initialized = true;
   dti2D.clothing = {};
@@ -289,12 +294,67 @@ function dti2DDrawBody(ctx, skin, m) {
   ctx.closePath();
   ctx.fill();
 
-  // Bust line subtle shadow
-  ctx.strokeStyle = dti2DAlpha(lo, 0.15);
-  ctx.lineWidth = 1;
+  // Torso contour shading (adds 3D depth)
+  ctx.save();
+  // Re-trace torso for clipping
+  ctx.beginPath();
+  ctx.moveTo(cx - m.shoulderW / 2, m.shoulderY);
+  ctx.quadraticCurveTo(cx - m.bustW / 2 - m.hu * 0.05, m.bustY - m.hu * 0.2, cx - m.bustW / 2, m.bustY);
+  ctx.quadraticCurveTo(cx - m.bustW / 2 + m.hu * 0.05, (m.bustY + m.waistY) / 2, cx - m.waistW / 2, m.waistY);
+  ctx.quadraticCurveTo(cx - m.waistW / 2 - m.hu * 0.08, (m.waistY + m.hipY) / 2, cx - m.hipW / 2, m.hipY);
+  ctx.quadraticCurveTo(cx - m.hipW / 2 + m.hu * 0.05, (m.hipY + m.crotchY) / 2, cx - legSpread, m.crotchY);
+  ctx.lineTo(cx + legSpread, m.crotchY);
+  ctx.quadraticCurveTo(cx + m.hipW / 2 - m.hu * 0.05, (m.hipY + m.crotchY) / 2, cx + m.hipW / 2, m.hipY);
+  ctx.quadraticCurveTo(cx + m.waistW / 2 + m.hu * 0.08, (m.waistY + m.hipY) / 2, cx + m.waistW / 2, m.waistY);
+  ctx.quadraticCurveTo(cx + m.bustW / 2 - m.hu * 0.05, (m.bustY + m.waistY) / 2, cx + m.bustW / 2, m.bustY);
+  ctx.quadraticCurveTo(cx + m.bustW / 2 + m.hu * 0.05, m.bustY - m.hu * 0.2, cx + m.shoulderW / 2, m.shoulderY);
+  ctx.closePath();
+  ctx.clip();
+  // Left edge contour shadow
+  var contourL = ctx.createLinearGradient(cx - m.shoulderW / 2 - m.hu * 0.05, 0, cx - m.waistW / 3, 0);
+  contourL.addColorStop(0, dti2DAlpha(lo, 0.2));
+  contourL.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = contourL;
+  ctx.fillRect(cx - m.shoulderW / 2 - m.hu * 0.1, m.shoulderY, m.shoulderW / 2, m.crotchY - m.shoulderY);
+  // Right edge contour shadow
+  var contourR = ctx.createLinearGradient(cx + m.shoulderW / 2 + m.hu * 0.05, 0, cx + m.waistW / 3, 0);
+  contourR.addColorStop(0, dti2DAlpha(lo, 0.2));
+  contourR.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = contourR;
+  ctx.fillRect(cx, m.shoulderY, m.shoulderW / 2 + m.hu * 0.1, m.crotchY - m.shoulderY);
+  // Center highlight (light hits the front of torso)
+  var centerHi = ctx.createRadialGradient(cx - m.hu * 0.05, m.bustY, 0, cx, m.waistY, m.bustW / 2);
+  centerHi.addColorStop(0, dti2DAlpha(hi, 0.12));
+  centerHi.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = centerHi;
+  ctx.fillRect(cx - m.bustW / 2, m.shoulderY, m.bustW, m.hipY - m.shoulderY);
+  ctx.restore();
+
+  // Bust line shadow (more visible)
+  ctx.strokeStyle = dti2DAlpha(lo, 0.2);
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.moveTo(cx - m.bustW / 2 + m.hu * 0.1, m.bustY + m.hu * 0.02);
   ctx.quadraticCurveTo(cx, m.bustY + m.hu * 0.08, cx + m.bustW / 2 - m.hu * 0.1, m.bustY + m.hu * 0.02);
+  ctx.stroke();
+
+  // Collarbone detail
+  ctx.strokeStyle = dti2DAlpha(lo, 0.12);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.shoulderW / 2 + m.hu * 0.05, m.shoulderY + m.hu * 0.02);
+  ctx.quadraticCurveTo(cx - m.neckW * 1.2, m.shoulderY - m.hu * 0.02, cx - m.neckW * 0.8, m.neckBot + m.hu * 0.03);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + m.shoulderW / 2 - m.hu * 0.05, m.shoulderY + m.hu * 0.02);
+  ctx.quadraticCurveTo(cx + m.neckW * 1.2, m.shoulderY - m.hu * 0.02, cx + m.neckW * 0.8, m.neckBot + m.hu * 0.03);
+  ctx.stroke();
+
+  // Navel hint
+  ctx.strokeStyle = dti2DAlpha(lo, 0.1);
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  ctx.arc(cx, m.waistY + m.hu * 0.08, m.hu * 0.012, 0.3, Math.PI - 0.3);
   ctx.stroke();
 
   // ── ARMS ──
@@ -416,150 +476,256 @@ function dti2DDrawFace(ctx, skin, m) {
 
   ctx.save();
 
-  // Eye positions
-  var eyeY = headCY - headRY * 0.05;
+  // Eye positions — larger, more expressive
+  var eyeY = headCY - headRY * 0.02;
   var eyeSpacing = headRX * 0.42;
-  var eyeW = hu * 0.09;
-  var eyeH = hu * 0.04;
+  var eyeW = hu * 0.11;
+  var eyeH = hu * 0.055;
 
-  // ── EYEBROWS ──
-  ctx.strokeStyle = dti2DShade(skin.base, -60);
-  ctx.lineWidth = hu * 0.025;
+  // ── EYEBROWS ── (gradient filled, not just strokes)
+  var browColor = dti2DShade(skin.base, -65);
   ctx.lineCap = 'round';
-  // Left brow
-  ctx.beginPath();
-  ctx.moveTo(cx - eyeSpacing - eyeW * 0.8, eyeY - eyeH * 2.2);
-  ctx.quadraticCurveTo(cx - eyeSpacing, eyeY - eyeH * 3.2, cx - eyeSpacing + eyeW * 0.9, eyeY - eyeH * 2.5);
-  ctx.stroke();
-  // Right brow
-  ctx.beginPath();
-  ctx.moveTo(cx + eyeSpacing + eyeW * 0.8, eyeY - eyeH * 2.2);
-  ctx.quadraticCurveTo(cx + eyeSpacing, eyeY - eyeH * 3.2, cx + eyeSpacing - eyeW * 0.9, eyeY - eyeH * 2.5);
-  ctx.stroke();
-
-  // ── EYES ──
-  // Eye whites
-  ctx.fillStyle = '#f8f5f0';
-  ctx.beginPath();
-  ctx.ellipse(cx - eyeSpacing, eyeY, eyeW, eyeH, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx + eyeSpacing, eyeY, eyeW, eyeH, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Irises
-  ctx.fillStyle = '#5a3a20';
-  var irisR = eyeH * 0.85;
-  ctx.beginPath();
-  ctx.arc(cx - eyeSpacing, eyeY + eyeH * 0.1, irisR, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx + eyeSpacing, eyeY + eyeH * 0.1, irisR, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Pupils
-  ctx.fillStyle = '#1a0a00';
-  var pupilR = irisR * 0.5;
-  ctx.beginPath();
-  ctx.arc(cx - eyeSpacing, eyeY + eyeH * 0.1, pupilR, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx + eyeSpacing, eyeY + eyeH * 0.1, pupilR, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Eye highlights
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.beginPath();
-  ctx.arc(cx - eyeSpacing - irisR * 0.3, eyeY - eyeH * 0.1, pupilR * 0.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx + eyeSpacing - irisR * 0.3, eyeY - eyeH * 0.1, pupilR * 0.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Eyeliner / lash line
-  ctx.strokeStyle = '#1a0a05';
-  ctx.lineWidth = hu * 0.015;
-  // Left eye
-  ctx.beginPath();
-  ctx.moveTo(cx - eyeSpacing - eyeW * 1.05, eyeY + eyeH * 0.1);
-  ctx.quadraticCurveTo(cx - eyeSpacing, eyeY - eyeH * 1.15, cx - eyeSpacing + eyeW * 1.1, eyeY - eyeH * 0.1);
-  ctx.stroke();
-  // Right eye
-  ctx.beginPath();
-  ctx.moveTo(cx + eyeSpacing - eyeW * 1.1, eyeY - eyeH * 0.1);
-  ctx.quadraticCurveTo(cx + eyeSpacing, eyeY - eyeH * 1.15, cx + eyeSpacing + eyeW * 1.05, eyeY + eyeH * 0.1);
-  ctx.stroke();
-
-  // Lashes (small strokes)
-  ctx.lineWidth = hu * 0.01;
-  for (var li = 0; li < 4; li++) {
-    var lx = cx - eyeSpacing - eyeW * 0.6 + (eyeW * 1.2 / 3) * li;
-    var ly = eyeY - eyeH * (0.9 + Math.sin(li * 0.8) * 0.2);
+  for (var side = -1; side <= 1; side += 2) {
+    var bx = cx + side * eyeSpacing;
+    // Filled brow shape
+    ctx.fillStyle = browColor;
     ctx.beginPath();
-    ctx.moveTo(lx, ly);
-    ctx.lineTo(lx - hu * 0.005, ly - hu * 0.02);
+    ctx.moveTo(bx - side * eyeW * 0.85, eyeY - eyeH * 2.4);
+    ctx.quadraticCurveTo(bx, eyeY - eyeH * 3.5, bx + side * eyeW * 0.95, eyeY - eyeH * 2.7);
+    ctx.quadraticCurveTo(bx + side * eyeW * 0.5, eyeY - eyeH * 2.2, bx - side * eyeW * 0.7, eyeY - eyeH * 2.1);
+    ctx.closePath();
+    ctx.fill();
+    // Brow hair strokes
+    ctx.strokeStyle = dti2DAlpha(browColor, 0.3);
+    ctx.lineWidth = hu * 0.008;
+    for (var bi = 0; bi < 5; bi++) {
+      var bt = bi / 4;
+      var bsx = bx - side * eyeW * 0.6 + side * eyeW * 1.3 * bt;
+      var bsy = eyeY - eyeH * (2.2 + Math.sin(bt * Math.PI) * 0.9);
+      ctx.beginPath();
+      ctx.moveTo(bsx, bsy + hu * 0.008);
+      ctx.lineTo(bsx + side * hu * 0.015, bsy - hu * 0.005);
+      ctx.stroke();
+    }
+  }
+
+  // ── EYES ── (almond-shaped with lid crease)
+  for (var es = -1; es <= 1; es += 2) {
+    var ex = cx + es * eyeSpacing;
+
+    // Eyelid crease
+    ctx.strokeStyle = dti2DAlpha(lo, 0.15);
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(ex - eyeW * 0.9, eyeY - eyeH * 1.2);
+    ctx.quadraticCurveTo(ex, eyeY - eyeH * 1.8, ex + eyeW * 0.9, eyeY - eyeH * 1.0);
     ctx.stroke();
-    var rx = cx + eyeSpacing - eyeW * 0.6 + (eyeW * 1.2 / 3) * li;
+
+    // Eye whites (almond shape)
+    ctx.fillStyle = '#faf7f2';
     ctx.beginPath();
-    ctx.moveTo(rx, ly);
-    ctx.lineTo(rx + hu * 0.005, ly - hu * 0.02);
+    ctx.moveTo(ex - eyeW, eyeY + eyeH * 0.1);
+    ctx.quadraticCurveTo(ex - eyeW * 0.3, eyeY - eyeH * 1.1, ex + eyeW * 0.6, eyeY - eyeH * 0.6);
+    ctx.quadraticCurveTo(ex + eyeW * 1.05, eyeY - eyeH * 0.2, ex + eyeW, eyeY + eyeH * 0.15);
+    ctx.quadraticCurveTo(ex + eyeW * 0.3, eyeY + eyeH * 1.1, ex - eyeW * 0.3, eyeY + eyeH * 0.7);
+    ctx.quadraticCurveTo(ex - eyeW * 0.9, eyeY + eyeH * 0.5, ex - eyeW, eyeY + eyeH * 0.1);
+    ctx.closePath();
+    ctx.fill();
+
+    // Iris with gradient
+    var irisR = eyeH * 0.9;
+    var irisGrad = ctx.createRadialGradient(ex, eyeY + eyeH * 0.1, 0, ex, eyeY + eyeH * 0.1, irisR);
+    irisGrad.addColorStop(0, '#3a2510');
+    irisGrad.addColorStop(0.3, '#5a3a20');
+    irisGrad.addColorStop(0.7, '#6a4a2a');
+    irisGrad.addColorStop(1, '#4a3018');
+    ctx.fillStyle = irisGrad;
+    ctx.beginPath();
+    ctx.arc(ex, eyeY + eyeH * 0.1, irisR, 0, Math.PI * 2);
+    ctx.fill();
+    // Iris ring
+    ctx.strokeStyle = '#3a2010';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+
+    // Pupil
+    var pupilR = irisR * 0.45;
+    ctx.fillStyle = '#0a0500';
+    ctx.beginPath();
+    ctx.arc(ex, eyeY + eyeH * 0.1, pupilR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Large catchlight
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.arc(ex - irisR * 0.3, eyeY - eyeH * 0.15, pupilR * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    // Small secondary catchlight
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath();
+    ctx.arc(ex + irisR * 0.25, eyeY + eyeH * 0.3, pupilR * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Upper eyelid shadow (on the white)
+    ctx.fillStyle = dti2DAlpha(lo, 0.08);
+    ctx.beginPath();
+    ctx.moveTo(ex - eyeW, eyeY + eyeH * 0.1);
+    ctx.quadraticCurveTo(ex, eyeY - eyeH * 0.8, ex + eyeW, eyeY + eyeH * 0.15);
+    ctx.quadraticCurveTo(ex, eyeY - eyeH * 0.3, ex - eyeW, eyeY + eyeH * 0.1);
+    ctx.fill();
+
+    // Eyeliner (thicker at outer corner)
+    ctx.strokeStyle = '#1a0a05';
+    ctx.lineWidth = hu * 0.018;
+    ctx.beginPath();
+    ctx.moveTo(ex - eyeW * 1.05, eyeY + eyeH * 0.15);
+    ctx.quadraticCurveTo(ex, eyeY - eyeH * 1.15, ex + eyeW * 1.1, eyeY - eyeH * 0.05);
+    ctx.stroke();
+
+    // Individual lashes (upper)
+    ctx.strokeStyle = '#1a0a05';
+    ctx.lineWidth = hu * 0.008;
+    for (var li = 0; li < 6; li++) {
+      var lt = li / 5;
+      var lx = ex - eyeW * 0.8 + eyeW * 1.6 * lt;
+      var ly = eyeY - eyeH * (0.7 + Math.sin(lt * Math.PI) * 0.4);
+      var lAngle = -1.2 + lt * 0.6;
+      var lLen = hu * (0.018 + Math.sin(lt * Math.PI) * 0.01);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(lx + Math.cos(lAngle) * lLen * es * 0.3, ly - lLen);
+      ctx.stroke();
+    }
+
+    // Lower lash line (subtle)
+    ctx.strokeStyle = dti2DAlpha('#1a0a05', 0.4);
+    ctx.lineWidth = hu * 0.008;
+    ctx.beginPath();
+    ctx.moveTo(ex - eyeW * 0.6, eyeY + eyeH * 0.55);
+    ctx.quadraticCurveTo(ex, eyeY + eyeH * 0.95, ex + eyeW * 0.8, eyeY + eyeH * 0.25);
     ctx.stroke();
   }
 
-  // ── NOSE ──
-  ctx.strokeStyle = dti2DAlpha(lo, 0.3);
-  ctx.lineWidth = hu * 0.012;
+  // ── NOSE ── (shadow-based, more defined)
   var noseY = headCY + headRY * 0.25;
+  // Nose bridge shadow
+  ctx.fillStyle = dti2DAlpha(lo, 0.08);
   ctx.beginPath();
-  ctx.moveTo(cx - hu * 0.02, noseY - hu * 0.06);
-  ctx.quadraticCurveTo(cx - hu * 0.04, noseY, cx - hu * 0.025, noseY + hu * 0.01);
+  ctx.moveTo(cx - hu * 0.015, headCY - headRY * 0.1);
+  ctx.quadraticCurveTo(cx - hu * 0.025, noseY - hu * 0.02, cx - hu * 0.035, noseY);
+  ctx.lineTo(cx + hu * 0.01, noseY);
+  ctx.quadraticCurveTo(cx + hu * 0.005, noseY - hu * 0.02, cx + hu * 0.005, headCY - headRY * 0.1);
+  ctx.closePath();
+  ctx.fill();
+  // Nose tip
+  ctx.fillStyle = dti2DAlpha(lo, 0.1);
+  ctx.beginPath();
+  ctx.ellipse(cx, noseY + hu * 0.005, hu * 0.025, hu * 0.015, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Nostrils
+  ctx.fillStyle = dti2DAlpha(lo, 0.18);
+  ctx.beginPath();
+  ctx.ellipse(cx - hu * 0.018, noseY + hu * 0.01, hu * 0.01, hu * 0.007, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx + hu * 0.018, noseY + hu * 0.01, hu * 0.01, hu * 0.007, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Nose highlight
+  ctx.fillStyle = dti2DAlpha(hi, 0.1);
+  ctx.beginPath();
+  ctx.ellipse(cx - hu * 0.005, noseY - hu * 0.02, hu * 0.008, hu * 0.02, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Philtrum (groove between nose and lip)
+  ctx.strokeStyle = dti2DAlpha(lo, 0.08);
+  ctx.lineWidth = 0.6;
+  ctx.beginPath();
+  ctx.moveTo(cx - hu * 0.008, noseY + hu * 0.02);
+  ctx.lineTo(cx - hu * 0.01, noseY + hu * 0.055);
   ctx.stroke();
-  // Nostril hints
   ctx.beginPath();
-  ctx.arc(cx - hu * 0.02, noseY + hu * 0.005, hu * 0.01, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(cx + hu * 0.02, noseY + hu * 0.005, hu * 0.01, 0, Math.PI * 2);
+  ctx.moveTo(cx + hu * 0.008, noseY + hu * 0.02);
+  ctx.lineTo(cx + hu * 0.01, noseY + hu * 0.055);
   ctx.stroke();
 
-  // ── LIPS ──
+  // ── LIPS ── (fuller, more defined with cupid's bow)
   var lipY = headCY + headRY * 0.52;
-  var lipW = hu * 0.1;
+  var lipW = hu * 0.12;
   var lipColor = dti2DShade(base, -20);
-  var lipHi = dti2DShade(lipColor, 30);
+  var lipHi = dti2DShade(lipColor, 25);
+  var lipDk = dti2DShade(lipColor, -15);
 
-  // Upper lip
+  // Upper lip with cupid's bow
   ctx.fillStyle = lipColor;
   ctx.beginPath();
   ctx.moveTo(cx - lipW, lipY);
-  ctx.quadraticCurveTo(cx - lipW * 0.5, lipY - hu * 0.03, cx, lipY - hu * 0.02);
-  ctx.quadraticCurveTo(cx + lipW * 0.5, lipY - hu * 0.03, cx + lipW, lipY);
-  ctx.quadraticCurveTo(cx + lipW * 0.3, lipY + hu * 0.005, cx, lipY + hu * 0.005);
-  ctx.quadraticCurveTo(cx - lipW * 0.3, lipY + hu * 0.005, cx - lipW, lipY);
+  ctx.quadraticCurveTo(cx - lipW * 0.6, lipY - hu * 0.025, cx - lipW * 0.2, lipY - hu * 0.015);
+  // Cupid's bow dip
+  ctx.quadraticCurveTo(cx, lipY - hu * 0.005, cx + lipW * 0.2, lipY - hu * 0.015);
+  ctx.quadraticCurveTo(cx + lipW * 0.6, lipY - hu * 0.025, cx + lipW, lipY);
+  // Lower edge of upper lip
+  ctx.quadraticCurveTo(cx + lipW * 0.4, lipY + hu * 0.01, cx, lipY + hu * 0.012);
+  ctx.quadraticCurveTo(cx - lipW * 0.4, lipY + hu * 0.01, cx - lipW, lipY);
   ctx.fill();
 
-  // Lower lip
-  ctx.fillStyle = lipHi;
+  // Upper lip cupid's bow peaks
+  ctx.fillStyle = lipDk;
+  ctx.beginPath();
+  ctx.moveTo(cx - lipW * 0.15, lipY - hu * 0.015);
+  ctx.quadraticCurveTo(cx, lipY - hu * 0.03, cx + lipW * 0.15, lipY - hu * 0.015);
+  ctx.quadraticCurveTo(cx, lipY - hu * 0.02, cx - lipW * 0.15, lipY - hu * 0.015);
+  ctx.fill();
+
+  // Lower lip (fuller)
+  var lowerLipGrad = ctx.createRadialGradient(cx, lipY + hu * 0.035, 0, cx, lipY + hu * 0.03, lipW * 0.8);
+  lowerLipGrad.addColorStop(0, lipHi);
+  lowerLipGrad.addColorStop(0.6, lipColor);
+  lowerLipGrad.addColorStop(1, lipDk);
+  ctx.fillStyle = lowerLipGrad;
+  ctx.beginPath();
+  ctx.moveTo(cx - lipW * 0.9, lipY + hu * 0.01);
+  ctx.quadraticCurveTo(cx - lipW * 0.5, lipY + hu * 0.06, cx, lipY + hu * 0.065);
+  ctx.quadraticCurveTo(cx + lipW * 0.5, lipY + hu * 0.06, cx + lipW * 0.9, lipY + hu * 0.01);
+  ctx.quadraticCurveTo(cx + lipW * 0.3, lipY + hu * 0.045, cx, lipY + hu * 0.05);
+  ctx.quadraticCurveTo(cx - lipW * 0.3, lipY + hu * 0.045, cx - lipW * 0.9, lipY + hu * 0.01);
+  ctx.fill();
+
+  // Lip shine highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(cx - hu * 0.01, lipY + hu * 0.03, lipW * 0.25, hu * 0.01, -0.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Lip line (between upper and lower)
+  ctx.strokeStyle = dti2DAlpha(lipDk, 0.3);
+  ctx.lineWidth = 0.6;
   ctx.beginPath();
   ctx.moveTo(cx - lipW * 0.85, lipY + hu * 0.005);
-  ctx.quadraticCurveTo(cx, lipY + hu * 0.055, cx + lipW * 0.85, lipY + hu * 0.005);
-  ctx.quadraticCurveTo(cx, lipY + hu * 0.04, cx - lipW * 0.85, lipY + hu * 0.005);
-  ctx.fill();
+  ctx.quadraticCurveTo(cx, lipY + hu * 0.015, cx + lipW * 0.85, lipY + hu * 0.005);
+  ctx.stroke();
 
-  // Lip highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  // Shadow under lower lip
+  ctx.strokeStyle = dti2DAlpha(lo, 0.1);
+  ctx.lineWidth = 0.7;
   ctx.beginPath();
-  ctx.ellipse(cx, lipY + hu * 0.025, lipW * 0.3, hu * 0.01, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(cx - lipW * 0.6, lipY + hu * 0.07);
+  ctx.quadraticCurveTo(cx, lipY + hu * 0.08, cx + lipW * 0.6, lipY + hu * 0.07);
+  ctx.stroke();
 
-  // ── CHEEK BLUSH ──
-  var blushColor = dti2DAlpha(dti2DShade(base, -10), 0.08);
-  ctx.fillStyle = blushColor;
+  // ── CHEEK BLUSH ── (softer, more visible)
+  var blushGrad = ctx.createRadialGradient(cx - headRX * 0.55, headCY + headRY * 0.18, 0, cx - headRX * 0.55, headCY + headRY * 0.18, hu * 0.08);
+  blushGrad.addColorStop(0, dti2DAlpha(dti2DShade(base, -10), 0.12));
+  blushGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = blushGrad;
   ctx.beginPath();
-  ctx.ellipse(cx - headRX * 0.6, headCY + headRY * 0.2, hu * 0.06, hu * 0.04, -0.1, 0, Math.PI * 2);
+  ctx.ellipse(cx - headRX * 0.55, headCY + headRY * 0.18, hu * 0.08, hu * 0.05, -0.1, 0, Math.PI * 2);
   ctx.fill();
+  var blushGrad2 = ctx.createRadialGradient(cx + headRX * 0.55, headCY + headRY * 0.18, 0, cx + headRX * 0.55, headCY + headRY * 0.18, hu * 0.08);
+  blushGrad2.addColorStop(0, dti2DAlpha(dti2DShade(base, -10), 0.12));
+  blushGrad2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = blushGrad2;
   ctx.beginPath();
-  ctx.ellipse(cx + headRX * 0.6, headCY + headRY * 0.2, hu * 0.06, hu * 0.04, 0.1, 0, Math.PI * 2);
+  ctx.ellipse(cx + headRX * 0.55, headCY + headRY * 0.18, hu * 0.08, hu * 0.05, 0.1, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
@@ -1149,54 +1315,196 @@ var DTI_2D_HAIR = {
 // CLOTHING — TOPS
 // ═══════════════════════════════════════════════════════════
 
-// Helper: fabric gradient fill based on style
+// Helper: fabric gradient fill based on style (richer, multi-stop)
 function dti2DFabricFill(ctx, color, style, x1, y1, x2, y2) {
-  var hi = dti2DShade(color, 25);
-  var lo = dti2DShade(color, -25);
+  var hi = dti2DShade(color, 35);
+  var lo = dti2DShade(color, -35);
+  var mid = dti2DShade(color, 8);
   var grad = ctx.createLinearGradient(x1, y1, x2, y2);
   grad.addColorStop(0, hi);
-  grad.addColorStop(0.35, color);
+  grad.addColorStop(0.25, mid);
+  grad.addColorStop(0.55, color);
+  grad.addColorStop(0.8, dti2DShade(color, -15));
   grad.addColorStop(1, lo);
   return grad;
+}
+
+// Helper: draw fabric wrinkle/fold lines that are actually visible
+function dti2DFabricFolds(ctx, color, folds, width) {
+  var dk = dti2DShade(color, -50);
+  ctx.save();
+  ctx.strokeStyle = dti2DAlpha(dk, 0.22);
+  ctx.lineWidth = width || 0.9;
+  ctx.lineCap = 'round';
+  for (var i = 0; i < folds.length; i++) {
+    var f = folds[i];
+    ctx.beginPath();
+    ctx.moveTo(f[0], f[1]);
+    if (f.length === 6) ctx.quadraticCurveTo(f[2], f[3], f[4], f[5]);
+    else if (f.length === 8) ctx.bezierCurveTo(f[2], f[3], f[4], f[5], f[6], f[7]);
+    else ctx.lineTo(f[2], f[3]);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Helper: draw a highlight fold line (light crease where fabric catches light)
+function dti2DFabricHighlights(ctx, color, folds, width) {
+  var hi = dti2DShade(color, 45);
+  ctx.save();
+  ctx.strokeStyle = dti2DAlpha(hi, 0.15);
+  ctx.lineWidth = width || 0.7;
+  ctx.lineCap = 'round';
+  for (var i = 0; i < folds.length; i++) {
+    var f = folds[i];
+    ctx.beginPath();
+    ctx.moveTo(f[0], f[1]);
+    if (f.length === 6) ctx.quadraticCurveTo(f[2], f[3], f[4], f[5]);
+    else if (f.length === 8) ctx.bezierCurveTo(f[2], f[3], f[4], f[5], f[6], f[7]);
+    else ctx.lineTo(f[2], f[3]);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// Helper: draw hem (thick bottom edge with shadow)
+function dti2DDrawHem(ctx, color, points, thickness) {
+  var dk = dti2DShade(color, -40);
+  ctx.save();
+  // Shadow line just above hem
+  ctx.strokeStyle = dti2DAlpha(dk, 0.18);
+  ctx.lineWidth = thickness || 1.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(points[0], points[1]);
+  for (var i = 2; i < points.length; i += 2) {
+    ctx.lineTo(points[i], points[i + 1]);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Helper: draw seam stitch marks
+function dti2DDrawStitching(ctx, color, x1, y1, x2, y2, count) {
+  var dk = dti2DShade(color, -45);
+  ctx.save();
+  ctx.strokeStyle = dti2DAlpha(dk, 0.18);
+  ctx.lineWidth = 0.5;
+  var n = count || 8;
+  for (var i = 0; i <= n; i++) {
+    var t = i / n;
+    var x = x1 + (x2 - x1) * t;
+    var y = y1 + (y2 - y1) * t;
+    ctx.beginPath();
+    ctx.moveTo(x - 1, y - 1);
+    ctx.lineTo(x + 1, y + 1);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // top_fitted: Fitted top (shoulder to hip, follows curves)
 function dti2DDrawTopFitted(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
-  var pad = hu * 0.02; // slight offset from body
+  var pad = hu * 0.02;
   ctx.save();
-  ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.shoulderW / 2, m.shoulderY, cx + m.shoulderW / 2, m.waistY);
+
+  // Main shape path (reusable)
+  function topPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.neckW * 1.0, m.neckBot + hu * 0.02);
+    ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.06, cx + m.neckW * 1.0, m.neckBot + hu * 0.02);
+    ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY);
+    ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY + hu * 0.3);
+    ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad, m.bustY + hu * 0.05);
+    ctx.quadraticCurveTo(cx + m.waistW / 2 + pad + hu * 0.05, m.waistY, cx + m.hipW / 2 + pad, m.hipY);
+    ctx.lineTo(cx + m.hipW / 2 + pad, m.hipY + hu * 0.05);
+    ctx.quadraticCurveTo(cx, m.hipY + hu * 0.08, cx - m.hipW / 2 - pad, m.hipY + hu * 0.05);
+    ctx.lineTo(cx - m.hipW / 2 - pad, m.hipY);
+    ctx.quadraticCurveTo(cx - m.waistW / 2 - pad - hu * 0.05, m.waistY, cx - m.bustW / 2 - pad, m.bustY + hu * 0.05);
+    ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, m.shoulderY + hu * 0.3);
+    ctx.lineTo(cx - m.shoulderW / 2 - pad, m.shoulderY);
+    ctx.closePath();
+  }
+
+  // Base fill
+  ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.shoulderW / 2, m.shoulderY, cx + m.shoulderW / 2, m.hipY);
+  topPath();
+  ctx.fill();
+
+  // Side shadow overlay (gives 3D roundness)
+  ctx.save();
+  topPath();
+  ctx.clip();
+  var sideShadowR = ctx.createLinearGradient(cx - m.shoulderW / 2 - pad, 0, cx - m.waistW / 2, 0);
+  sideShadowR.addColorStop(0, dti2DAlpha(dti2DShade(color, -50), 0.2));
+  sideShadowR.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sideShadowR;
+  ctx.fillRect(cx - m.shoulderW / 2 - pad - hu * 0.1, m.shoulderY, m.shoulderW / 2, m.hipY - m.shoulderY + hu * 0.1);
+  var sideShadowL = ctx.createLinearGradient(cx + m.shoulderW / 2 + pad, 0, cx + m.waistW / 2, 0);
+  sideShadowL.addColorStop(0, dti2DAlpha(dti2DShade(color, -50), 0.2));
+  sideShadowL.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sideShadowL;
+  ctx.fillRect(cx, m.shoulderY, m.shoulderW / 2 + pad + hu * 0.1, m.hipY - m.shoulderY + hu * 0.1);
+  // Bust shadow
+  var bustShadow = ctx.createRadialGradient(cx, m.bustY + hu * 0.05, 0, cx, m.bustY + hu * 0.05, m.bustW / 2);
+  bustShadow.addColorStop(0, 'rgba(0,0,0,0)');
+  bustShadow.addColorStop(0.7, 'rgba(0,0,0,0)');
+  bustShadow.addColorStop(1, dti2DAlpha(dti2DShade(color, -40), 0.12));
+  ctx.fillStyle = bustShadow;
+  ctx.fillRect(cx - m.bustW / 2, m.bustY - hu * 0.1, m.bustW, hu * 0.3);
+  ctx.restore();
+
+  // Visible wrinkle fold lines
+  dti2DFabricFolds(ctx, color, [
+    // Diagonal folds from bust to waist
+    [cx - m.bustW / 4, m.bustY + hu * 0.05, cx - m.waistW / 3, m.waistY - hu * 0.05, cx - m.waistW / 4 - hu * 0.02, m.waistY + hu * 0.08],
+    [cx + m.bustW / 4, m.bustY + hu * 0.05, cx + m.waistW / 3, m.waistY - hu * 0.05, cx + m.waistW / 4 + hu * 0.02, m.waistY + hu * 0.08],
+    // Waist gather folds
+    [cx - m.waistW / 3, m.waistY, cx - m.hipW / 3 - hu * 0.01, (m.waistY + m.hipY) / 2, cx - m.hipW / 4, m.hipY],
+    [cx + m.waistW / 3, m.waistY, cx + m.hipW / 3 + hu * 0.01, (m.waistY + m.hipY) / 2, cx + m.hipW / 4, m.hipY],
+    // Center crease
+    [cx, m.bustY + hu * 0.08, cx - hu * 0.01, m.waistY, cx + hu * 0.01, m.hipY - hu * 0.05],
+    // Under-bust drape
+    [cx - m.bustW / 3, m.bustY + hu * 0.02, cx, m.bustY + hu * 0.1, cx + m.bustW / 3, m.bustY + hu * 0.02],
+    // Shoulder tension lines
+    [cx - m.shoulderW / 2, m.shoulderY + hu * 0.02, cx - m.shoulderW / 3, m.shoulderY + hu * 0.12],
+    [cx + m.shoulderW / 2, m.shoulderY + hu * 0.02, cx + m.shoulderW / 3, m.shoulderY + hu * 0.12]
+  ], 0.9);
+
+  // Light fabric highlights between folds
+  dti2DFabricHighlights(ctx, color, [
+    [cx - m.bustW / 6, m.bustY, cx - m.waistW / 5, (m.bustY + m.waistY) / 2, cx - m.waistW / 4, m.waistY],
+    [cx + m.bustW / 6, m.bustY, cx + m.waistW / 5, (m.bustY + m.waistY) / 2, cx + m.waistW / 4, m.waistY]
+  ], 1);
+
+  // Neckline seam
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -45), 0.25);
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  // Neckline (crew neck)
   ctx.moveTo(cx - m.neckW * 1.0, m.neckBot + hu * 0.02);
   ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.06, cx + m.neckW * 1.0, m.neckBot + hu * 0.02);
-  // Right shoulder & sleeve
-  ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY);
-  ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY + hu * 0.3);
-  // Right side down
-  ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx + m.waistW / 2 + pad + hu * 0.05, m.waistY, cx + m.hipW / 2 + pad, m.hipY);
-  ctx.lineTo(cx + m.hipW / 2 + pad, m.hipY + hu * 0.05);
-  // Bottom hem
-  ctx.quadraticCurveTo(cx, m.hipY + hu * 0.08, cx - m.hipW / 2 - pad, m.hipY + hu * 0.05);
-  // Left side up
-  ctx.lineTo(cx - m.hipW / 2 - pad, m.hipY);
-  ctx.quadraticCurveTo(cx - m.waistW / 2 - pad - hu * 0.05, m.waistY, cx - m.bustW / 2 - pad, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, m.shoulderY + hu * 0.3);
-  ctx.lineTo(cx - m.shoulderW / 2 - pad, m.shoulderY);
-  ctx.closePath();
-  ctx.fill();
-  // Fabric fold lines
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.1);
-  ctx.lineWidth = 0.8;
+  ctx.stroke();
+
+  // Hem with thickness
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 1.8;
   ctx.beginPath();
-  ctx.moveTo(cx - m.bustW / 4, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx - m.waistW / 3, m.waistY, cx - m.hipW / 4, m.hipY);
+  ctx.moveTo(cx - m.hipW / 2 - pad, m.hipY + hu * 0.05);
+  ctx.quadraticCurveTo(cx, m.hipY + hu * 0.08, cx + m.hipW / 2 + pad, m.hipY + hu * 0.05);
+  ctx.stroke();
+
+  // Sleeve cuff seam
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.shoulderW / 2 - pad, m.shoulderY + hu * 0.29);
+  ctx.lineTo(cx - m.bustW / 2 - pad, m.shoulderY + hu * 0.29);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(cx + m.bustW / 4, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx + m.waistW / 3, m.waistY, cx + m.hipW / 4, m.hipY);
+  ctx.moveTo(cx + m.shoulderW / 2 + pad, m.shoulderY + hu * 0.29);
+  ctx.lineTo(cx + m.bustW / 2 + pad, m.shoulderY + hu * 0.29);
   ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1206,30 +1514,80 @@ function dti2DDrawTopCrop(ctx, color, style, m) {
   var pad = hu * 0.02;
   var hemY = m.bustY + hu * 0.15;
   ctx.save();
+
+  function cropPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.neckW * 1.3, m.neckBot);
+    ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.1, cx + m.neckW * 1.3, m.neckBot);
+    ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY);
+    ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY + hu * 0.18);
+    ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad - hu * 0.02, hemY);
+    ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx - m.bustW / 2 - pad + hu * 0.02, hemY);
+    ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, m.shoulderY + hu * 0.18);
+    ctx.lineTo(cx - m.shoulderW / 2 - pad, m.shoulderY);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.shoulderW / 2, m.shoulderY, cx + m.shoulderW / 2, hemY);
+  cropPath();
+  ctx.fill();
+
+  // Side shadow overlay
+  ctx.save();
+  cropPath();
+  ctx.clip();
+  var ss = ctx.createLinearGradient(cx - m.shoulderW / 2 - pad, 0, cx - m.bustW / 3, 0);
+  ss.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.18));
+  ss.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss;
+  ctx.fillRect(cx - m.shoulderW / 2 - pad - hu * 0.05, m.shoulderY, m.shoulderW / 2, hemY - m.shoulderY + hu * 0.05);
+  var ss2 = ctx.createLinearGradient(cx + m.shoulderW / 2 + pad, 0, cx + m.bustW / 3, 0);
+  ss2.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.18));
+  ss2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss2;
+  ctx.fillRect(cx, m.shoulderY, m.shoulderW / 2 + pad + hu * 0.05, hemY - m.shoulderY + hu * 0.05);
+  ctx.restore();
+
+  // Wrinkle folds
+  dti2DFabricFolds(ctx, color, [
+    [cx - m.bustW / 4, m.bustY - hu * 0.05, cx - m.bustW / 3, m.bustY + hu * 0.05, cx - m.bustW / 4 - hu * 0.01, hemY - hu * 0.02],
+    [cx + m.bustW / 4, m.bustY - hu * 0.05, cx + m.bustW / 3, m.bustY + hu * 0.05, cx + m.bustW / 4 + hu * 0.01, hemY - hu * 0.02],
+    [cx - m.bustW / 3, m.bustY, cx, m.bustY + hu * 0.08, cx + m.bustW / 3, m.bustY],
+    [cx - m.shoulderW / 3, m.shoulderY + hu * 0.03, cx - m.shoulderW / 4, m.shoulderY + hu * 0.1]
+  ], 0.9);
+
+  // Neckline seam
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  // Scoop neckline
   ctx.moveTo(cx - m.neckW * 1.3, m.neckBot);
   ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.1, cx + m.neckW * 1.3, m.neckBot);
-  // Right shoulder
-  ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY);
-  ctx.lineTo(cx + m.shoulderW / 2 + pad, m.shoulderY + hu * 0.18);
-  // Right side
-  ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad - hu * 0.02, hemY);
-  // Bottom hem
-  ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx - m.bustW / 2 - pad + hu * 0.02, hemY);
-  // Left side
-  ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, m.shoulderY + hu * 0.18);
-  ctx.lineTo(cx - m.shoulderW / 2 - pad, m.shoulderY);
-  ctx.closePath();
-  ctx.fill();
-  // Hem detail
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -30), 0.15);
-  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Hem with visible thickness
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.28);
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(cx - m.bustW / 2 - pad + hu * 0.02, hemY);
   ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx + m.bustW / 2 + pad - hu * 0.02, hemY);
   ctx.stroke();
+
+  // Elastic gather at hem (small scallops)
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -35), 0.15);
+  ctx.lineWidth = 0.6;
+  var hemLeft = cx - m.bustW / 2 - pad + hu * 0.04;
+  var hemRight = cx + m.bustW / 2 + pad - hu * 0.04;
+  var hemSegs = 6;
+  for (var i = 0; i < hemSegs; i++) {
+    var sx = hemLeft + (hemRight - hemLeft) * (i / hemSegs);
+    var ex = hemLeft + (hemRight - hemLeft) * ((i + 1) / hemSegs);
+    ctx.beginPath();
+    ctx.moveTo(sx, hemY - hu * 0.005);
+    ctx.quadraticCurveTo((sx + ex) / 2, hemY + hu * 0.015, ex, hemY - hu * 0.005);
+    ctx.stroke();
+  }
+
   ctx.restore();
 }
 
@@ -1239,34 +1597,88 @@ function dti2DDrawTopOversized(ctx, color, style, m) {
   var extra = hu * 0.12;
   var hemY = m.hipY + hu * 0.12;
   ctx.save();
+
+  function oversizePath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.neckW * 1.2, m.neckBot);
+    ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.05, cx + m.neckW * 1.2, m.neckBot);
+    ctx.lineTo(cx + m.shoulderW / 2 + extra, m.shoulderY + hu * 0.08);
+    ctx.lineTo(cx + m.shoulderW / 2 + extra + hu * 0.05, m.elbowY - hu * 0.2);
+    ctx.lineTo(cx + m.shoulderW / 2 + extra - hu * 0.02, m.elbowY - hu * 0.15);
+    ctx.lineTo(cx + m.hipW / 2 + extra, hemY);
+    ctx.lineTo(cx - m.hipW / 2 - extra, hemY);
+    ctx.lineTo(cx - m.shoulderW / 2 - extra + hu * 0.02, m.elbowY - hu * 0.15);
+    ctx.lineTo(cx - m.shoulderW / 2 - extra - hu * 0.05, m.elbowY - hu * 0.2);
+    ctx.lineTo(cx - m.shoulderW / 2 - extra, m.shoulderY + hu * 0.08);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.shoulderW / 2 - extra, m.shoulderY, cx + m.shoulderW / 2 + extra, hemY);
+  oversizePath();
+  ctx.fill();
+
+  // Shadow overlay for depth
+  ctx.save();
+  oversizePath();
+  ctx.clip();
+  // Vertical center drape shadow (fabric hangs from shoulders)
+  var drapeShadow = ctx.createRadialGradient(cx, m.waistY, m.waistW / 3, cx, m.waistY, m.hipW / 2 + extra);
+  drapeShadow.addColorStop(0, 'rgba(0,0,0,0)');
+  drapeShadow.addColorStop(0.6, 'rgba(0,0,0,0)');
+  drapeShadow.addColorStop(1, dti2DAlpha(dti2DShade(color, -40), 0.15));
+  ctx.fillStyle = drapeShadow;
+  ctx.fillRect(cx - m.hipW / 2 - extra, m.shoulderY, m.hipW + extra * 2, hemY - m.shoulderY);
+  ctx.restore();
+
+  // Heavy drape fold lines (oversized = more folds)
+  dti2DFabricFolds(ctx, color, [
+    [cx - m.waistW / 3, m.bustY, cx - m.waistW / 2.5, m.waistY, cx - m.hipW / 3, hemY],
+    [cx + m.waistW / 3, m.bustY, cx + m.waistW / 2.5, m.waistY, cx + m.hipW / 3, hemY],
+    [cx - m.waistW / 6, m.bustY + hu * 0.1, cx - m.waistW / 5, m.waistY + hu * 0.1, cx - m.hipW / 5, hemY - hu * 0.02],
+    [cx + m.waistW / 6, m.bustY + hu * 0.1, cx + m.waistW / 5, m.waistY + hu * 0.1, cx + m.hipW / 5, hemY - hu * 0.02],
+    // Sleeve drape folds
+    [cx + m.shoulderW / 2 + extra * 0.5, m.shoulderY + hu * 0.1, cx + m.shoulderW / 2 + extra * 0.3, m.elbowY - hu * 0.25],
+    [cx - m.shoulderW / 2 - extra * 0.5, m.shoulderY + hu * 0.1, cx - m.shoulderW / 2 - extra * 0.3, m.elbowY - hu * 0.25],
+    // Horizontal wrinkles at gather points
+    [cx - m.waistW / 2, m.waistY + hu * 0.05, cx, m.waistY + hu * 0.08, cx + m.waistW / 2, m.waistY + hu * 0.05],
+    [cx - m.hipW / 3, m.hipY, cx, m.hipY + hu * 0.03, cx + m.hipW / 3, m.hipY]
+  ], 1.0);
+
+  // Highlights between folds
+  dti2DFabricHighlights(ctx, color, [
+    [cx, m.bustY + hu * 0.05, cx - hu * 0.02, m.waistY, cx + hu * 0.02, hemY - hu * 0.1],
+    [cx - m.waistW / 4, m.bustY, cx - m.waistW / 3, m.waistY],
+    [cx + m.waistW / 4, m.bustY, cx + m.waistW / 3, m.waistY]
+  ], 1.2);
+
+  // Neckline seam (ribbed collar)
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.22);
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  // Wide crew neck
   ctx.moveTo(cx - m.neckW * 1.2, m.neckBot);
   ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.05, cx + m.neckW * 1.2, m.neckBot);
-  // Right — dropped shoulder, wide sleeve
-  ctx.lineTo(cx + m.shoulderW / 2 + extra, m.shoulderY + hu * 0.08);
-  ctx.lineTo(cx + m.shoulderW / 2 + extra + hu * 0.05, m.elbowY - hu * 0.2);
-  ctx.lineTo(cx + m.shoulderW / 2 + extra - hu * 0.02, m.elbowY - hu * 0.15);
-  // Right side — straight down (boxy)
+  ctx.stroke();
+
+  // Hem with thickness
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.hipW / 2 - extra, hemY);
   ctx.lineTo(cx + m.hipW / 2 + extra, hemY);
-  // Bottom hem
-  ctx.lineTo(cx - m.hipW / 2 - extra, hemY);
-  // Left side up
-  ctx.lineTo(cx - m.shoulderW / 2 - extra + hu * 0.02, m.elbowY - hu * 0.15);
+  ctx.stroke();
+
+  // Sleeve cuff seams
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx + m.shoulderW / 2 + extra - hu * 0.02, m.elbowY - hu * 0.15);
+  ctx.lineTo(cx + m.shoulderW / 2 + extra + hu * 0.05, m.elbowY - hu * 0.2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - m.shoulderW / 2 - extra + hu * 0.02, m.elbowY - hu * 0.15);
   ctx.lineTo(cx - m.shoulderW / 2 - extra - hu * 0.05, m.elbowY - hu * 0.2);
-  ctx.lineTo(cx - m.shoulderW / 2 - extra, m.shoulderY + hu * 0.08);
-  ctx.closePath();
-  ctx.fill();
-  // Drape fold lines
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.08);
-  ctx.lineWidth = 0.8;
-  for (var i = -1; i <= 1; i += 2) {
-    ctx.beginPath();
-    ctx.moveTo(cx + i * m.waistW / 3, m.bustY);
-    ctx.quadraticCurveTo(cx + i * m.waistW / 2.5, m.waistY, cx + i * m.hipW / 3, hemY);
-    ctx.stroke();
-  }
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1277,30 +1689,81 @@ function dti2DDrawTopOffShoulder(ctx, color, style, m) {
   var hemY = m.waistY + hu * 0.1;
   var necklineY = m.shoulderY + hu * 0.12;
   ctx.save();
+
+  function offshPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.shoulderW / 2 - pad, necklineY);
+    ctx.quadraticCurveTo(cx - m.bustW / 3, m.bustY - hu * 0.15, cx, m.bustY - hu * 0.12);
+    ctx.quadraticCurveTo(cx + m.bustW / 3, m.bustY - hu * 0.15, cx + m.shoulderW / 2 + pad, necklineY);
+    ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad, m.bustY + hu * 0.05);
+    ctx.quadraticCurveTo(cx + m.waistW / 2 + pad + hu * 0.04, m.waistY, cx + m.waistW / 2 + pad + hu * 0.06, hemY);
+    ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx - m.waistW / 2 - pad - hu * 0.06, hemY);
+    ctx.quadraticCurveTo(cx - m.waistW / 2 - pad - hu * 0.04, m.waistY, cx - m.bustW / 2 - pad, m.bustY + hu * 0.05);
+    ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, necklineY);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.shoulderW / 2, necklineY, cx + m.shoulderW / 2, hemY);
-  ctx.beginPath();
-  // Off-shoulder neckline (dips below shoulders)
-  ctx.moveTo(cx - m.shoulderW / 2 - pad, necklineY);
-  ctx.quadraticCurveTo(cx - m.bustW / 3, m.bustY - hu * 0.15, cx, m.bustY - hu * 0.12);
-  ctx.quadraticCurveTo(cx + m.bustW / 3, m.bustY - hu * 0.15, cx + m.shoulderW / 2 + pad, necklineY);
-  // Right side down
-  ctx.quadraticCurveTo(cx + m.bustW / 2 + pad, m.bustY, cx + m.bustW / 2 + pad, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx + m.waistW / 2 + pad + hu * 0.04, m.waistY, cx + m.waistW / 2 + pad + hu * 0.06, hemY);
-  // Bottom
-  ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx - m.waistW / 2 - pad - hu * 0.06, hemY);
-  // Left side up
-  ctx.quadraticCurveTo(cx - m.waistW / 2 - pad - hu * 0.04, m.waistY, cx - m.bustW / 2 - pad, m.bustY + hu * 0.05);
-  ctx.quadraticCurveTo(cx - m.bustW / 2 - pad, m.bustY, cx - m.shoulderW / 2 - pad, necklineY);
-  ctx.closePath();
+  offshPath();
   ctx.fill();
-  // Ruffle detail on neckline
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -20), 0.15);
-  ctx.lineWidth = 1;
+
+  // Side shadow overlay
+  ctx.save();
+  offshPath();
+  ctx.clip();
+  var ss = ctx.createLinearGradient(cx - m.bustW / 2 - pad, 0, cx - m.bustW / 4, 0);
+  ss.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.18));
+  ss.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss;
+  ctx.fillRect(cx - m.shoulderW / 2 - pad, necklineY, m.shoulderW / 2, hemY - necklineY);
+  var ss2 = ctx.createLinearGradient(cx + m.bustW / 2 + pad, 0, cx + m.bustW / 4, 0);
+  ss2.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.18));
+  ss2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss2;
+  ctx.fillRect(cx, necklineY, m.shoulderW / 2 + pad, hemY - necklineY);
+  ctx.restore();
+
+  // Wrinkle folds
+  dti2DFabricFolds(ctx, color, [
+    [cx - m.bustW / 4, m.bustY - hu * 0.05, cx - m.waistW / 3, m.bustY + hu * 0.08, cx - m.waistW / 3, hemY - hu * 0.02],
+    [cx + m.bustW / 4, m.bustY - hu * 0.05, cx + m.waistW / 3, m.bustY + hu * 0.08, cx + m.waistW / 3, hemY - hu * 0.02],
+    [cx, m.bustY - hu * 0.08, cx, m.bustY + hu * 0.03, cx - hu * 0.01, hemY - hu * 0.03]
+  ], 0.9);
+
+  // Ruffle detail on neckline (multiple layers for realism)
+  var ruffleColor = dti2DShade(color, -25);
+  ctx.strokeStyle = dti2DAlpha(ruffleColor, 0.28);
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(cx - m.shoulderW / 2, necklineY + hu * 0.01);
   ctx.quadraticCurveTo(cx - m.bustW / 3, m.bustY - hu * 0.13, cx, m.bustY - hu * 0.1);
   ctx.quadraticCurveTo(cx + m.bustW / 3, m.bustY - hu * 0.13, cx + m.shoulderW / 2, necklineY + hu * 0.01);
   ctx.stroke();
+  // Ruffle scallops
+  ctx.strokeStyle = dti2DAlpha(ruffleColor, 0.2);
+  ctx.lineWidth = 0.8;
+  var ruffleSegs = 8;
+  var rStart = cx - m.shoulderW / 2;
+  var rEnd = cx + m.shoulderW / 2;
+  for (var ri = 0; ri < ruffleSegs; ri++) {
+    var rx1 = rStart + (rEnd - rStart) * (ri / ruffleSegs);
+    var rx2 = rStart + (rEnd - rStart) * ((ri + 1) / ruffleSegs);
+    var ry = necklineY + hu * 0.005 + Math.sin(ri * 1.2) * hu * 0.008;
+    ctx.beginPath();
+    ctx.moveTo(rx1, ry);
+    ctx.quadraticCurveTo((rx1 + rx2) / 2, ry + hu * 0.02, rx2, ry);
+    ctx.stroke();
+  }
+
+  // Hem
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad - hu * 0.06, hemY);
+  ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx + m.waistW / 2 + pad + hu * 0.06, hemY);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1321,35 +1784,84 @@ function dti2DDrawBottomSkirt(ctx, color, style, m) {
   var pad = hu * 0.02;
   var hemY = m.kneeY + hu * 0.4;
   ctx.save();
+
+  function skirtPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
+    ctx.quadraticCurveTo(cx + m.hipW / 2 + pad + hu * 0.05, m.hipY, cx + m.hipW / 2 + hu * 0.15, hemY);
+    ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx - m.hipW / 2 - hu * 0.15, hemY);
+    ctx.quadraticCurveTo(cx - m.hipW / 2 - pad - hu * 0.05, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.hipW / 2, m.waistY, cx + m.hipW / 2, hemY);
+  skirtPath();
+  ctx.fill();
+
+  // Side shadow overlay
+  ctx.save();
+  skirtPath();
+  ctx.clip();
+  var ss = ctx.createLinearGradient(cx - m.hipW / 2 - hu * 0.15, 0, cx - m.hipW / 4, 0);
+  ss.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.2));
+  ss.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss;
+  ctx.fillRect(cx - m.hipW / 2 - hu * 0.2, m.waistY, m.hipW / 2, hemY - m.waistY + hu * 0.05);
+  var ss2 = ctx.createLinearGradient(cx + m.hipW / 2 + hu * 0.15, 0, cx + m.hipW / 4, 0);
+  ss2.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.2));
+  ss2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss2;
+  ctx.fillRect(cx, m.waistY, m.hipW / 2 + hu * 0.2, hemY - m.waistY + hu * 0.05);
+  ctx.restore();
+
+  // Visible drape folds (radiating from waist)
+  dti2DFabricFolds(ctx, color, [
+    [cx - hu * 0.16, m.hipY - hu * 0.05, cx - hu * 0.2, (m.hipY + hemY) / 2, cx - hu * 0.24, hemY],
+    [cx - hu * 0.06, m.hipY - hu * 0.03, cx - hu * 0.08, (m.hipY + hemY) / 2, cx - hu * 0.1, hemY],
+    [cx + hu * 0.06, m.hipY - hu * 0.03, cx + hu * 0.08, (m.hipY + hemY) / 2, cx + hu * 0.1, hemY],
+    [cx + hu * 0.16, m.hipY - hu * 0.05, cx + hu * 0.2, (m.hipY + hemY) / 2, cx + hu * 0.24, hemY],
+    // Between-leg shadow
+    [cx - hu * 0.02, m.crotchY - hu * 0.05, cx, m.kneeY, cx + hu * 0.02, hemY - hu * 0.05]
+  ], 1.0);
+
+  // Highlights between folds
+  dti2DFabricHighlights(ctx, color, [
+    [cx - hu * 0.11, m.hipY, cx - hu * 0.13, (m.hipY + hemY) / 2, cx - hu * 0.16, hemY - hu * 0.05],
+    [cx + hu * 0.11, m.hipY, cx + hu * 0.13, (m.hipY + hemY) / 2, cx + hu * 0.16, hemY - hu * 0.05],
+    [cx, m.hipY, cx, (m.hipY + hemY) / 2]
+  ], 1.0);
+
+  // Waistband (thicker, more defined)
+  ctx.fillStyle = dti2DShade(color, -15);
   ctx.beginPath();
-  // Waistband
   ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
   ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
-  // Right side flares out
-  ctx.quadraticCurveTo(cx + m.hipW / 2 + pad + hu * 0.05, m.hipY, cx + m.hipW / 2 + hu * 0.15, hemY);
-  // Hem
-  ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx - m.hipW / 2 - hu * 0.15, hemY);
-  // Left side up
-  ctx.quadraticCurveTo(cx - m.hipW / 2 - pad - hu * 0.05, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
   ctx.closePath();
   ctx.fill();
-  // Fabric drape folds
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.08);
+  // Waistband seam lines
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -45), 0.22);
   ctx.lineWidth = 0.8;
-  for (var i = -2; i <= 2; i++) {
-    ctx.beginPath();
-    ctx.moveTo(cx + i * hu * 0.08, m.hipY);
-    ctx.quadraticCurveTo(cx + i * hu * 0.1, (m.hipY + hemY) / 2, cx + i * hu * 0.12, hemY);
-    ctx.stroke();
-  }
-  // Waistband line
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -30), 0.12);
-  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY + hu * 0.02);
-  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.04, cx + m.waistW / 2 + pad, m.waistY + hu * 0.02);
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
   ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.stroke();
+
+  // Hem with thickness
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.hipW / 2 - hu * 0.15, hemY);
+  ctx.quadraticCurveTo(cx, hemY + hu * 0.03, cx + m.hipW / 2 + hu * 0.15, hemY);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1359,24 +1871,71 @@ function dti2DDrawBottomMini(ctx, color, style, m) {
   var pad = hu * 0.02;
   var hemY = m.crotchY + hu * 0.1;
   ctx.save();
+
+  function miniPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
+    ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + m.hipW / 2 + hu * 0.06, hemY);
+    ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx - m.hipW / 2 - hu * 0.06, hemY);
+    ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.hipW / 2, m.waistY, cx + m.hipW / 2, hemY);
+  miniPath();
+  ctx.fill();
+
+  // Side shadows
+  ctx.save();
+  miniPath();
+  ctx.clip();
+  var ss = ctx.createLinearGradient(cx - m.hipW / 2 - hu * 0.06, 0, cx - m.hipW / 3, 0);
+  ss.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.2));
+  ss.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss;
+  ctx.fillRect(cx - m.hipW / 2 - hu * 0.1, m.waistY, m.hipW / 2, hemY - m.waistY + hu * 0.05);
+  var ss2 = ctx.createLinearGradient(cx + m.hipW / 2 + hu * 0.06, 0, cx + m.hipW / 3, 0);
+  ss2.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.2));
+  ss2.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ss2;
+  ctx.fillRect(cx, m.waistY, m.hipW / 2 + hu * 0.1, hemY - m.waistY + hu * 0.05);
+  ctx.restore();
+
+  // Pleat fold lines (more visible)
+  dti2DFabricFolds(ctx, color, [
+    [cx - hu * 0.1, m.hipY - hu * 0.02, cx - hu * 0.12, hemY],
+    [cx, m.hipY - hu * 0.02, cx, hemY],
+    [cx + hu * 0.1, m.hipY - hu * 0.02, cx + hu * 0.12, hemY],
+    [cx - hu * 0.05, m.hipY, cx - hu * 0.06, hemY - hu * 0.02],
+    [cx + hu * 0.05, m.hipY, cx + hu * 0.06, hemY - hu * 0.02]
+  ], 0.8);
+
+  // Waistband
+  ctx.fillStyle = dti2DShade(color, -12);
   ctx.beginPath();
   ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
   ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
-  ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + m.hipW / 2 + hu * 0.06, hemY);
-  ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx - m.hipW / 2 - hu * 0.06, hemY);
-  ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY + hu * 0.025);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.035, cx - m.waistW / 2 - pad, m.waistY + hu * 0.025);
   ctx.closePath();
   ctx.fill();
-  // Pleat lines
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -35), 0.1);
-  ctx.lineWidth = 0.6;
-  for (var i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.moveTo(cx + i * hu * 0.1, m.hipY - hu * 0.02);
-    ctx.lineTo(cx + i * hu * 0.12, hemY);
-    ctx.stroke();
-  }
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -45), 0.22);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY + hu * 0.025);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.035, cx + m.waistW / 2 + pad, m.waistY + hu * 0.025);
+  ctx.stroke();
+
+  // Hem
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.hipW / 2 - hu * 0.06, hemY);
+  ctx.quadraticCurveTo(cx, hemY + hu * 0.02, cx + m.hipW / 2 + hu * 0.06, hemY);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1386,41 +1945,118 @@ function dti2DDrawBottomPants(ctx, color, style, m) {
   var pad = hu * 0.02;
   var legSpread = hu * 0.12;
   ctx.save();
+
+  function pantsPath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
+    ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + legSpread + m.hu * 0.2, m.crotchY);
+    ctx.quadraticCurveTo(cx + legSpread + m.kneeW + pad, m.kneeY, cx + legSpread + m.ankleW + pad, m.ankleY);
+    ctx.lineTo(cx + legSpread - m.ankleW - pad, m.ankleY);
+    ctx.quadraticCurveTo(cx + legSpread - m.kneeW, m.kneeY, cx + legSpread - hu * 0.05, m.crotchY);
+    ctx.lineTo(cx - legSpread + hu * 0.05, m.crotchY);
+    ctx.quadraticCurveTo(cx - legSpread + m.kneeW, m.kneeY, cx - legSpread + m.ankleW + pad, m.ankleY);
+    ctx.lineTo(cx - legSpread - m.ankleW - pad, m.ankleY);
+    ctx.quadraticCurveTo(cx - legSpread - m.kneeW - pad, m.kneeY, cx - legSpread - m.hu * 0.2, m.crotchY);
+    ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.hipW / 2, m.waistY, cx + m.hipW / 2, m.ankleY);
-  // Draw as single shape: waist -> hips -> split into two legs
-  ctx.beginPath();
+  pantsPath();
+  ctx.fill();
+
+  // Side shadow + inner leg shadow
+  ctx.save();
+  pantsPath();
+  ctx.clip();
+  // Outer side shadows
+  for (var side = -1; side <= 1; side += 2) {
+    var outerX = cx + side * (legSpread + m.kneeW + pad);
+    var innerX = cx + side * legSpread;
+    var legShadow = ctx.createLinearGradient(outerX, 0, innerX, 0);
+    legShadow.addColorStop(0, dti2DAlpha(dti2DShade(color, -45), 0.18));
+    legShadow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = legShadow;
+    ctx.fillRect(Math.min(outerX, innerX), m.crotchY, Math.abs(outerX - innerX) + hu * 0.05, m.ankleY - m.crotchY);
+  }
+  // Inner leg shadow (between legs)
+  var innerShadow = ctx.createLinearGradient(cx - legSpread, 0, cx + legSpread, 0);
+  innerShadow.addColorStop(0, 'rgba(0,0,0,0)');
+  innerShadow.addColorStop(0.35, dti2DAlpha(dti2DShade(color, -40), 0.15));
+  innerShadow.addColorStop(0.5, dti2DAlpha(dti2DShade(color, -50), 0.2));
+  innerShadow.addColorStop(0.65, dti2DAlpha(dti2DShade(color, -40), 0.15));
+  innerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = innerShadow;
+  ctx.fillRect(cx - legSpread - hu * 0.05, m.crotchY - hu * 0.05, legSpread * 2 + hu * 0.1, m.ankleY - m.crotchY + hu * 0.05);
+  ctx.restore();
+
+  // Center crease lines (pressed pants)
+  dti2DFabricFolds(ctx, color, [
+    // Front creases (each leg)
+    [cx - legSpread, m.crotchY + hu * 0.08, cx - legSpread, m.kneeY, cx - legSpread, m.ankleY - hu * 0.05],
+    [cx + legSpread, m.crotchY + hu * 0.08, cx + legSpread, m.kneeY, cx + legSpread, m.ankleY - hu * 0.05],
+    // Knee wrinkles
+    [cx - legSpread - m.kneeW * 0.5, m.kneeY - hu * 0.03, cx - legSpread, m.kneeY + hu * 0.01, cx - legSpread + m.kneeW * 0.5, m.kneeY - hu * 0.03],
+    [cx + legSpread - m.kneeW * 0.5, m.kneeY - hu * 0.03, cx + legSpread, m.kneeY + hu * 0.01, cx + legSpread + m.kneeW * 0.5, m.kneeY - hu * 0.03],
+    [cx - legSpread - m.kneeW * 0.4, m.kneeY + hu * 0.02, cx - legSpread, m.kneeY + hu * 0.04, cx - legSpread + m.kneeW * 0.4, m.kneeY + hu * 0.02],
+    [cx + legSpread - m.kneeW * 0.4, m.kneeY + hu * 0.02, cx + legSpread, m.kneeY + hu * 0.04, cx + legSpread + m.kneeW * 0.4, m.kneeY + hu * 0.02],
+    // Hip area diagonal tension lines
+    [cx - m.hipW / 3, m.hipY, cx - legSpread - hu * 0.05, m.crotchY - hu * 0.08],
+    [cx + m.hipW / 3, m.hipY, cx + legSpread + hu * 0.05, m.crotchY - hu * 0.08]
+  ], 0.9);
+
+  // Highlights on front of legs
+  dti2DFabricHighlights(ctx, color, [
+    [cx - legSpread + hu * 0.02, m.crotchY + hu * 0.15, cx - legSpread + hu * 0.02, m.kneeY - hu * 0.05],
+    [cx + legSpread - hu * 0.02, m.crotchY + hu * 0.15, cx + legSpread - hu * 0.02, m.kneeY - hu * 0.05]
+  ], 1.0);
+
   // Waistband
+  ctx.fillStyle = dti2DShade(color, -12);
+  ctx.beginPath();
   ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
   ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
-  // Right hip
-  ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + legSpread + m.hu * 0.2, m.crotchY);
-  // Right leg outer
-  ctx.quadraticCurveTo(cx + legSpread + m.kneeW + pad, m.kneeY, cx + legSpread + m.ankleW + pad, m.ankleY);
-  // Right ankle
-  ctx.lineTo(cx + legSpread - m.ankleW - pad, m.ankleY);
-  // Right leg inner
-  ctx.quadraticCurveTo(cx + legSpread - m.kneeW, m.kneeY, cx + legSpread - hu * 0.05, m.crotchY);
-  // Crotch
-  ctx.lineTo(cx - legSpread + hu * 0.05, m.crotchY);
-  // Left leg inner
-  ctx.quadraticCurveTo(cx - legSpread + m.kneeW, m.kneeY, cx - legSpread + m.ankleW + pad, m.ankleY);
-  // Left ankle
-  ctx.lineTo(cx - legSpread - m.ankleW - pad, m.ankleY);
-  // Left leg outer
-  ctx.quadraticCurveTo(cx - legSpread - m.kneeW - pad, m.kneeY, cx - legSpread - m.hu * 0.2, m.crotchY);
-  // Left hip
-  ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
   ctx.closePath();
   ctx.fill();
-  // Crease lines
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -35), 0.08);
+  // Waistband seams
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -45), 0.22);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.stroke();
+
+  // Button/fly detail
+  ctx.fillStyle = dti2DAlpha(dti2DShade(color, -30), 0.2);
+  ctx.beginPath();
+  ctx.arc(cx, m.waistY + hu * 0.01, hu * 0.012, 0, Math.PI * 2);
+  ctx.fill();
+  // Fly seam
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.18);
   ctx.lineWidth = 0.7;
-  for (var side = -1; side <= 1; side += 2) {
+  ctx.beginPath();
+  ctx.moveTo(cx, m.waistY + hu * 0.03);
+  ctx.lineTo(cx, m.crotchY - hu * 0.05);
+  ctx.stroke();
+
+  // Ankle hems
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 1.8;
+  for (var s = -1; s <= 1; s += 2) {
     ctx.beginPath();
-    ctx.moveTo(cx + side * legSpread, m.crotchY + hu * 0.1);
-    ctx.lineTo(cx + side * legSpread, m.ankleY - hu * 0.1);
+    ctx.moveTo(cx + s * legSpread - m.ankleW - pad, m.ankleY);
+    ctx.lineTo(cx + s * legSpread + m.ankleW + pad, m.ankleY);
     ctx.stroke();
   }
+
   ctx.restore();
 }
 
@@ -1431,35 +2067,102 @@ function dti2DDrawBottomWide(ctx, color, style, m) {
   var legSpread = hu * 0.12;
   var flare = hu * 0.18;
   ctx.save();
+
+  function widePath() {
+    ctx.beginPath();
+    ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
+    ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + legSpread + m.hu * 0.2, m.crotchY);
+    ctx.quadraticCurveTo(cx + legSpread + m.kneeW + pad + hu * 0.02, m.kneeY, cx + legSpread + m.ankleW + flare, m.ankleY);
+    ctx.lineTo(cx + legSpread - m.ankleW - flare * 0.3, m.ankleY);
+    ctx.quadraticCurveTo(cx + legSpread - m.kneeW, m.kneeY, cx + legSpread - hu * 0.05, m.crotchY);
+    ctx.lineTo(cx - legSpread + hu * 0.05, m.crotchY);
+    ctx.quadraticCurveTo(cx - legSpread + m.kneeW, m.kneeY, cx - legSpread + m.ankleW + flare * 0.3, m.ankleY);
+    ctx.lineTo(cx - legSpread - m.ankleW - flare, m.ankleY);
+    ctx.quadraticCurveTo(cx - legSpread - m.kneeW - pad - hu * 0.02, m.kneeY, cx - legSpread - m.hu * 0.2, m.crotchY);
+    ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+    ctx.closePath();
+  }
+
+  // Base fill
   ctx.fillStyle = dti2DFabricFill(ctx, color, style, cx - m.hipW / 2, m.waistY, cx + m.hipW / 2, m.ankleY);
+  widePath();
+  ctx.fill();
+
+  // Shadow overlay
+  ctx.save();
+  widePath();
+  ctx.clip();
+  // Inner leg shadow
+  var innerShadow = ctx.createLinearGradient(cx - legSpread, 0, cx + legSpread, 0);
+  innerShadow.addColorStop(0, 'rgba(0,0,0,0)');
+  innerShadow.addColorStop(0.35, dti2DAlpha(dti2DShade(color, -40), 0.15));
+  innerShadow.addColorStop(0.5, dti2DAlpha(dti2DShade(color, -50), 0.2));
+  innerShadow.addColorStop(0.65, dti2DAlpha(dti2DShade(color, -40), 0.15));
+  innerShadow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = innerShadow;
+  ctx.fillRect(cx - legSpread - hu * 0.1, m.crotchY - hu * 0.05, legSpread * 2 + hu * 0.2, m.ankleY - m.crotchY + hu * 0.1);
+  ctx.restore();
+
+  // Heavy drape folds (wide-leg = lots of fabric movement)
+  dti2DFabricFolds(ctx, color, [
+    // Outer drape lines flaring from knee
+    [cx - legSpread - hu * 0.03, m.kneeY, cx - legSpread - hu * 0.06, (m.kneeY + m.ankleY) / 2, cx - legSpread - flare * 0.5, m.ankleY],
+    [cx + legSpread + hu * 0.03, m.kneeY, cx + legSpread + hu * 0.06, (m.kneeY + m.ankleY) / 2, cx + legSpread + flare * 0.5, m.ankleY],
+    // Inner drape
+    [cx - legSpread + hu * 0.03, m.kneeY + hu * 0.05, cx - legSpread + hu * 0.05, (m.kneeY + m.ankleY) / 2, cx - legSpread + flare * 0.2, m.ankleY],
+    [cx + legSpread - hu * 0.03, m.kneeY + hu * 0.05, cx + legSpread - hu * 0.05, (m.kneeY + m.ankleY) / 2, cx + legSpread - flare * 0.2, m.ankleY],
+    // Center front creases
+    [cx - legSpread, m.crotchY + hu * 0.1, cx - legSpread, m.kneeY],
+    [cx + legSpread, m.crotchY + hu * 0.1, cx + legSpread, m.kneeY],
+    // Hip tension lines
+    [cx - m.hipW / 3, m.hipY, cx - legSpread - hu * 0.06, m.crotchY - hu * 0.06],
+    [cx + m.hipW / 3, m.hipY, cx + legSpread + hu * 0.06, m.crotchY - hu * 0.06],
+    // Knee area wrinkles
+    [cx - legSpread - m.kneeW * 0.6, m.kneeY, cx - legSpread, m.kneeY + hu * 0.02, cx - legSpread + m.kneeW * 0.6, m.kneeY],
+    [cx + legSpread - m.kneeW * 0.6, m.kneeY, cx + legSpread, m.kneeY + hu * 0.02, cx + legSpread + m.kneeW * 0.6, m.kneeY]
+  ], 1.0);
+
+  // Highlights
+  dti2DFabricHighlights(ctx, color, [
+    [cx - legSpread, m.crotchY + hu * 0.15, cx - legSpread - hu * 0.01, m.kneeY - hu * 0.08],
+    [cx + legSpread, m.crotchY + hu * 0.15, cx + legSpread + hu * 0.01, m.kneeY - hu * 0.08]
+  ], 1.0);
+
+  // Waistband
+  ctx.fillStyle = dti2DShade(color, -12);
   ctx.beginPath();
   ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
   ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY - hu * 0.02);
-  // Right hip
-  ctx.quadraticCurveTo(cx + m.hipW / 2 + pad, m.hipY, cx + legSpread + m.hu * 0.2, m.crotchY);
-  // Right leg — flares out from knee
-  ctx.quadraticCurveTo(cx + legSpread + m.kneeW + pad + hu * 0.02, m.kneeY, cx + legSpread + m.ankleW + flare, m.ankleY);
-  ctx.lineTo(cx + legSpread - m.ankleW - flare * 0.3, m.ankleY);
-  ctx.quadraticCurveTo(cx + legSpread - m.kneeW, m.kneeY, cx + legSpread - hu * 0.05, m.crotchY);
-  // Crotch
-  ctx.lineTo(cx - legSpread + hu * 0.05, m.crotchY);
-  // Left leg
-  ctx.quadraticCurveTo(cx - legSpread + m.kneeW, m.kneeY, cx - legSpread + m.ankleW + flare * 0.3, m.ankleY);
-  ctx.lineTo(cx - legSpread - m.ankleW - flare, m.ankleY);
-  ctx.quadraticCurveTo(cx - legSpread - m.kneeW - pad - hu * 0.02, m.kneeY, cx - legSpread - m.hu * 0.2, m.crotchY);
-  // Left hip
-  ctx.quadraticCurveTo(cx - m.hipW / 2 - pad, m.hipY, cx - m.waistW / 2 - pad, m.waistY - hu * 0.02);
+  ctx.lineTo(cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
   ctx.closePath();
   ctx.fill();
-  // Drape fold lines
-  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -35), 0.08);
-  ctx.lineWidth = 0.7;
-  for (var side = -1; side <= 1; side += 2) {
-    ctx.beginPath();
-    ctx.moveTo(cx + side * legSpread - side * hu * 0.03, m.kneeY);
-    ctx.quadraticCurveTo(cx + side * legSpread + side * hu * 0.02, (m.kneeY + m.ankleY) / 2, cx + side * (legSpread + flare * 0.5), m.ankleY);
-    ctx.stroke();
-  }
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -45), 0.22);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - pad, m.waistY + hu * 0.03);
+  ctx.quadraticCurveTo(cx, m.waistY + hu * 0.045, cx + m.waistW / 2 + pad, m.waistY + hu * 0.03);
+  ctx.stroke();
+
+  // Button
+  ctx.fillStyle = dti2DAlpha(dti2DShade(color, -30), 0.2);
+  ctx.beginPath();
+  ctx.arc(cx, m.waistY + hu * 0.01, hu * 0.012, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ankle hems
+  ctx.strokeStyle = dti2DAlpha(dti2DShade(color, -40), 0.25);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - legSpread - m.ankleW - flare, m.ankleY);
+  ctx.lineTo(cx - legSpread + m.ankleW + flare * 0.3, m.ankleY);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + legSpread - m.ankleW - flare * 0.3, m.ankleY);
+  ctx.lineTo(cx + legSpread + m.ankleW + flare, m.ankleY);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -1477,44 +2180,78 @@ var DTI_2D_BOTTOMS = {
 function dti2DDrawShoesBoots(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var legSpread = hu * 0.12;
-  var dk = dti2DShade(color, -30);
-  var hi = dti2DShade(color, 20);
+  var dk = dti2DShade(color, -35);
+  var hi = dti2DShade(color, 25);
   var bootTop = m.kneeY + hu * 0.2;
   ctx.save();
   for (var side = -1; side <= 1; side += 2) {
     var fx = cx + side * legSpread;
-    ctx.fillStyle = color;
+    var bLeft = fx - m.ankleW - hu * 0.04;
+    var bRight = fx + m.ankleW + hu * 0.04;
+
+    // Boot shaft with gradient
+    var bootGrad = ctx.createLinearGradient(bLeft, 0, bRight, 0);
+    bootGrad.addColorStop(0, dk);
+    bootGrad.addColorStop(0.3, color);
+    bootGrad.addColorStop(0.5, hi);
+    bootGrad.addColorStop(0.7, color);
+    bootGrad.addColorStop(1, dk);
+    ctx.fillStyle = bootGrad;
     ctx.beginPath();
-    // Boot shaft
-    ctx.moveTo(fx - m.ankleW - hu * 0.04, bootTop);
-    ctx.lineTo(fx - m.ankleW - hu * 0.04, m.footY - hu * 0.02);
-    // Sole
+    ctx.moveTo(bLeft, bootTop);
+    ctx.lineTo(bLeft, m.footY - hu * 0.02);
     ctx.lineTo(fx - m.footW * 0.5, m.footY + hu * 0.02);
     ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.02);
-    ctx.lineTo(fx + m.ankleW + hu * 0.04, m.footY - hu * 0.02);
-    ctx.lineTo(fx + m.ankleW + hu * 0.04, bootTop);
+    ctx.lineTo(bRight, m.footY - hu * 0.02);
+    ctx.lineTo(bRight, bootTop);
     ctx.closePath();
     ctx.fill();
-    // Boot top trim
-    ctx.strokeStyle = dk;
-    ctx.lineWidth = 1.5;
+
+    // Ankle crease wrinkles
+    var ankleY = m.ankleY;
+    ctx.strokeStyle = dti2DAlpha(dk, 0.2);
+    ctx.lineWidth = 0.7;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW - hu * 0.04, bootTop);
-    ctx.lineTo(fx + m.ankleW + hu * 0.04, bootTop);
+    ctx.moveTo(bLeft + hu * 0.01, ankleY - hu * 0.02);
+    ctx.quadraticCurveTo(fx, ankleY, bRight - hu * 0.01, ankleY - hu * 0.02);
     ctx.stroke();
-    // Sole line
-    ctx.strokeStyle = dti2DAlpha(dk, 0.3);
+    ctx.beginPath();
+    ctx.moveTo(bLeft + hu * 0.01, ankleY + hu * 0.01);
+    ctx.quadraticCurveTo(fx, ankleY + hu * 0.025, bRight - hu * 0.01, ankleY + hu * 0.01);
+    ctx.stroke();
+
+    // Boot top trim (thicker)
+    ctx.strokeStyle = dk;
     ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(bLeft, bootTop);
+    ctx.lineTo(bRight, bootTop);
+    ctx.stroke();
+
+    // Sole (thick, visible)
+    ctx.fillStyle = dti2DShade(dk, -15);
     ctx.beginPath();
     ctx.moveTo(fx - m.footW * 0.5, m.footY + hu * 0.02);
     ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.02);
-    ctx.stroke();
-    // Highlight
-    ctx.strokeStyle = dti2DAlpha(hi, 0.12);
-    ctx.lineWidth = 1;
+    ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.05);
+    ctx.lineTo(fx - m.footW * 0.5, m.footY + hu * 0.05);
+    ctx.closePath();
+    ctx.fill();
+
+    // Vertical highlight streak
+    ctx.strokeStyle = dti2DAlpha(hi, 0.15);
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.5, bootTop + hu * 0.05);
-    ctx.lineTo(fx - m.ankleW * 0.5, m.footY - hu * 0.05);
+    ctx.moveTo(fx - m.ankleW * 0.3, bootTop + hu * 0.05);
+    ctx.lineTo(fx - m.ankleW * 0.3, m.footY - hu * 0.05);
+    ctx.stroke();
+
+    // Side seam
+    ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(bRight - hu * 0.01, bootTop);
+    ctx.lineTo(bRight - hu * 0.01, m.footY - hu * 0.02);
     ctx.stroke();
   }
   ctx.restore();
