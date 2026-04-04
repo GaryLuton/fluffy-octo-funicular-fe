@@ -108,11 +108,11 @@ function dti2DComputeBodyMetrics(w, h, breathOffset) {
     footW: hu * 0.3,
     footH: hu * 0.22,
     // Arms
-    armOuterX: hu * 0.55,  // offset from cx
+    armOuterX: hu * 0.54,  // offset from cx
     elbowY: topY + hu * 2.5,
     wristY: topY + hu * 3.2,
-    handY: topY + hu * 3.5,
-    handW: hu * 0.16,
+    handY: topY + hu * 3.45,
+    handW: hu * 0.18,
     // Misc
     topY: topY,
     botY: topY + hu * 7.1
@@ -233,43 +233,99 @@ function dti2DDrawBody(ctx, skin, m) {
   // ── LEGS ──
   var legSpread = m.hu * 0.12;
 
-  // Left leg
-  ctx.fillStyle = skinGrad;
-  ctx.beginPath();
-  ctx.moveTo(cx - legSpread - m.hu * 0.18, m.crotchY);
-  ctx.quadraticCurveTo(cx - legSpread - m.hu * 0.2, m.kneeY, cx - legSpread - m.kneeW, m.kneeY);
-  ctx.quadraticCurveTo(cx - legSpread - m.hu * 0.16, (m.kneeY + m.ankleY) / 2, cx - legSpread - m.ankleW, m.ankleY);
-  ctx.lineTo(cx - legSpread - m.ankleW, m.footY);
-  ctx.lineTo(cx - legSpread + m.ankleW, m.footY);
-  ctx.lineTo(cx - legSpread + m.ankleW, m.ankleY);
-  ctx.quadraticCurveTo(cx - legSpread + m.hu * 0.16, (m.kneeY + m.ankleY) / 2, cx - legSpread + m.kneeW, m.kneeY);
-  ctx.quadraticCurveTo(cx - legSpread + m.hu * 0.18, m.crotchY, cx - legSpread + m.hu * 0.14, m.crotchY);
-  ctx.closePath();
-  ctx.fill();
+  for (var legSide = -1; legSide <= 1; legSide += 2) {
+    var lx = cx + legSide * legSpread;
+    var thighW = m.hu * 0.2;
+    var calfW = m.hu * 0.16;
 
-  // Right leg
-  ctx.beginPath();
-  ctx.moveTo(cx + legSpread + m.hu * 0.18, m.crotchY);
-  ctx.quadraticCurveTo(cx + legSpread + m.hu * 0.2, m.kneeY, cx + legSpread + m.kneeW, m.kneeY);
-  ctx.quadraticCurveTo(cx + legSpread + m.hu * 0.16, (m.kneeY + m.ankleY) / 2, cx + legSpread + m.ankleW, m.ankleY);
-  ctx.lineTo(cx + legSpread + m.ankleW, m.footY);
-  ctx.lineTo(cx + legSpread - m.ankleW, m.footY);
-  ctx.lineTo(cx + legSpread - m.ankleW, m.ankleY);
-  ctx.quadraticCurveTo(cx + legSpread - m.hu * 0.16, (m.kneeY + m.ankleY) / 2, cx + legSpread - m.kneeW, m.kneeY);
-  ctx.quadraticCurveTo(cx + legSpread - m.hu * 0.18, m.crotchY, cx + legSpread - m.hu * 0.14, m.crotchY);
-  ctx.closePath();
-  ctx.fill();
+    // Leg gradient
+    var legGrad = ctx.createLinearGradient(lx - thighW, 0, lx + thighW, 0);
+    if (legSide < 0) {
+      legGrad.addColorStop(0, lo);
+      legGrad.addColorStop(0.4, base);
+      legGrad.addColorStop(0.8, hi);
+    } else {
+      legGrad.addColorStop(0.2, hi);
+      legGrad.addColorStop(0.6, base);
+      legGrad.addColorStop(1, lo);
+    }
+    ctx.fillStyle = legGrad;
+
+    ctx.beginPath();
+    // Outer edge: thigh to knee (smooth curve with slight thigh fullness)
+    ctx.moveTo(lx + legSide * thighW, m.crotchY);
+    ctx.bezierCurveTo(
+      lx + legSide * (thighW + m.hu * 0.02), m.crotchY + (m.kneeY - m.crotchY) * 0.4,
+      lx + legSide * (m.kneeW + m.hu * 0.03), m.kneeY - m.hu * 0.1,
+      lx + legSide * m.kneeW, m.kneeY
+    );
+    // Outer edge: knee to ankle (calf taper with subtle calf curve)
+    ctx.bezierCurveTo(
+      lx + legSide * (m.kneeW + m.hu * 0.01), m.kneeY + (m.ankleY - m.kneeY) * 0.3,
+      lx + legSide * (m.ankleW + m.hu * 0.04), m.ankleY - m.hu * 0.2,
+      lx + legSide * (m.ankleW + m.hu * 0.01), m.ankleY
+    );
+    // Ankle to foot top
+    ctx.lineTo(lx + legSide * (m.ankleW + m.hu * 0.01), m.footY - m.hu * 0.02);
+    // Foot bottom
+    ctx.lineTo(lx - legSide * (m.ankleW + m.hu * 0.01), m.footY - m.hu * 0.02);
+    // Inner ankle
+    ctx.lineTo(lx - legSide * (m.ankleW + m.hu * 0.01), m.ankleY);
+    // Inner edge: ankle to knee
+    ctx.bezierCurveTo(
+      lx - legSide * (m.ankleW + m.hu * 0.03), m.ankleY - m.hu * 0.15,
+      lx - legSide * (m.kneeW - m.hu * 0.02), m.kneeY + (m.ankleY - m.kneeY) * 0.3,
+      lx - legSide * (m.kneeW - m.hu * 0.02), m.kneeY
+    );
+    // Inner edge: knee to crotch
+    ctx.bezierCurveTo(
+      lx - legSide * (m.kneeW - m.hu * 0.01), m.kneeY - m.hu * 0.1,
+      lx - legSide * (thighW - m.hu * 0.04), m.crotchY + (m.kneeY - m.crotchY) * 0.3,
+      lx - legSide * (thighW - m.hu * 0.04), m.crotchY
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // Kneecap highlight
+    ctx.fillStyle = dti2DAlpha(hi, 0.06);
+    ctx.beginPath();
+    ctx.ellipse(lx, m.kneeY, m.kneeW * 0.5, m.hu * 0.03, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Shin highlight
+    ctx.strokeStyle = dti2DAlpha(hi, 0.05);
+    ctx.lineWidth = m.hu * 0.02;
+    ctx.beginPath();
+    ctx.moveTo(lx + legSide * m.hu * 0.01, m.kneeY + m.hu * 0.05);
+    ctx.lineTo(lx + legSide * m.hu * 0.005, m.ankleY - m.hu * 0.1);
+    ctx.stroke();
+  }
 
   // ── FEET (bare) ──
-  ctx.fillStyle = base;
-  // Left foot
-  ctx.beginPath();
-  ctx.ellipse(cx - legSpread, m.footY, m.footW * 0.5, m.footH * 0.5, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Right foot
-  ctx.beginPath();
-  ctx.ellipse(cx + legSpread, m.footY, m.footW * 0.5, m.footH * 0.5, 0, 0, Math.PI * 2);
-  ctx.fill();
+  for (var footSide = -1; footSide <= 1; footSide += 2) {
+    var fx = cx + footSide * legSpread;
+    // Foot shadow
+    ctx.fillStyle = dti2DAlpha(lo, 0.08);
+    ctx.beginPath();
+    ctx.ellipse(fx + footSide * m.hu * 0.02, m.footY + m.hu * 0.01, m.footW * 0.55, m.footH * 0.4, footSide * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Foot body
+    ctx.fillStyle = base;
+    ctx.beginPath();
+    ctx.ellipse(fx + footSide * m.hu * 0.02, m.footY, m.footW * 0.52, m.footH * 0.38, footSide * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Toe line
+    ctx.strokeStyle = dti2DAlpha(lo, 0.08);
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.arc(fx + footSide * m.hu * 0.04, m.footY - m.hu * 0.005, m.footW * 0.2, 0, Math.PI);
+    ctx.stroke();
+    // Ankle bone bump
+    ctx.fillStyle = dti2DAlpha(hi, 0.08);
+    ctx.beginPath();
+    ctx.ellipse(fx + footSide * (m.ankleW + m.hu * 0.005), m.ankleY + m.hu * 0.01, m.hu * 0.015, m.hu * 0.02, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // ── TORSO ──
   ctx.fillStyle = skinGrad;
@@ -330,13 +386,29 @@ function dti2DDrawBody(ctx, skin, m) {
   ctx.fillRect(cx - m.bustW / 2, m.shoulderY, m.bustW, m.hipY - m.shoulderY);
   ctx.restore();
 
-  // Bust line shadow (more visible)
-  ctx.strokeStyle = dti2DAlpha(lo, 0.2);
-  ctx.lineWidth = 1.2;
+  // Bust line shadow (defined under-bust crease)
+  ctx.strokeStyle = dti2DAlpha(lo, 0.15);
+  ctx.lineWidth = 1.0;
   ctx.beginPath();
-  ctx.moveTo(cx - m.bustW / 2 + m.hu * 0.1, m.bustY + m.hu * 0.02);
-  ctx.quadraticCurveTo(cx, m.bustY + m.hu * 0.08, cx + m.bustW / 2 - m.hu * 0.1, m.bustY + m.hu * 0.02);
+  ctx.moveTo(cx - m.bustW / 2 + m.hu * 0.12, m.bustY + m.hu * 0.03);
+  ctx.quadraticCurveTo(cx - m.bustW / 4, m.bustY + m.hu * 0.07, cx, m.bustY + m.hu * 0.05);
+  ctx.quadraticCurveTo(cx + m.bustW / 4, m.bustY + m.hu * 0.07, cx + m.bustW / 2 - m.hu * 0.12, m.bustY + m.hu * 0.03);
   ctx.stroke();
+  // Center cleavage shadow
+  ctx.strokeStyle = dti2DAlpha(lo, 0.1);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.hu * 0.015, m.bustY - m.hu * 0.06);
+  ctx.quadraticCurveTo(cx, m.bustY + m.hu * 0.04, cx + m.hu * 0.015, m.bustY - m.hu * 0.06);
+  ctx.stroke();
+  // Bust volume highlights (subtle roundness)
+  ctx.fillStyle = dti2DAlpha(hi, 0.06);
+  ctx.beginPath();
+  ctx.ellipse(cx - m.bustW / 4, m.bustY - m.hu * 0.01, m.hu * 0.08, m.hu * 0.06, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx + m.bustW / 4, m.bustY - m.hu * 0.01, m.hu * 0.08, m.hu * 0.06, 0.2, 0, Math.PI * 2);
+  ctx.fill();
 
   // Collarbone detail
   ctx.strokeStyle = dti2DAlpha(lo, 0.12);
@@ -358,31 +430,96 @@ function dti2DDrawBody(ctx, skin, m) {
   ctx.stroke();
 
   // ── ARMS ──
-  var armW = m.hu * 0.12;
+  var armW = m.hu * 0.15;
 
-  // Left arm
-  ctx.fillStyle = skinGrad;
-  ctx.beginPath();
-  ctx.moveTo(cx - m.shoulderW / 2, m.shoulderY);
-  ctx.quadraticCurveTo(cx - m.armOuterX - armW, m.elbowY, cx - m.armOuterX - armW * 0.7, m.wristY);
-  ctx.lineTo(cx - m.armOuterX - m.handW / 2, m.handY);
-  // Hand
-  ctx.quadraticCurveTo(cx - m.armOuterX - m.handW * 0.6, m.handY + m.hu * 0.15, cx - m.armOuterX + m.handW * 0.2, m.handY + m.hu * 0.12);
-  ctx.lineTo(cx - m.armOuterX + armW * 0.5, m.wristY);
-  ctx.quadraticCurveTo(cx - m.armOuterX + armW * 0.3, m.elbowY, cx - m.shoulderW / 2 + m.hu * 0.08, m.shoulderY + m.hu * 0.15);
-  ctx.closePath();
-  ctx.fill();
+  // Draw arms with proper tapering and muscle definition
+  for (var armSide = -1; armSide <= 1; armSide += 2) {
+    var sDir = armSide;
+    var armOutX = m.armOuterX;
 
-  // Right arm
-  ctx.beginPath();
-  ctx.moveTo(cx + m.shoulderW / 2, m.shoulderY);
-  ctx.quadraticCurveTo(cx + m.armOuterX + armW, m.elbowY, cx + m.armOuterX + armW * 0.7, m.wristY);
-  ctx.lineTo(cx + m.armOuterX + m.handW / 2, m.handY);
-  ctx.quadraticCurveTo(cx + m.armOuterX + m.handW * 0.6, m.handY + m.hu * 0.15, cx + m.armOuterX - m.handW * 0.2, m.handY + m.hu * 0.12);
-  ctx.lineTo(cx + m.armOuterX - armW * 0.5, m.wristY);
-  ctx.quadraticCurveTo(cx + m.armOuterX - armW * 0.3, m.elbowY, cx + m.shoulderW / 2 - m.hu * 0.08, m.shoulderY + m.hu * 0.15);
-  ctx.closePath();
-  ctx.fill();
+    // Arm gradient (follows body gradient direction)
+    var armGrad = ctx.createLinearGradient(cx + sDir * (armOutX - armW), 0, cx + sDir * (armOutX + armW), 0);
+    if (sDir < 0) {
+      armGrad.addColorStop(0, lo);
+      armGrad.addColorStop(0.5, base);
+      armGrad.addColorStop(1, hi);
+    } else {
+      armGrad.addColorStop(0, hi);
+      armGrad.addColorStop(0.5, base);
+      armGrad.addColorStop(1, lo);
+    }
+    ctx.fillStyle = armGrad;
+
+    ctx.beginPath();
+    // Shoulder connection (smooth blend into torso)
+    ctx.moveTo(cx + sDir * m.shoulderW / 2, m.shoulderY);
+    // Upper arm outer edge (slight bicep curve)
+    ctx.bezierCurveTo(
+      cx + sDir * (armOutX + armW * 0.6), m.shoulderY + m.hu * 0.15,
+      cx + sDir * (armOutX + armW * 1.1), m.elbowY - m.hu * 0.15,
+      cx + sDir * (armOutX + armW * 0.8), m.elbowY
+    );
+    // Forearm outer edge (slight taper)
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX + armW * 0.7), (m.elbowY + m.wristY) / 2,
+      cx + sDir * (armOutX + armW * 0.5), m.wristY
+    );
+    // Wrist to hand
+    ctx.lineTo(cx + sDir * (armOutX + m.handW * 0.5), m.handY - m.hu * 0.01);
+    // Hand — graceful, slightly curved fingers
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX + m.handW * 0.55), m.handY + m.hu * 0.06,
+      cx + sDir * (armOutX + m.handW * 0.15), m.handY + m.hu * 0.1
+    );
+    // Fingertip curve
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX - m.handW * 0.15), m.handY + m.hu * 0.12,
+      cx + sDir * (armOutX - m.handW * 0.2), m.handY + m.hu * 0.08
+    );
+    // Hand inner edge back up
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX - m.handW * 0.3), m.handY + m.hu * 0.02,
+      cx + sDir * (armOutX - armW * 0.3), m.wristY
+    );
+    // Forearm inner edge
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX - armW * 0.2), (m.elbowY + m.wristY) / 2,
+      cx + sDir * (armOutX - armW * 0.1), m.elbowY
+    );
+    // Upper arm inner edge back to shoulder
+    ctx.quadraticCurveTo(
+      cx + sDir * (armOutX + armW * 0.1), m.elbowY - m.hu * 0.2,
+      cx + sDir * (m.shoulderW / 2 - m.hu * 0.06), m.shoulderY + m.hu * 0.18
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // Elbow dimple
+    ctx.fillStyle = dti2DAlpha(lo, 0.06);
+    ctx.beginPath();
+    ctx.arc(cx + sDir * armOutX, m.elbowY, armW * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wrist line
+    ctx.strokeStyle = dti2DAlpha(lo, 0.1);
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx + sDir * (armOutX - armW * 0.25), m.wristY + m.hu * 0.005);
+    ctx.lineTo(cx + sDir * (armOutX + armW * 0.45), m.wristY + m.hu * 0.005);
+    ctx.stroke();
+
+    // Finger separation lines (subtle)
+    ctx.strokeStyle = dti2DAlpha(lo, 0.07);
+    ctx.lineWidth = 0.4;
+    var fingerBase = m.handY + m.hu * 0.04;
+    for (var fi = 0; fi < 3; fi++) {
+      var fOff = (fi - 1) * m.handW * 0.18;
+      ctx.beginPath();
+      ctx.moveTo(cx + sDir * (armOutX + fOff), fingerBase);
+      ctx.lineTo(cx + sDir * (armOutX + fOff), fingerBase + m.hu * 0.03);
+      ctx.stroke();
+    }
+  }
 
   // ── NECK ──
   ctx.fillStyle = base;
@@ -414,16 +551,28 @@ function dti2DDrawBody(ctx, skin, m) {
   ctx.ellipse(cx, m.headCY, m.headRX, m.headRY, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Jaw line (slight chin taper)
+  // Jaw line (elegant V-shaped chin taper)
   ctx.fillStyle = base;
   ctx.beginPath();
-  ctx.moveTo(cx - m.headRX * 0.85, m.headCY + m.headRY * 0.3);
-  ctx.quadraticCurveTo(cx - m.headRX * 0.5, m.headCY + m.headRY * 1.05, cx, m.headCY + m.headRY * 1.08);
-  ctx.quadraticCurveTo(cx + m.headRX * 0.5, m.headCY + m.headRY * 1.05, cx + m.headRX * 0.85, m.headCY + m.headRY * 0.3);
-  ctx.lineTo(cx + m.headRX * 0.85, m.headCY + m.headRY * 0.6);
-  ctx.quadraticCurveTo(cx, m.headCY + m.headRY * 0.9, cx - m.headRX * 0.85, m.headCY + m.headRY * 0.6);
+  ctx.moveTo(cx - m.headRX * 0.82, m.headCY + m.headRY * 0.25);
+  ctx.quadraticCurveTo(cx - m.headRX * 0.6, m.headCY + m.headRY * 0.85, cx - m.headRX * 0.2, m.headCY + m.headRY * 1.05);
+  ctx.quadraticCurveTo(cx, m.headCY + m.headRY * 1.1, cx + m.headRX * 0.2, m.headCY + m.headRY * 1.05);
+  ctx.quadraticCurveTo(cx + m.headRX * 0.6, m.headCY + m.headRY * 0.85, cx + m.headRX * 0.82, m.headCY + m.headRY * 0.25);
+  ctx.lineTo(cx + m.headRX * 0.82, m.headCY + m.headRY * 0.55);
+  ctx.quadraticCurveTo(cx, m.headCY + m.headRY * 0.85, cx - m.headRX * 0.82, m.headCY + m.headRY * 0.55);
   ctx.closePath();
   ctx.fill();
+  // Jaw contour shadow
+  ctx.strokeStyle = dti2DAlpha(lo, 0.06);
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.headRX * 0.65, m.headCY + m.headRY * 0.65);
+  ctx.quadraticCurveTo(cx - m.headRX * 0.35, m.headCY + m.headRY * 0.95, cx, m.headCY + m.headRY * 1.05);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + m.headRX * 0.65, m.headCY + m.headRY * 0.65);
+  ctx.quadraticCurveTo(cx + m.headRX * 0.35, m.headCY + m.headRY * 0.95, cx, m.headCY + m.headRY * 1.05);
+  ctx.stroke();
 
   // ── EARS ──
   ctx.fillStyle = base;
@@ -1317,27 +1466,41 @@ var DTI_2D_HAIR = {
 
 // Helper: fabric gradient fill based on style (richer, multi-stop)
 function dti2DFabricFill(ctx, color, style, x1, y1, x2, y2) {
-  var hi = dti2DShade(color, 35);
-  var lo = dti2DShade(color, -35);
-  var mid = dti2DShade(color, 8);
+  var hi = dti2DShade(color, 40);
+  var lo = dti2DShade(color, -40);
+  var mid = dti2DShade(color, 12);
   var grad = ctx.createLinearGradient(x1, y1, x2, y2);
   grad.addColorStop(0, hi);
-  grad.addColorStop(0.25, mid);
+  grad.addColorStop(0.15, dti2DShade(color, 25));
+  grad.addColorStop(0.35, mid);
   grad.addColorStop(0.55, color);
-  grad.addColorStop(0.8, dti2DShade(color, -15));
+  grad.addColorStop(0.75, dti2DShade(color, -18));
+  grad.addColorStop(0.9, dti2DShade(color, -30));
   grad.addColorStop(1, lo);
   return grad;
 }
 
 // Helper: draw fabric wrinkle/fold lines that are actually visible
 function dti2DFabricFolds(ctx, color, folds, width) {
-  var dk = dti2DShade(color, -50);
+  var dk = dti2DShade(color, -55);
   ctx.save();
-  ctx.strokeStyle = dti2DAlpha(dk, 0.22);
-  ctx.lineWidth = width || 0.9;
   ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   for (var i = 0; i < folds.length; i++) {
     var f = folds[i];
+    // Draw each fold with double-stroke for depth
+    // Shadow line (darker, wider)
+    ctx.strokeStyle = dti2DAlpha(dk, 0.18);
+    ctx.lineWidth = (width || 0.9) + 0.4;
+    ctx.beginPath();
+    ctx.moveTo(f[0], f[1]);
+    if (f.length === 6) ctx.quadraticCurveTo(f[2], f[3], f[4], f[5]);
+    else if (f.length === 8) ctx.bezierCurveTo(f[2], f[3], f[4], f[5], f[6], f[7]);
+    else ctx.lineTo(f[2], f[3]);
+    ctx.stroke();
+    // Main fold line
+    ctx.strokeStyle = dti2DAlpha(dk, 0.28);
+    ctx.lineWidth = width || 0.9;
     ctx.beginPath();
     ctx.moveTo(f[0], f[1]);
     if (f.length === 6) ctx.quadraticCurveTo(f[2], f[3], f[4], f[5]);
@@ -1350,10 +1513,10 @@ function dti2DFabricFolds(ctx, color, folds, width) {
 
 // Helper: draw a highlight fold line (light crease where fabric catches light)
 function dti2DFabricHighlights(ctx, color, folds, width) {
-  var hi = dti2DShade(color, 45);
+  var hi = dti2DShade(color, 50);
   ctx.save();
-  ctx.strokeStyle = dti2DAlpha(hi, 0.15);
-  ctx.lineWidth = width || 0.7;
+  ctx.strokeStyle = dti2DAlpha(hi, 0.22);
+  ctx.lineWidth = width || 0.8;
   ctx.lineCap = 'round';
   for (var i = 0; i < folds.length; i++) {
     var f = folds[i];
@@ -2180,78 +2343,122 @@ var DTI_2D_BOTTOMS = {
 function dti2DDrawShoesBoots(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var legSpread = hu * 0.12;
-  var dk = dti2DShade(color, -35);
-  var hi = dti2DShade(color, 25);
-  var bootTop = m.kneeY + hu * 0.2;
+  var dk = dti2DShade(color, -40);
+  var hi = dti2DShade(color, 30);
+  var vdk = dti2DShade(color, -60);
+  var bootTop = m.kneeY + hu * 0.15;
   ctx.save();
   for (var side = -1; side <= 1; side += 2) {
     var fx = cx + side * legSpread;
-    var bLeft = fx - m.ankleW - hu * 0.04;
-    var bRight = fx + m.ankleW + hu * 0.04;
+    var bLeft = fx - m.ankleW - hu * 0.06;
+    var bRight = fx + m.ankleW + hu * 0.06;
+    var toeExtend = side * hu * 0.03;
 
-    // Boot shaft with gradient
+    // Boot shaft with richer gradient
     var bootGrad = ctx.createLinearGradient(bLeft, 0, bRight, 0);
     bootGrad.addColorStop(0, dk);
-    bootGrad.addColorStop(0.3, color);
-    bootGrad.addColorStop(0.5, hi);
-    bootGrad.addColorStop(0.7, color);
+    bootGrad.addColorStop(0.2, dti2DShade(color, -10));
+    bootGrad.addColorStop(0.35, hi);
+    bootGrad.addColorStop(0.5, color);
+    bootGrad.addColorStop(0.7, dti2DShade(color, -10));
     bootGrad.addColorStop(1, dk);
     ctx.fillStyle = bootGrad;
     ctx.beginPath();
     ctx.moveTo(bLeft, bootTop);
-    ctx.lineTo(bLeft, m.footY - hu * 0.02);
-    ctx.lineTo(fx - m.footW * 0.5, m.footY + hu * 0.02);
-    ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.02);
-    ctx.lineTo(bRight, m.footY - hu * 0.02);
-    ctx.lineTo(bRight, bootTop);
+    // Slight calf shape on shaft
+    ctx.quadraticCurveTo(bLeft - hu * 0.01, (bootTop + m.ankleY) / 2, bLeft, m.ankleY);
+    ctx.lineTo(bLeft, m.footY - hu * 0.01);
+    // Toe with rounded shape
+    ctx.quadraticCurveTo(bLeft, m.footY + hu * 0.03, fx - hu * 0.01 + toeExtend, m.footY + hu * 0.035);
+    ctx.lineTo(fx + m.footW * 0.5 + toeExtend, m.footY + hu * 0.03);
+    ctx.quadraticCurveTo(bRight + hu * 0.01, m.footY + hu * 0.01, bRight, m.footY - hu * 0.02);
+    // Right side up
+    ctx.lineTo(bRight, m.ankleY);
+    ctx.quadraticCurveTo(bRight + hu * 0.01, (bootTop + m.ankleY) / 2, bRight, bootTop);
     ctx.closePath();
     ctx.fill();
 
-    // Ankle crease wrinkles
+    // Ankle crease wrinkles (multiple for realism)
     var ankleY = m.ankleY;
-    ctx.strokeStyle = dti2DAlpha(dk, 0.2);
-    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = dti2DAlpha(dk, 0.25);
+    ctx.lineWidth = hu * 0.008;
+    for (var wi = 0; wi < 3; wi++) {
+      var wy = ankleY - hu * 0.025 + wi * hu * 0.018;
+      ctx.beginPath();
+      ctx.moveTo(bLeft + hu * 0.015, wy);
+      ctx.quadraticCurveTo(fx, wy + hu * 0.012, bRight - hu * 0.015, wy);
+      ctx.stroke();
+    }
+
+    // Boot top rim (folded leather effect)
+    ctx.fillStyle = dti2DShade(color, -15);
     ctx.beginPath();
-    ctx.moveTo(bLeft + hu * 0.01, ankleY - hu * 0.02);
-    ctx.quadraticCurveTo(fx, ankleY, bRight - hu * 0.01, ankleY - hu * 0.02);
-    ctx.stroke();
+    ctx.moveTo(bLeft - hu * 0.005, bootTop);
+    ctx.lineTo(bRight + hu * 0.005, bootTop);
+    ctx.lineTo(bRight + hu * 0.005, bootTop + hu * 0.025);
+    ctx.quadraticCurveTo(fx, bootTop + hu * 0.035, bLeft - hu * 0.005, bootTop + hu * 0.025);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = dti2DAlpha(vdk, 0.2);
+    ctx.lineWidth = hu * 0.006;
     ctx.beginPath();
-    ctx.moveTo(bLeft + hu * 0.01, ankleY + hu * 0.01);
-    ctx.quadraticCurveTo(fx, ankleY + hu * 0.025, bRight - hu * 0.01, ankleY + hu * 0.01);
+    ctx.moveTo(bLeft - hu * 0.005, bootTop);
+    ctx.lineTo(bRight + hu * 0.005, bootTop);
     ctx.stroke();
 
-    // Boot top trim (thicker)
-    ctx.strokeStyle = dk;
-    ctx.lineWidth = 2;
+    // Sole (chunky, visible)
+    ctx.fillStyle = vdk;
     ctx.beginPath();
-    ctx.moveTo(bLeft, bootTop);
-    ctx.lineTo(bRight, bootTop);
+    ctx.moveTo(bLeft - hu * 0.005, m.footY + hu * 0.025);
+    ctx.lineTo(fx + m.footW * 0.52 + toeExtend, m.footY + hu * 0.03);
+    ctx.lineTo(fx + m.footW * 0.52 + toeExtend, m.footY + hu * 0.06);
+    ctx.quadraticCurveTo(fx + toeExtend, m.footY + hu * 0.065, bLeft - hu * 0.005, m.footY + hu * 0.055);
+    ctx.closePath();
+    ctx.fill();
+    // Sole edge highlight
+    ctx.strokeStyle = dti2DAlpha(dk, 0.3);
+    ctx.lineWidth = hu * 0.005;
+    ctx.beginPath();
+    ctx.moveTo(bLeft, m.footY + hu * 0.025);
+    ctx.lineTo(fx + m.footW * 0.5 + toeExtend, m.footY + hu * 0.03);
     ctx.stroke();
 
-    // Sole (thick, visible)
-    ctx.fillStyle = dti2DShade(dk, -15);
+    // Heel (slight block heel)
+    ctx.fillStyle = dti2DShade(vdk, -5);
     ctx.beginPath();
-    ctx.moveTo(fx - m.footW * 0.5, m.footY + hu * 0.02);
-    ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.02);
-    ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.05);
-    ctx.lineTo(fx - m.footW * 0.5, m.footY + hu * 0.05);
+    ctx.moveTo(bLeft, m.footY + hu * 0.02);
+    ctx.lineTo(bLeft - hu * 0.008, m.footY + hu * 0.06);
+    ctx.lineTo(bLeft + hu * 0.04, m.footY + hu * 0.06);
+    ctx.lineTo(bLeft + hu * 0.03, m.footY + hu * 0.02);
     ctx.closePath();
     ctx.fill();
 
-    // Vertical highlight streak
-    ctx.strokeStyle = dti2DAlpha(hi, 0.15);
-    ctx.lineWidth = 1.5;
+    // Vertical highlight streak (leather sheen)
+    ctx.strokeStyle = dti2DAlpha(hi, 0.12);
+    ctx.lineWidth = hu * 0.02;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.3, bootTop + hu * 0.05);
-    ctx.lineTo(fx - m.ankleW * 0.3, m.footY - hu * 0.05);
+    ctx.moveTo(fx - m.ankleW * 0.2, bootTop + hu * 0.04);
+    ctx.lineTo(fx - m.ankleW * 0.2, m.ankleY - hu * 0.03);
     ctx.stroke();
 
-    // Side seam
-    ctx.strokeStyle = dti2DAlpha(dk, 0.15);
-    ctx.lineWidth = 0.6;
+    // Side seam stitching
+    ctx.strokeStyle = dti2DAlpha(dk, 0.12);
+    ctx.lineWidth = hu * 0.004;
+    ctx.setLineDash([hu * 0.008, hu * 0.006]);
     ctx.beginPath();
-    ctx.moveTo(bRight - hu * 0.01, bootTop);
-    ctx.lineTo(bRight - hu * 0.01, m.footY - hu * 0.02);
+    ctx.moveTo(bRight - hu * 0.015, bootTop + hu * 0.03);
+    ctx.lineTo(bRight - hu * 0.015, m.footY - hu * 0.01);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Pull tab at top
+    ctx.strokeStyle = dti2DAlpha(dk, 0.2);
+    ctx.lineWidth = hu * 0.008;
+    ctx.beginPath();
+    ctx.moveTo(fx - hu * 0.015, bootTop + hu * 0.005);
+    ctx.lineTo(fx - hu * 0.015, bootTop - hu * 0.01);
+    ctx.quadraticCurveTo(fx, bootTop - hu * 0.02, fx + hu * 0.015, bootTop - hu * 0.01);
+    ctx.lineTo(fx + hu * 0.015, bootTop + hu * 0.005);
     ctx.stroke();
   }
   ctx.restore();
@@ -2260,34 +2467,90 @@ function dti2DDrawShoesBoots(ctx, color, style, m) {
 function dti2DDrawShoesHeels(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var legSpread = hu * 0.12;
-  var dk = dti2DShade(color, -30);
+  var dk = dti2DShade(color, -35);
+  var hi = dti2DShade(color, 25);
+  var vdk = dti2DShade(color, -55);
   ctx.save();
   for (var side = -1; side <= 1; side += 2) {
     var fx = cx + side * legSpread;
-    // Shoe body (pointed toe)
-    ctx.fillStyle = color;
+    var toeDir = side;
+
+    // Shoe body gradient (pointed toe pump)
+    var shoeGrad = ctx.createLinearGradient(fx - m.ankleW, 0, fx + m.ankleW, 0);
+    shoeGrad.addColorStop(0, dk);
+    shoeGrad.addColorStop(0.3, color);
+    shoeGrad.addColorStop(0.5, hi);
+    shoeGrad.addColorStop(0.7, color);
+    shoeGrad.addColorStop(1, dk);
+    ctx.fillStyle = shoeGrad;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW, m.ankleY + hu * 0.02);
-    ctx.quadraticCurveTo(fx - m.footW * 0.4, m.footY, fx + m.footW * 0.6, m.footY - hu * 0.01);
-    ctx.lineTo(fx + m.ankleW, m.ankleY + hu * 0.02);
+    // Back of shoe at ankle
+    ctx.moveTo(fx - m.ankleW * 0.9, m.ankleY + hu * 0.01);
+    // Sole curve to pointed toe
+    ctx.quadraticCurveTo(fx - m.footW * 0.3, m.footY + hu * 0.01, fx + toeDir * m.footW * 0.55, m.footY - hu * 0.015);
+    // Top of shoe (vamp)
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.2, m.footY - hu * 0.04, fx + m.ankleW * 0.3, m.ankleY + hu * 0.02);
+    // Back top
+    ctx.lineTo(fx - m.ankleW * 0.9, m.ankleY + hu * 0.01);
     ctx.closePath();
     ctx.fill();
-    // Heel
+
+    // Inner opening
+    ctx.fillStyle = dti2DAlpha(vdk, 0.15);
+    ctx.beginPath();
+    ctx.ellipse(fx - m.ankleW * 0.1, m.ankleY + hu * 0.01, m.ankleW * 0.5, hu * 0.012, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Stiletto heel
+    var heelX = fx - m.ankleW * 0.6;
     ctx.fillStyle = dk;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.3, m.ankleY + hu * 0.02);
-    ctx.lineTo(fx - m.ankleW * 0.5, m.footY + hu * 0.04);
-    ctx.lineTo(fx - m.ankleW * 0.2, m.footY + hu * 0.04);
-    ctx.lineTo(fx - m.ankleW * 0.1, m.ankleY + hu * 0.04);
+    ctx.moveTo(heelX - hu * 0.008, m.ankleY + hu * 0.015);
+    ctx.lineTo(heelX - hu * 0.015, m.footY + hu * 0.06);
+    ctx.lineTo(heelX + hu * 0.01, m.footY + hu * 0.06);
+    ctx.lineTo(heelX + hu * 0.012, m.ankleY + hu * 0.02);
     ctx.closePath();
     ctx.fill();
-    // Strap
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
+    // Heel tip
+    ctx.fillStyle = vdk;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.3, m.ankleY);
-    ctx.quadraticCurveTo(fx, m.ankleY - hu * 0.02, fx + m.ankleW * 0.3, m.ankleY);
+    dti2DRoundRect(ctx, heelX - hu * 0.018, m.footY + hu * 0.055, hu * 0.032, hu * 0.01, hu * 0.003);
+    ctx.fill();
+    // Heel highlight
+    ctx.strokeStyle = dti2DAlpha(hi, 0.15);
+    ctx.lineWidth = hu * 0.005;
+    ctx.beginPath();
+    ctx.moveTo(heelX - hu * 0.005, m.ankleY + hu * 0.025);
+    ctx.lineTo(heelX - hu * 0.01, m.footY + hu * 0.045);
     ctx.stroke();
+
+    // Sole line
+    ctx.strokeStyle = dti2DAlpha(vdk, 0.2);
+    ctx.lineWidth = hu * 0.006;
+    ctx.beginPath();
+    ctx.moveTo(fx - m.ankleW * 0.8, m.footY + hu * 0.015);
+    ctx.quadraticCurveTo(fx, m.footY + hu * 0.02, fx + toeDir * m.footW * 0.55, m.footY - hu * 0.01);
+    ctx.stroke();
+
+    // Ankle strap
+    ctx.strokeStyle = color;
+    ctx.lineWidth = hu * 0.018;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(fx - m.ankleW * 0.5, m.ankleY - hu * 0.01);
+    ctx.quadraticCurveTo(fx, m.ankleY - hu * 0.03, fx + m.ankleW * 0.5, m.ankleY - hu * 0.01);
+    ctx.stroke();
+    // Strap buckle
+    ctx.fillStyle = dti2DShade(hi, 10);
+    ctx.beginPath();
+    ctx.arc(fx + m.ankleW * 0.5, m.ankleY - hu * 0.01, hu * 0.01, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Toe highlight
+    ctx.fillStyle = dti2DAlpha(hi, 0.08);
+    ctx.beginPath();
+    ctx.ellipse(fx + toeDir * m.footW * 0.25, m.footY - hu * 0.01, m.footW * 0.15, hu * 0.012, toeDir * 0.3, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -2295,46 +2558,104 @@ function dti2DDrawShoesHeels(ctx, color, style, m) {
 function dti2DDrawShoesSneakers(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var legSpread = hu * 0.12;
-  var dk = dti2DShade(color, -25);
+  var dk = dti2DShade(color, -30);
   var hi = dti2DShade(color, 30);
+  var vdk = dti2DShade(color, -50);
   ctx.save();
   for (var side = -1; side <= 1; side += 2) {
     var fx = cx + side * legSpread;
-    // Chunky sole
+    var toeDir = side;
+
+    // Chunky sole (white rubber)
+    var soleGrad = ctx.createLinearGradient(0, m.footY + hu * 0.02, 0, m.footY + hu * 0.07);
+    soleGrad.addColorStop(0, '#f8f8f8');
+    soleGrad.addColorStop(0.5, '#e8e8e8');
+    soleGrad.addColorStop(1, '#d0d0d0');
+    ctx.fillStyle = soleGrad;
+    ctx.beginPath();
+    ctx.moveTo(fx - m.footW * 0.55, m.footY + hu * 0.02);
+    ctx.lineTo(fx + toeDir * m.footW * 0.6, m.footY + hu * 0.02);
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.65, m.footY + hu * 0.04, fx + toeDir * m.footW * 0.6, m.footY + hu * 0.065);
+    ctx.quadraticCurveTo(fx, m.footY + hu * 0.075, fx - m.footW * 0.55, m.footY + hu * 0.065);
+    ctx.closePath();
+    ctx.fill();
+    // Sole edge line
+    ctx.strokeStyle = dti2DAlpha('#999999', 0.2);
+    ctx.lineWidth = hu * 0.005;
+    ctx.beginPath();
+    ctx.moveTo(fx - m.footW * 0.55, m.footY + hu * 0.04);
+    ctx.lineTo(fx + toeDir * m.footW * 0.6, m.footY + hu * 0.035);
+    ctx.stroke();
+
+    // Shoe body with gradient
+    var sneakerGrad = ctx.createLinearGradient(fx - m.ankleW, 0, fx + m.ankleW, 0);
+    sneakerGrad.addColorStop(0, dk);
+    sneakerGrad.addColorStop(0.25, color);
+    sneakerGrad.addColorStop(0.5, hi);
+    sneakerGrad.addColorStop(0.75, color);
+    sneakerGrad.addColorStop(1, dk);
+    ctx.fillStyle = sneakerGrad;
+    ctx.beginPath();
+    ctx.moveTo(fx - m.ankleW - hu * 0.03, m.ankleY);
+    // Back collar
+    ctx.quadraticCurveTo(fx - m.ankleW - hu * 0.04, m.ankleY + hu * 0.02, fx - m.footW * 0.5, m.footY + hu * 0.02);
+    // Sole
+    ctx.lineTo(fx + toeDir * m.footW * 0.55, m.footY + hu * 0.02);
+    // Toe up
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.4, m.footY - hu * 0.02, fx + m.ankleW * 0.5, m.ankleY + hu * 0.02);
+    // Tongue top
+    ctx.quadraticCurveTo(fx, m.ankleY - hu * 0.02, fx - m.ankleW * 0.3, m.ankleY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Toe cap (rubber bumper)
     ctx.fillStyle = '#f0f0f0';
+    ctx.globalAlpha = 0.7;
     ctx.beginPath();
-    ctx.moveTo(fx - m.footW * 0.55, m.footY + hu * 0.03);
-    ctx.lineTo(fx + m.footW * 0.6, m.footY + hu * 0.03);
-    ctx.lineTo(fx + m.footW * 0.6, m.footY + hu * 0.06);
-    ctx.quadraticCurveTo(fx, m.footY + hu * 0.07, fx - m.footW * 0.55, m.footY + hu * 0.06);
+    ctx.moveTo(fx + toeDir * m.footW * 0.15, m.footY + hu * 0.02);
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.45, m.footY - hu * 0.015, fx + toeDir * m.footW * 0.55, m.footY + hu * 0.02);
     ctx.closePath();
     ctx.fill();
-    // Shoe body
-    ctx.fillStyle = color;
+    ctx.globalAlpha = 1;
+
+    // Tongue
+    ctx.fillStyle = dti2DShade(color, 10);
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW - hu * 0.02, m.ankleY + hu * 0.01);
-    ctx.lineTo(fx - m.footW * 0.5, m.footY + hu * 0.03);
-    ctx.lineTo(fx + m.footW * 0.55, m.footY + hu * 0.03);
-    ctx.lineTo(fx + m.ankleW + hu * 0.02, m.ankleY + hu * 0.01);
+    ctx.moveTo(fx - hu * 0.025, m.ankleY);
+    ctx.quadraticCurveTo(fx, m.ankleY - hu * 0.025, fx + hu * 0.025, m.ankleY);
+    ctx.lineTo(fx + hu * 0.02, m.ankleY + hu * 0.03);
+    ctx.lineTo(fx - hu * 0.02, m.ankleY + hu * 0.03);
     ctx.closePath();
     ctx.fill();
-    // Toe cap
-    ctx.fillStyle = hi;
-    ctx.beginPath();
-    ctx.moveTo(fx + m.footW * 0.2, m.footY + hu * 0.03);
-    ctx.quadraticCurveTo(fx + m.footW * 0.5, m.footY - hu * 0.01, fx + m.footW * 0.55, m.footY + hu * 0.03);
-    ctx.closePath();
-    ctx.fill();
-    // Lace detail
-    ctx.strokeStyle = dti2DAlpha('#ffffff', 0.4);
-    ctx.lineWidth = 0.8;
+
+    // Laces (criss-cross)
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = hu * 0.007;
     for (var li = 0; li < 3; li++) {
-      var ly = m.ankleY + hu * 0.02 + li * hu * 0.02;
+      var ly = m.ankleY + hu * 0.01 + li * hu * 0.015;
       ctx.beginPath();
-      ctx.moveTo(fx - hu * 0.02, ly);
-      ctx.lineTo(fx + hu * 0.02, ly);
+      ctx.moveTo(fx - hu * 0.018, ly);
+      ctx.lineTo(fx + hu * 0.018, ly + hu * 0.008);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(fx + hu * 0.018, ly);
+      ctx.lineTo(fx - hu * 0.018, ly + hu * 0.008);
       ctx.stroke();
     }
+
+    // Swoosh/stripe detail
+    ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+    ctx.lineWidth = hu * 0.015;
+    ctx.beginPath();
+    ctx.moveTo(fx - m.footW * 0.3, m.footY + hu * 0.005);
+    ctx.quadraticCurveTo(fx, m.footY - hu * 0.015, fx + m.ankleW * 0.3, m.ankleY + hu * 0.015);
+    ctx.stroke();
+
+    // Back tab
+    ctx.fillStyle = dti2DShade(color, -20);
+    ctx.beginPath();
+    dti2DRoundRect(ctx, fx - m.ankleW - hu * 0.04, m.ankleY - hu * 0.01, hu * 0.025, hu * 0.03, hu * 0.005);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -2342,31 +2663,76 @@ function dti2DDrawShoesSneakers(ctx, color, style, m) {
 function dti2DDrawShoesFlats(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var legSpread = hu * 0.12;
-  var dk = dti2DShade(color, -25);
+  var dk = dti2DShade(color, -30);
+  var hi = dti2DShade(color, 20);
+  var vdk = dti2DShade(color, -50);
   ctx.save();
   for (var side = -1; side <= 1; side += 2) {
     var fx = cx + side * legSpread;
-    ctx.fillStyle = color;
+    var toeDir = side;
+
+    // Shoe body gradient
+    var flatGrad = ctx.createLinearGradient(fx - m.ankleW, 0, fx + m.ankleW, 0);
+    flatGrad.addColorStop(0, dk);
+    flatGrad.addColorStop(0.3, color);
+    flatGrad.addColorStop(0.5, hi);
+    flatGrad.addColorStop(0.7, color);
+    flatGrad.addColorStop(1, dk);
+    ctx.fillStyle = flatGrad;
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.8, m.footY - hu * 0.01);
-    ctx.quadraticCurveTo(fx - m.footW * 0.3, m.footY + hu * 0.01, fx + m.footW * 0.5, m.footY);
-    ctx.quadraticCurveTo(fx + m.footW * 0.5, m.footY - hu * 0.02, fx + m.ankleW * 0.8, m.footY - hu * 0.015);
+    // Back of shoe
+    ctx.moveTo(fx - m.ankleW * 0.7, m.footY - hu * 0.025);
+    // Back rim curve down
+    ctx.quadraticCurveTo(fx - m.ankleW * 0.8, m.footY - hu * 0.005, fx - m.footW * 0.35, m.footY + hu * 0.012);
+    // Sole to toe (rounded)
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.15, m.footY + hu * 0.018, fx + toeDir * m.footW * 0.48, m.footY + hu * 0.005);
+    // Toe top curve
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.42, m.footY - hu * 0.025, fx + m.ankleW * 0.3, m.footY - hu * 0.025);
+    // Top opening back to start
+    ctx.quadraticCurveTo(fx, m.footY - hu * 0.035, fx - m.ankleW * 0.7, m.footY - hu * 0.025);
     ctx.closePath();
     ctx.fill();
-    // Strap (Mary Jane style)
-    ctx.strokeStyle = dk;
-    ctx.lineWidth = 1.2;
+
+    // Inner rim (opening)
+    ctx.fillStyle = dti2DAlpha(vdk, 0.1);
     ctx.beginPath();
-    ctx.moveTo(fx - m.ankleW * 0.5, m.footY - hu * 0.01);
-    ctx.quadraticCurveTo(fx, m.footY - hu * 0.03, fx + m.ankleW * 0.5, m.footY - hu * 0.01);
-    ctx.stroke();
-    // Sole
-    ctx.strokeStyle = dti2DAlpha(dk, 0.25);
-    ctx.lineWidth = 1.5;
+    ctx.ellipse(fx - m.ankleW * 0.05, m.footY - hu * 0.02, m.ankleW * 0.4, hu * 0.008, toeDir * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Thin sole edge
+    ctx.strokeStyle = dti2DAlpha(vdk, 0.2);
+    ctx.lineWidth = hu * 0.008;
     ctx.beginPath();
-    ctx.moveTo(fx - m.footW * 0.4, m.footY + hu * 0.01);
-    ctx.lineTo(fx + m.footW * 0.5, m.footY + hu * 0.01);
+    ctx.moveTo(fx - m.footW * 0.35, m.footY + hu * 0.015);
+    ctx.quadraticCurveTo(fx + toeDir * m.footW * 0.15, m.footY + hu * 0.022, fx + toeDir * m.footW * 0.48, m.footY + hu * 0.008);
     ctx.stroke();
+
+    // Bow decoration on top
+    var bowX = fx + toeDir * m.footW * 0.1;
+    var bowY = m.footY - hu * 0.02;
+    ctx.fillStyle = dk;
+    // Left loop
+    ctx.beginPath();
+    ctx.moveTo(bowX, bowY);
+    ctx.quadraticCurveTo(bowX - hu * 0.02, bowY - hu * 0.015, bowX - hu * 0.015, bowY);
+    ctx.quadraticCurveTo(bowX - hu * 0.01, bowY + hu * 0.008, bowX, bowY);
+    ctx.fill();
+    // Right loop
+    ctx.beginPath();
+    ctx.moveTo(bowX, bowY);
+    ctx.quadraticCurveTo(bowX + hu * 0.02, bowY - hu * 0.015, bowX + hu * 0.015, bowY);
+    ctx.quadraticCurveTo(bowX + hu * 0.01, bowY + hu * 0.008, bowX, bowY);
+    ctx.fill();
+    // Center knot
+    ctx.beginPath();
+    ctx.arc(bowX, bowY, hu * 0.005, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Toe highlight
+    ctx.fillStyle = dti2DAlpha(hi, 0.08);
+    ctx.beginPath();
+    ctx.ellipse(fx + toeDir * m.footW * 0.25, m.footY - hu * 0.005, m.footW * 0.12, hu * 0.008, toeDir * 0.3, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -2384,148 +2750,394 @@ var DTI_2D_SHOES = {
 
 function dti2DDrawAccNecklace(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
+  var dk = dti2DShade(color, -30);
+  var hi = dti2DShade(color, 30);
   ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.5;
   ctx.lineCap = 'round';
-  // Chain
+
+  // Outer chain (longer, sits on collarbone)
+  ctx.strokeStyle = dti2DAlpha(color, 0.7);
+  ctx.lineWidth = hu * 0.015;
   ctx.beginPath();
-  ctx.moveTo(cx - m.neckW * 1.2, m.neckBot + hu * 0.01);
-  ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.1, cx + m.neckW * 1.2, m.neckBot + hu * 0.01);
+  ctx.moveTo(cx - m.shoulderW * 0.32, m.shoulderY + hu * 0.02);
+  ctx.quadraticCurveTo(cx, m.shoulderY + hu * 0.18, cx + m.shoulderW * 0.32, m.shoulderY + hu * 0.02);
   ctx.stroke();
+  // Small links on outer chain
+  for (var ci = 0; ci < 5; ci++) {
+    var ct = (ci + 1) / 6;
+    var clx = cx - m.shoulderW * 0.32 + m.shoulderW * 0.64 * ct;
+    var cly = m.shoulderY + hu * 0.02 + Math.sin(ct * Math.PI) * hu * 0.16;
+    ctx.fillStyle = dti2DAlpha(hi, 0.3);
+    ctx.beginPath();
+    ctx.arc(clx, cly, hu * 0.008, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Inner chain (choker-like, tighter to neck)
+  ctx.strokeStyle = color;
+  ctx.lineWidth = hu * 0.022;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.neckW * 1.8, m.neckBot + hu * 0.01);
+  ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.08, cx + m.neckW * 1.8, m.neckBot + hu * 0.01);
+  ctx.stroke();
+  // Chain highlight
+  ctx.strokeStyle = dti2DAlpha(hi, 0.2);
+  ctx.lineWidth = hu * 0.01;
+  ctx.beginPath();
+  ctx.moveTo(cx - m.neckW * 1.6, m.neckBot + hu * 0.01);
+  ctx.quadraticCurveTo(cx, m.neckBot + hu * 0.06, cx + m.neckW * 1.6, m.neckBot + hu * 0.01);
+  ctx.stroke();
+
   // Pendant
-  ctx.fillStyle = color;
+  var pendY = m.neckBot + hu * 0.12;
+  var pendR = hu * 0.06;
+  // Pendant shadow
+  ctx.fillStyle = dti2DAlpha(dk, 0.15);
   ctx.beginPath();
-  ctx.arc(cx, m.neckBot + hu * 0.12, hu * 0.025, 0, Math.PI * 2);
+  ctx.arc(cx + hu * 0.005, pendY + hu * 0.005, pendR * 1.1, 0, Math.PI * 2);
   ctx.fill();
-  // Second chain (layered)
-  ctx.strokeStyle = dti2DAlpha(color, 0.6);
-  ctx.lineWidth = 1;
+  // Pendant body
+  var pendGrad = ctx.createRadialGradient(cx - pendR * 0.3, pendY - pendR * 0.3, 0, cx, pendY, pendR);
+  pendGrad.addColorStop(0, hi);
+  pendGrad.addColorStop(0.6, color);
+  pendGrad.addColorStop(1, dk);
+  ctx.fillStyle = pendGrad;
   ctx.beginPath();
-  ctx.moveTo(cx - m.neckW * 1.0, m.neckBot + hu * 0.02);
-  ctx.quadraticCurveTo(cx, m.shoulderY + hu * 0.05, cx + m.neckW * 1.0, m.neckBot + hu * 0.02);
+  ctx.arc(cx, pendY, pendR, 0, Math.PI * 2);
+  ctx.fill();
+  // Pendant shine
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath();
+  ctx.arc(cx - pendR * 0.25, pendY - pendR * 0.25, pendR * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Pendant outline
+  ctx.strokeStyle = dti2DAlpha(dk, 0.3);
+  ctx.lineWidth = hu * 0.008;
+  ctx.beginPath();
+  ctx.arc(cx, pendY, pendR, 0, Math.PI * 2);
   ctx.stroke();
+
   ctx.restore();
 }
 
 function dti2DDrawAccBag(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
-  var dk = dti2DShade(color, -25);
-  var hi = dti2DShade(color, 15);
-  var bagX = cx + m.armOuterX + hu * 0.15;
-  var bagY = m.hipY;
-  var bagW = hu * 0.22;
-  var bagH = hu * 0.28;
+  var dk = dti2DShade(color, -30);
+  var hi = dti2DShade(color, 20);
+  var vdk = dti2DShade(color, -50);
+  var bagX = cx + m.armOuterX + hu * 0.22;
+  var bagY = m.hipY - hu * 0.05;
+  var bagW = hu * 0.35;
+  var bagH = hu * 0.42;
   ctx.save();
+
+  // Strap shadow
+  ctx.strokeStyle = dti2DAlpha(vdk, 0.15);
+  ctx.lineWidth = hu * 0.04;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx + m.shoulderW / 2, m.shoulderY + hu * 0.06);
+  ctx.quadraticCurveTo(bagX + hu * 0.02, m.waistY, bagX + hu * 0.02, bagY);
+  ctx.stroke();
   // Strap
   ctx.strokeStyle = dk;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = hu * 0.03;
   ctx.beginPath();
-  ctx.moveTo(cx + m.shoulderW / 2 - hu * 0.05, m.shoulderY + hu * 0.05);
-  ctx.quadraticCurveTo(bagX, m.waistY, bagX, bagY - bagH * 0.1);
+  ctx.moveTo(cx + m.shoulderW / 2 - hu * 0.02, m.shoulderY + hu * 0.04);
+  ctx.quadraticCurveTo(bagX, m.waistY, bagX, bagY);
   ctx.stroke();
-  // Bag body
-  ctx.fillStyle = color;
+  // Strap highlight
+  ctx.strokeStyle = dti2DAlpha(hi, 0.2);
+  ctx.lineWidth = hu * 0.012;
   ctx.beginPath();
-  dti2DRoundRect(ctx,bagX - bagW / 2, bagY, bagW, bagH, hu * 0.03);
-  ctx.fill();
-  // Flap
-  ctx.fillStyle = dk;
+  ctx.moveTo(cx + m.shoulderW / 2 - hu * 0.03, m.shoulderY + hu * 0.04);
+  ctx.quadraticCurveTo(bagX - hu * 0.01, m.waistY, bagX - hu * 0.01, bagY);
+  ctx.stroke();
+
+  // Bag shadow
+  ctx.fillStyle = dti2DAlpha(vdk, 0.12);
   ctx.beginPath();
-  dti2DRoundRect(ctx,bagX - bagW / 2, bagY, bagW, bagH * 0.35, [hu * 0.03, hu * 0.03, 0, 0]);
+  dti2DRoundRect(ctx, bagX - bagW / 2 + hu * 0.01, bagY + hu * 0.015, bagW, bagH, hu * 0.04);
   ctx.fill();
-  // Clasp
-  ctx.fillStyle = hi;
+
+  // Bag body with gradient
+  var bagGrad = ctx.createLinearGradient(bagX - bagW / 2, bagY, bagX + bagW / 2, bagY + bagH);
+  bagGrad.addColorStop(0, hi);
+  bagGrad.addColorStop(0.3, color);
+  bagGrad.addColorStop(0.7, color);
+  bagGrad.addColorStop(1, dk);
+  ctx.fillStyle = bagGrad;
   ctx.beginPath();
-  ctx.arc(bagX, bagY + bagH * 0.35, hu * 0.015, 0, Math.PI * 2);
+  dti2DRoundRect(ctx, bagX - bagW / 2, bagY, bagW, bagH, hu * 0.04);
   ctx.fill();
+
+  // Flap with gradient
+  var flapGrad = ctx.createLinearGradient(0, bagY, 0, bagY + bagH * 0.4);
+  flapGrad.addColorStop(0, dti2DShade(color, -10));
+  flapGrad.addColorStop(1, dk);
+  ctx.fillStyle = flapGrad;
+  ctx.beginPath();
+  dti2DRoundRect(ctx, bagX - bagW / 2, bagY, bagW, bagH * 0.38, [hu * 0.04, hu * 0.04, hu * 0.02, hu * 0.02]);
+  ctx.fill();
+
+  // Flap edge line
+  ctx.strokeStyle = dti2DAlpha(vdk, 0.2);
+  ctx.lineWidth = hu * 0.008;
+  ctx.beginPath();
+  ctx.moveTo(bagX - bagW / 2 + hu * 0.02, bagY + bagH * 0.38);
+  ctx.lineTo(bagX + bagW / 2 - hu * 0.02, bagY + bagH * 0.38);
+  ctx.stroke();
+
+  // Clasp/buckle
+  var claspY = bagY + bagH * 0.38;
+  ctx.fillStyle = dti2DShade(hi, 15);
+  ctx.beginPath();
+  dti2DRoundRect(ctx, bagX - hu * 0.025, claspY - hu * 0.015, hu * 0.05, hu * 0.03, hu * 0.008);
+  ctx.fill();
+  ctx.strokeStyle = dti2DAlpha(vdk, 0.15);
+  ctx.lineWidth = hu * 0.005;
+  ctx.beginPath();
+  dti2DRoundRect(ctx, bagX - hu * 0.025, claspY - hu * 0.015, hu * 0.05, hu * 0.03, hu * 0.008);
+  ctx.stroke();
+
+  // Stitching along edges
+  ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+  ctx.lineWidth = hu * 0.004;
+  ctx.setLineDash([hu * 0.01, hu * 0.008]);
+  ctx.beginPath();
+  ctx.moveTo(bagX - bagW / 2 + hu * 0.03, bagY + hu * 0.03);
+  ctx.lineTo(bagX - bagW / 2 + hu * 0.03, bagY + bagH - hu * 0.03);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bagX + bagW / 2 - hu * 0.03, bagY + hu * 0.03);
+  ctx.lineTo(bagX + bagW / 2 - hu * 0.03, bagY + bagH - hu * 0.03);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
   ctx.restore();
 }
 
 function dti2DDrawAccHat(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var hcy = m.headCY, hry = m.headRY, hrx = m.headRX;
-  var dk = dti2DShade(color, -20);
-  var hi = dti2DShade(color, 15);
+  var dk = dti2DShade(color, -25);
+  var hi = dti2DShade(color, 20);
+  var vdk = dti2DShade(color, -45);
   ctx.save();
-  // Brim
-  ctx.fillStyle = color;
+
+  // Crown (drawn first, behind brim)
+  var crownGrad = ctx.createLinearGradient(cx - hrx, hcy - hry * 1.8, cx + hrx, hcy - hry * 0.85);
+  crownGrad.addColorStop(0, hi);
+  crownGrad.addColorStop(0.4, color);
+  crownGrad.addColorStop(0.8, dk);
+  ctx.fillStyle = crownGrad;
   ctx.beginPath();
-  ctx.ellipse(cx, hcy - hry * 0.85, hrx * 1.5, hu * 0.06, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Crown
-  ctx.beginPath();
-  ctx.moveTo(cx - hrx * 0.85, hcy - hry * 0.85);
-  ctx.quadraticCurveTo(cx - hrx * 0.9, hcy - hry * 1.6, cx, hcy - hry * 1.7);
-  ctx.quadraticCurveTo(cx + hrx * 0.9, hcy - hry * 1.6, cx + hrx * 0.85, hcy - hry * 0.85);
+  ctx.moveTo(cx - hrx * 0.9, hcy - hry * 0.85);
+  ctx.quadraticCurveTo(cx - hrx * 0.95, hcy - hry * 1.5, cx - hrx * 0.3, hcy - hry * 1.75);
+  ctx.quadraticCurveTo(cx, hcy - hry * 1.82, cx + hrx * 0.3, hcy - hry * 1.75);
+  ctx.quadraticCurveTo(cx + hrx * 0.95, hcy - hry * 1.5, cx + hrx * 0.9, hcy - hry * 0.85);
   ctx.closePath();
   ctx.fill();
-  // Brim shadow
-  ctx.fillStyle = dti2DAlpha(dk, 0.1);
+  // Crown crease
+  ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+  ctx.lineWidth = hu * 0.008;
   ctx.beginPath();
-  ctx.ellipse(cx, hcy - hry * 0.82, hrx * 1.5, hu * 0.03, 0, 0, Math.PI);
-  ctx.fill();
-  // Highlight
-  ctx.fillStyle = dti2DAlpha(hi, 0.08);
+  ctx.moveTo(cx - hrx * 0.5, hcy - hry * 1.1);
+  ctx.quadraticCurveTo(cx, hcy - hry * 1.35, cx + hrx * 0.5, hcy - hry * 1.1);
+  ctx.stroke();
+
+  // Brim with gradient
+  var brimGrad = ctx.createLinearGradient(cx - hrx * 1.6, 0, cx + hrx * 1.6, 0);
+  brimGrad.addColorStop(0, dk);
+  brimGrad.addColorStop(0.3, color);
+  brimGrad.addColorStop(0.5, hi);
+  brimGrad.addColorStop(0.7, color);
+  brimGrad.addColorStop(1, dk);
+  ctx.fillStyle = brimGrad;
   ctx.beginPath();
-  ctx.ellipse(cx - hrx * 0.2, hcy - hry * 1.35, hrx * 0.4, hu * 0.08, -0.15, 0, Math.PI * 2);
+  ctx.ellipse(cx, hcy - hry * 0.85, hrx * 1.6, hu * 0.08, 0, 0, Math.PI * 2);
   ctx.fill();
+
+  // Brim edge shadow (underneath)
+  ctx.fillStyle = dti2DAlpha(vdk, 0.12);
+  ctx.beginPath();
+  ctx.ellipse(cx, hcy - hry * 0.8, hrx * 1.6, hu * 0.04, 0, 0, Math.PI);
+  ctx.fill();
+
+  // Brim top shadow (where crown meets brim)
+  ctx.fillStyle = dti2DAlpha(dk, 0.08);
+  ctx.beginPath();
+  ctx.ellipse(cx, hcy - hry * 0.87, hrx * 0.9, hu * 0.025, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Crown highlight
+  ctx.fillStyle = dti2DAlpha(hi, 0.12);
+  ctx.beginPath();
+  ctx.ellipse(cx - hrx * 0.15, hcy - hry * 1.45, hrx * 0.35, hu * 0.1, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hat band/ribbon
+  ctx.fillStyle = dti2DShade(dk, -10);
+  ctx.beginPath();
+  ctx.moveTo(cx - hrx * 0.88, hcy - hry * 0.87);
+  ctx.quadraticCurveTo(cx, hcy - hry * 0.95, cx + hrx * 0.88, hcy - hry * 0.87);
+  ctx.lineTo(cx + hrx * 0.88, hcy - hry * 0.82);
+  ctx.quadraticCurveTo(cx, hcy - hry * 0.9, cx - hrx * 0.88, hcy - hry * 0.82);
+  ctx.closePath();
+  ctx.fill();
+
+  // Brim edge outline
+  ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+  ctx.lineWidth = hu * 0.008;
+  ctx.beginPath();
+  ctx.ellipse(cx, hcy - hry * 0.85, hrx * 1.6, hu * 0.08, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
   ctx.restore();
 }
 
 function dti2DDrawAccBelt(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
-  var dk = dti2DShade(color, -30);
-  var hi = dti2DShade(color, 20);
-  var beltH = hu * 0.04;
+  var dk = dti2DShade(color, -35);
+  var hi = dti2DShade(color, 25);
+  var vdk = dti2DShade(color, -55);
+  var beltH = hu * 0.06;
   ctx.save();
-  ctx.fillStyle = color;
+
+  // Belt body with gradient
+  var beltGrad = ctx.createLinearGradient(0, m.waistY - beltH / 2, 0, m.waistY + beltH / 2);
+  beltGrad.addColorStop(0, hi);
+  beltGrad.addColorStop(0.3, color);
+  beltGrad.addColorStop(0.7, color);
+  beltGrad.addColorStop(1, dk);
+  ctx.fillStyle = beltGrad;
   ctx.beginPath();
-  ctx.moveTo(cx - m.waistW / 2 - hu * 0.03, m.waistY - beltH / 2);
-  ctx.quadraticCurveTo(cx, m.waistY - beltH / 2 + hu * 0.01, cx + m.waistW / 2 + hu * 0.03, m.waistY - beltH / 2);
-  ctx.lineTo(cx + m.waistW / 2 + hu * 0.03, m.waistY + beltH / 2);
-  ctx.quadraticCurveTo(cx, m.waistY + beltH / 2 + hu * 0.01, cx - m.waistW / 2 - hu * 0.03, m.waistY + beltH / 2);
+  ctx.moveTo(cx - m.waistW / 2 - hu * 0.04, m.waistY - beltH / 2);
+  ctx.quadraticCurveTo(cx, m.waistY - beltH / 2 + hu * 0.012, cx + m.waistW / 2 + hu * 0.04, m.waistY - beltH / 2);
+  ctx.lineTo(cx + m.waistW / 2 + hu * 0.04, m.waistY + beltH / 2);
+  ctx.quadraticCurveTo(cx, m.waistY + beltH / 2 + hu * 0.012, cx - m.waistW / 2 - hu * 0.04, m.waistY + beltH / 2);
   ctx.closePath();
   ctx.fill();
-  // Buckle
-  ctx.fillStyle = dk;
+
+  // Belt edge lines
+  ctx.strokeStyle = dti2DAlpha(vdk, 0.2);
+  ctx.lineWidth = hu * 0.006;
   ctx.beginPath();
-  dti2DRoundRect(ctx,cx - hu * 0.03, m.waistY - beltH * 0.7, hu * 0.06, beltH * 1.4, hu * 0.008);
-  ctx.fill();
-  ctx.fillStyle = hi;
+  ctx.moveTo(cx - m.waistW / 2 - hu * 0.04, m.waistY - beltH / 2);
+  ctx.quadraticCurveTo(cx, m.waistY - beltH / 2 + hu * 0.012, cx + m.waistW / 2 + hu * 0.04, m.waistY - beltH / 2);
+  ctx.stroke();
   ctx.beginPath();
-  dti2DRoundRect(ctx,cx - hu * 0.02, m.waistY - beltH * 0.45, hu * 0.04, beltH * 0.9, hu * 0.005);
+  ctx.moveTo(cx - m.waistW / 2 - hu * 0.04, m.waistY + beltH / 2);
+  ctx.quadraticCurveTo(cx, m.waistY + beltH / 2 + hu * 0.012, cx + m.waistW / 2 + hu * 0.04, m.waistY + beltH / 2);
+  ctx.stroke();
+
+  // Stitching line
+  ctx.strokeStyle = dti2DAlpha(dk, 0.15);
+  ctx.lineWidth = hu * 0.003;
+  ctx.setLineDash([hu * 0.008, hu * 0.006]);
+  ctx.beginPath();
+  ctx.moveTo(cx - m.waistW / 2 - hu * 0.03, m.waistY - beltH / 2 + hu * 0.012);
+  ctx.quadraticCurveTo(cx, m.waistY - beltH / 2 + hu * 0.02, cx + m.waistW / 2 + hu * 0.03, m.waistY - beltH / 2 + hu * 0.012);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Belt holes (small dots to the right of buckle)
+  for (var bh = 0; bh < 3; bh++) {
+    ctx.fillStyle = dti2DAlpha(vdk, 0.2);
+    ctx.beginPath();
+    ctx.arc(cx + hu * 0.08 + bh * hu * 0.025, m.waistY, hu * 0.005, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Buckle frame (larger, metallic)
+  var buckW = hu * 0.08;
+  var buckH = beltH * 1.5;
+  ctx.fillStyle = dti2DShade('#888888', -20);
+  ctx.beginPath();
+  dti2DRoundRect(ctx, cx - buckW / 2, m.waistY - buckH / 2, buckW, buckH, hu * 0.01);
   ctx.fill();
+  // Buckle inner cutout
+  ctx.fillStyle = dti2DShade('#aaaaaa', 10);
+  ctx.beginPath();
+  dti2DRoundRect(ctx, cx - buckW / 2 + hu * 0.012, m.waistY - buckH / 2 + hu * 0.012, buckW - hu * 0.024, buckH - hu * 0.024, hu * 0.006);
+  ctx.fill();
+  // Buckle shine
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  dti2DRoundRect(ctx, cx - buckW / 2 + hu * 0.015, m.waistY - buckH / 2 + hu * 0.012, buckW * 0.35, buckH - hu * 0.024, hu * 0.004);
+  ctx.fill();
+  // Buckle prong
+  ctx.strokeStyle = dti2DShade('#888888', -30);
+  ctx.lineWidth = hu * 0.008;
+  ctx.beginPath();
+  ctx.moveTo(cx - hu * 0.005, m.waistY - buckH / 2 + hu * 0.015);
+  ctx.lineTo(cx + hu * 0.01, m.waistY + buckH / 2 - hu * 0.015);
+  ctx.stroke();
+
   ctx.restore();
 }
 
 function dti2DDrawAccEarrings(ctx, color, style, m) {
   var cx = m.cx, hu = m.hu;
   var hcy = m.headCY, hry = m.headRY, hrx = m.headRX;
-  var hi = dti2DShade(color, 30);
+  var hi = dti2DShade(color, 35);
+  var dk = dti2DShade(color, -30);
   ctx.save();
-  // Earring posts
+
   for (var side = -1; side <= 1; side += 2) {
-    var ex = cx + side * hrx * 0.97;
-    var ey = hcy + hry * 0.1;
-    // Post
+    var ex = cx + side * hrx * 0.98;
+    var ey = hcy + hry * 0.08;
+
+    // Post/hook
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = hu * 0.012;
+    ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(ex, ey);
-    ctx.lineTo(ex, ey + hu * 0.02);
+    ctx.quadraticCurveTo(ex + side * hu * 0.005, ey + hu * 0.025, ex, ey + hu * 0.04);
     ctx.stroke();
-    // Earring drop
-    ctx.fillStyle = color;
+
+    // Earring drop - teardrop shape
+    var dropCY = ey + hu * 0.07;
+    var dropR = hu * 0.045;
+
+    // Shadow
+    ctx.fillStyle = dti2DAlpha(dk, 0.12);
     ctx.beginPath();
-    ctx.arc(ex, ey + hu * 0.04, hu * 0.025, 0, Math.PI * 2);
+    ctx.arc(ex + hu * 0.003, dropCY + hu * 0.003, dropR * 1.05, 0, Math.PI * 2);
     ctx.fill();
-    // Highlight
-    ctx.fillStyle = dti2DAlpha(hi, 0.3);
+
+    // Main drop with gradient
+    var earGrad = ctx.createRadialGradient(ex - dropR * 0.3, dropCY - dropR * 0.3, 0, ex, dropCY, dropR);
+    earGrad.addColorStop(0, hi);
+    earGrad.addColorStop(0.5, color);
+    earGrad.addColorStop(1, dk);
+    ctx.fillStyle = earGrad;
     ctx.beginPath();
-    ctx.arc(ex - hu * 0.008, ey + hu * 0.035, hu * 0.01, 0, Math.PI * 2);
+    ctx.moveTo(ex, ey + hu * 0.035);
+    ctx.quadraticCurveTo(ex - dropR * 1.1, dropCY - dropR * 0.2, ex - dropR * 0.5, dropCY + dropR * 0.5);
+    ctx.quadraticCurveTo(ex, dropCY + dropR * 1.15, ex + dropR * 0.5, dropCY + dropR * 0.5);
+    ctx.quadraticCurveTo(ex + dropR * 1.1, dropCY - dropR * 0.2, ex, ey + hu * 0.035);
+    ctx.closePath();
     ctx.fill();
+
+    // Shine highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(ex - dropR * 0.2, dropCY - dropR * 0.15, dropR * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outline
+    ctx.strokeStyle = dti2DAlpha(dk, 0.2);
+    ctx.lineWidth = hu * 0.005;
+    ctx.beginPath();
+    ctx.moveTo(ex, ey + hu * 0.035);
+    ctx.quadraticCurveTo(ex - dropR * 1.1, dropCY - dropR * 0.2, ex - dropR * 0.5, dropCY + dropR * 0.5);
+    ctx.quadraticCurveTo(ex, dropCY + dropR * 1.15, ex + dropR * 0.5, dropCY + dropR * 0.5);
+    ctx.quadraticCurveTo(ex + dropR * 1.1, dropCY - dropR * 0.2, ex, ey + hu * 0.035);
+    ctx.stroke();
   }
+
   ctx.restore();
 }
 
