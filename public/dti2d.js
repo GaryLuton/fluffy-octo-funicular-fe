@@ -61,15 +61,15 @@ function dti2DRoundRect(ctx, x, y, w, h, r) {
 
 // ── Body Metrics ──
 // Computes key body landmark coordinates scaled to canvas size
-// Fashion croquis: ~8.5 head-tall figure
+// 7.5-head figure for realistic proportions that fill mobile canvas
 function dti2DComputeBodyMetrics(w, h, breathOffset) {
-  var s = Math.min(w / 320, h / 580);
+  var s = Math.min(w / 320, h / 520);
   var cx = w / 2;
   var bo = breathOffset || 0;
 
-  // Head unit = total height / 8.5
-  var hu = (h * 0.88) / 8.5;
-  var topY = h * 0.04;
+  // Head unit = total height / 7.5 (using 92% of canvas)
+  var hu = (h * 0.92) / 7.5;
+  var topY = h * 0.03;
 
   var m = {
     s: s,
@@ -77,45 +77,45 @@ function dti2DComputeBodyMetrics(w, h, breathOffset) {
     hu: hu,
     // Head
     headCY: topY + hu * 0.5,
-    headRX: hu * 0.38,
-    headRY: hu * 0.48,
+    headRX: hu * 0.42,
+    headRY: hu * 0.5,
     // Neck
     neckTop: topY + hu * 0.95,
-    neckBot: topY + hu * 1.2,
+    neckBot: topY + hu * 1.15,
     neckW: hu * 0.18,
     // Shoulders
-    shoulderY: topY + hu * 1.35 + bo * 0.3,
-    shoulderW: hu * 0.95,
+    shoulderY: topY + hu * 1.3 + bo * 0.3,
+    shoulderW: hu * 1.0,
     // Bust
-    bustY: topY + hu * 1.8,
-    bustW: hu * 0.85,
+    bustY: topY + hu * 1.7,
+    bustW: hu * 0.9,
     // Waist
-    waistY: topY + hu * 2.6 + bo * 0.5,
-    waistW: hu * 0.48,
+    waistY: topY + hu * 2.4 + bo * 0.5,
+    waistW: hu * 0.52,
     // Hip
-    hipY: topY + hu * 3.2,
-    hipW: hu * 0.82,
+    hipY: topY + hu * 2.9,
+    hipW: hu * 0.88,
     // Crotch
-    crotchY: topY + hu * 3.8,
+    crotchY: topY + hu * 3.4,
     // Knee
-    kneeY: topY + hu * 5.4,
-    kneeW: hu * 0.22,
+    kneeY: topY + hu * 4.8,
+    kneeW: hu * 0.24,
     // Ankle
-    ankleY: topY + hu * 7.2,
-    ankleW: hu * 0.14,
+    ankleY: topY + hu * 6.4,
+    ankleW: hu * 0.15,
     // Foot
-    footY: topY + hu * 7.6,
-    footW: hu * 0.28,
-    footH: hu * 0.2,
+    footY: topY + hu * 6.8,
+    footW: hu * 0.3,
+    footH: hu * 0.22,
     // Arms
-    armOuterX: hu * 0.52,  // offset from cx
-    elbowY: topY + hu * 2.8,
-    wristY: topY + hu * 3.6,
-    handY: topY + hu * 3.9,
-    handW: hu * 0.15,
+    armOuterX: hu * 0.55,  // offset from cx
+    elbowY: topY + hu * 2.5,
+    wristY: topY + hu * 3.2,
+    handY: topY + hu * 3.5,
+    handW: hu * 0.16,
     // Misc
     topY: topY,
-    botY: topY + hu * 8.0
+    botY: topY + hu * 7.1
   };
   return m;
 }
@@ -161,8 +161,12 @@ function dti2DInitScene() {
 
 function dti2DFinishInit(canvas, container, w, h) {
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
+  // Set canvas internal resolution
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  // Let CSS control display size — do NOT set style.width/height in px
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
 
   var ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
@@ -171,6 +175,7 @@ function dti2DFinishInit(canvas, container, w, h) {
   dti2D.ctx = ctx;
   dti2D.width = w;
   dti2D.height = h;
+  dti2D.dpr = dpr;
   dti2D.scale = dpr;
   dti2D.initialized = true;
   dti2D.clothing = {};
