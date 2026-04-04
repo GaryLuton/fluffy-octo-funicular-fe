@@ -1253,9 +1253,7 @@
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="/dti3d.js"></script>
+<script src="/dti2d.js"></script>
 <script>
 
 // ─── ALL DATA + QUIZ JS (preserved from original) ────────
@@ -2796,6 +2794,7 @@ function backToHub(){
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
   if(dtiTimerInterval) clearInterval(dtiTimerInterval);
+  if(typeof dti2DDestroy === 'function') dti2DDestroy();
   document.getElementById('chatMessages2').innerHTML = '';
   document.getElementById('sectionNameNav').textContent = 'FloveeHub';
   // Clear FloveeHub game chat histories
@@ -3761,9 +3760,9 @@ var DTI_TOTAL_TIME = 90;
 function dtiSetSkin(idx){
   dtiState.skinIdx = idx;
   var s = DTI_SKIN_TONES[idx];
-  // Update 3D avatar skin color
-  if (dti3D.scene) {
-    dti3DUpdateSkin(s);
+  // Update 2D avatar skin color
+  if (dti2D.initialized) {
+    dti2DUpdateSkin(s);
   }
   // Update skin row buttons
   document.querySelectorAll('.dti-skin-btn').forEach(function(b,i){
@@ -3792,15 +3791,15 @@ function dtiInit(){
   dtiRenderSkinPicker();
   dtiSetSkin(dtiState.skinIdx);
 
-  // Initialize 3D scene (creates scene if first time, or clears clothing)
-  if (!dti3D.scene) {
+  // Initialize 2D scene (creates canvas if first time, or clears clothing)
+  if (!dti2D.initialized) {
     // Delay to ensure container is visible and has dimensions
     setTimeout(function(){
-      dti3DInitScene();
+      dti2DInitScene();
       dtiSetSkin(dtiState.skinIdx);
     }, 200);
   } else {
-    dti3DClearClothing();
+    dti2DClearClothing();
   }
 
   // Style panels
@@ -3920,14 +3919,14 @@ function dtiRenderItems(cat){
 }
 
 function dtiUpdateFigure(){
-  // 3D clothing update
-  if (!dti3D.scene || !dti3D.clothingGroup) return;
-  dti3DClearClothing();
+  // 2D clothing update
+  if (!dti2D.initialized) return;
+  dti2DClearClothing();
   var cats = ['hair','tops','bottoms','shoes','accessories'];
   cats.forEach(function(cat){
     var pick = dtiState.picks[cat];
-    if(pick && DTI_3D[pick.svg]){
-      dti3DAddClothing(pick.svg, pick.color, pick.style);
+    if(pick && DTI_2D[pick.svg]){
+      dti2DAddClothing(pick.svg, pick.color, pick.style);
     }
   });
 }
@@ -3978,8 +3977,8 @@ async function dtiSubmit(){
   document.getElementById('dtiSubmitBtn').disabled = true;
   document.getElementById('dtiSubmitBtn').textContent = 'Judging...';
 
-  // Trigger 3D runway spin
-  if (typeof dti3DRunwaySpin === 'function') dti3DRunwaySpin();
+  // Trigger 2D runway sparkle animation
+  if (typeof dti2DRunwaySpin === 'function') dti2DRunwaySpin();
 
   var fName = getFloveeName();
   var aeName = resolveAeName();
