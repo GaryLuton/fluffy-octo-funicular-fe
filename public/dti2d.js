@@ -36,6 +36,29 @@ function dti2DAlpha(hex, a) {
   } catch(e) { return hex; }
 }
 
+// Polyfill: rounded rectangle (ctx.roundRect not supported on all browsers)
+function dti2DRoundRect(ctx, x, y, w, h, r) {
+  var radii;
+  if (typeof r === 'number') {
+    radii = [r, r, r, r];
+  } else if (Array.isArray(r)) {
+    radii = [r[0]||0, r[1]||0, r[2]||0, r[3]||0];
+  } else {
+    radii = [0, 0, 0, 0];
+  }
+  var tl = radii[0], tr = radii[1], br = radii[2], bl = radii[3];
+  ctx.moveTo(x + tl, y);
+  ctx.lineTo(x + w - tr, y);
+  ctx.arcTo(x + w, y, x + w, y + tr, tr);
+  ctx.lineTo(x + w, y + h - br);
+  ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
+  ctx.lineTo(x + bl, y + h);
+  ctx.arcTo(x, y + h, x, y + h - bl, bl);
+  ctx.lineTo(x, y + tl);
+  ctx.arcTo(x, y, x + tl, y, tl);
+  ctx.closePath();
+}
+
 // ── Body Metrics ──
 // Computes key body landmark coordinates scaled to canvas size
 // Fashion croquis: ~8.5 head-tall figure
@@ -117,8 +140,15 @@ function dti2DInitScene() {
 
   var rect = container.getBoundingClientRect();
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var w = (rect.width || 300);
-  var h = (rect.height || 520);
+  var w = rect.width;
+  var h = rect.height;
+
+  // If container has no dimensions yet, retry after layout settles
+  if (!w || !h) {
+    container.removeChild(canvas);
+    setTimeout(dti2DInitScene, 300);
+    return;
+  }
   canvas.width = w * dpr;
   canvas.height = h * dpr;
   canvas.style.width = w + 'px';
@@ -1651,12 +1681,12 @@ function dti2DDrawAccBag(ctx, color, style, m) {
   // Bag body
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.roundRect(bagX - bagW / 2, bagY, bagW, bagH, hu * 0.03);
+  dti2DRoundRect(ctx,bagX - bagW / 2, bagY, bagW, bagH, hu * 0.03);
   ctx.fill();
   // Flap
   ctx.fillStyle = dk;
   ctx.beginPath();
-  ctx.roundRect(bagX - bagW / 2, bagY, bagW, bagH * 0.35, [hu * 0.03, hu * 0.03, 0, 0]);
+  dti2DRoundRect(ctx,bagX - bagW / 2, bagY, bagW, bagH * 0.35, [hu * 0.03, hu * 0.03, 0, 0]);
   ctx.fill();
   // Clasp
   ctx.fillStyle = hi;
@@ -1714,11 +1744,11 @@ function dti2DDrawAccBelt(ctx, color, style, m) {
   // Buckle
   ctx.fillStyle = dk;
   ctx.beginPath();
-  ctx.roundRect(cx - hu * 0.03, m.waistY - beltH * 0.7, hu * 0.06, beltH * 1.4, hu * 0.008);
+  dti2DRoundRect(ctx,cx - hu * 0.03, m.waistY - beltH * 0.7, hu * 0.06, beltH * 1.4, hu * 0.008);
   ctx.fill();
   ctx.fillStyle = hi;
   ctx.beginPath();
-  ctx.roundRect(cx - hu * 0.02, m.waistY - beltH * 0.45, hu * 0.04, beltH * 0.9, hu * 0.005);
+  dti2DRoundRect(ctx,cx - hu * 0.02, m.waistY - beltH * 0.45, hu * 0.04, beltH * 0.9, hu * 0.005);
   ctx.fill();
   ctx.restore();
 }
@@ -1905,7 +1935,7 @@ function dti2DAnimate() {
     }
   }
 
-  dti2DRender();
+  try { dti2DRender(); } catch(e) { console.error('DTI 2D render error:', e); }
   dti2D.animFrameId = requestAnimationFrame(dti2DAnimate);
 }
 
