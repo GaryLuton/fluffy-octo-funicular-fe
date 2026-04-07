@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Activities — Stuflover</title>
+  <title>Bored? Not Anymore — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root{--bg:#f9c4c4;--tx:#1e0c06;--ac:#c4522a;--ac2:#a83e1e;--white:#fff;}
@@ -156,13 +156,14 @@
 </nav>
 
 <div class="hero">
-  <h1 id="heroTitle">What Should I Do?</h1>
-  <p class="hero-sub" id="heroSub">Personalized activity ideas based on your vibe, aesthetic, and energy.</p>
+  <div style="font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:8px;">Stuflover presents</div>
+  <h1 id="heroTitle">I Am So<br>Bored</h1>
+  <p class="hero-sub" id="heroSub">same. but not for long. here are things to do that actually match your vibe.</p>
 </div>
 
 <div class="refresh-row">
   <button class="refresh-btn" id="refreshBtn" onclick="generateActivities()">
-    <span class="refresh-icon">&#x21bb;</span> Refresh Activities
+    <span class="refresh-icon">&#x21bb;</span> Give Me New Ideas
   </button>
 </div>
 
@@ -262,11 +263,11 @@
 
   // ─── CATEGORIES CONFIG ───
   const CATEGORIES = [
-    {key:'creative', label:'Creative', emoji:'🎨'},
-    {key:'social',   label:'Social',   emoji:'💬'},
-    {key:'solo',     label:'Solo',     emoji:'🌙'},
-    {key:'active',   label:'Active',   emoji:'⚡'},
-    {key:'chill',    label:'Chill',    emoji:'🧸'},
+    {key:'creative', label:'Make Something', emoji:''},
+    {key:'social',   label:'With Friends', emoji:''},
+    {key:'solo',     label:'Me Time', emoji:''},
+    {key:'active',   label:'Move', emoji:''},
+    {key:'chill',    label:'Reset', emoji:''},
   ];
 
   // ─── BUILD PROMPT ───
@@ -299,12 +300,16 @@ USER PROFILE:
 - Saturday morning vibe: ${saturday}
 - Coffee order style: ${coffee}
 
-Generate EXACTLY 5 categories of activities. For each category, give 3-4 specific, fun activity ideas that MATCH this person's aesthetic and vibe. Be specific and creative — not generic. If they're goth, suggest goth things. If they're cottagecore, suggest cottagecore things. Match the energy.
+Generate EXACTLY 5 categories of activities. For each category, give 3-4 SPECIFIC, fun, viral-worthy activity ideas that MATCH this person's aesthetic and vibe. These should feel like ideas from TikTok or Pinterest that teens actually want to do. Be creative and specific — not generic boring suggestions.
 
-Categories: Creative, Social, Solo, Active, Chill
+If they are goth, suggest dark and moody things. If cottagecore, suggest cozy nature things. If Y2K, suggest nostalgic 2000s things. Match their music taste too.
+
+Categories: Creative (make something), Social (do with friends), Solo (me time), Active (move your body), Chill (relax and reset)
+
+Keep titles short and catchy (under 6 words). Descriptions should be 1 sentence max, casual and fun.
 
 Return ONLY valid JSON in this exact format (no markdown, no code fences):
-{"creative":[{"title":"short title","desc":"1-2 sentence description"}],"social":[...],"solo":[...],"active":[...],"chill":[...]}`;
+{"creative":[{"title":"short title","desc":"casual fun description"}],"social":[...],"solo":[...],"active":[...],"chill":[...]}`;
   }
 
   // ─── RENDER ───
