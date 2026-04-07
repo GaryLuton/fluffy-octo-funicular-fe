@@ -941,6 +941,14 @@
           <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">M</div></div>
           <span class="story-label">Me</span>
         </div>
+        <div class="story-item" onclick="openSection('floveegroup')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">C</div></div>
+          <span class="story-label">Groups</span>
+        </div>
+        <div class="story-item" onclick="openSection('readit')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">R</div></div>
+          <span class="story-label">ReadIt</span>
+        </div>
       </div>
     </div>
 
@@ -1037,6 +1045,30 @@
           </div>
         </div>
         <span class="feed-cta">Go</span>
+      </div>
+
+      <!-- Groups -->
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('floveegroup')" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><circle cx="9" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.6"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          <div>
+            <h2 class="feed-heading" style="margin-bottom:2px;">Groups</h2>
+            <p class="feed-desc" style="margin:0;">Join communities. Find your people.</p>
+          </div>
+        </div>
+        <span class="feed-cta">Join</span>
+      </div>
+
+      <!-- ReadIt -->
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('readit')" style="cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke="currentColor" stroke-width="1" opacity="0.4"/><line x1="8" y1="11" x2="14" y2="11" stroke="currentColor" stroke-width="1" opacity="0.4"/></svg>
+          <div>
+            <h2 class="feed-heading" style="margin-bottom:2px;">ReadIt</h2>
+            <p class="feed-desc" style="margin:0;">Book community. Reviews + recs.</p>
+          </div>
+        </div>
+        <span class="feed-cta">Read</span>
       </div>
 
     </div>
@@ -6205,11 +6237,13 @@ const SECTIONS = [
   {id:'friends',    name:'Social',         sub:'friends + groups',  col:5},
   {id:'stufloverdaily',name:'Discover',    sub:'trending + inspo',  col:4},
   {id:'myprofile',  name:'Me',             sub:'profile + routine', col:9},
+  {id:'floveegroup',name:'Groups',         sub:'find your people',  col:6},
+  {id:'readit',     name:'ReadIt',         sub:'books + booktok',   col:10},
 ];
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
-  const hues = [0,60,120,180,240,300];
+  const hues = [0,45,90,135,180,225,270,315];
   const icons = {
     fitforit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76zM10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="white" opacity="0.9"/></svg>',
     beyou:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white" opacity="0.5"/></svg>',
