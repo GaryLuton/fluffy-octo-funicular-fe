@@ -10,7 +10,7 @@
     html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
     input,button,select,textarea{font-size:16px;}
-    body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;transition:background 0.8s,color 0.8s;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;transition:background 0.8s,color 0.8s;line-height:1.6;font-size:15px;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     .serif{font-family:'Barlow Condensed',sans-serif;font-weight:900;}
 
@@ -925,8 +925,16 @@
       </div>
     </div>
 
-    <!-- INSTANT FEED (no API calls, loads immediately) -->
+    <!-- QUICK INTERACTIONS -->
+    <div style="padding:4px 30px 0;position:relative;z-index:2;">
+      <h2 style="font-size:0.55rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.2;margin-bottom:8px;" id="feedHeading">Quick Vibes</h2>
+    </div>
     <div id="instantFeed" style="position:relative;z-index:2;padding:0 30px 16px;max-width:500px;margin:0 auto;"></div>
+
+    <!-- YOUR SECTIONS -->
+    <div style="padding:4px 30px 0;position:relative;z-index:2;">
+      <h2 style="font-size:0.55rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.2;margin-bottom:0;" id="gridHeading">Your Sections</h2>
+    </div>
 
     <!-- CHROME NEW TAB GRID -->
     <div class="content-grid" id="browserGrid"></div>
@@ -2331,6 +2339,12 @@ function buildPage(){
   addScrapbookDecos();
   startGlobalMsgPoll();
   buildInstantFeed();
+
+  // Style section headings
+  var fh = document.getElementById('feedHeading');
+  var gh = document.getElementById('gridHeading');
+  if(fh) fh.style.color = searchPal.tx;
+  if(gh) gh.style.color = searchPal.tx;
   // Add emoji pickers to chat inputs
   var chatRow1 = document.querySelector('#normalChat .chat-input-row');
   if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
