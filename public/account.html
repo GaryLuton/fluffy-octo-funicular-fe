@@ -104,9 +104,23 @@ var API_BASE = window.STUFLOVER_API_URL || '';
 
 // Load user info
 var user = window.stufloverUser ? window.stufloverUser() : null;
-if (user) {
-  document.getElementById('welcomeName').textContent = 'Welcome, ' + user.username;
+if (user && user.username) {
+  document.getElementById('welcomeName').textContent = user.username;
   document.getElementById('welcomeEmail').textContent = user.email || '';
+} else {
+  // Try fetching from API
+  var token = localStorage.getItem('stuflover_token');
+  if(token){
+    fetch((window.STUFLOVER_API_URL||'')+'/api/auth/me',{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.user && d.user.username){
+        document.getElementById('welcomeName').textContent = d.user.username;
+        document.getElementById('welcomeEmail').textContent = d.user.email || '';
+        localStorage.setItem('stuflover_user', JSON.stringify(d.user));
+      }
+    }).catch(function(){});
+  }
 }
 
 // Load profile info

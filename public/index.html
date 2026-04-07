@@ -223,7 +223,7 @@
     <li><a href="lifestyle.html">My Page</a></li>
     <li><a href="fitforit.html">Closet</a></li>
     <li><a href="beyou.html">Mindful</a></li>
-    <li><a href="#videos">Videos</a></li>
+    <li><a href="#videos" onclick="event.preventDefault();document.getElementById('videos').scrollIntoView({behavior:'smooth'})">Videos</a></li>
     <li><a href="account.html">Account</a></li>
   </ul>
 </nav>
@@ -313,7 +313,7 @@
         <div class="feature-tag" style="background:rgba(42,26,20,0.08);">Personalized</div>
       </div>
     </a>
-    <a href="lifestyle.html" class="feature-card" style="background:var(--white);">
+    <a href="lifestyle.html#friends" class="feature-card" style="background:var(--white);" onclick="localStorage.setItem('stuflover_open_section','friends')">
       <div class="feature-thumb" style="background:linear-gradient(135deg,#f0dde0,#e8c8d0);">
         <svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><circle cx="9" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/><circle cx="12" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/><circle cx="15" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/></svg>
       </div>
@@ -339,7 +339,7 @@
       <button class="refresh-btn" id="refreshBtn" onclick="refreshVideos()">Refresh My Feed</button>
     </div>
   </div>
-  <p class="videos-hint reveal">Click a video to watch it here on the site (avoid clicking the YouTube logo in the corner to stay on the page!)</p>
+  <p class="videos-hint reveal">Tap any video to watch it right here</p>
   <div class="video-grid reveal" id="videoGrid"></div>
 </div>
 

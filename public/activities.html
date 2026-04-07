@@ -425,8 +425,13 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     generating = false;
   };
 
-  // ─── AUTO-GENERATE ON LOAD ───
-  generateActivities();
+  // ─── AUTO-GENERATE ON LOAD (only if quiz completed) ───
+  var savedProfile = JSON.parse(localStorage.getItem('stuflover_profile')||'null');
+  if(savedProfile && savedProfile.aesthetics && Object.keys(savedProfile.aesthetics).length > 0){
+    generateActivities();
+  } else {
+    document.getElementById('activitiesContainer').innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:0.4;"><p style="font-size:1.1rem;margin-bottom:16px;">Take the quiz first to get personalized activities</p><a href="lifestyle.html" style="color:var(--ac);font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Take the Quiz</a></div>';
+  }
 
 })();
 </script>

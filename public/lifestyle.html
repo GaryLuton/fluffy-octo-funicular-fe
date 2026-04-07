@@ -2474,6 +2474,10 @@ function buildPage(){
   startGlobalMsgPoll();
   buildInstantFeed();
 
+  // Auto-open section from deep link
+  var autoOpen = localStorage.getItem('stuflover_open_section');
+  if(autoOpen){ localStorage.removeItem('stuflover_open_section'); setTimeout(function(){ openSection(autoOpen); },300); }
+
   // Style story bar
   document.querySelectorAll('.story-avatar').forEach(function(a){ a.style.background=searchPal.bg; a.style.color=searchPal.tx; });
   document.querySelectorAll('.story-label').forEach(function(l){ l.style.color=searchPal.tx; });
