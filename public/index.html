@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600&display=swap" rel="stylesheet"/>
+  <title>Stuflover — Your Vibe, Your World</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
       --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
@@ -212,35 +212,34 @@
   </ul>
 </nav>
 
-<div class="hero">
-  <h1 class="reveal">Stuf<br>lover</h1>
-  <p class="reveal" style="font-size:1.05rem;color:rgba(30,12,6,0.45);margin-top:16px;max-width:400px;text-align:center;line-height:1.8;">your world, your aesthetic, your way</p>
-  <a href="lifestyle.html" class="reveal" style="display:inline-block;margin-top:28px;padding:16px 44px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;border-radius:6px;transition:all 0.25s;">Open My Page</a>
+<div class="hero" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 40px 60px;position:relative;">
+  <div class="reveal" style="font-size:0.7rem;letter-spacing:6px;text-transform:uppercase;color:var(--terracotta);margin-bottom:16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;">Welcome to</div>
+  <h1 class="reveal" style="font-size:clamp(6rem,18vw,14rem);line-height:0.82;letter-spacing:-4px;margin-bottom:20px;">Stuf<br>lover</h1>
+  <p class="reveal" style="font-size:1.1rem;color:rgba(30,12,6,0.4);max-width:360px;line-height:1.8;margin-bottom:8px;">the app that gets your aesthetic. take the quiz, get your page, live your vibe.</p>
+  <div class="reveal" style="font-family:'Caveat',cursive;font-size:1.2rem;color:var(--terracotta);opacity:0.6;margin-bottom:32px;">your world, made for you</div>
+  <a href="lifestyle.html" class="reveal" style="display:inline-block;padding:18px 52px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:4px;text-transform:uppercase;border-radius:50px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 6px 24px rgba(196,82,42,0.3);" onmouseenter="this.style.transform='translateY(-4px) scale(1.03)';this.style.boxShadow='0 10px 36px rgba(196,82,42,0.4)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(196,82,42,0.3)'">Take the Quiz</a>
+  <div class="reveal" style="margin-top:12px;font-size:0.7rem;opacity:0.25;letter-spacing:2px;">scroll to explore more</div>
 </div>
 
 <!-- QUICK ACCESS -->
-<div style="background:var(--white);padding:50px 60px;" id="explore">
-  <h2 class="reveal" style="text-align:center;margin-bottom:36px;">Explore</h2>
-  <div class="reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:800px;margin:0 auto;">
-    <a href="lifestyle.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:24px 16px;background:var(--pink-light);border-radius:16px;transition:all 0.25s;cursor:pointer;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom:8px;"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="var(--terracotta)" opacity="0.7"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="var(--terracotta)" opacity="0.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="var(--terracotta)" opacity="0.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="var(--terracotta)" opacity="0.3"/></svg>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;">My Page</div>
-      <div style="font-size:0.72rem;opacity:0.4;margin-top:4px;">Games, chat, style</div>
+<div style="background:var(--white);padding:60px 48px;" id="explore">
+  <div class="reveal" style="text-align:center;margin-bottom:12px;font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;">Jump to</div>
+  <div class="reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:720px;margin:0 auto;">
+    <a href="lifestyle.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--pink-light),rgba(245,170,170,0.3));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">My Page</div>
+      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">games + style</div>
     </a>
-    <a href="fitforit.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:24px 16px;background:var(--pink-light);border-radius:16px;transition:all 0.25s;cursor:pointer;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom:8px;"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76z" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/></svg>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;">Closet</div>
-      <div style="font-size:0.72rem;opacity:0.4;margin-top:4px;">Your wardrobe</div>
+    <a href="fitforit.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--peach),rgba(247,212,176,0.3));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Closet</div>
+      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">your wardrobe</div>
     </a>
-    <a href="beyou.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:24px 16px;background:var(--pink-light);border-radius:16px;transition:all 0.25s;cursor:pointer;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom:8px;"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="var(--terracotta)" opacity="0.4"/></svg>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;">Mindful</div>
-      <div style="font-size:0.72rem;opacity:0.4;margin-top:4px;">Breathe, journal</div>
+    <a href="beyou.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,rgba(200,180,220,0.3),rgba(180,160,200,0.15));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Mindful</div>
+      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">breathe + journal</div>
     </a>
-    <a href="academic.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:24px 16px;background:var(--pink-light);border-radius:16px;transition:all 0.25s;cursor:pointer;" onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <svg width="28" height="28" viewBox="0 0 24 24" style="margin-bottom:8px;"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/></svg>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;">Study</div>
-      <div style="font-size:0.72rem;opacity:0.4;margin-top:4px;">Homework help</div>
+    <a href="academic.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,rgba(180,210,180,0.3),rgba(160,190,160,0.15));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Study</div>
+      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">homework help</div>
     </a>
   </div>
 </div>
@@ -288,7 +287,14 @@
 
 <footer>
   <div class="footer-logo">Stuflover</div>
-  <p>be unique · your vibe, your rules</p>
+  <p style="margin-bottom:16px;">your vibe, your rules</p>
+  <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+    <a href="lifestyle.html" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;color:var(--brown);opacity:0.3;transition:opacity 0.2s;" onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='0.3'">My Page</a>
+    <a href="fitforit.html" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;color:var(--brown);opacity:0.3;transition:opacity 0.2s;" onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='0.3'">Closet</a>
+    <a href="beyou.html" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;color:var(--brown);opacity:0.3;transition:opacity 0.2s;" onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='0.3'">Mindful</a>
+    <a href="academic.html" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;color:var(--brown);opacity:0.3;transition:opacity 0.2s;" onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='0.3'">Study</a>
+    <a href="account.html" style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;color:var(--brown);opacity:0.3;transition:opacity 0.2s;" onmouseenter="this.style.opacity='0.7'" onmouseleave="this.style.opacity='0.3'">Account</a>
+  </div>
 </footer>
 
 <!-- ADD MODAL -->
