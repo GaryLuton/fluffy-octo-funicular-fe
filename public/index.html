@@ -222,34 +222,85 @@
 </div>
 
 <!-- QUICK ACCESS -->
-<div style="background:var(--white);padding:60px 48px;" id="explore">
-  <div class="reveal" style="text-align:center;margin-bottom:12px;font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;">Jump to</div>
-  <div class="reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:720px;margin:0 auto;">
-    <a href="lifestyle.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--pink-light),rgba(240,221,214,0.35));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">My Page</div>
-      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">games + style</div>
-    </a>
-    <a href="fitforit.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--peach),rgba(232,213,200,0.35));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Closet</div>
-      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">your wardrobe</div>
-    </a>
-    <a href="beyou.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,rgba(200,180,220,0.3),rgba(180,160,200,0.15));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Mindful</div>
-      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">breathe + journal</div>
-    </a>
-    <a href="academic.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,rgba(180,210,180,0.3),rgba(160,190,160,0.15));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Study</div>
-      <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">homework help</div>
-    </a>
-  </div>
-</div>
+<style>
+  .feature-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:800px;margin:0 auto;}
+  .feature-card{text-decoration:none;color:var(--brown);border-radius:20px;overflow:hidden;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;display:flex;flex-direction:column;border:1px solid rgba(42,26,20,0.04);}
+  .feature-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 16px 40px rgba(0,0,0,0.1);}
+  .feature-thumb{padding:32px 24px 20px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:120px;}
+  .feature-thumb svg{position:relative;z-index:1;opacity:0.7;}
+  .feature-body{padding:16px 20px 20px;}
+  .feature-headline{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:1px;text-transform:uppercase;line-height:1.2;margin-bottom:4px;}
+  .feature-hook{font-size:0.78rem;opacity:0.45;line-height:1.5;}
+  .feature-tag{display:inline-block;font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;padding:3px 10px;border-radius:10px;opacity:0.5;margin-top:8px;}
+  @media(max-width:768px){.feature-grid{grid-template-columns:1fr;max-width:400px;}}
+</style>
 
-<div class="boredom-hub" id="boredom">
-  <h2 class="reveal">More to Explore</h2>
-  <div class="boredom-cards reveal">
-    <div class="boredom-card" onclick="window.location.href='lifestyle.html'"><div class="card-icon"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg></div><h3>Lifestyle</h3></div>
-    <div class="boredom-card" onclick="window.location.href='academic.html'"><div class="card-icon"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="11" x2="13" y2="11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><h3>Academic</h3></div>
-    <div class="boredom-card" onclick="window.location.href='activities.html'"><div class="card-icon"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Activities</h3></div>
+<div style="background:var(--white);padding:60px 40px;" id="explore">
+  <div class="reveal" style="text-align:center;margin-bottom:28px;">
+    <div style="font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;margin-bottom:6px;">What's Inside</div>
+    <h2 style="font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-0.5px;">Everything You Need</h2>
+  </div>
+  <div class="reveal feature-grid">
+    <a href="lifestyle.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#f5e0e0,#f0d0c8);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2" fill="var(--terracotta)" opacity="0.6"/><rect x="14" y="3" width="7" height="7" rx="2" fill="var(--terracotta)" opacity="0.4"/><rect x="3" y="14" width="7" height="7" rx="2" fill="var(--terracotta)" opacity="0.4"/><rect x="14" y="14" width="7" height="7" rx="2" fill="var(--terracotta)" opacity="0.3"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">Your Entire Vibe In One Page</div>
+        <div class="feature-hook">games, friends, style, routine — all personalized to your aesthetic. people are saying it is scary accurate.</div>
+        <div class="feature-tag" style="background:var(--terracotta);color:white;">Most Popular</div>
+      </div>
+    </a>
+    <a href="fitforit.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#e8ddd4,#ddd0c4);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76z" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><path d="M10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="var(--terracotta)" opacity="0.5"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">Cher's Closet But Make It Real</div>
+        <div class="feature-hook">snap photos of your clothes, AI organizes them, then build outfits from your actual wardrobe. yes really.</div>
+        <div class="feature-tag" style="background:rgba(42,26,20,0.08);">New Feature</div>
+      </div>
+    </a>
+    <a href="beyou.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#e4dae8,#d8d0e0);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="var(--terracotta)" opacity="0.4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="var(--terracotta)" stroke-width="1" opacity="0.3"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">2 Minutes That Actually Calm You Down</div>
+        <div class="feature-hook">breathing exercises, private journal, grounding — designed for when everything feels like too much.</div>
+        <div class="feature-tag" style="background:rgba(42,26,20,0.08);">Self Care</div>
+      </div>
+    </a>
+    <a href="academic.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#dae4d8,#d0dcc8);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke="var(--terracotta)" stroke-width="1" opacity="0.4"/><line x1="8" y1="11" x2="14" y2="11" stroke="var(--terracotta)" stroke-width="1" opacity="0.4"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">Studying Without The Stress</div>
+        <div class="feature-hook">flashcards, quizzes, a Flovee that explains things like your smartest friend. no judgement ever.</div>
+        <div class="feature-tag" style="background:rgba(42,26,20,0.08);">Brain Boost</div>
+      </div>
+    </a>
+    <a href="activities.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#f0e0d0,#e8d4c0);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">Bored? Not For Long</div>
+        <div class="feature-hook">AI generates activities so specific to your vibe that people think we are reading their minds.</div>
+        <div class="feature-tag" style="background:rgba(42,26,20,0.08);">Personalized</div>
+      </div>
+    </a>
+    <a href="lifestyle.html" class="feature-card" style="background:var(--white);">
+      <div class="feature-thumb" style="background:linear-gradient(135deg,#f0dde0,#e8c8d0);">
+        <svg width="48" height="48" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" fill="none" stroke="var(--terracotta)" stroke-width="1.5"/><circle cx="9" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/><circle cx="12" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/><circle cx="15" cy="10" r="1" fill="var(--terracotta)" opacity="0.5"/></svg>
+      </div>
+      <div class="feature-body">
+        <div class="feature-headline">Message Your Friends (Finally)</div>
+        <div class="feature-hook">add friends, send messages, get pinged when they reply. all inside Stuflover. no other app needed.</div>
+        <div class="feature-tag" style="background:rgba(42,26,20,0.08);">Social</div>
+      </div>
+    </a>
   </div>
 </div>
 
