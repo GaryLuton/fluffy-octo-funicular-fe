@@ -2083,21 +2083,21 @@ function buildPage(){
   var existingTip = document.getElementById('dailyTip');
   if(existingTip) existingTip.remove();
   var tips = {
-    kawaii:['try a pastel mood board today — it is so calming','matching your phone case to your outfit hits different','journaling in coloured pens makes everything better'],
-    softgirl:['soft lighting in photos changes EVERYTHING','a silk pillowcase is the best investment ever','layer your necklaces — trust the process'],
-    cleangirl:['slicked back hair + hoop earrings = instant slay','a capsule wardrobe saves you 20 minutes every morning','ice water first thing in the morning actually works'],
-    coquette:['ribbon in your hair is an instant mood boost','handwrite a note to someone today — so underrated','a spritz of perfume on your pillow is elite'],
-    goth:['candlelight journaling hits different at night','a dark playlist while walking is main character behaviour','black nail polish never misses'],
-    darkacad:['reading for 20 minutes before bed improves your sleep','writing with a nice pen makes studying bearable','a library date with yourself is elite self care'],
-    grunge:['thrifting is literally the most sustainable thing you can do','making a playlist for your mood is free therapy','band tees from charity shops are unmatched'],
-    y2k:['butterfly clips are making the biggest comeback','low rise is confidence in an outfit','a disposable camera at your next hangout = memories'],
-    street:['white sneakers go with literally everything','layering is an art and you are the artist','a good playlist is the ultimate accessory'],
-    cottage:['baking something from scratch is the best reset','fresh flowers on your desk change the whole room','a walk with no phone is surprisingly magical'],
-    hippie:['making friendship bracelets is genuinely therapeutic','plants in your room boost your mood scientifically','tie dye is easier than you think and so fun'],
-    oldmoney:['a well-fitted blazer elevates any outfit instantly','good posture makes you look and feel confident','investing in quality basics saves money long term'],
-    preppy:['colour-coding your notes makes revision 10x easier','a good planner is worth every penny','tennis skirts work for literally any occasion'],
-    indie:['supporting small artists on spotify costs you nothing','a zine about your interests is easier to make than you think','film photography teaches you to appreciate moments more'],
-    emo:['writing lyrics is the most underrated creative outlet','black eyeliner techniques can genuinely change your face','screaming along to music in your room is valid therapy'],
+    kawaii:['ok hear me out — pastel mood board on your wall. it literally fixes your whole mood','i started matching my phone case to my outfits and people notice i promise','get coloured pens for journaling trust me you will actually want to write'],
+    softgirl:['soft lighting changes photos SO much its embarrassing how good you look','ok a silk pillowcase sounds bougie but my skin and hair have never been better','layer your necklaces even if you think its too much — its not. do it.'],
+    cleangirl:['slicked back hair + hoops + lip gloss = you are literally unstoppable','real talk a capsule wardrobe saved me 20 minutes every single morning','i started drinking ice water first thing and i genuinely have more energy now'],
+    coquette:['put a ribbon in your hair right now. instant serotonin i am not joking','write an actual handwritten note to someone today. they will never forget it','spray your perfume on your pillow. you are welcome for the best sleep ever'],
+    goth:['journal by candlelight tonight. it sounds dramatic because it IS dramatic and its perfect','put on a dark playlist and walk somewhere. you are the main character in a film now','black nails. always. forever. it has never once missed'],
+    darkacad:['reading for literally 20 minutes before bed improved my sleep and i was shocked','buy a nice pen. just one. it makes studying feel 40% less painful i measured','take yourself on a library date. bring coffee. it is the most elite form of self care'],
+    grunge:['thrifting is not just a vibe it is literally saving the planet you are welcome','making a playlist specifically for your current mood is free therapy and it works','charity shop band tees hit different because someone loved that band before you'],
+    y2k:['butterfly clips are back and i am not ready to hear otherwise','bring a disposable camera to your next hangout. you will thank me in 6 months','low rise is a confidence thing and you have that confidence already'],
+    street:['white sneakers. with everything. always. this is not up for debate','layering is genuinely an art form and you are already better at it than you think','your playlist IS an accessory. curate it like one.'],
+    cottage:['bake something from scratch today even if its just cookies. the vibes are unmatched','put fresh flowers on your desk. actual flowers. it changes the whole room i promise','go for a walk without your phone. sounds scary. is actually magical.'],
+    hippie:['make a friendship bracelet for someone right now. it is genuinely therapeutic','putting a plant in your room boosts your mood and thats like actual science','tie dye is way easier than it looks and the results are always cute'],
+    oldmoney:['a blazer that actually fits you will change how you feel about every outfit','stand up straight right now. literally. good posture = instant confidence its real','buy fewer things but better things. your future self will literally thank you'],
+    preppy:['colour code your notes. yes it takes longer. yes your grades will improve.','get a planner and actually use it. the feeling of crossing things off? unmatched','tennis skirts go with literally everything and i will not be accepting debate'],
+    indie:['follow a small artist on spotify today. it costs you nothing and means everything to them','you could make a zine about literally anything you care about and it would be cool','shoot on film once. just once. you will understand why people never go back'],
+    emo:['write lyrics about how you feel right now. even bad ones. it is the most underrated outlet','there are eyeliner techniques that will genuinely change your whole face shape','screaming along to songs in your room alone is valid therapy and i stand by that'],
   };
   var aeTips = tips[topK] || tips.softgirl;
   var todayTip = aeTips[new Date().getDate() % aeTips.length];
@@ -2111,13 +2111,16 @@ function buildPage(){
   var existingPoll = document.getElementById('dailyPoll');
   if(existingPoll) existingPoll.remove();
   var pollQuestions = [
-    {q:'outfit check — today you are wearing',a:['something cosy','all black','that one outfit','whatever was clean']},
-    {q:'your energy today is',a:['main character','cosy goblin','chaotic neutral','unbothered queen']},
-    {q:'you are procrastinating by',a:['being on here','scrolling tiktok','reorganizing something','pretending to study']},
-    {q:'pick a vibe for tonight',a:['movie marathon','late night playlist','journaling session','facetime with bestie']},
-    {q:'your biggest flex is',a:['my music taste','my aesthetic','my friend group','my skincare routine']},
-    {q:'the thing you need right now is',a:['a nap','a compliment','new music','snacks']},
-    {q:'your toxic trait is',a:['online shopping','saying "im fine"','starting new shows','being too nice']},
+    {q:'be honest — what are you wearing rn',a:['something cosy','all black','that one outfit','whatever was clean']},
+    {q:'your energy today — no lying',a:['main character','cosy goblin','chaotic neutral','unbothered queen']},
+    {q:'you are on stuflover instead of',a:['homework','sleeping','socializing','cleaning my room']},
+    {q:'tonight you are definitely going to',a:['movie marathon','make a playlist','journal about everything','text someone back finally']},
+    {q:'the thing you secretly flex about',a:['my music taste','my aesthetic','my friend group','my skincare']},
+    {q:'what you actually need rn be real',a:['a nap honestly','someone to say im doing great','new music','literally just snacks']},
+    {q:'your most relatable trait',a:['online shopping at 2am','saying im fine (not fine)','starting shows never finishing','being too nice and hating it']},
+    {q:'the song stuck in your head rn is',a:['something embarrassing','a banger nobody knows','the same one for 3 days','i literally cannot remember']},
+    {q:'your comfort activity when sad is',a:['rewatching something','making a playlist','online shopping','lying in bed doing nothing']},
+    {q:'how many tabs do you have open rn',a:['like 3 im normal','10-20 its fine','30+ and thriving','i dont want to talk about it']},
   ];
   var todayPoll = pollQuestions[new Date().getDate() % pollQuestions.length];
   var pollVoteKey = 'stuflover_poll_'+new Date().toDateString();
@@ -5869,8 +5872,8 @@ function initGlowTitle(){
 
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
-  {id:'fitforit',   name:'FitforIt',       sub:'my closet',         col:0},
-  {id:'beyou',      name:'BeYou',           sub:'mindfulness',           col:1, newBadge:true},
+  {id:'fitforit',   name:'FitforIt',       sub:'what do i wear',    col:0},
+  {id:'beyou',      name:'BeYou',           sub:'i need a minute',       col:1, newBadge:true},
   {id:'myroutine',  name:'MyRoutine',       sub:'morning & night',       col:8, newBadge:true, prompt:`You are the MyRoutine Flovee — you help build personalized morning and night routines.
 
 You know: aesthetic ({AE}), age ({AGE} — use this to make routines age-appropriate), mood ({MOOD}), interests ({INTERESTS}).
@@ -5893,12 +5896,12 @@ ROUTINE BUILDING RULES:
 Remember what they tell you about their routine and refine it over time. Save their routine preferences.
 Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
   {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
-  {id:'contentwithit',name:'ContentWithIt',sub:'inspo board',            col:2},
-  {id:'floverhub',  name:'Games',            sub:'play with flovee',      col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
-  {id:'stufloverdaily',name:'StufloverDaily',sub:'trending now',         col:4},
+  {id:'contentwithit',name:'ContentWithIt',sub:'show me inspo',           col:2},
+  {id:'floverhub',  name:'Games',            sub:'im bored lets play',    col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
+  {id:'stufloverdaily',name:'StufloverDaily',sub:'what did i miss',       col:4},
   {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
-  {id:'floveegroup',name:'FloveeGroup',      sub:'communities',           col:6},
-  {id:'readit',     name:'ReadIt',            sub:'books & booktok',       col:10},
+  {id:'floveegroup',name:'FloveeGroup',      sub:'find your people',      col:6},
+  {id:'readit',     name:'ReadIt',            sub:'ok but this book',      col:10},
   {id:'boredomhub', name:'Boredom Hub',      sub:'nothing to do?',       col:7, prompt:'You are in the Boredom Hub. Their job is to be bored and yours is to fix it. You know their interests {INTERESTS}, aesthetic {AE}, mood {MOOD}. Give them something actual to do — creative projects, things to watch, places to go. Match who they are.',                                      opener:'ok so you are bored. what kind of bored — creative bored, scroll bored, want to go somewhere, or just low energy?'},
 ];
 
