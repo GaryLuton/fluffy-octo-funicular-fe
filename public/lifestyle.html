@@ -975,6 +975,9 @@
     <!-- VERTICAL FEED (TikTok FYP style — no menus, just scroll) -->
     <div id="verticalFeed" style="position:relative;z-index:2;max-width:540px;margin:0 auto;padding:0 20px 60px;">
 
+      <!-- Flovee Post (disappearing) -->
+      <div class="feed-section feed-reveal" id="floveePostWrap" style="display:none;"></div>
+
       <!-- Quick Vibes -->
       <div class="feed-section feed-reveal">
         <h2 class="feed-heading">Quick Vibes</h2>
@@ -2473,6 +2476,31 @@ function buildPage(){
   addScrapbookDecos();
   startGlobalMsgPoll();
   buildInstantFeed();
+
+  // What's New popup
+  var updateVersion = '2.5';
+  var lastSeen = localStorage.getItem('stuflover_update_seen');
+  if(lastSeen !== updateVersion){
+    var updatePopup = document.createElement('div');
+    updatePopup.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);animation:fadeSlide 0.3s ease;';
+    updatePopup.innerHTML =
+      '<div style="background:'+pal.bg+';color:'+pal.tx+';border-radius:20px;padding:28px 24px;max-width:360px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">'+
+        '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;margin-bottom:8px;">What\'s New</div>'+
+        '<h2 style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1.4rem;margin-bottom:14px;">Stuflover v'+updateVersion+'</h2>'+
+        '<div style="font-size:0.82rem;line-height:1.7;opacity:0.6;">'+
+          '<p style="margin-bottom:10px;"><strong>Flovee Posts</strong> — your flovee now posts short disappearing moments throughout the day. check back to catch them before they vanish.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Instant Feed</strong> — this or that, mini challenges, and rate-yourself cards load instantly. no more waiting.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Instagram Story Bar</strong> — swipe through sections at the top of the page.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Scroll Progress</strong> — the thin bar at the top shows how far you have scrolled.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Bug Fixes</strong> — friends deep link, camera permissions, account name, journal backup warning.</p>'+
+        '</div>'+
+        '<button onclick="localStorage.setItem(\'stuflover_update_seen\',\''+updateVersion+'\');this.closest(\'div\').parentNode.remove();" style="width:100%;padding:14px;margin-top:14px;border:none;border-radius:14px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">Got It</button>'+
+      '</div>';
+    document.body.appendChild(updatePopup);
+  }
+
+  // Load flovee post
+  loadFloveePost();
 
   // Auto-open section from deep link
   var autoOpen = localStorage.getItem('stuflover_open_section');
@@ -5967,6 +5995,64 @@ function buildInstantFeed(){
   more.onclick = function(){ buildInstantFeed(); };
   feed.appendChild(more);
 }
+
+// ─── FLOVEE POST ──────────────────────────────────────────
+var FLOVEE_NAMES = {lumi:'Lumi',delara:'Delara',vesper:'Vesper',zola:'Zola',miro:'Miro',seraph:'Seraph',remi:'Remi',nox:'Nox'};
+
+async function loadFloveePost(){
+  var wrap = document.getElementById('floveePostWrap');
+  if(!wrap || !searchPal) return;
+  var pal = searchPal;
+  var base = window.STUFLOVER_API_URL || '';
+  var token = localStorage.getItem('stuflover_token');
+  if(!token) return;
+
+  try{
+    var res = await (window._origFetch||fetch).call(window, base+'/api/flovee/post',{
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+    });
+    var data = await res.json();
+
+    if(data.status === 'active' && data.post){
+      var f = FLOVEE_NAMES[data.post.flovee_id] || 'Flovee';
+      var exp = new Date(data.post.expires_at);
+      var hoursLeft = Math.max(0, Math.round((exp - Date.now()) / 3600000));
+      var timeLabel = hoursLeft > 6 ? 'here for a while' : hoursLeft > 1 ? 'here for a few more hours' : 'fading soon';
+
+      wrap.style.display = 'block';
+      wrap.innerHTML =
+        '<div style="padding:20px 22px;border-radius:18px;background:'+pal.ac+'0a;border:1px solid '+pal.tx+'08;">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
+            '<div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.35;color:'+pal.tx+';">'+f+' just posted</div>'+
+            '<div style="font-size:0.62rem;opacity:0.2;color:'+pal.tx+';">'+timeLabel+'</div>'+
+          '</div>'+
+          '<div style="font-size:0.92rem;line-height:1.65;color:'+pal.tx+';opacity:0.7;font-style:italic;">'+escHtml(data.post.content)+'</div>'+
+        '</div>';
+
+    } else if(data.status === 'missed'){
+      var mf = FLOVEE_NAMES[data.missedFlovee] || 'Flovee';
+      wrap.style.display = 'block';
+      wrap.innerHTML =
+        '<div style="padding:14px 18px;border-radius:14px;background:'+pal.tx+'04;text-align:center;">'+
+          '<div style="font-size:0.78rem;opacity:0.35;color:'+pal.tx+';">you missed a post from '+mf+'</div>'+
+        '</div>';
+
+    } else if(data.status === 'none'){
+      // Generate a new post
+      try{
+        await (window._origFetch||fetch).call(window, base+'/api/flovee/generate',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+        });
+        // Reload after generating
+        setTimeout(loadFloveePost, 1000);
+      }catch(e){}
+    }
+  }catch(e){}
+}
+
+// Poll for flovee posts every 60 seconds
+setInterval(loadFloveePost, 60000);
 
 // ─── POLL VOTE ────────────────────────────────────────────
 function votePoll(idx){

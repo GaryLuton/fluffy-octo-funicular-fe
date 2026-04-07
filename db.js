@@ -224,6 +224,19 @@ async function initDb() {
     );
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS flovee_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      flovee_id TEXT NOT NULL,
+      user_id INTEGER NOT NULL,
+      content TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      expires_at TEXT NOT NULL,
+      seen INTEGER DEFAULT 0,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+
   save();
   return db;
 }
@@ -623,6 +636,29 @@ const stmts = {
       SELECT 'page_visit' as type, page, visited_at as timestamp FROM page_visits WHERE user_id = ?
       ORDER BY timestamp DESC LIMIT ?
     `, [userId, userId, limit || 50]),
+  },
+  // Flovee Posts
+  createFloveePost: {
+    run: (floveeId, userId, content, expiresAt) => run(
+      'INSERT INTO flovee_posts (flovee_id, user_id, content, expires_at) VALUES (?,?,?,?)',
+      [floveeId, userId, content, expiresAt]
+    ),
+  },
+  getActiveFloveePost: {
+    get: (userId) => get(
+      "SELECT * FROM flovee_posts WHERE user_id=? AND expires_at > datetime('now') ORDER BY created_at DESC LIMIT 1", [userId]
+    ),
+  },
+  getLastExpiredUnseen: {
+    get: (userId) => get(
+      "SELECT * FROM flovee_posts WHERE user_id=? AND expires_at <= datetime('now') AND seen=0 ORDER BY created_at DESC LIMIT 1", [userId]
+    ),
+  },
+  markPostSeen: {
+    run: (postId) => run('UPDATE flovee_posts SET seen=1 WHERE id=?', [postId]),
+  },
+  cleanExpiredPosts: {
+    run: () => run("DELETE FROM flovee_posts WHERE expires_at < datetime('now','-24 hours')"),
   },
 };
 

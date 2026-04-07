@@ -730,6 +730,88 @@ app.get('/api/admin/overview', adminAuth, (req, res) => {
   }
 });
 
+// ─── Flovee Posts ───
+
+const FLOVEES = {
+  lumi: {name:'Lumi',personality:'clean girl, wellness obsessed, specific and grounded',tone:'calm and bright'},
+  delara: {name:'Delara',personality:'dark academia, literary, observational',tone:'quiet and a little melancholy'},
+  vesper: {name:'Vesper',personality:'coquette, hyper-feminine, dreamy',tone:'soft and slightly wistful'},
+  zola: {name:'Zola',personality:'chaotic, funny, self-aware',tone:'unhinged but warm'},
+  miro: {name:'Miro',personality:'weird girl, indie, niche interests',tone:'enthusiastic and odd'},
+  seraph: {name:'Seraph',personality:'spiritual, intuitive, gentle',tone:'slow and wondering'},
+  remi: {name:'Remi',personality:'main character energy, romanticises everything',tone:'cinematic and warm'},
+  nox: {name:'Nox',personality:'deadpan, dry, post-ironic',tone:'flat but secretly kind'},
+};
+
+// Get active flovee post for user
+app.get('/api/flovee/post', auth, (req, res) => {
+  try {
+    const active = stmts.getActiveFloveePost.get(req.user.id);
+    if (active) {
+      stmts.markPostSeen.run(active.id);
+      return res.json({ post: active, status: 'active' });
+    }
+    const missed = stmts.getLastExpiredUnseen.get(req.user.id);
+    if (missed) {
+      stmts.markPostSeen.run(missed.id);
+      return res.json({ post: null, status: 'missed', missedFlovee: missed.flovee_id });
+    }
+    res.json({ post: null, status: 'none' });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// Generate a flovee post
+app.post('/api/flovee/generate', auth, async (req, res) => {
+  try {
+    // Pick a flovee based on user's aesthetic
+    const userData = stmts.getData.get(req.user.id, 'profile');
+    let floveeId = 'remi';
+    if (userData) {
+      try {
+        const profile = JSON.parse(userData.value);
+        const ae = profile.aesthetics || {};
+        const topAe = Object.entries(ae).sort((a,b) => b[1]-a[1])[0]?.[0] || 'softgirl';
+        const aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
+        floveeId = aeMap[topAe] || 'remi';
+      } catch(e) {}
+    }
+    const f = FLOVEES[floveeId] || FLOVEES.remi;
+    const now = new Date();
+    const hour = now.getHours();
+    const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const seasons = ['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn','autumn','winter'];
+    const dayOfWeek = days[now.getDay()];
+    const season = seasons[now.getMonth()];
+
+    if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'x-api-key': ANTHROPIC_API_KEY,'anthropic-version': '2023-06-01','Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 150,
+        system: `You are ${f.name}, a character in a teen lifestyle app. Your personality: ${f.personality}.\n\nGenerate a single short post — something you are doing, thinking, feeling, or have just discovered. It should feel like catching a friend at a random moment in her day.\n\nRules:\n- Maximum 3 sentences\n- Never generic, always specific — a real song, a real feeling, a real detail\n- Warm but not saccharine\n- Written in first person, present tense, like a story mid-happening\n- No questions, no calls to action — this is about you not the user\n- Should feel slightly incomplete, like the reader walked in halfway through something\n- Tone is ${f.tone}\n- Output the post text only, nothing else`,
+        messages: [{role:'user',content:`Generate a post for this moment: ${timeOfDay} on a ${dayOfWeek} in ${season}.`}]
+      })
+    });
+    const data = await response.json();
+    const content = data.content?.[0]?.text || '';
+    if (!content) return res.status(500).json({ error: 'Failed to generate' });
+
+    // Random expiry between 6-18 hours
+    const expiryHours = 6 + Math.random() * 12;
+    const expiresAt = new Date(Date.now() + expiryHours * 3600000).toISOString();
+
+    stmts.createFloveePost.run(floveeId, req.user.id, content, expiresAt);
+    res.json({ ok: true, floveeId, content, expiresAt });
+  } catch (err) {
+    console.error('Flovee post error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ─── Anthropic API Proxy ───
 
 app.post('/api/chat', auth, async (req, res) => {
