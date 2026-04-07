@@ -2617,39 +2617,37 @@ function buildFloveeHubOpener(){
 
 // ─── FLOVEEHUB GAMES ─────────────────────────────────────
 var HUB_GAMES = [
-  // ── VISUAL GAMES (not chatbots) ──
-  {id:'dti', name:'Dress To Impress', desc:'Get a theme, build an outfit, walk the runway', tag:'fashion', iconFn:'bowSVG',
+  // Fashion Games
+  {id:'dti', name:'Dress To Impress', desc:'Build an outfit for a theme', tag:'fashion', category:'Fashion', iconFn:'bowSVG',
     isDtiGame:true, prompt:'', opener:''},
+  {id:'ratethis', name:'Rate the Look', desc:'Rate outfits — real or fake?', tag:'fashion', category:'Fashion', iconFn:'bowSVG',
+    isCardGame:true, cardType:'rate',
+    sysPrompt:'Describe a DETAILED outfit (top, bottom, shoes, accessories, hair, nails — be specific with colours, brands, textures). It is secretly either: (1) a real celebrity outfit, (2) a runway look, or (3) completely made up. Return ONLY JSON: {outfit:"the full outfit description", category:"celebrity|runway|madeup", reveal:"who wore it / what show / or that you made it up", isReal:true/false}. Keep it appropriate. No markdown.',
+    userPrompt:'Describe a detailed outfit for me to rate. Make it interesting.'},
+  {id:'stylechallenge', name:'Style Challenge', desc:'Wild constraints — build an outfit', tag:'fashion', category:'Fashion', iconFn:'starSVG',
+    isCardGame:true, cardType:'challenge',
+    sysPrompt:'Generate a fun, creative fashion style challenge constraint. Return ONLY JSON: {challenge:"the constraint rule", example:"a brief example of what could work", difficulty:"easy|medium|hard"}. Constraints like: "only one colour allowed", "max 3 items total", "everything must have a pattern", "dress for two events at once", etc. Keep it fun and appropriate. No markdown.',
+    userPrompt:'Give me a creative fashion style challenge constraint.'},
 
-  {id:'thisorthat', name:'This or That', desc:'Two cards appear — tap your pick before time runs out', tag:'quick', iconFn:'starSVG',
+  // Quick Games
+  {id:'thisorthat', name:'This or That', desc:'Two cards — tap your pick', tag:'quick', category:'Quick', iconFn:'starSVG',
     isCardGame:true, cardType:'choice',
     sysPrompt:'Generate a This or That question. Return ONLY JSON: {question:"the question", optionA:"first choice", optionB:"second choice", funFact:"a fun fact about the more popular choice"}. Make it fun and relevant to teens. No markdown.',
     userPrompt:'Give me a This or That question. Topics: fashion, food, social media, music, lifestyle, school, celebrities.'},
-
-  {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices on visual cards — see what others picked', tag:'fun', iconFn:'butterflySVG',
+  {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices', tag:'fun', category:'Quick', iconFn:'butterflySVG',
     isCardGame:true, cardType:'choice',
     sysPrompt:'Generate a Would You Rather question with two genuinely difficult options. Return ONLY JSON: {question:"would you rather...", optionA:"first option", optionB:"second option", percentA:number, funFact:"why this is a hard choice"}. percentA is what percent of people would pick A (make it close to 50/50). Keep it fun, clean, appropriate for teens. No markdown.',
     userPrompt:'Give me a Would You Rather question that is genuinely hard to choose between.'},
 
-  {id:'aestheticquiz', name:'Aesthetic Quiz', desc:'Swipe through 5 visual cards to reveal your secret aesthetic', tag:'quiz', iconFn:'flowerSVG',
+  // Quizzes
+  {id:'aestheticquiz', name:'Aesthetic Quiz', desc:'Discover your secret aesthetic', tag:'quiz', category:'Quizzes', iconFn:'flowerSVG',
     isCardGame:true, cardType:'quiz',
     sysPrompt:'Generate ONE aesthetic quiz question with 4 options. Return ONLY JSON: {question:"scenario or question", options:["A text","B text","C text","D text"], aesthetics:["aesthetic for A","aesthetic for B","aesthetic for C","aesthetic for D"]}. Make it a fun creative scenario, not boring. Each option maps to a surprising aesthetic. Keep it appropriate. No markdown.',
     userPrompt:'Give me a fun scenario-based aesthetic quiz question with 4 creative options.'},
-
-  {id:'trivia', name:'Trivia Battle', desc:'Answer pop culture questions on cards — beat your high score', tag:'quiz', iconFn:'moonSVG',
+  {id:'trivia', name:'Trivia Battle', desc:'Pop culture questions', tag:'quiz', category:'Quizzes', iconFn:'moonSVG',
     isCardGame:true, cardType:'trivia',
     sysPrompt:'Generate a pop culture trivia question about music, fashion, social media, TV shows, or celebrities that teens would know. Return ONLY JSON: {question:"the question", options:["A","B","C","D"], correct:0, explanation:"why that is the answer"}. correct is the 0-based index of the right answer. Keep it fun and appropriate. No markdown.',
     userPrompt:'Give me a pop culture trivia question for teens.'},
-
-  {id:'ratethis', name:'Rate the Look', desc:'AI describes an outfit — you rate it — was it real or fake?', tag:'fashion', iconFn:'bowSVG',
-    isCardGame:true, cardType:'rate',
-    sysPrompt:'Describe a DETAILED outfit (top, bottom, shoes, accessories, hair, nails — be specific with colours, brands, textures). It is secretly either: (1) a real celebrity outfit, (2) a runway look, or (3) completely made up. Return ONLY JSON: {outfit:"the full outfit description", category:"celebrity|runway|madeup", reveal:"who wore it / what show / or that you made it up", isReal:true/false}. Keep it appropriate. No markdown.',
-    userPrompt:'Describe a detailed outfit for me to rate. Make it interesting.'},
-
-  {id:'stylechallenge', name:'Style Challenge', desc:'Get a wild fashion constraint — build an outfit — get scored', tag:'fashion', iconFn:'starSVG',
-    isCardGame:true, cardType:'challenge',
-    sysPrompt:'Generate a fun, creative fashion style challenge constraint. Return ONLY JSON: {challenge:"the constraint rule", example:"a brief example of what could work", difficulty:"easy|medium|hard"}. Constraints like: "only one colour allowed", "max 3 items total", "everything must have a pattern", "dress for two events at once", etc. Keep it fun and appropriate. No markdown.',
-    userPrompt:'Give me a creative fashion style challenge constraint.'},
 ];
 
 var currentHubGame = null;
@@ -2707,41 +2705,49 @@ function openHub(){
     bbg.appendChild(ico);
   }
 
-  // Build game grid
+  // Build game grid grouped by category
   var grid = document.getElementById('hubGrid');
   grid.innerHTML = '';
   var iconMap = {starSVG:starSVG,flowerSVG:flowerSVG,butterflySVG:butterflySVG,batSVG:batSVG,moonSVG:moonSVG,bookSVG:bookSVG,bowSVG:bowSVG,vinylSVG:vinylSVG,noteSVG:noteSVG};
 
-  HUB_GAMES.forEach(function(game, gi){
-    var tile = document.createElement('div');
-    tile.className = 'hub-tile';
-    tile.onclick = function(){ startHubGame(game); };
+  // Group by category
+  var categories = [];
+  var catMap = {};
+  HUB_GAMES.forEach(function(game){
+    var cat = game.category || 'Other';
+    if(!catMap[cat]){ catMap[cat] = []; categories.push(cat); }
+    catMap[cat].push(game);
+  });
 
-    // Thumbnail with gradient + icon
-    var hue = (gi * 40) % 360;
-    var thumbBg = 'linear-gradient(135deg,'+pal.ac+'18,'+pal.ac+'0a)';
+  var gi = 0;
+  categories.forEach(function(cat){
+    // Category label
+    var label = document.createElement('div');
+    label.style.cssText = 'grid-column:1/-1;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;padding:16px 0 4px;color:'+pal.tx+';';
+    if(gi > 0) label.style.borderTop = '1px solid '+pal.tx+'08';
+    label.textContent = cat;
+    grid.appendChild(label);
 
-    var iconFn = iconMap[game.iconFn] || aeIcons[gi%aeIcons.length];
-    var iconHtml = makeIconSvg(iconFn, pal.ac, 44);
-    // Scatter 2 deco icons in thumb
-    var decos = '';
-    for(var d=0;d<2;d++){
-      decos += '<span class="hub-thumb-deco" style="left:'+(15+Math.random()*65)+'%;top:'+(10+Math.random()*60)+'%;position:absolute;transform:rotate('+(Math.random()*30-15).toFixed(0)+'deg);">'+
-        makeIconSvg(aeIcons[(gi+d)%aeIcons.length], pal.ac, 20+Math.round(Math.random()*16))+'</span>';
-    }
+    catMap[cat].forEach(function(game){
+      var tile = document.createElement('div');
+      tile.className = 'hub-tile';
+      tile.onclick = function(){ startHubGame(game); };
+      var thumbBg = 'linear-gradient(135deg,'+pal.ac+'18,'+pal.ac+'0a)';
+      var iconFn = iconMap[game.iconFn] || aeIcons[gi%aeIcons.length];
+      var iconHtml = makeIconSvg(iconFn, pal.ac, 44);
 
-    tile.innerHTML =
-      '<div class="hub-thumb" style="background:'+thumbBg+'">'+
-        decos+
-        '<div class="hub-thumb-icon">'+iconHtml+'</div>'+
-      '</div>'+
-      '<div class="hub-info" style="background:'+pal.bg+';color:'+pal.tx+'">'+
-        '<div class="hub-game-name">'+game.name+'</div>'+
-        '<div class="hub-game-desc">'+game.desc+'</div>'+
-        '<div class="hub-game-tag" style="background:'+pal.ac+'18;color:'+pal.tx+'">'+game.tag+'</div>'+
-      '</div>';
+      tile.innerHTML =
+        '<div class="hub-thumb" style="background:'+thumbBg+'">'+
+          '<div class="hub-thumb-icon">'+iconHtml+'</div>'+
+        '</div>'+
+        '<div class="hub-info" style="background:'+pal.bg+';color:'+pal.tx+'">'+
+          '<div class="hub-game-name">'+game.name+'</div>'+
+          '<div class="hub-game-desc">'+game.desc+'</div>'+
+        '</div>';
 
-    grid.appendChild(tile);
+      grid.appendChild(tile);
+      gi++;
+    });
   });
 }
 
