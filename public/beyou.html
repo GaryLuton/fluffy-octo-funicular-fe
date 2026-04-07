@@ -6,7 +6,9 @@
   <title>BeYou — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
+    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:color 1.2s;display:flex;flex-direction:column;position:relative;}
     .view.scrollable{overflow-y:auto;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
@@ -157,9 +159,20 @@
       .mode-pill{padding:8px 16px;font-size:0.65rem;letter-spacing:2px;}
       .complete-title{font-size:1.3rem;}
     }
-    @media(max-width:420px){
+    @media(max-width:480px){
       .petal-wrap{width:150px;height:150px;}
       .petal{width:48px;height:48px;}
+      .sub-nav{padding:12px 16px;gap:10px;top:48px;}
+      .reflect-container{padding:0 20px;}
+      .reflect-prompt{font-size:clamp(1.2rem,3vw,1.6rem);}
+      .journal-container{padding:80px 16px 100px;}
+      .journal-textarea{font-size:0.88rem;min-height:80px;}
+      .regulate-container{padding:80px 16px 100px;}
+      .ground-step{padding:14px 16px;min-height:44px;}
+      .mode-pill{padding:7px 12px;font-size:0.6rem;letter-spacing:1.5px;min-height:44px;}
+      .mode-bar{bottom:12px;padding:4px;}
+      .nav-btn,.sub-nav-back,.breathe-start,.reflect-next,.journal-save,.dur-btn,.mood-chip{min-height:44px;display:inline-flex;align-items:center;}
+      body{font-size:15px;}
     }
   </style>
 </head>

@@ -11,7 +11,9 @@
       --terracotta:#c87860; --terracotta-dark:#a86050;
       --brown:#2a1a14; --white:#ffffff;
     }
+    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    input,button,select,textarea{font-size:16px;}
     body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;display:flex;align-items:center;justify-content:center;
       background-image:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(42,26,20,0.018) 18px,rgba(42,26,20,0.018) 19px),
         repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(42,26,20,0.018) 18px,rgba(42,26,20,0.018) 19px),
@@ -54,9 +56,14 @@
     .divider{text-align:center;margin:24px 0 16px;font-size:0.78rem;color:rgba(42,26,20,0.3);letter-spacing:1px;}
 
     @media(max-width:480px){
-      .auth-card{padding:28px 20px;border-radius:18px;}
+      .auth-card{padding:28px 16px;border-radius:18px;}
       .logo-top h1{font-size:2.4rem;}
       .logo-top{margin-bottom:28px;}
+      .auth-container{width:calc(100% - 32px);}
+      .submit-btn{min-height:48px;padding:14px;}
+      .tab{min-height:44px;padding:13px 8px;}
+      .form-group input{padding:14px 16px;min-height:44px;}
+      body{font-size:15px;}
     }
   </style>
 </head>
