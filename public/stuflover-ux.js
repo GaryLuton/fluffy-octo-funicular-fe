@@ -35,18 +35,39 @@
     }
   }
 
-  // 13. Social proof popup
-  var proofMsgs = [
-    '5 people just took the quiz',
-    'someone just joined from your school',
-    'new drop alert coming soon',
-    '12 people are online right now',
-    'a new group was just created',
-    'trending: this or that is going viral',
-  ];
-  function showSocialProof(){
+  // 13. Real activity notifications (only true stuff)
+  async function showRealActivity(){
     var existing = document.getElementById('socialProof');
     if(existing) existing.remove();
+    var msg = null;
+    try{
+      var token = localStorage.getItem('stuflover_token');
+      if(!token) return;
+      var base = window.STUFLOVER_API_URL || '';
+      // Check for pending friend requests
+      var res = await (window._origFetch||fetch).call(window, base+'/api/friends/requests',{
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+      });
+      if(res.ok){
+        var data = await res.json();
+        if(data.requests && data.requests.length > 0){
+          msg = data.requests[0].username + ' wants to be your friend';
+        }
+      }
+      // If no friend requests, check for new messages
+      if(!msg){
+        var fres = await (window._origFetch||fetch).call(window, base+'/api/friends',{
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+        });
+        if(fres.ok){
+          var fdata = await fres.json();
+          if(fdata.friends && fdata.friends.length > 0){
+            msg = 'you have ' + fdata.friends.length + ' friend' + (fdata.friends.length>1?'s':'') + ' on stuflover';
+          }
+        }
+      }
+    }catch(e){}
+    if(!msg) return; // Don't show anything fake
     var popup = document.createElement('div');
     popup.id = 'socialProof';
     popup.style.cssText = 'position:fixed;bottom:20px;left:20px;padding:12px 18px;border-radius:12px;background:rgba(42,26,20,0.85);color:white;font-size:0.78rem;z-index:500;backdrop-filter:blur(10px);animation:slideInLeft 0.4s ease;max-width:260px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
@@ -55,9 +76,9 @@
     setTimeout(function(){ popup.style.opacity='0'; popup.style.transition='opacity 0.3s'; }, 4000);
     setTimeout(function(){ popup.remove(); }, 4500);
   }
-  // Show after 8 seconds, then every 45 seconds
-  setTimeout(showSocialProof, 8000);
-  setInterval(showSocialProof, 45000);
+  // Show real activity after 8 seconds, then every 60 seconds
+  setTimeout(showRealActivity, 8000);
+  setInterval(showRealActivity, 60000);
 
   // 15. Easter egg — tap logo 3 times for confetti
   var logoTaps = 0;
