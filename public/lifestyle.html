@@ -2015,10 +2015,46 @@ function buildPage(){
   // BG SVG
   buildBgSvg(pal, topK);
 
-  // Header
+  // Personalized header
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var username = (user && user.username) || '';
+  var hour = new Date().getHours();
+  var timeGreet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
+
+  // Personalized eyebrow based on mood + time
+  var eyebrowTexts = {
+    good: timeGreet + (username ? ', '+username : '') + ' — you are glowing today',
+    creative: timeGreet + (username ? ', '+username : '') + ' — let that creativity flow',
+    low: timeGreet + (username ? ', '+username : '') + ' — take it easy, you deserve it',
+    hyped: timeGreet + (username ? ', '+username : '') + ' — that energy is unmatched',
+    cosy: timeGreet + (username ? ', '+username : '') + ' — cosy vibes activated',
+    tired: timeGreet + (username ? ', '+username : '') + ' — rest is productive too',
+  };
+  var personalEyebrow = eyebrowTexts[P.moodToday] || (timeGreet + (username ? ', '+username : '') + ' — welcome to your world');
+  document.getElementById('aeEyebrow').textContent = personalEyebrow;
+
   document.getElementById('aeTitle').textContent = aeName.toUpperCase();
   document.getElementById('aeTitle').style.color = pal.tx;
   document.getElementById('aeEyebrow').style.color = pal.tx;
+
+  // Add personal stats below the title
+  var headerEl = document.querySelector('.page-header');
+  var existingStats = document.getElementById('personalStats');
+  if(existingStats) existingStats.remove();
+  var stats = document.createElement('div');
+  stats.id = 'personalStats';
+  stats.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;opacity:0.4;font-size:0.72rem;';
+  var statItems = [];
+  if(P.faveColour) statItems.push('<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:'+P.faveColour.hex+';display:inline-block;"></span>'+P.faveColour.name+'</span>');
+  if(P.music.length > 0){
+    var topArtist = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    statItems.push('listening to '+topArtist);
+  }
+  if(P.moodToday) statItems.push('feeling '+P.moodToday);
+  if(P.energyWord) statItems.push(P.energyWord+' energy');
+  stats.innerHTML = statItems.map(function(s){return '<span style="color:'+pal.tx+'">'+s+'</span>';}).join('<span style="opacity:0.3;color:'+pal.tx+'">·</span>');
+  var searchWrap = document.getElementById('searchWrap');
+  if(searchWrap && headerEl) headerEl.insertBefore(stats, searchWrap);
 
   // Style search
   initSearch(pal);
@@ -2044,11 +2080,10 @@ function buildPage(){
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
 
-  // Show welcome message
-  var user = window.stufloverUser ? window.stufloverUser() : null;
-  if(user && user.username){
+  // Nav welcome
+  if(username){
     var wel = document.getElementById('navWelcome');
-    if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
+    if(wel){ wel.textContent=username; wel.style.display='inline'; }
   }
 
   // Style the For You section
