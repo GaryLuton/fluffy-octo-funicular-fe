@@ -9,7 +9,9 @@
   <script src="stuflover-backend.js"></script>
   <style>
     :root{--pink:#faf0f0;--bg:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--ac:#c87860;--terra-dark:#a86050;--ac2:#a86050;--brown:#2a1a14;--tx:#2a1a14;--white:#ffffff;--peach:#e8d5c8;}
+    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;
       background-image:radial-gradient(circle at 20px 20px, rgba(30,12,6,0.03) 1px, transparent 1px),
                         radial-gradient(circle at 60px 60px, rgba(30,12,6,0.02) 1px, transparent 1px);
@@ -142,6 +144,29 @@
       .nav-links.open{display:flex;}
       .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
       .nav-toggle{display:block;}
+      .tabs-bar{padding:14px 24px 0;gap:6px;}
+      .tab-btn{padding:10px 20px;font-size:0.85rem;letter-spacing:2px;}
+      .tab-content{padding:24px 20px 50px;}
+      .quiz-opts{grid-template-columns:1fr 1fr;}
+    }
+    @media(max-width:480px){
+      nav{padding:12px 16px;}
+      .tabs-bar{flex-wrap:wrap;padding:14px 16px 0;gap:6px;margin-top:60px;}
+      .tab-btn{padding:10px 16px;font-size:0.8rem;letter-spacing:1.5px;flex:1;min-width:0;min-height:44px;}
+      .tab-content{padding:20px 16px 40px;}
+      .fc-create{flex-direction:column;}
+      .fc-create input{min-width:100%;}
+      .quiz-topic-row{flex-direction:column;}
+      .quiz-topic-row input{width:100%;}
+      .quiz-opts{grid-template-columns:1fr;}
+      .quiz-opt{min-height:44px;padding:14px 16px;}
+      .chat-input-row{gap:8px;}
+      .chat-input-row input{padding:14px 18px;}
+      .send-btn,.action-btn{padding:14px 20px;min-height:44px;}
+      .fc-nav{min-height:44px;}
+      .nav-link,.nav-toggle{min-height:44px;display:flex;align-items:center;}
+      .flip-card{height:220px;}
+      body{font-size:15px;}
     }
   </style>
 </head>

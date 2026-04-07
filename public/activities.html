@@ -7,7 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root{--bg:#faf0f0;--pink:#faf0f0;--pink-mid:#f0ddd6;--tx:#2a1a14;--ac:#c87860;--ac2:#a86050;--white:#ffffff;--peach:#e8d5c8;}
+    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;transition:background 0.6s,color 0.6s;position:relative;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
@@ -104,22 +106,29 @@
     .nav-toggle svg{width:22px;height:22px;display:block;}
 
     /* RESPONSIVE */
-    @media(max-width:700px){
+    @media(max-width:768px){
       .hero h1{font-size:clamp(2.8rem,12vw,5rem);}
-      .category{padding:0 20px 40px;}
-      .cards-row{grid-template-columns:1fr;}
+      .category{padding:0 24px 40px;}
+      .cards-row{grid-template-columns:repeat(2,1fr);}
       nav{padding:14px 20px;}
       .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
       .nav-links.open{display:flex;}
       .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
       .nav-toggle{display:block;}
-      .hero{padding:100px 20px 40px;}
+      .hero{padding:100px 24px 40px;}
       .hero-sub{font-size:0.88rem;}
       .refresh-row{padding:16px 20px;}
     }
-    @media(max-width:420px){
+    @media(max-width:480px){
       .hero h1{font-size:clamp(2.2rem,11vw,3.5rem);}
-      .card{padding:20px 18px;}
+      .hero{padding:90px 16px 30px;}
+      .category{padding:0 16px 30px;}
+      .cards-row{grid-template-columns:1fr;}
+      .activity-card{padding:20px 18px;min-height:120px;}
+      .refresh-btn{padding:12px 28px;min-height:44px;}
+      .nav-link,.nav-toggle{min-height:44px;display:flex;align-items:center;}
+      .cat-label{font-size:1.2rem;letter-spacing:3px;}
+      body{font-size:15px;}
     }
   </style>
 </head>
