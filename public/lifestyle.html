@@ -5965,42 +5965,17 @@ function initGlowTitle(){
 
 // ─── SECTIONS DATA ────────────────────────────────────────
 const SECTIONS = [
-  {id:'fitforit',   name:'FitforIt',       sub:'what do i wear',    col:0},
-  {id:'beyou',      name:'BeYou',           sub:'i need a minute',       col:1, newBadge:true},
-  {id:'myroutine',  name:'MyRoutine',       sub:'morning & night',       col:8, newBadge:true, prompt:`You are the MyRoutine Flovee — you help build personalized morning and night routines.
-
-You know: aesthetic ({AE}), age ({AGE} — use this to make routines age-appropriate), mood ({MOOD}), interests ({INTERESTS}).
-
-HOW IT WORKS:
-1. First ask: "morning routine or night routine?"
-2. Then ask about their goals (better skin, more energy, less stress, be more productive, feel confident, etc.)
-3. Ask about their schedule — what time they wake up/go to bed, how much time they have
-4. Build a step-by-step routine personalized to them
-
-ROUTINE BUILDING RULES:
-- Make routines realistic for their age — a 14 year old has different needs than a 20 year old
-- Include: skincare steps, outfit prep, mindset/affirmation, breakfast/snack ideas, exercise/stretch suggestions, wind-down activities
-- Match their aesthetic — cottagecore morning routine looks different from streetwear morning routine
-- Be specific with timing: "5 min — wash face with gentle cleanser"
-- Keep it achievable — do not overwhelm them with 20 steps
-- Suggest products/activities they would actually enjoy based on their interests
-- For night routines: include phone-down time, journaling, skincare, relaxation
-
-Remember what they tell you about their routine and refine it over time. Save their routine preferences.
-Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
-  {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
-  {id:'contentwithit',name:'ContentWithIt',sub:'show me inspo',           col:2},
-  {id:'floverhub',  name:'Games',            sub:'im bored lets play',    col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
-  {id:'stufloverdaily',name:'StufloverDaily',sub:'what did i miss',       col:4},
-  {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
-  {id:'floveegroup',name:'FloveeGroup',      sub:'find your people',      col:6},
-  {id:'readit',     name:'ReadIt',            sub:'ok but this book',      col:10},
-  {id:'boredomhub', name:'Boredom Hub',      sub:'nothing to do?',       col:7, prompt:'You are in the Boredom Hub. Their job is to be bored and yours is to fix it. You know their interests {INTERESTS}, aesthetic {AE}, mood {MOOD}. Give them something actual to do — creative projects, things to watch, places to go. Match who they are.',                                      opener:'ok so you are bored. what kind of bored — creative bored, scroll bored, want to go somewhere, or just low energy?'},
+  {id:'fitforit',   name:'Style',          sub:'closet + outfits',  col:0},
+  {id:'beyou',      name:'Wellness',       sub:'breathe + journal', col:1},
+  {id:'floverhub',  name:'Games',          sub:'play something',    col:3, prompt:function(){ return buildFloveeHubPrompt(); }, opener:function(){ return buildFloveeHubOpener(); }},
+  {id:'friends',    name:'Social',         sub:'friends + groups',  col:5},
+  {id:'stufloverdaily',name:'Discover',    sub:'trending + inspo',  col:4},
+  {id:'myprofile',  name:'Me',             sub:'profile + routine', col:9},
 ];
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
 function buildGrid(pal, aeName){
-  const hues = [0,35,70,105,140,175,210,245,280,315,350];
+  const hues = [0,60,120,180,240,300];
   const icons = {
     fitforit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76zM10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="white" opacity="0.9"/></svg>',
     beyou:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white" opacity="0.5"/></svg>',
