@@ -2026,6 +2026,7 @@ function buildPage(){
   initFontPicker();
   applyChatFont();
   addScrapbookDecos();
+  startGlobalMsgPoll();
   // Add emoji pickers to chat inputs
   var chatRow1 = document.querySelector('#normalChat .chat-input-row');
   if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
@@ -4758,6 +4759,87 @@ async function submitCwPost(){
 // ─── FRIENDS / MESSAGES ──────────────────────────────────
 var frSelectedFriend = null;
 var frPollInterval = null;
+var frLastMsgCount = 0;
+var frGlobalPollInterval = null;
+
+// Notification sound using Web Audio API
+function playPing(){
+  try{
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.3);
+    // Second tone for a cute double-ping
+    var osc2 = ctx.createOscillator();
+    var gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.frequency.value = 1100;
+    osc2.type = 'sine';
+    gain2.gain.setValueAtTime(0.2, ctx.currentTime+0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+    osc2.start(ctx.currentTime+0.15);
+    osc2.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+// Request notification permission on first interaction
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+document.addEventListener('click', requestNotifPermission, {once:true});
+
+// Show browser notification
+function showNotification(title, body){
+  if('Notification' in window && Notification.permission === 'granted'){
+    try{ new Notification(title, {body:body, icon:'/favicon.ico'}); }catch(e){}
+  }
+}
+
+// Global message polling — runs even when not in Friends view
+function startGlobalMsgPoll(){
+  if(frGlobalPollInterval) return;
+  frGlobalPollInterval = setInterval(async function(){
+    try{
+      var res = await frFetch('/api/friends',{headers:frHeaders()});
+      var data = await res.json();
+      var friends = data.friends||[];
+      // Check each friend for new messages
+      for(var i=0;i<friends.length;i++){
+        var f = friends[i];
+        try{
+          var mres = await frFetch('/api/friends/messages/'+f.id,{headers:frHeaders()});
+          var mdata = await mres.json();
+          var msgs = mdata.messages||[];
+          var key = 'stuflover_lastmsg_'+f.id;
+          var lastKnown = parseInt(localStorage.getItem(key)||'0');
+          if(msgs.length > 0){
+            var latest = msgs[msgs.length-1];
+            var latestId = latest.id||0;
+            var user = window.stufloverUser ? window.stufloverUser() : null;
+            var myId = user ? parseInt(user.id) : 0;
+            if(latestId > lastKnown && parseInt(latest.from_user) !== myId){
+              playPing();
+              showNotification('New message from '+f.username, latest.text.substring(0,60));
+              localStorage.setItem(key, latestId.toString());
+            } else if(latestId > lastKnown){
+              localStorage.setItem(key, latestId.toString());
+            }
+          }
+        }catch(e){}
+      }
+    }catch(e){}
+  }, 8000);
+}
 
 function frFetch(path, opts){
   var url = (window.STUFLOVER_API_URL||'') + path;
@@ -4932,7 +5014,16 @@ async function loadFrMessages(friend){
     var pal = searchPal;
     var user = window.stufloverUser ? window.stufloverUser() : null;
     var myId = user ? parseInt(user.id) : 0;
-    container.innerHTML = (data.messages||[]).map(function(m){
+    var msgs = data.messages||[];
+    // Detect new incoming message and ping
+    if(msgs.length > frLastMsgCount && frLastMsgCount > 0){
+      var latest = msgs[msgs.length-1];
+      if(parseInt(latest.from_user) !== myId) playPing();
+    }
+    frLastMsgCount = msgs.length;
+    // Update last known for global poll
+    if(msgs.length>0) localStorage.setItem('stuflover_lastmsg_'+friend.id, (msgs[msgs.length-1].id||0).toString());
+    container.innerHTML = msgs.map(function(m){
       var isMe = parseInt(m.from_user) === myId;
       var time = new Date(m.created_at+'Z');
       var h = time.getHours(); var min = time.getMinutes();
