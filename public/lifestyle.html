@@ -925,6 +925,9 @@
       </div>
     </div>
 
+    <!-- INSTANT FEED (no API calls, loads immediately) -->
+    <div id="instantFeed" style="position:relative;z-index:2;padding:0 30px 16px;max-width:500px;margin:0 auto;"></div>
+
     <!-- CHROME NEW TAB GRID -->
     <div class="content-grid" id="browserGrid"></div>
   </div>
@@ -2327,6 +2330,7 @@ function buildPage(){
   applyChatFont();
   addScrapbookDecos();
   startGlobalMsgPoll();
+  buildInstantFeed();
   // Add emoji pickers to chat inputs
   var chatRow1 = document.querySelector('#normalChat .chat-input-row');
   if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
@@ -5698,6 +5702,103 @@ function initSparkleTrail(){
 }
 
 // Cursor trail settings panel
+// ─── INSTANT FEED (no API, loads immediately) ─────────────
+function buildInstantFeed(){
+  var feed = document.getElementById('instantFeed');
+  if(!feed || !searchPal) return;
+  var pal = searchPal;
+  var aeName = resolveAeName();
+  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topK = topK?topK[0]:'softgirl';
+
+  // Shuffle and pick 4 items from a large pool
+  var allItems = [];
+
+  // This or That (instant, no API)
+  var totQs = [
+    ['morning person','night owl'],['sweet','savoury'],['texting','calling'],['summer','winter'],
+    ['cats','dogs'],['city','countryside'],['music with lyrics','instrumental'],['iced coffee','hot coffee'],
+    ['reading','watching'],['photos','videos'],['early bird','last minute'],['cosy in','going out'],
+    ['sweet snacks','salty snacks'],['playlist','album on shuffle'],['window seat','aisle seat'],
+    ['baths','showers'],['sunsets','sunrises'],['handwritten','typed'],['solo trip','group trip'],
+  ];
+  totQs.forEach(function(q){
+    allItems.push({type:'tot', q:q});
+  });
+
+  // Rate prompts (0 API)
+  var ratePrompts = [
+    'rate your outfit today 1-10 and be honest','rate your current mood on a scale of cosy to chaotic',
+    'rate how well your room matches your aesthetic rn','rate your music taste — are you a 10?',
+    'rate your current phone wallpaper vibes','rate how productive you have been today no lying',
+  ];
+  ratePrompts.forEach(function(p){ allItems.push({type:'rate', prompt:p}); });
+
+  // Mini challenges (instant)
+  var challenges = [
+    'open your camera roll — the 7th photo is your new aesthetic. what is it?',
+    'describe your outfit right now using only 3 words',
+    'pick a colour. now name 5 things in your room that colour.',
+    'the last song you listened to is now the title of your autobiography. what is it?',
+    'text someone "thinking of you" right now. do it. they need it.',
+    'look out your window. describe what you see like a movie scene.',
+    'name your top 3 comfort shows in order. go.',
+    'if your life had a soundtrack what song is playing rn?',
+    'pick an item you are wearing. tell its backstory.',
+    'close your eyes and think of a colour. open them. that colour is your energy today.',
+  ];
+  challenges.forEach(function(c){ allItems.push({type:'challenge', text:c}); });
+
+  // Shuffle
+  for(var i=allItems.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=allItems[i]; allItems[i]=allItems[j]; allItems[j]=tmp;
+  }
+
+  // Pick 4
+  var picked = allItems.slice(0,4);
+  feed.innerHTML = '';
+
+  picked.forEach(function(item, idx){
+    var card = document.createElement('div');
+    card.style.cssText = 'padding:16px 18px;border-radius:14px;margin-bottom:10px;background:'+pal.tx+'05;border:1px solid '+pal.tx+'06;animation:fadeSlideIn 0.3s ease both;animation-delay:'+(idx*0.08)+'s;';
+
+    if(item.type === 'tot'){
+      // This or That — two tappable buttons
+      card.innerHTML =
+        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">This or That</div>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.nextElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[0])+'</button>'+
+          '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.previousElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[1])+'</button>'+
+        '</div>';
+
+    } else if(item.type === 'challenge'){
+      card.innerHTML =
+        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">Mini Challenge</div>'+
+        '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;">'+escHtml(item.text)+'</div>';
+
+    } else if(item.type === 'rate'){
+      card.innerHTML =
+        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">Quick Rate</div>'+
+        '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;margin-bottom:10px;">'+escHtml(item.prompt)+'</div>'+
+        '<div style="display:flex;gap:4px;">'+
+        [1,2,3,4,5,6,7,8,9,10].map(function(n){
+          return '<button onclick="this.parentNode.querySelectorAll(\'button\').forEach(function(b,i){b.style.background=i<'+n+'?\''+pal.ac+'20\':\'transparent\';b.style.color=i<'+n+'?\''+pal.ac+'\':\''+pal.tx+'\'})" style="width:28px;height:28px;border-radius:50%;border:1px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;">'+n+'</button>';
+        }).join('')+
+        '</div>';
+    }
+
+    feed.appendChild(card);
+  });
+
+  // "Show more" button
+  var more = document.createElement('button');
+  more.style.cssText = 'width:100%;padding:12px;border-radius:12px;border:1.5px dashed '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;cursor:pointer;opacity:0.4;transition:opacity 0.2s;margin-bottom:16px;';
+  more.textContent = 'show me more';
+  more.onclick = function(){ buildInstantFeed(); };
+  feed.appendChild(more);
+}
+
 // ─── POLL VOTE ────────────────────────────────────────────
 function votePoll(idx){
   var key = 'stuflover_poll_'+new Date().toDateString();
