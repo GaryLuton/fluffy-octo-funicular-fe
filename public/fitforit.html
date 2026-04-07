@@ -355,7 +355,11 @@ var photoDataUrl = null; // stores the base64 photo
 
 function handlePhoto(input){
   var file = input.files && input.files[0];
-  if(!file) return;
+  if(!file){
+    var err = document.getElementById('addErr');
+    if(err){ err.textContent = 'Could not access camera — check permissions in your browser settings'; err.style.color = '#c44'; }
+    return;
+  }
   var err = document.getElementById('addErr');
   err.textContent = 'Processing photo...';
   err.style.color = PAL.ac;
