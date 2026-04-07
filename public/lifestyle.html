@@ -90,6 +90,14 @@
     .sug-label{font-weight:600;flex:1;}
     .sug-hint{font-size:0.74rem;opacity:0.38;}
 
+    /* STORY BAR (Instagram style) */
+    .story-ring{width:52px;height:52px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--terra),#e8829a,#9070e0);display:flex;align-items:center;justify-content:center;transition:transform 0.2s;}
+    .story-ring:hover{transform:scale(1.08);}
+    .story-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;}
+    .story-label{font-size:0.6rem;font-weight:600;opacity:0.5;text-align:center;white-space:nowrap;}
+    #storyBar::-webkit-scrollbar{display:none;}
+    #storyBar{scrollbar-width:none;}
+
     /* VERTICAL FEED */
     .feed-section{margin-bottom:20px;}
     .feed-heading{font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;margin-bottom:10px;}
@@ -904,9 +912,39 @@
 
   <!-- HOME VIEW -->
   <div id="homeView">
-    <!-- Scrapbook decorations -->
     <div id="scrapDecos" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;"></div>
-    <div class="page-header">
+
+    <!-- INSTAGRAM STORY UI — horizontal scroll categories -->
+    <div id="storyBar" style="padding:70px 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;position:relative;z-index:5;">
+      <div style="display:inline-flex;gap:14px;padding:8px 24px;">
+        <div class="story-item" onclick="openSection('fitforit')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">S</div></div>
+          <span class="story-label">Style</span>
+        </div>
+        <div class="story-item" onclick="window.location.href='beyou.html'" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">W</div></div>
+          <span class="story-label">Wellness</span>
+        </div>
+        <div class="story-item" onclick="openSection('floverhub')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">G</div></div>
+          <span class="story-label">Games</span>
+        </div>
+        <div class="story-item" onclick="openSection('friends')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">F</div></div>
+          <span class="story-label">Social</span>
+        </div>
+        <div class="story-item" onclick="openSection('stufloverdaily')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">D</div></div>
+          <span class="story-label">Discover</span>
+        </div>
+        <div class="story-item" onclick="openSection('myprofile')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
+          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">M</div></div>
+          <span class="story-label">Me</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-header" style="padding-top:16px;">
       <div class="ae-eyebrow" id="aeEyebrow">your aesthetic is</div>
       <div class="ae-title bc" id="aeTitle"></div>
 
@@ -2403,6 +2441,10 @@ function buildPage(){
   addScrapbookDecos();
   startGlobalMsgPoll();
   buildInstantFeed();
+
+  // Style story bar
+  document.querySelectorAll('.story-avatar').forEach(function(a){ a.style.background=searchPal.bg; a.style.color=searchPal.tx; });
+  document.querySelectorAll('.story-label').forEach(function(l){ l.style.color=searchPal.tx; });
 
   // Style feed sections
   document.querySelectorAll('.feed-heading').forEach(function(h){h.style.color=searchPal.tx;});
@@ -7016,5 +7058,6 @@ function showShopMenu(e, item, pal){
 
 </script>
 
+<script src="/stuflover-ux.js"></script>
 </body>
 </html>
