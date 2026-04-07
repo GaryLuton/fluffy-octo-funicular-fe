@@ -214,7 +214,21 @@
 <div class="modal-bg" id="addModal">
   <div class="modal-box" id="addModalBox">
     <h3>Add to Closet</h3>
-    <input id="addUrl" placeholder="Paste a photo URL of your item..." oninput="previewAdd()"/>
+    <!-- Camera / Photo upload -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <label style="flex:1;padding:14px;border-radius:10px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="cameraLabel">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        Take Photo
+        <input type="file" accept="image/*" capture="environment" id="cameraInput" onchange="handlePhoto(this)" style="display:none;"/>
+      </label>
+      <label style="flex:1;padding:14px;border-radius:10px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="galleryLabel">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" opacity="0.5"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        From Gallery
+        <input type="file" accept="image/*" id="galleryInput" onchange="handlePhoto(this)" style="display:none;"/>
+      </label>
+    </div>
+    <div style="text-align:center;font-size:0.7rem;opacity:0.3;margin-bottom:8px;">or paste a URL</div>
+    <input id="addUrl" placeholder="Paste an image URL..." oninput="previewAdd()" style="font-size:0.82rem;"/>
     <img class="modal-preview" id="addPreview"/>
     <input id="addName" placeholder="What is it? (e.g. black crop top)"/>
     <select id="addCat">
@@ -344,15 +358,54 @@ function deleteItem(e,idx){
 
 // ─── ADD ITEM ────────────────────────────────────────────
 function openAddModal(){
+  photoDataUrl = null;
   document.getElementById('addModal').classList.add('open');
   document.getElementById('addUrl').value='';
   document.getElementById('addName').value='';
   document.getElementById('addCat').value='';
   document.getElementById('addErr').textContent='';
   document.getElementById('addPreview').style.display='none';
-  setTimeout(function(){document.getElementById('addUrl').focus();},100);
+  document.getElementById('cameraInput').value='';
+  document.getElementById('galleryInput').value='';
 }
 function closeAddModal(){document.getElementById('addModal').classList.remove('open');}
+
+var photoDataUrl = null; // stores the base64 photo
+
+function handlePhoto(input){
+  var file = input.files && input.files[0];
+  if(!file) return;
+  var err = document.getElementById('addErr');
+  err.textContent = 'Processing photo...';
+  err.style.color = PAL.ac;
+
+  // Resize to max 400px to save localStorage space
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var canvas = document.createElement('canvas');
+      var maxSize = 400;
+      var w = img.width, h = img.height;
+      if(w > h){ if(w > maxSize){h = h*(maxSize/w); w = maxSize;} }
+      else { if(h > maxSize){w = w*(maxSize/h); h = maxSize;} }
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      photoDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+      // Show preview
+      var preview = document.getElementById('addPreview');
+      preview.src = photoDataUrl;
+      preview.style.display = 'block';
+      document.getElementById('addUrl').value = '';
+      err.textContent = 'Photo ready!';
+      err.style.color = PAL.ac;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
 function previewAdd(){
   var url=document.getElementById('addUrl').value.trim();
@@ -362,16 +415,19 @@ function previewAdd(){
 }
 
 function addItem(){
-  var url=document.getElementById('addUrl').value.trim();
+  var url = photoDataUrl || document.getElementById('addUrl').value.trim();
   var name=document.getElementById('addName').value.trim();
   var cat=document.getElementById('addCat').value;
   var err=document.getElementById('addErr');
-  if(!url){err.textContent='Paste a photo URL';err.style.color='#c44';return;}
+  if(!url){err.textContent='Take a photo or paste a URL';err.style.color='#c44';return;}
   if(!name){err.textContent='Give it a name';err.style.color='#c44';return;}
   if(!cat){err.textContent='Pick a category';err.style.color='#c44';return;}
   var items=getCloset();
   items.push({url:url,name:name,cat:cat,added:Date.now()});
-  saveCloset(items);
+  try{ saveCloset(items); }catch(e){
+    // If localStorage is full (too many photos), warn
+    err.textContent='Storage full — try removing some items first';err.style.color='#c44';return;
+  }
   closeAddModal();
   renderCloset();
 }
