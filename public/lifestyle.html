@@ -984,8 +984,7 @@
     <!-- FloveeHub game platform -->
     <div id="hubView">
       <div class="hub-banner" id="hubBanner">
-        <div class="hub-banner-bg" id="hubBannerBg"></div>
-        <div class="hub-title bc" id="hubTitle">FloveeHub</div>
+        <div class="hub-title bc" id="hubTitle">Games</div>
         <div class="hub-sub" id="hubSub"></div>
       </div>
       <div class="hub-grid" id="hubGrid"></div>
@@ -2691,19 +2690,8 @@ function openHub(){
   // Banner
   document.getElementById('hubTitle').style.color = pal.tx;
   document.getElementById('hubSub').style.color = pal.tx;
-  document.getElementById('hubSub').textContent = fName+' is waiting for you — pick something to do together';
-  document.getElementById('hubBanner').style.background = 'linear-gradient(135deg,'+pal.ac+'12,'+pal.ac+'06)';
-
-  // Scatter icons in banner bg
-  var bbg = document.getElementById('hubBannerBg');
-  bbg.innerHTML = '';
-  for(var i=0;i<6;i++){
-    var ico = document.createElement('span');
-    ico.className = 'hub-thumb-deco';
-    ico.style.cssText = 'left:'+(Math.random()*90)+'%;top:'+(Math.random()*80)+'%;position:absolute;transform:rotate('+(Math.random()*40-20).toFixed(0)+'deg);';
-    ico.innerHTML = makeIconSvg(aeIcons[i%aeIcons.length], pal.ac, 28+Math.round(Math.random()*20));
-    bbg.appendChild(ico);
-  }
+  document.getElementById('hubSub').textContent = 'Pick a game to play';
+  document.getElementById('hubBanner').style.background = pal.bg;
 
   // Build game grid grouped by category
   var grid = document.getElementById('hubGrid');
@@ -5713,7 +5701,7 @@ Remember what they tell you about their routine and refine it over time. Save th
 Keep messages short and friendly. Be encouraging.`,        opener:'hey! let us build your perfect routine. are we working on your morning routine or your night routine?'},
   {id:'myprofile',   name:'MyProfile',       sub:'customize you',         col:9},
   {id:'contentwithit',name:'ContentWithIt',sub:'inspo board',            col:2},
-  {id:'floverhub',  name:'FloveeHub',       sub:'just talk',             col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
+  {id:'floverhub',  name:'Games',            sub:'play with flovee',      col:3, prompt:function(){ return buildFloveeHubPrompt(); },                                                                   opener:function(){ return buildFloveeHubOpener(); }},
   {id:'stufloverdaily',name:'StufloverDaily',sub:'trending now',         col:4},
   {id:'friends',    name:'Friends',          sub:'friend stuff',         col:5, prompt:'You are in the Friends section. You know their social energy ({SOCIAL}) and friend group ({FG}). Help them navigate friend stuff — what to say, how to handle things, group dynamics. You are on their side always but you are honest too.',                                                     opener:'what is going on with your people?'},
   {id:'floveegroup',name:'FloveeGroup',      sub:'communities',           col:6},
