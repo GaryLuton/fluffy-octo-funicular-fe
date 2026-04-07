@@ -176,4 +176,62 @@
   window.stufloverUser = getUser;
   window.STUFLOVER_API_URL = API_BASE;
 
+  // ─── Message Notification System (runs on ALL pages) ───
+  function _playPing(){
+    try{
+      var ctx = new (window.AudioContext||window.webkitAudioContext)();
+      var o1 = ctx.createOscillator(); var g1 = ctx.createGain();
+      o1.connect(g1); g1.connect(ctx.destination);
+      o1.frequency.value=880; o1.type='sine';
+      g1.gain.setValueAtTime(0.25,ctx.currentTime);
+      g1.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+      o1.start(ctx.currentTime); o1.stop(ctx.currentTime+0.3);
+      var o2 = ctx.createOscillator(); var g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.frequency.value=1100; o2.type='sine';
+      g2.gain.setValueAtTime(0.18,ctx.currentTime+0.15);
+      g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+      o2.start(ctx.currentTime+0.15); o2.stop(ctx.currentTime+0.4);
+    }catch(e){}
+  }
+
+  // Request notification permission
+  document.addEventListener('click', function(){
+    if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
+  }, {once:true});
+
+  // Poll for new messages on every page
+  if(getToken() && !window.location.pathname.includes('auth.html')){
+    setInterval(function(){
+      _origFetch.call(window, API_BASE+'/api/friends', {
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()}
+      }).then(function(r){return r.json();}).then(function(d){
+        var friends = d.friends||[];
+        friends.forEach(function(f){
+          _origFetch.call(window, API_BASE+'/api/friends/messages/'+f.id, {
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()}
+          }).then(function(r){return r.json();}).then(function(md){
+            var msgs = md.messages||[];
+            if(msgs.length===0) return;
+            var latest = msgs[msgs.length-1];
+            var key = 'stuflover_lastmsg_'+f.id;
+            var lastKnown = parseInt(localStorage.getItem(key)||'0');
+            var user = getUser();
+            var myId = user ? parseInt(user.id) : 0;
+            var latestId = latest.id||0;
+            if(latestId > lastKnown && parseInt(latest.from_user)!==myId){
+              _playPing();
+              if('Notification' in window && Notification.permission==='granted'){
+                try{new Notification('Message from '+f.username, {body:latest.text.substring(0,60)});}catch(e){}
+              }
+              localStorage.setItem(key, latestId.toString());
+            } else if(latestId > lastKnown){
+              localStorage.setItem(key, latestId.toString());
+            }
+          }).catch(function(){});
+        });
+      }).catch(function(){});
+    }, 8000);
+  }
+
 })();
