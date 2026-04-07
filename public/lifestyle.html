@@ -835,10 +835,10 @@
 
 <!-- LANDING -->
 <div id="heroSection">
-  <div class="hero-hook">only takes 2 minutes</div>
-  <h1 class="bc">What is<br>Your<br>Vibe?</h1>
-  <p class="hero-sub">Answer a few questions and we will build a page that actually looks like you. Your aesthetic, your colours, your everything.</p>
-  <button class="start-btn bc" onclick="startQuiz()">Take the Quiz</button>
+  <div class="hero-hook">this will change your phone forever</div>
+  <h1 class="bc">Find<br>Your<br>Aesthetic</h1>
+  <p class="hero-sub">2 minutes. a few honest answers. then we build you a page so personal it is literally scary accurate.</p>
+  <button class="start-btn bc" onclick="startQuiz()">Let's Go</button>
 </div>
 
 <!-- QUIZ -->
@@ -2022,15 +2022,17 @@ function buildPage(){
   var timeGreet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
 
   // Personalized eyebrow based on mood + time
+  var name = username || 'bestie';
   var eyebrowTexts = {
-    good: timeGreet + (username ? ', '+username : '') + ' — you are glowing today',
-    creative: timeGreet + (username ? ', '+username : '') + ' — let that creativity flow',
-    low: timeGreet + (username ? ', '+username : '') + ' — take it easy, you deserve it',
-    hyped: timeGreet + (username ? ', '+username : '') + ' — that energy is unmatched',
-    cosy: timeGreet + (username ? ', '+username : '') + ' — cosy vibes activated',
-    tired: timeGreet + (username ? ', '+username : '') + ' — rest is productive too',
+    good: [name+' you are LITERALLY glowing rn', 'ok '+name+' main character energy today', name+'!! the vibe is immaculate today', 'not '+name+' looking iconic as always'],
+    creative: ['the ideas are FLOWING '+name, name+' your creative era is insane rn', 'ok artist mode activated '+name, name+' is about to create something iconic'],
+    low: [name+' soft hours activated — you deserve this', 'gentle reminder '+name+' you are doing amazing', name+' cozy era — no rushing today', 'sending '+name+' the biggest hug rn'],
+    hyped: ['NOBODY can stop '+name+' today', name+' THE ENERGY IS UNREAL', 'ok '+name+' is literally unstoppable rn', name+'!! this energy is contagious'],
+    cosy: [name+' cosy mode unlocked', 'ok '+name+' blanket burrito era', name+' comfort is the vibe today', 'the coziest person alive: '+name],
+    tired: [name+' rest IS the flex', 'taking it easy because '+name+' deserves it', name+' recharging era — so valid', 'permission to do nothing granted '+name],
   };
-  var personalEyebrow = eyebrowTexts[P.moodToday] || (timeGreet + (username ? ', '+username : '') + ' — welcome to your world');
+  var moodArr = eyebrowTexts[P.moodToday] || [timeGreet+' '+name+' — your world is waiting', name+'!! welcome back to the best page on the internet', 'ok '+name+' let us make today iconic', name+' the vibes are already immaculate'];
+  var personalEyebrow = moodArr[Math.floor(Math.random()*moodArr.length)];
   document.getElementById('aeEyebrow').textContent = personalEyebrow;
 
   document.getElementById('aeTitle').textContent = aeName.toUpperCase();
