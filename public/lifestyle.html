@@ -2058,6 +2058,55 @@ function buildPage(){
   var searchWrap = document.getElementById('searchWrap');
   if(searchWrap && headerEl) headerEl.insertBefore(stats, searchWrap);
 
+  // Share your aesthetic card
+  var existingShare = document.getElementById('shareCard');
+  if(existingShare) existingShare.remove();
+  var shareCard = document.createElement('div');
+  shareCard.id = 'shareCard';
+  shareCard.style.cssText = 'margin-bottom:24px;padding:18px 22px;border-radius:16px;background:'+pal.ac+'10;border:1.5px solid '+pal.tx+'08;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;';
+  var shareText = 'i am '+aeName.toLowerCase()+' aesthetic';
+  if(P.music.length > 0){
+    var topA = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    shareText += ', i listen to ' + topA;
+  }
+  if(P.faveColour) shareText += ', my colour is ' + P.faveColour.name.toLowerCase();
+  shareText += ' — what are you? take the quiz at stuflover.com';
+  shareCard.innerHTML =
+    '<div style="flex:1;min-width:0;">'+
+      '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:4px;">Share your vibe</div>'+
+      '<div style="font-size:0.82rem;color:'+pal.tx+';opacity:0.6;line-height:1.5;">'+escHtml(shareText)+'</div>'+
+    '</div>'+
+    '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'Copied!\';var b=this;setTimeout(function(){b.textContent=\'Copy\'},1500)}.bind(this))" style="padding:8px 18px;border:none;border-radius:10px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Copy</button>';
+  if(searchWrap && headerEl) headerEl.insertBefore(shareCard, searchWrap);
+
+  // Daily tip based on aesthetic
+  var existingTip = document.getElementById('dailyTip');
+  if(existingTip) existingTip.remove();
+  var tips = {
+    kawaii:['try a pastel mood board today — it is so calming','matching your phone case to your outfit hits different','journaling in coloured pens makes everything better'],
+    softgirl:['soft lighting in photos changes EVERYTHING','a silk pillowcase is the best investment ever','layer your necklaces — trust the process'],
+    cleangirl:['slicked back hair + hoop earrings = instant slay','a capsule wardrobe saves you 20 minutes every morning','ice water first thing in the morning actually works'],
+    coquette:['ribbon in your hair is an instant mood boost','handwrite a note to someone today — so underrated','a spritz of perfume on your pillow is elite'],
+    goth:['candlelight journaling hits different at night','a dark playlist while walking is main character behaviour','black nail polish never misses'],
+    darkacad:['reading for 20 minutes before bed improves your sleep','writing with a nice pen makes studying bearable','a library date with yourself is elite self care'],
+    grunge:['thrifting is literally the most sustainable thing you can do','making a playlist for your mood is free therapy','band tees from charity shops are unmatched'],
+    y2k:['butterfly clips are making the biggest comeback','low rise is confidence in an outfit','a disposable camera at your next hangout = memories'],
+    street:['white sneakers go with literally everything','layering is an art and you are the artist','a good playlist is the ultimate accessory'],
+    cottage:['baking something from scratch is the best reset','fresh flowers on your desk change the whole room','a walk with no phone is surprisingly magical'],
+    hippie:['making friendship bracelets is genuinely therapeutic','plants in your room boost your mood scientifically','tie dye is easier than you think and so fun'],
+    oldmoney:['a well-fitted blazer elevates any outfit instantly','good posture makes you look and feel confident','investing in quality basics saves money long term'],
+    preppy:['colour-coding your notes makes revision 10x easier','a good planner is worth every penny','tennis skirts work for literally any occasion'],
+    indie:['supporting small artists on spotify costs you nothing','a zine about your interests is easier to make than you think','film photography teaches you to appreciate moments more'],
+    emo:['writing lyrics is the most underrated creative outlet','black eyeliner techniques can genuinely change your face','screaming along to music in your room is valid therapy'],
+  };
+  var aeTips = tips[topK] || tips.softgirl;
+  var todayTip = aeTips[new Date().getDate() % aeTips.length];
+  var tipDiv = document.createElement('div');
+  tipDiv.id = 'dailyTip';
+  tipDiv.style.cssText = 'margin-bottom:20px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'06;font-size:0.8rem;line-height:1.6;color:'+pal.tx+';opacity:0.7;';
+  tipDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:4px;">Daily tip for you</span>' + escHtml(todayTip);
+  if(searchWrap && headerEl) headerEl.insertBefore(tipDiv, searchWrap);
+
   // Style search
   initSearch(pal);
 
