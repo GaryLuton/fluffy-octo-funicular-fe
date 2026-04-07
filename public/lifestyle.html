@@ -2107,6 +2107,66 @@ function buildPage(){
   tipDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:4px;">Daily tip for you</span>' + escHtml(todayTip);
   if(searchWrap && headerEl) headerEl.insertBefore(tipDiv, searchWrap);
 
+  // ── ENGAGEMENT: Daily Poll (quick interaction, replayable) ──
+  var existingPoll = document.getElementById('dailyPoll');
+  if(existingPoll) existingPoll.remove();
+  var pollQuestions = [
+    {q:'outfit check — today you are wearing',a:['something cosy','all black','that one outfit','whatever was clean']},
+    {q:'your energy today is',a:['main character','cosy goblin','chaotic neutral','unbothered queen']},
+    {q:'you are procrastinating by',a:['being on here','scrolling tiktok','reorganizing something','pretending to study']},
+    {q:'pick a vibe for tonight',a:['movie marathon','late night playlist','journaling session','facetime with bestie']},
+    {q:'your biggest flex is',a:['my music taste','my aesthetic','my friend group','my skincare routine']},
+    {q:'the thing you need right now is',a:['a nap','a compliment','new music','snacks']},
+    {q:'your toxic trait is',a:['online shopping','saying "im fine"','starting new shows','being too nice']},
+  ];
+  var todayPoll = pollQuestions[new Date().getDate() % pollQuestions.length];
+  var pollVoteKey = 'stuflover_poll_'+new Date().toDateString();
+  var existingVote = localStorage.getItem(pollVoteKey);
+
+  var pollDiv = document.createElement('div');
+  pollDiv.id = 'dailyPoll';
+  pollDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.ac+'0a;border:1.5px solid '+pal.tx+'06;';
+  var pollHtml = '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:8px;">Daily Poll</div>';
+  pollHtml += '<div style="font-size:0.95rem;font-weight:600;color:'+pal.tx+';margin-bottom:12px;line-height:1.4;">'+escHtml(todayPoll.q)+'</div>';
+  pollHtml += '<div id="pollOptions" style="display:flex;flex-wrap:wrap;gap:6px;">';
+  todayPoll.a.forEach(function(opt,i){
+    var voted = existingVote === i.toString();
+    pollHtml += '<button onclick="votePoll('+i+')" style="padding:8px 16px;border-radius:20px;font-size:0.78rem;font-family:Space Grotesk,sans-serif;font-weight:500;cursor:pointer;transition:all 0.2s;border:1.5px solid '+(voted?pal.ac:pal.tx+'12')+';background:'+(voted?pal.ac+'18':'transparent')+';color:'+pal.tx+';" '+(existingVote?'disabled':'')+'>'+escHtml(opt)+'</button>';
+  });
+  pollHtml += '</div>';
+  if(existingVote){
+    pollHtml += '<div style="font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+pal.tx+';">you picked: '+escHtml(todayPoll.a[parseInt(existingVote)])+' — new poll tomorrow</div>';
+  }
+  pollDiv.innerHTML = pollHtml;
+  if(searchWrap && headerEl) headerEl.insertBefore(pollDiv, searchWrap);
+
+  // ── ENGAGEMENT: Streak counter (completion + replayability) ──
+  var existingStreak = document.getElementById('streakCounter');
+  if(existingStreak) existingStreak.remove();
+  var streakKey = 'stuflover_streak';
+  var lastVisitKey = 'stuflover_last_visit';
+  var today = new Date().toDateString();
+  var lastVisit = localStorage.getItem(lastVisitKey);
+  var streak = parseInt(localStorage.getItem(streakKey)||'0');
+  if(lastVisit === today){
+    // already counted today
+  } else {
+    var yesterday = new Date(Date.now()-86400000).toDateString();
+    if(lastVisit === yesterday){ streak++; }
+    else if(lastVisit){ streak = 1; }
+    else { streak = 1; }
+    localStorage.setItem(streakKey, streak.toString());
+    localStorage.setItem(lastVisitKey, today);
+  }
+  if(streak > 0){
+    var streakDiv = document.createElement('div');
+    streakDiv.id = 'streakCounter';
+    streakDiv.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:'+pal.ac+'14;font-size:0.72rem;font-weight:600;color:'+pal.tx+';margin-bottom:16px;';
+    var fireWord = streak >= 7 ? 'on fire' : streak >= 3 ? 'keeping it going' : 'just getting started';
+    streakDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;font-size:0.85rem;color:'+pal.ac+';">'+streak+'</span> day streak — '+fireWord;
+    if(headerEl) headerEl.insertBefore(streakDiv, document.getElementById('aeEyebrow'));
+  }
+
   // Style search
   initSearch(pal);
 
@@ -2130,6 +2190,22 @@ function buildPage(){
 
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
+
+  // ── Quiz completion celebration ──
+  var isFirstTime = !localStorage.getItem('stuflover_quiz_done');
+  localStorage.setItem('stuflover_quiz_done','true');
+  if(isFirstTime){
+    // Show celebration overlay briefly
+    var celebDiv = document.createElement('div');
+    celebDiv.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:'+pal.bg+';color:'+pal.tx+';text-align:center;padding:40px;animation:fadeSlide 0.5s ease both;';
+    celebDiv.innerHTML =
+      '<div style="font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:12px;">Quiz Complete</div>'+
+      '<div style="font-size:clamp(2rem,6vw,3.5rem);font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9;margin-bottom:16px;">You Are<br>'+aeName+'</div>'+
+      '<div style="font-size:0.9rem;opacity:0.45;max-width:320px;line-height:1.7;margin-bottom:24px;">your page is ready. everything is personalized to you now.</div>'+
+      '<button onclick="this.parentNode.remove()" style="padding:14px 40px;background:'+pal.ac+';color:'+pal.bg+';border:none;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">See My Page</button>'+
+      '<button onclick="var t=\'i just took the stuflover quiz and i am '+aeName.toLowerCase()+' aesthetic — take it at stuflover.vercel.app\';navigator.clipboard.writeText(t);this.textContent=\'Copied!\';var b=this;setTimeout(function(){b.textContent=\'Share My Result\'},1500)" style="padding:10px 28px;background:transparent;color:'+pal.tx+';border:1.5px solid '+pal.tx+'20;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Share My Result</button>';
+    document.body.appendChild(celebDiv);
+  }
 
   // Nav welcome
   if(username){
@@ -5526,6 +5602,30 @@ function initSparkleTrail(){
 }
 
 // Cursor trail settings panel
+// ─── POLL VOTE ────────────────────────────────────────────
+function votePoll(idx){
+  var key = 'stuflover_poll_'+new Date().toDateString();
+  localStorage.setItem(key, idx.toString());
+  // Refresh to show result
+  var pollOpts = document.getElementById('pollOptions');
+  if(pollOpts){
+    pollOpts.querySelectorAll('button').forEach(function(b,i){
+      b.disabled = true;
+      if(i === idx){
+        b.style.borderColor = searchPal.ac;
+        b.style.background = searchPal.ac+'18';
+        b.style.transform = 'scale(1.05)';
+      } else {
+        b.style.opacity = '0.4';
+      }
+    });
+    var result = document.createElement('div');
+    result.style.cssText = 'font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+searchPal.tx+';';
+    result.textContent = 'nice pick — new poll tomorrow';
+    pollOpts.parentNode.appendChild(result);
+  }
+}
+
 // ─── SCRAPBOOK DECORATIONS ────────────────────────────────
 function addScrapbookDecos(){
   var container = document.getElementById('scrapDecos');
