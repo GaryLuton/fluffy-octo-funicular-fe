@@ -173,49 +173,35 @@
 
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
-    <a class="nav-btn bc" href="account.html">Account</a>
-    <a class="nav-btn bc" href="index.html">Home</a>
+    <a class="nav-btn bc" href="lifestyle.html">Back</a>
   </div>
 </nav>
-<div class="sub-nav">
-  <a class="sub-nav-back bc" href="lifestyle.html">← Back</a>
-  <span class="sub-nav-title bc">FitforIt</span>
-</div>
-
-<div class="tabs" id="mainTabs">
-  <button class="tab bc on" id="tabCloset" onclick="switchTab('closet')">My Closet</button>
-  <button class="tab bc" id="tabBuilder" onclick="switchTab('builder')">Build Outfit</button>
-</div>
 
 <!-- CLOSET VIEW -->
-<div class="closet" id="closetView">
-  <div class="closet-banner" id="closetBanner">
-    <div class="closet-banner-title" id="bannerTitle">My Closet</div>
-    <div class="closet-banner-sub">add your clothes, build outfits, let your flovee style you</div>
+<div class="closet" id="closetView" style="padding-top:80px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div>
+      <h1 class="bc" style="font-size:1.6rem;letter-spacing:-0.5px;margin-bottom:2px;" id="bannerTitle">My Closet</h1>
+      <div class="closet-title bc" id="closetCount" style="opacity:0.3;">0 items</div>
+    </div>
+    <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()">+ Add</button>
   </div>
-  <div class="closet-header">
-    <div class="closet-title bc" id="closetCount">0 items</div>
-    <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()">Add Item</button>
-  </div>
-  <div class="closet-cats" id="closetCats"></div>
   <div class="closet-grid" id="closetGrid"></div>
-</div>
 
-<!-- OUTFIT BUILDER -->
-<div class="builder" id="builderView">
-  <div class="builder-header">
-    <div class="closet-title bc">Your Outfit</div>
-    <button class="builder-btn outline bc" onclick="clearOutfit()">Clear</button>
+  <!-- Outfit Builder inline below closet -->
+  <div id="builderSection" style="margin-top:32px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h2 class="bc" style="font-size:0.9rem;letter-spacing:2px;opacity:0.4;">Build an Outfit</h2>
+      <button class="builder-btn outline bc" onclick="clearOutfit()" style="padding:6px 14px;font-size:0.68rem;">Clear</button>
+    </div>
+    <div class="builder-preview" id="builderPreview"></div>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="builder-btn bc" id="suggestBtn" onclick="aiSuggest()">AI Suggest</button>
+    </div>
+    <div class="suggest-result" id="suggestResult"></div>
   </div>
-  <div class="builder-preview" id="builderPreview"></div>
-  <div class="builder-btns">
-    <button class="builder-btn bc" id="suggestBtn" onclick="aiSuggest()">AI Suggest Outfit</button>
-  </div>
-  <div class="suggest-result" id="suggestResult"></div>
-  <div class="builder-pick-label" id="pickLabel">Pick items from your closet</div>
-  <div class="closet-cats" id="builderCats"></div>
+</div>
   <div class="builder-items" id="builderItems"></div>
 </div>
 
@@ -319,28 +305,16 @@ function switchTab(tab){
 // ─── CLOSET ──────────────────────────────────────────────
 function renderCloset(){
   var items=getCloset();
-  var filtered=currentCat==='all'?items:items.filter(function(i){return i.cat===currentCat;});
   document.getElementById('closetCount').textContent=items.length+' item'+(items.length!==1?'s':'');
 
-  // Cat filters
-  var catsHtml='';
-  CATS.forEach(function(c){
-    var on=c===currentCat?' on':'';
-    var style='color:'+PAL.tx+';border-color:'+(c===currentCat?PAL.ac:'rgba(128,128,128,0.12)');
-    catsHtml+='<button class="closet-cat'+on+' bc" style="'+style+'" onclick="filterCat(\''+c+'\')">'+c+'</button>';
-  });
-  document.getElementById('closetCats').innerHTML=catsHtml;
-
   var grid=document.getElementById('closetGrid');
-  if(filtered.length===0){
-    grid.innerHTML='<div class="closet-empty">'+
-      (items.length===0?'Your closet is empty — add items to get started!':'No items in this category')+
-    '</div>';
+  if(items.length===0){
+    grid.innerHTML='<div class="closet-empty">Tap + Add to start building your closet</div>';
+    document.getElementById('builderSection').style.display='none';
     return;
   }
   grid.innerHTML='';
-  filtered.forEach(function(item,i){
-    var idx=items.indexOf(item);
+  items.forEach(function(item,i){
     var card=document.createElement('div');
     card.className='closet-item';
     card.style.background=PAL.tx+'06';
@@ -348,14 +322,14 @@ function renderCloset(){
       '<img src="'+escHtml(item.url)+'" alt="" onerror="this.style.background=\'rgba(128,128,128,0.1)\'"/>'+
       '<div class="closet-item-info" style="color:'+PAL.tx+'">'+
         '<div class="closet-item-name">'+escHtml(item.name)+'</div>'+
-        '<div class="closet-item-cat">'+escHtml(item.cat)+'</div>'+
       '</div>'+
-      '<button class="closet-item-del" onclick="deleteItem(event,'+idx+')">x</button>';
+      '<button class="closet-item-del" onclick="deleteItem(event,'+i+')">x</button>';
     grid.appendChild(card);
   });
+  // Show builder when 2+ items
+  document.getElementById('builderSection').style.display=items.length>=2?'block':'none';
+  if(items.length>=2) renderBuilder();
 }
-
-function filterCat(cat){currentCat=cat;renderCloset();}
 
 function deleteItem(e,idx){
   e.stopPropagation();
@@ -487,39 +461,7 @@ function renderBuilder(){
     preview.appendChild(slot);
   });
 
-  // Cat filter for picking
-  var catsHtml='';
-  ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'].forEach(function(c){
-    var on=c===builderCat?' on':'';
-    var style='color:'+PAL.tx+';border-color:'+(c===builderCat?PAL.ac:'rgba(128,128,128,0.12)');
-    catsHtml+='<button class="closet-cat'+on+' bc" style="'+style+'" onclick="pickBuilderCat(\''+c+'\')">'+c+'</button>';
-  });
-  document.getElementById('builderCats').innerHTML=catsHtml;
-
-  // Items to pick from
-  var items=getCloset().filter(function(i){return i.cat===builderCat;});
-  var grid=document.getElementById('builderItems');
-  grid.innerHTML='';
-  if(items.length===0){
-    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;opacity:0.3;font-style:italic;">No '+builderCat+' in your closet</div>';
-    return;
-  }
-  items.forEach(function(item){
-    var isPicked=outfitPicks[builderCat]&&outfitPicks[builderCat].url===item.url;
-    var card=document.createElement('div');
-    card.className='builder-item'+(isPicked?' picked':'');
-    card.style.borderColor=isPicked?PAL.ac:'transparent';
-    card.style.background=PAL.tx+'06';
-    card.innerHTML='<img src="'+escHtml(item.url)+'" alt=""/>';
-    card.onclick=function(){
-      if(isPicked){outfitPicks[builderCat]=null;}else{outfitPicks[builderCat]=item;}
-      renderBuilder();
-    };
-    grid.appendChild(card);
-  });
 }
-
-function pickBuilderCat(cat){builderCat=cat;renderBuilder();}
 
 function clearOutfit(){
   for(var k in outfitPicks)outfitPicks[k]=null;
