@@ -874,7 +874,7 @@
       <div class="search-wrap" id="searchWrap">
         <div class="search-chrome" id="searchChrome">
           <div class="search-dots"><div class="search-dot"></div><div class="search-dot"></div><div class="search-dot"></div></div>
-          <input class="search-input" id="searchInput" placeholder="Search or go to..."
+          <input class="search-input" id="searchInput" placeholder="What are you looking for?"
             autocomplete="off"
             oninput="onSearchInput(this.value)"
             onkeydown="onSearchKey(event)"
@@ -2058,7 +2058,44 @@ function buildPage(){
   var searchWrap = document.getElementById('searchWrap');
   if(searchWrap && headerEl) headerEl.insertBefore(stats, searchWrap);
 
-  // Share your aesthetic card
+  // ── Wrap tip, fact, poll, share into a collapsible daily section ──
+  var existingDaily = document.getElementById('dailySection');
+  if(existingDaily) existingDaily.remove();
+  var dailyWrap = document.createElement('div');
+  dailyWrap.id = 'dailySection';
+  dailyWrap.style.cssText = 'margin-bottom:20px;';
+
+  var dailyToggle = document.createElement('button');
+  dailyToggle.style.cssText = 'width:100%;padding:12px 16px;border-radius:14px;background:'+pal.ac+'08;border:1.5px solid '+pal.tx+'06;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;font-weight:500;transition:all 0.2s;';
+  dailyToggle.innerHTML = '<span>Your daily stuff</span><span id="dailyArrow" style="font-size:0.7rem;opacity:0.3;transition:transform 0.2s;">v</span>';
+
+  var dailyContent = document.createElement('div');
+  dailyContent.id = 'dailyContent';
+  dailyContent.style.cssText = 'display:none;margin-top:12px;display:flex;flex-direction:column;gap:12px;';
+  var dailyOpen = localStorage.getItem('stuflover_daily_open') === 'true';
+  dailyContent.style.display = dailyOpen ? 'flex' : 'none';
+  if(dailyOpen) document.getElementById('dailyArrow')&&0; // arrow will be set after append
+
+  dailyToggle.onclick = function(){
+    var c = document.getElementById('dailyContent');
+    var a = document.getElementById('dailyArrow');
+    var open = c.style.display === 'none';
+    c.style.display = open ? 'flex' : 'none';
+    if(a) a.style.transform = open ? 'rotate(180deg)' : '';
+    localStorage.setItem('stuflover_daily_open', open.toString());
+  };
+
+  dailyWrap.appendChild(dailyToggle);
+  dailyWrap.appendChild(dailyContent);
+  if(searchWrap && headerEl) headerEl.insertBefore(dailyWrap, searchWrap);
+
+  // Set arrow state
+  setTimeout(function(){
+    var a = document.getElementById('dailyArrow');
+    if(a && dailyOpen) a.style.transform = 'rotate(180deg)';
+  }, 10);
+
+  // ── Share card ──
   var existingShare = document.getElementById('shareCard');
   if(existingShare) existingShare.remove();
   var shareCard = document.createElement('div');
@@ -2077,7 +2114,7 @@ function buildPage(){
       '<div style="font-size:0.82rem;color:'+pal.tx+';opacity:0.6;line-height:1.5;">'+escHtml(shareText)+'</div>'+
     '</div>'+
     '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'Copied!\';var b=this;setTimeout(function(){b.textContent=\'Copy\'},1500)}.bind(this))" style="padding:8px 18px;border:none;border-radius:10px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Copy</button>';
-  if(searchWrap && headerEl) headerEl.insertBefore(shareCard, searchWrap);
+  dailyContent.appendChild(shareCard);
 
   // Daily tip based on aesthetic
   var existingTip = document.getElementById('dailyTip');
@@ -2105,7 +2142,7 @@ function buildPage(){
   tipDiv.id = 'dailyTip';
   tipDiv.style.cssText = 'margin-bottom:20px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'06;font-size:0.8rem;line-height:1.6;color:'+pal.tx+';opacity:0.7;';
   tipDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:4px;">Today\'s micro wisdom</span>' + escHtml(todayTip);
-  if(searchWrap && headerEl) headerEl.insertBefore(tipDiv, searchWrap);
+  dailyContent.appendChild(tipDiv);
 
   // ── "Did You Know?" — surprising facts matched to aesthetic ──
   var existingFact = document.getElementById('surpriseFact');
@@ -2133,7 +2170,7 @@ function buildPage(){
   factDiv.id = 'surpriseFact';
   factDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.tx+'06;border-left:3px solid '+pal.ac+'40;';
   factDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:6px;color:'+pal.tx+';">Did you know?</span><span style="font-size:0.82rem;line-height:1.65;color:'+pal.tx+';opacity:0.65;">'+escHtml(todayFact)+'</span>';
-  if(searchWrap && headerEl) headerEl.insertBefore(factDiv, searchWrap);
+  dailyContent.appendChild(factDiv);
 
   // ── ENGAGEMENT: Daily Poll (quick interaction, replayable) ──
   var existingPoll = document.getElementById('dailyPoll');
@@ -2169,7 +2206,7 @@ function buildPage(){
     pollHtml += '<div style="font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+pal.tx+';">you picked: '+escHtml(todayPoll.a[parseInt(existingVote)])+' — new poll tomorrow</div>';
   }
   pollDiv.innerHTML = pollHtml;
-  if(searchWrap && headerEl) headerEl.insertBefore(pollDiv, searchWrap);
+  dailyContent.appendChild(pollDiv);
 
   // ── ENGAGEMENT: Streak counter (completion + replayability) ──
   var existingStreak = document.getElementById('streakCounter');
