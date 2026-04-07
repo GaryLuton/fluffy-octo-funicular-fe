@@ -869,7 +869,6 @@
 </head>
 <body>
 
-<div class="vignette-overlay"></div>
 
 <nav id="mainNav">
   <a class="logo bc" id="navLogo" href="index.html">Stuflover</a>
@@ -902,77 +901,14 @@
 <div id="lifestylePage">
   <svg id="bgSvg" xmlns="http://www.w3.org/2000/svg"></svg>
 
-  <!-- Floating hearts -->
-  <div id="floatingHeartsWrap" style="pointer-events:none;position:fixed;inset:0;z-index:0;overflow:hidden;">
-    <svg class="floating-heart" width="16" height="16" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-    <svg class="floating-heart" width="12" height="12" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-    <svg class="floating-heart" width="10" height="10" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-    <svg class="floating-heart" width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-  </div>
-
   <!-- HOME VIEW -->
   <div id="homeView">
-    <div id="scrapDecos" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;"></div>
-
-    <!-- INSTAGRAM STORY UI — horizontal scroll categories -->
-    <div id="storyBar" style="padding:70px 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;position:relative;z-index:5;">
-      <div style="display:inline-flex;gap:14px;padding:8px 24px;">
-        <div class="story-item" onclick="openSection('fitforit')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">S</div></div>
-          <span class="story-label">Style</span>
-        </div>
-        <div class="story-item" onclick="window.location.href='beyou.html'" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">W</div></div>
-          <span class="story-label">Wellness</span>
-        </div>
-        <div class="story-item" onclick="openSection('floverhub')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">G</div></div>
-          <span class="story-label">Games</span>
-        </div>
-        <div class="story-item" onclick="openSection('friends')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">F</div></div>
-          <span class="story-label">Social</span>
-        </div>
-        <div class="story-item" onclick="openSection('stufloverdaily')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">D</div></div>
-          <span class="story-label">Discover</span>
-        </div>
-        <div class="story-item" onclick="openSection('myprofile')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">M</div></div>
-          <span class="story-label">Me</span>
-        </div>
-        <div class="story-item" onclick="openSection('floveegroup')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">C</div></div>
-          <span class="story-label">Groups</span>
-        </div>
-        <div class="story-item" onclick="openSection('readit')" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;">
-          <div class="story-ring"><div class="story-avatar" style="font-size:0.9rem;">R</div></div>
-          <span class="story-label">ReadIt</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="page-header" style="padding-top:16px;">
+    <div class="page-header" style="padding-top:76px;">
       <div class="ae-eyebrow" id="aeEyebrow">your aesthetic is</div>
       <div class="ae-title bc" id="aeTitle"></div>
-
-      <!-- Search bar -->
-      <div class="search-wrap" id="searchWrap">
-        <div class="search-chrome" id="searchChrome">
-          <div class="search-dots"><div class="search-dot"></div><div class="search-dot"></div><div class="search-dot"></div></div>
-          <input class="search-input" id="searchInput" placeholder="What are you looking for?"
-            autocomplete="off"
-            oninput="onSearchInput(this.value)"
-            onkeydown="onSearchKey(event)"
-            onfocus="onSearchFocus()"
-            onblur="onSearchBlur()"/>
-        </div>
-        <button class="search-go bc" id="searchGo" onclick="goSearch()">Go</button>
-        <div class="search-dropdown" id="searchDropdown"></div>
-      </div>
     </div>
 
-    <!-- VERTICAL FEED (TikTok FYP style — no menus, just scroll) -->
+    <!-- Vertical feed -->
     <div id="verticalFeed" style="position:relative;z-index:2;max-width:540px;margin:0 auto;padding:0 20px 60px;">
 
       <!-- Flovee Post (disappearing) -->
@@ -984,7 +920,7 @@
         <div id="instantFeed"></div>
       </div>
 
-      <!-- Sections (inline, not a grid to click) -->
+      <!-- Sections -->
       <div class="feed-section feed-reveal">
         <h2 class="feed-heading">Jump In</h2>
         <div class="content-grid" id="browserGrid"></div>
@@ -6020,13 +5956,21 @@ async function loadFloveePost(){
       var timeLabel = hoursLeft > 6 ? 'here for a while' : hoursLeft > 1 ? 'here for a few more hours' : 'fading soon';
 
       wrap.style.display = 'block';
+      var shareText = f+': "'+data.post.content+'" — stuflover.vercel.app';
       wrap.innerHTML =
-        '<div style="padding:20px 22px;border-radius:18px;background:'+pal.ac+'0a;border:1px solid '+pal.tx+'08;">'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
-            '<div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.35;color:'+pal.tx+';">'+f+' just posted</div>'+
-            '<div style="font-size:0.62rem;opacity:0.2;color:'+pal.tx+';">'+timeLabel+'</div>'+
+        '<div style="padding:22px 24px;border-radius:20px;background:linear-gradient(135deg,'+pal.ac+'12,'+pal.ac+'06);border:1px solid '+pal.tx+'06;position:relative;">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'+
+            '<div style="display:flex;align-items:center;gap:8px;">'+
+              '<div style="width:28px;height:28px;border-radius:50%;background:'+pal.ac+'25;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">'+f.charAt(0)+'</div>'+
+              '<div style="font-size:0.72rem;font-weight:600;color:'+pal.tx+';">'+f+'</div>'+
+            '</div>'+
+            '<div style="font-size:0.6rem;opacity:0.2;color:'+pal.tx+';">'+timeLabel+'</div>'+
           '</div>'+
-          '<div style="font-size:0.92rem;line-height:1.65;color:'+pal.tx+';opacity:0.7;font-style:italic;">'+escHtml(data.post.content)+'</div>'+
+          '<div style="font-size:0.95rem;line-height:1.7;color:'+pal.tx+';opacity:0.75;">'+escHtml(data.post.content)+'</div>'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">'+
+            '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" style="padding:6px 16px;border-radius:20px;border:1px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:opacity 0.2s;">share</button>'+
+            '<div style="font-size:0.58rem;opacity:0.15;color:'+pal.tx+';">disappears in '+hoursLeft+'h</div>'+
+          '</div>'+
         '</div>';
 
     } else if(data.status === 'missed'){
