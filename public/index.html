@@ -7,25 +7,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
-      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
-      --brown:#1e0c06; --white:#ffffff;
+      --pink-light:#faf0f0; --pink-mid:#f0ddd6; --peach:#e8d5c8;
+      --terracotta:#c87860; --terracotta-dark:#a86050;
+      --brown:#2a1a14; --white:#ffffff;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);overflow-x:hidden;
-      background-image:radial-gradient(circle, rgba(30,12,6,0.04) 1px, transparent 1px);background-size:24px 24px;}
+      background-image:radial-gradient(circle, rgba(42,26,20,0.03) 1px, transparent 1px);background-size:24px 24px;}
     h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     /* Smooth hover transitions for all interactive elements */
     a,button,.boredom-card,.polaroid,.empty-slot,.video-card,.react-btn,.tab{transition:all 0.25s cubic-bezier(0.4,0,0.2,1);}
     /* Section heading underline accent */
     .boredom-hub h2, .viral h2, .videos h2, .style-section h2, .be-unique h2{position:relative;display:inline-block;}
     .boredom-hub h2::after, .videos h2::after, .style-section h2::after{content:'';position:absolute;bottom:-6px;left:0;width:60px;height:4px;border-radius:2px;background:var(--terracotta);opacity:0.55;}
-    nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.6);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid rgba(30,12,6,0.06);box-shadow:0 1px 12px rgba(30,12,6,0.05);}
+    nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(250,240,240,0.65);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid rgba(42,26,20,0.06);box-shadow:0 1px 12px rgba(42,26,20,0.04);}
     .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);}
     nav ul{list-style:none;display:flex;gap:32px;}
     nav ul a{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1rem;letter-spacing:2px;text-transform:uppercase;color:var(--brown);text-decoration:none;transition:opacity 0.25s cubic-bezier(0.4,0,0.2,1);}
     nav ul a:hover{opacity:0.45;}
-    .hero{min-height:100vh;background:var(--pink-light);background-image:radial-gradient(circle at 20% 80%,rgba(196,82,42,0.06) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(247,212,176,0.4) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(245,170,170,0.15) 0%,transparent 60%);display:flex;align-items:center;padding:120px 60px 80px;position:relative;overflow:hidden;}
+    .hero{min-height:100vh;background:var(--pink-light);background-image:radial-gradient(circle at 20% 80%,rgba(200,120,96,0.06) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(232,213,200,0.45) 0%,transparent 45%),radial-gradient(circle at 50% 50%,rgba(240,221,214,0.2) 0%,transparent 60%);display:flex;align-items:center;padding:120px 60px 80px;position:relative;overflow:hidden;}
     .hero h1{font-size:clamp(5.5rem,14vw,12rem);line-height:0.88;color:var(--brown);z-index:2;}
     .hero-circle{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:340px;height:340px;border-radius:50%;border:7px solid var(--white);box-shadow:0 10px 40px rgba(30,12,6,0.13);background:linear-gradient(135deg,#e8c8b0,#c8a090);display:flex;align-items:center;justify-content:center;font-size:6rem;}
     .flower{position:absolute;right:385px;top:calc(50% - 210px);width:78px;height:78px;z-index:3;}
@@ -63,7 +63,7 @@
     .refresh-btn{background:transparent;color:var(--terracotta);border:2.5px solid var(--terracotta);padding:12px 28px;}
     .refresh-btn:hover{background:var(--terracotta);color:white;}
     .refresh-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-    .refresh-btn .spinner{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(196,82,42,0.3);border-top-color:var(--terracotta);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
+    .refresh-btn .spinner{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(200,120,96,0.3);border-top-color:var(--terracotta);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
     .refresh-btn:hover .spinner{border-color:rgba(255,255,255,0.3);border-top-color:white;}
     @keyframes spin{to{transform:rotate(360deg);}}
     .video-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
@@ -71,7 +71,7 @@
     .video-thumb{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s,opacity 0.3s;}
     .video-card:hover .video-thumb{transform:scale(1.08);opacity:0.85;}
     .play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
-    .play-circle{width:64px;height:64px;background:rgba(249,196,196,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 24px rgba(0,0,0,0.35);transition:transform 0.2s;}
+    .play-circle{width:64px;height:64px;background:rgba(250,240,240,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 24px rgba(0,0,0,0.35);transition:transform 0.2s;}
     .video-card:hover .play-circle{transform:scale(1.15);}
     .video-remove-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;background:rgba(30,12,6,0.8);color:white;border:none;border-radius:50%;cursor:pointer;font-size:0.78rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;z-index:5;}
     .video-card:hover .video-remove-btn{opacity:1;}
@@ -83,7 +83,7 @@
     .react-btn.disliked{background:#444;transform:scale(1.1);}
     .video-title-bar{position:absolute;bottom:0;left:0;right:0;padding:6px 10px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-size:0.72rem;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity 0.2s;pointer-events:none;font-weight:600;letter-spacing:0.3px;}
     .video-card:hover .video-title-bar{opacity:1;}
-    .empty-slot{aspect-ratio:16/9;border-radius:14px;background:var(--pink-light);border:3px dashed rgba(196,82,42,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background 0.2s,border-color 0.2s;}
+    .empty-slot{aspect-ratio:16/9;border-radius:14px;background:var(--pink-light);border:3px dashed rgba(200,120,96,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:background 0.2s,border-color 0.2s;}
     .empty-slot:hover{background:var(--peach);border-color:var(--terracotta);}
     .empty-slot span:first-child{font-size:2rem;}
     .empty-slot span:last-child{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;color:var(--terracotta);opacity:0.75;}
@@ -135,7 +135,7 @@
     @property --gradient-angle{syntax:"<angle>";initial-value:0deg;inherits:false;}
     @keyframes gradient-rotate{to{--gradient-angle:360deg;}}
     .video-card{position:relative;z-index:0;}
-    .video-card::before{content:'';position:absolute;inset:-3px;border-radius:17px;background:conic-gradient(from var(--gradient-angle),#f9c4c4,#c4522a,#f7d4b0,#f5aaaa,#c4522a,#f9c4c4);z-index:-1;opacity:0;transition:opacity 0.4s;animation:gradient-rotate 3s linear infinite;}
+    .video-card::before{content:'';position:absolute;inset:-3px;border-radius:17px;background:conic-gradient(from var(--gradient-angle),#faf0f0,#c87860,#e8d5c8,#f0ddd6,#c87860,#faf0f0);z-index:-1;opacity:0;transition:opacity 0.4s;animation:gradient-rotate 3s linear infinite;}
     .video-card:hover::before{opacity:1;}
 
     /* PREMIUM video card hover */
@@ -148,21 +148,21 @@
       50%{background-position:100% 50%;}
       100%{background-position:0% 50%;}
     }
-    .viral h2{background:linear-gradient(90deg,#c4522a,#d4756a,#f5aaaa,#f7d4b0,#c4522a,#a83e1e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradient-text-flow 5s ease infinite;}
+    .viral h2{background:linear-gradient(90deg,#c87860,#d4968a,#f0ddd6,#e8d5c8,#c87860,#a86050);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradient-text-flow 5s ease infinite;}
 
     /* FOOTER SPARKLE / SHIMMER */
     @keyframes shimmer{
       0%{background-position:-200% center;}
       100%{background-position:200% center;}
     }
-    .footer-logo{position:relative;display:inline-block;background:linear-gradient(90deg,var(--brown) 30%,rgba(247,212,176,0.9) 48%,rgba(196,82,42,0.8) 50%,rgba(247,212,176,0.9) 52%,var(--brown) 70%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3.5s ease-in-out infinite;}
+    .footer-logo{position:relative;display:inline-block;background:linear-gradient(90deg,var(--brown) 30%,rgba(232,213,200,0.9) 48%,rgba(200,120,96,0.8) 50%,rgba(232,213,200,0.9) 52%,var(--brown) 70%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3.5s ease-in-out infinite;}
     /* ── HAMBURGER MENU ── */
     .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--brown);}
     .nav-toggle svg{width:24px;height:24px;display:block;}
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      nav ul{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(30,12,6,0.08);padding:8px 0;}
+      nav ul{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(250,240,240,0.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(42,26,20,0.08);padding:8px 0;}
       nav ul.open{display:flex;}
       nav ul a{display:block;padding:14px 24px;border-bottom:1px solid rgba(30,12,6,0.05);}
       .nav-toggle{display:block;}
@@ -217,7 +217,7 @@
   <h1 class="reveal" style="font-size:clamp(6rem,18vw,14rem);line-height:0.82;letter-spacing:-4px;margin-bottom:20px;">Stuf<br>lover</h1>
   <p class="reveal" style="font-size:1.1rem;color:rgba(30,12,6,0.4);max-width:360px;line-height:1.8;margin-bottom:8px;">the app that gets your aesthetic. take the quiz, get your page, live your vibe.</p>
   <div class="reveal" style="font-family:'Caveat',cursive;font-size:1.2rem;color:var(--terracotta);opacity:0.6;margin-bottom:32px;">your world, made for you</div>
-  <a href="lifestyle.html" class="reveal" style="display:inline-block;padding:18px 52px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:4px;text-transform:uppercase;border-radius:50px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 6px 24px rgba(196,82,42,0.3);" onmouseenter="this.style.transform='translateY(-4px) scale(1.03)';this.style.boxShadow='0 10px 36px rgba(196,82,42,0.4)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(196,82,42,0.3)'">Take the Quiz</a>
+  <a href="lifestyle.html" class="reveal" style="display:inline-block;padding:18px 52px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:4px;text-transform:uppercase;border-radius:50px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 6px 24px rgba(200,120,96,0.25);" onmouseenter="this.style.transform='translateY(-4px) scale(1.03)';this.style.boxShadow='0 10px 36px rgba(200,120,96,0.35)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(200,120,96,0.25)'">Take the Quiz</a>
   <div class="reveal" style="margin-top:12px;font-size:0.7rem;opacity:0.25;letter-spacing:2px;">scroll to explore more</div>
 </div>
 
@@ -225,11 +225,11 @@
 <div style="background:var(--white);padding:60px 48px;" id="explore">
   <div class="reveal" style="text-align:center;margin-bottom:12px;font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;">Jump to</div>
   <div class="reveal" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:720px;margin:0 auto;">
-    <a href="lifestyle.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--pink-light),rgba(245,170,170,0.3));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+    <a href="lifestyle.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--pink-light),rgba(240,221,214,0.35));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">My Page</div>
       <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">games + style</div>
     </a>
-    <a href="fitforit.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--peach),rgba(247,212,176,0.3));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+    <a href="fitforit.html" style="text-decoration:none;color:var(--brown);text-align:center;padding:28px 12px;background:linear-gradient(135deg,var(--peach),rgba(232,213,200,0.35));border-radius:18px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;border:1.5px solid rgba(30,12,6,0.04);" onmouseenter="this.style.transform='translateY(-6px) scale(1.03)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.08)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
       <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;">Closet</div>
       <div style="font-size:0.7rem;opacity:0.35;margin-top:4px;">your wardrobe</div>
     </a>
@@ -271,7 +271,7 @@
 </div>
 
 <!-- STUFLOVER SHOP COMING SOON -->
-<div class="shop-teaser" id="shopTeaser" style="background:linear-gradient(135deg,var(--terracotta),var(--terracotta-dark));padding:80px 60px;text-align:center;position:relative;overflow:hidden;">
+<div class="shop-teaser" id="shopTeaser" style="background:linear-gradient(135deg,var(--terracotta),#b86e6e,var(--terracotta-dark));padding:80px 60px;text-align:center;position:relative;overflow:hidden;">
   <div style="position:absolute;inset:0;opacity:0.06;background-image:repeating-linear-gradient(45deg,transparent,transparent 20px,white 20px,white 21px);pointer-events:none;"></div>
   <div class="reveal" style="position:relative;">
     <div style="font-size:0.7rem;letter-spacing:6px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;">Coming Soon</div>

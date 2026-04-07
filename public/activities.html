@@ -6,7 +6,7 @@
   <title>Bored? Not Anymore — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#f9c4c4;--tx:#1e0c06;--ac:#c4522a;--ac2:#a83e1e;--white:#fff;}
+    :root{--bg:#faf0f0;--pink:#faf0f0;--pink-mid:#f0ddd6;--tx:#2a1a14;--ac:#c87860;--ac2:#a86050;--white:#ffffff;--peach:#e8d5c8;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;transition:background 0.6s,color 0.6s;position:relative;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
@@ -39,7 +39,7 @@
     nav, .hero, .refresh-row, #activitiesContainer{position:relative;z-index:1;}
 
     /* NAV */
-    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
+    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
     .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;letter-spacing:4px;text-decoration:none;color:var(--tx);}
     .nav-links{display:flex;align-items:center;gap:16px;}
     .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--tx);transition:opacity 0.2s;}
@@ -109,7 +109,7 @@
       .category{padding:0 20px 40px;}
       .cards-row{grid-template-columns:1fr;}
       nav{padding:14px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
+      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);padding:8px 0;}
       .nav-links.open{display:flex;}
       .nav-link{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(30,12,6,0.05);}
       .nav-toggle{display:block;}
@@ -205,7 +205,7 @@
 
   // ─── PALETTE (same logic as lifestyle.html) ───
   function resolvePalette(){
-    if(!profile) return {bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a',ac2:'#a83e1e'};
+    if(!profile) return {bg:'#faf0f0',tx:'#2a1a14',ac:'#c87860',ac2:'#a86050'};
     const ae=profile.aesthetics||{}; const et=profile.extraTags||[];
     const sorted=Object.entries(ae).sort((a,b)=>b[1]-a[1]);
     const top=sorted[0]?.[0];
@@ -338,7 +338,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
         const card = document.createElement('div');
         card.className = 'activity-card';
         card.setAttribute('data-cat', cat.key);
-        card.style.background = pal.bg === '#f9c4c4' ? '#fff' : lightenHex(pal.bg, 0.35);
+        card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
         card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
         card.style.animationDelay = (globalCardIdx * 0.08) + 's';
         globalCardIdx++;
