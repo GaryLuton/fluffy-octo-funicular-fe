@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Study Helper — Stuflover</title>
+  <title>Brain Boost — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <script src="stuflover-config.js"></script>
   <script src="stuflover-backend.js"></script>
@@ -158,11 +158,18 @@
   </div>
 </nav>
 
+<!-- HEADER -->
+<div style="text-align:center;padding:80px 20px 10px;">
+  <div style="font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:6px;">Stuflover</div>
+  <h1 class="bc" style="font-size:clamp(2.2rem,6vw,3.5rem);letter-spacing:-1px;line-height:0.9;margin-bottom:8px;">Brain Boost</h1>
+  <p style="font-size:0.88rem;opacity:0.4;max-width:340px;margin:0 auto;line-height:1.7;">no stress. just learning that actually sticks.</p>
+</div>
+
 <!-- TABS -->
 <div class="tabs-bar">
-  <button class="tab-btn bc active" data-tab="homework">Homework Help</button>
+  <button class="tab-btn bc active" data-tab="homework">Ask Flovee</button>
   <button class="tab-btn bc" data-tab="flashcards">Flash Cards</button>
-  <button class="tab-btn bc" data-tab="quiz">Quiz</button>
+  <button class="tab-btn bc" data-tab="quiz">Quiz Me</button>
 </div>
 
 <!-- MOTIVATIONAL QUOTE -->
@@ -172,30 +179,37 @@
 <div id="homework" class="tab-content active">
   <div class="chat-box" id="chatBox"></div>
   <div class="chat-input-row">
-    <input type="text" id="chatInput" placeholder="Ask about your homework..." autocomplete="off"/>
+    <input type="text" id="chatInput" placeholder="Ask anything — no stupid questions here..." autocomplete="off"/>
     <button class="send-btn bc" id="chatSend">Send</button>
   </div>
 </div>
 
 <!-- FLASH CARDS -->
 <div id="flashcards" class="tab-content">
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;margin-bottom:4px;">Your cards</div>
+    <p style="font-size:0.82rem;opacity:0.35;">tap a card to flip it</p>
+  </div>
   <div class="fc-create">
-    <input type="text" id="fcFront" placeholder="Front (question)"/>
-    <input type="text" id="fcBack" placeholder="Back (answer)"/>
+    <input type="text" id="fcFront" placeholder="Question or term..."/>
+    <input type="text" id="fcBack" placeholder="Answer..."/>
     <button class="action-btn bc" id="fcAdd">Add</button>
   </div>
   <div class="card-stage" id="fcStage">
-    <div class="fc-empty" id="fcEmpty">No cards yet. Add some above!</div>
+    <div class="fc-empty" id="fcEmpty">No cards yet — add your first one above</div>
   </div>
 </div>
 
 <!-- QUIZ -->
 <div id="quiz" class="tab-content">
-  <div class="quiz-topic-row">
-    <input type="text" id="quizTopic" placeholder="Enter a topic (e.g. Photosynthesis, WW2, Algebra)"/>
-    <button class="action-btn bc" id="quizGen">Generate</button>
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;margin-bottom:8px;">Test yourself</div>
+    <div class="quiz-score bc" id="quizScore" style="font-size:1rem;margin-bottom:12px;"></div>
   </div>
-  <div class="quiz-score bc" id="quizScore"></div>
+  <div class="quiz-topic-row">
+    <input type="text" id="quizTopic" placeholder="What do you want to be quizzed on?"/>
+    <button class="action-btn bc" id="quizGen">Go</button>
+  </div>
   <div id="quizArea"></div>
 </div>
 
@@ -203,21 +217,21 @@
 (function(){
   /* ── Motivational quote ── */
   var studyQuotes=[
-    "You are capable of amazing things — keep going!",
-    "A little progress each day adds up to big results.",
-    "You don't have to be perfect, just keep trying.",
-    "Believe in yourself — you've got this!",
-    "Every expert was once a beginner.",
-    "Your future self will thank you for studying today.",
-    "Small steps still move you forward.",
-    "Mistakes mean you're learning something new.",
-    "You're doing better than you think!",
-    "Dream big, study hard, stay focused.",
-    "Difficult roads lead to beautiful destinations.",
-    "Be proud of how far you've come.",
-    "Consistency beats perfection every single time.",
-    "The struggle you're in today is the strength you need tomorrow.",
-    "You're one study session closer to your goals."
+    "your brain is literally so powerful rn",
+    "main character energy but make it academic",
+    "studying hits different when you actually get it",
+    "you are not behind. you are on your own timeline.",
+    "confused? good. that means you are about to learn something",
+    "hot take: you are smarter than you think",
+    "this is your sign to trust the process",
+    "plot twist: you actually understand this",
+    "learning > stressing. always.",
+    "you do not need to be perfect. you need to be curious.",
+    "one more question and you are literally unstoppable",
+    "your future self is so proud of you rn",
+    "no because you are actually getting this",
+    "the girlies who study casually > the girlies who panic",
+    "breathe. you got this. for real."
   ];
   var quoteEl=document.getElementById('motiQuote');
   if(quoteEl){quoteEl.textContent='"'+studyQuotes[Math.floor(Math.random()*studyQuotes.length)]+'"';}
