@@ -68,9 +68,31 @@
     .g-err{font-size:0.75rem;color:#c44;min-height:16px;margin-bottom:6px;}
     .g-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#c87860;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
-    /* MOBILE */
+    /* SHARED TODOS */
+    .todo-list{margin-top:8px;}
+    .todo-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;margin-bottom:4px;background:white;border:1px solid rgba(42,26,20,0.04);font-size:0.85rem;transition:all 0.15s;}
+    .todo-check{width:20px;height:20px;border-radius:6px;border:2px solid rgba(42,26,20,0.15);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;color:transparent;font-size:0.7rem;}
+    .todo-check.done{background:#c87860;border-color:#c87860;color:white;}
+    .todo-text{flex:1;line-height:1.4;}
+    .todo-text.done{text-decoration:line-through;opacity:0.35;}
+    .todo-del{opacity:0;font-size:0.6rem;background:none;border:none;cursor:pointer;color:rgba(200,60,60,0.5);padding:4px;transition:opacity 0.15s;}
+    .todo-item:hover .todo-del{opacity:1;}
+    .todo-add-row{display:flex;gap:6px;margin-top:8px;}
+    .todo-add-input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid rgba(42,26,20,0.08);background:white;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;color:#2a1a14;outline:none;}
+    .todo-add-btn{padding:8px 16px;border:none;border-radius:8px;background:#c87860;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;}
+
+    /* IMAGE IN CHAT */
+    .msg img{max-width:100%;border-radius:10px;margin-top:6px;display:block;}
+
+    /* MOBILE MENU */
+    .mobile-menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#2a1a14;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:200;}
+
     @media(max-width:640px){
-      .sidebar{display:none;}
+      .sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:300;width:250px;transition:left 0.25s ease;box-shadow:4px 0 20px rgba(0,0,0,0.1);background:#f5f0ed;}
+      .sidebar.open{left:0;}
+      .sidebar-overlay.open{display:block;}
+      .mobile-menu-btn{display:block;}
       .top-bar{padding:10px 14px;}
       .msgs{padding:12px 14px;}
       .input-row{padding:10px 14px;}
@@ -82,6 +104,7 @@
 
 <div class="top-bar">
   <div class="top-left">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <a class="top-logo bc" href="index.html">Stuflover</a>
     <span class="top-tag bc">Collab</span>
   </div>
@@ -90,9 +113,23 @@
     <a class="top-btn" href="lifestyle.html">Site</a>
   </div>
 </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- GATE (shown when not logged in or no access) -->
-<div id="gate">
+<!-- PASSWORD GATE -->
+<div id="passGate" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;">
+  <div style="width:90%;max-width:340px;">
+    <h1 class="bc" style="font-size:2rem;margin-bottom:6px;">Collab</h1>
+    <p style="font-size:0.82rem;opacity:0.3;margin-bottom:20px;">enter the workspace password</p>
+    <div class="gate-card" style="text-align:left;">
+      <input class="g-input" id="passInput" type="password" placeholder="password" onkeydown="if(event.key==='Enter')checkPass()" autofocus/>
+      <div class="g-err" id="passErr"></div>
+      <button class="g-btn" onclick="checkPass()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN GATE (shown after password is correct) -->
+<div id="gate" style="display:none;">
   <div style="width:90%;max-width:380px;">
     <h1 class="bc" id="gateTitle">Collab</h1>
     <p id="gateMsg">checking...</p>
@@ -144,6 +181,9 @@
     </div>
 
     <div class="sidebar-section" style="margin-top:16px;">tools</div>
+    <div class="sidebar-item" onclick="openChannel('tasks')" id="ch_tasks">
+      <div class="dot" style="background:#ffb74d;"></div> Tasks
+    </div>
     <div class="sidebar-item" onclick="openChannel('claude')" id="ch_claude">
       <div class="dot" style="background:#b39ddb;"></div> Ask Claude
     </div>
@@ -164,7 +204,11 @@
       <div class="chat-header-desc" id="chDesc">team chat</div>
     </div>
     <div class="msgs" id="chatMsgs"></div>
-    <div class="input-row">
+    <div class="input-row" id="inputRow">
+      <label style="padding:8px;cursor:pointer;opacity:0.3;transition:opacity 0.15s;flex-shrink:0;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=0.3" title="Share image">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <input type="file" accept="image/*" onchange="shareImage(this)" style="display:none;"/>
+      </label>
       <textarea class="input-box" id="chatInput" placeholder="message..." rows="1"
         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
         oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"></textarea>
@@ -177,6 +221,26 @@
 <script src="/stuflover-backend.js"></script>
 <script>
 var myUsername='', myRole='', currentChannel='general', chatPoll=null;
+var COLLAB_PASS='DIGITALDRAW101';
+
+function checkPass(){
+  var val=document.getElementById('passInput').value.trim();
+  if(val===COLLAB_PASS){
+    sessionStorage.setItem('collab_auth','1');
+    document.getElementById('passGate').style.display='none';
+    document.getElementById('gate').style.display='flex';
+    init();
+  }else{
+    document.getElementById('passErr').textContent='wrong password';
+    document.getElementById('passInput').value='';
+  }
+}
+
+// Auto-skip password if already entered this session
+if(sessionStorage.getItem('collab_auth')==='1'){
+  document.getElementById('passGate').style.display='none';
+  document.getElementById('gate').style.display='flex';
+}
 
 async function api(url,opts){
   var base=window.STUFLOVER_API_URL||'';
@@ -187,6 +251,12 @@ async function api(url,opts){
   return r.json();
 }
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function linkify(s){return s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#c87860;word-break:break-all;">$1</a>');}
+
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
 
 // ─── INIT ───
 async function init(){
@@ -260,8 +330,9 @@ async function gateRegister(){
 // ─── CHANNELS ───
 var channelInfo={
   general:{name:'General',desc:'team chat',color:'#c87860'},
-  designs:{name:'Designs',desc:'share printify designs + ideas',color:'#7986cb'},
+  designs:{name:'Designs',desc:'share printify designs + links',color:'#7986cb'},
   ideas:{name:'Ideas',desc:'brainstorm anything',color:'#81c784'},
+  tasks:{name:'Tasks',desc:'shared to-do list',color:'#ffb74d'},
   claude:{name:'Ask Claude',desc:'AI assistant for the team',color:'#b39ddb'}
 };
 
@@ -274,11 +345,21 @@ function openChannel(ch){
   document.getElementById('chDot').style.background=info.color;
   document.querySelectorAll('.sidebar-item').forEach(function(el){el.classList.remove('on');});
   var el=document.getElementById('ch_'+ch);if(el)el.classList.add('on');
+  // Close mobile sidebar
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
 
-  if(ch==='claude'){
+  var inputRow=document.getElementById('inputRow');
+
+  if(ch==='tasks'){
+    inputRow.style.display='none';
+    loadTasks();
+  }else if(ch==='claude'){
+    inputRow.style.display='flex';
     document.getElementById('chatInput').placeholder='ask claude anything about stuflover...';
     loadClaudeChat();
   }else{
+    inputRow.style.display='flex';
     document.getElementById('chatInput').placeholder='message #'+info.name.toLowerCase()+'...';
     loadChat();
     chatPoll=setInterval(loadChat,4000);
@@ -304,9 +385,13 @@ function renderMsgs(msgs){
     var isMe=m.username===myUsername;
     var d=new Date(m.created_at+'Z');
     var time=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+    var content=linkify(esc(m.text));
+    // Check if message is an image (base64 or URL)
+    var isImg=m.text.match(/^data:image/)||m.text.match(/^https?:\/\/\S+\.(png|jpg|jpeg|gif|webp)(\?|$)/i);
+    if(isImg) content='<img src="'+esc(m.text)+'" alt="shared image" onerror="this.style.display=\'none\'"/>';
     return '<div class="msg '+(isMe?'me':'them')+'">'+
       (!isMe?'<div class="msg-user">'+esc(m.username)+'</div>':'')+
-      esc(m.text)+
+      content+
       '<div class="msg-time">'+time+'</div>'+
     '</div>';
   }).join('');
@@ -417,7 +502,134 @@ async function removeMember(id){
   loadTeamSidebar();
 }
 
-init();
+// ─── IMAGE SHARING ───
+function shareImage(input){
+  var file=input.files&&input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var max=600;var w=img.width,h=img.height;
+      if(w>h){if(w>max){h=h*(max/w);w=max;}}else{if(h>max){w=w*(max/h);h=max;}}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var dataUrl=canvas.toDataURL('image/jpeg',0.8);
+      // Send as a message
+      api('/api/collab/messages',{method:'POST',body:JSON.stringify({text:dataUrl,channel:currentChannel})}).then(loadChat);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+
+// ─── SHARED TASKS ───
+function loadTasks(){
+  var tasks=JSON.parse(localStorage.getItem('collab_tasks')||'[]');
+  // Also try to load from server
+  api('/api/collab/messages?channel=tasks').then(function(data){
+    // Tasks are stored as special messages with JSON
+    var serverTasks=[];
+    (data.messages||[]).forEach(function(m){
+      try{var t=JSON.parse(m.text);if(t&&t._type==='tasks'){serverTasks=t.items;}}catch(e){}
+    });
+    if(serverTasks.length) tasks=serverTasks;
+    renderTasks(tasks);
+  }).catch(function(){renderTasks(tasks);});
+}
+
+function renderTasks(tasks){
+  var el=document.getElementById('chatMsgs');
+  var done=tasks.filter(function(t){return t.done;}).length;
+  el.innerHTML=
+    '<div style="max-width:500px;margin:0 auto;padding:10px 0;">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'+
+        '<div style="font-size:0.88rem;font-weight:600;">Team Tasks</div>'+
+        '<div style="font-size:0.72rem;opacity:0.3;">'+done+'/'+tasks.length+' done</div>'+
+      '</div>'+
+      (tasks.length?'<div style="height:4px;border-radius:2px;background:rgba(42,26,20,0.06);margin-bottom:12px;"><div style="height:100%;width:'+(tasks.length?Math.round(done/tasks.length*100):0)+'%;background:#c87860;border-radius:2px;transition:width 0.3s;"></div></div>':'')+
+      '<div class="todo-list">'+
+        tasks.map(function(t,i){
+          return '<div class="todo-item">'+
+            '<button class="todo-check'+(t.done?' done':'')+'" onclick="toggleTask('+i+')">'+
+              (t.done?'&#10003;':'')+
+            '</button>'+
+            '<span class="todo-text'+(t.done?' done':'')+'">'+esc(t.text)+'</span>'+
+            '<span style="font-size:0.6rem;opacity:0.2;">'+esc(t.by||'')+'</span>'+
+            '<button class="todo-del" onclick="deleteTask('+i+')">x</button>'+
+          '</div>';
+        }).join('')+
+      '</div>'+
+      '<div class="todo-add-row">'+
+        '<input class="todo-add-input" id="todoInput" placeholder="add a task..." onkeydown="if(event.key===\'Enter\')addTask()"/>'+
+        '<button class="todo-add-btn" onclick="addTask()">Add</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function getTaskList(){
+  var tasks=[];
+  document.querySelectorAll('.todo-item').forEach(function(el){
+    var text=el.querySelector('.todo-text').textContent;
+    var done=el.querySelector('.todo-check').classList.contains('done');
+    var by=el.querySelectorAll('span')[1]?el.querySelectorAll('span')[1].textContent:'';
+    tasks.push({text:text,done:done,by:by});
+  });
+  return tasks;
+}
+
+function saveTasks(tasks){
+  localStorage.setItem('collab_tasks',JSON.stringify(tasks));
+  // Also save to server as a special message
+  api('/api/collab/messages',{method:'POST',body:JSON.stringify({text:JSON.stringify({_type:'tasks',items:tasks}),channel:'tasks'})}).catch(function(){});
+}
+
+function addTask(){
+  var input=document.getElementById('todoInput');
+  var text=input.value.trim();if(!text)return;
+  var tasks=getTaskList();
+  tasks.push({text:text,done:false,by:myUsername});
+  saveTasks(tasks);
+  renderTasks(tasks);
+}
+
+function toggleTask(i){
+  var tasks=getTaskList();
+  if(tasks[i]) tasks[i].done=!tasks[i].done;
+  saveTasks(tasks);
+  renderTasks(tasks);
+}
+
+function deleteTask(i){
+  var tasks=getTaskList();
+  tasks.splice(i,1);
+  saveTasks(tasks);
+  renderTasks(tasks);
+}
+
+// ─── NOTIFICATIONS ───
+var notifEnabled=false;
+function enableNotifs(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+  notifEnabled=true;
+}
+
+var prevMsgCounts={};
+function checkNewMsgs(ch,count){
+  if(!notifEnabled)return;
+  if(prevMsgCounts[ch]!==undefined && count>prevMsgCounts[ch] && ch!==currentChannel){
+    try{new Notification('Stuflover Collab',{body:'New message in #'+ch,icon:'/favicon.ico'});}catch(e){}
+  }
+  prevMsgCounts[ch]=count;
+}
+
+// Only auto-init if password was already entered this session
+if(sessionStorage.getItem('collab_auth')==='1') init();
+// Ask for notification permission after first interaction
+document.addEventListener('click',function(){enableNotifs();},{once:true});
 </script>
 </body>
 </html>
