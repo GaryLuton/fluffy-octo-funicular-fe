@@ -115,8 +115,21 @@
 </div>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-<!-- GATE (shown when not logged in or no access) -->
-<div id="gate">
+<!-- PASSWORD GATE -->
+<div id="passGate" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;">
+  <div style="width:90%;max-width:340px;">
+    <h1 class="bc" style="font-size:2rem;margin-bottom:6px;">Collab</h1>
+    <p style="font-size:0.82rem;opacity:0.3;margin-bottom:20px;">enter the workspace password</p>
+    <div class="gate-card" style="text-align:left;">
+      <input class="g-input" id="passInput" type="password" placeholder="password" onkeydown="if(event.key==='Enter')checkPass()" autofocus/>
+      <div class="g-err" id="passErr"></div>
+      <button class="g-btn" onclick="checkPass()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN GATE (shown after password is correct) -->
+<div id="gate" style="display:none;">
   <div style="width:90%;max-width:380px;">
     <h1 class="bc" id="gateTitle">Collab</h1>
     <p id="gateMsg">checking...</p>
@@ -208,6 +221,26 @@
 <script src="/stuflover-backend.js"></script>
 <script>
 var myUsername='', myRole='', currentChannel='general', chatPoll=null;
+var COLLAB_PASS='DIGITALDRAW101';
+
+function checkPass(){
+  var val=document.getElementById('passInput').value.trim();
+  if(val===COLLAB_PASS){
+    sessionStorage.setItem('collab_auth','1');
+    document.getElementById('passGate').style.display='none';
+    document.getElementById('gate').style.display='flex';
+    init();
+  }else{
+    document.getElementById('passErr').textContent='wrong password';
+    document.getElementById('passInput').value='';
+  }
+}
+
+// Auto-skip password if already entered this session
+if(sessionStorage.getItem('collab_auth')==='1'){
+  document.getElementById('passGate').style.display='none';
+  document.getElementById('gate').style.display='flex';
+}
 
 async function api(url,opts){
   var base=window.STUFLOVER_API_URL||'';
@@ -593,7 +626,8 @@ function checkNewMsgs(ch,count){
   prevMsgCounts[ch]=count;
 }
 
-init();
+// Only auto-init if password was already entered this session
+if(sessionStorage.getItem('collab_auth')==='1') init();
 // Ask for notification permission after first interaction
 document.addEventListener('click',function(){enableNotifs();},{once:true});
 </script>
