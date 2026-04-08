@@ -74,9 +74,10 @@
     .modal-box h3{font-size:1.2rem;margin-bottom:16px;}
 
     /* FAB */
-    .fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;border:none;font-size:1.6rem;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,0.2);transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);z-index:50;display:flex;align-items:center;justify-content:center;}
-    .fab:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 10px 32px rgba(0,0,0,0.25);}
-    .fab:active{transform:scale(0.95);}
+    .fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);height:54px;border-radius:27px;border:none;font-size:0.82rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 28px rgba(0,0,0,0.25);transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);z-index:50;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 28px;}
+    .fab:hover{transform:translateX(-50%) translateY(-3px) scale(1.03);box-shadow:0 10px 36px rgba(0,0,0,0.3);}
+    .fab:active{transform:translateX(-50%) scale(0.97);}
+    .fab svg{flex-shrink:0;}
 
     .empty{text-align:center;padding:60px 20px;opacity:0.3;font-size:0.92rem;line-height:1.7;}
 
@@ -110,36 +111,57 @@
 
 <div class="feed" id="feedView"></div>
 
-<button class="fab" id="fab" onclick="openPostModal()">+</button>
+<button class="fab" id="fab" onclick="startPost()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg> Post Fit</button>
 
-<!-- POST MODAL -->
-<div class="modal-bg" id="postModal">
-  <div class="modal-box" id="postModalBox">
-    <h3 class="bc">Post Your Fit</h3>
-    <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <label style="flex:1;padding:16px;border-radius:12px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="fcCameraLabel">
-        <svg width="22" height="22" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;opacity:0.5;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-        Take Photo
-        <input type="file" accept="image/*" capture="environment" id="fcCamera" onchange="handleFcPhoto(this)" style="display:none;"/>
-      </label>
-      <label style="flex:1;padding:16px;border-radius:12px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="fcGalleryLabel">
-        <svg width="22" height="22" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" opacity="0.4"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
-        Gallery
-        <input type="file" accept="image/*" id="fcGallery" onchange="handleFcPhoto(this)" style="display:none;"/>
-      </label>
+<!-- Hidden file inputs -->
+<input type="file" accept="image/*" capture="environment" id="fcCamera" onchange="handleFcPhoto(this)" style="display:none;"/>
+<input type="file" accept="image/*" id="fcGallery" onchange="handleFcPhoto(this)" style="display:none;"/>
+
+<!-- FULL-SCREEN POST COMPOSER -->
+<div id="postScreen" style="display:none;position:fixed;inset:0;z-index:600;flex-direction:column;">
+
+  <!-- Photo fills the screen -->
+  <div id="postPhotoWrap" style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0a0a;">
+    <!-- Before photo: picker -->
+    <div id="postPicker" style="text-align:center;padding:40px;">
+      <div style="font-size:3rem;margin-bottom:16px;">📸</div>
+      <div class="bc" style="font-size:clamp(1.5rem,5vw,2.2rem);color:white;margin-bottom:8px;">SHOW YOUR FIT</div>
+      <div style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-bottom:28px;line-height:1.6;">snap it or pick from your camera roll</div>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="document.getElementById('fcCamera').click()" class="bc" style="padding:16px 32px;border:none;border-radius:16px;background:white;color:#0a0a0a;font-size:0.85rem;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          Camera
+        </button>
+        <button onclick="document.getElementById('fcGallery').click()" class="bc" style="padding:16px 32px;border:none;border-radius:16px;background:rgba(255,255,255,0.15);color:white;font-size:0.85rem;letter-spacing:2px;cursor:pointer;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);transition:all 0.2s;">
+          <svg width="18" height="18" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" opacity="0.5"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+          Gallery
+        </button>
+      </div>
     </div>
-    <img id="fcPreview" style="width:100%;border-radius:12px;margin-bottom:12px;display:none;max-height:300px;object-fit:cover;"/>
-    <input id="fcCaption" placeholder="caption (optional)" maxlength="80" style="width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.12);border-radius:10px;font-family:Space Grotesk,sans-serif;font-size:0.88rem;color:inherit;background:transparent;outline:none;margin-bottom:10px;"/>
-    <div style="display:flex;gap:6px;margin-bottom:14px;">
-      <button class="bc expiry-btn" onclick="pickExpiry(this,6)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:0.4;transition:all 0.2s;">6h</button>
-      <button class="bc expiry-btn" onclick="pickExpiry(this,12)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:0.4;transition:all 0.2s;">12h</button>
-      <button class="bc expiry-btn on" onclick="pickExpiry(this,24)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid currentColor;background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:1;transition:all 0.2s;">24h</button>
+    <!-- After photo: full preview -->
+    <img id="postPhoto" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+    <!-- Gradient overlay on photo for readability -->
+    <div id="postGradient" style="display:none;position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(transparent,rgba(0,0,0,0.7));pointer-events:none;"></div>
+  </div>
+
+  <!-- Bottom bar: caption + actions (overlays photo) -->
+  <div id="postBar" style="display:none;position:absolute;bottom:0;left:0;right:0;padding:16px 20px 24px;z-index:10;">
+    <input id="fcCaption" placeholder="add a caption..." maxlength="80" style="width:100%;padding:14px 18px;border:none;border-radius:20px;background:rgba(255,255,255,0.15);backdrop-filter:blur(12px);font-family:Space Grotesk,sans-serif;font-size:0.95rem;color:white;outline:none;margin-bottom:12px;"/>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:6px;flex:1;" id="expiryPills">
+        <button class="bc expiry-pill" onclick="pickExpiry(this,6)" style="padding:8px 16px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;transition:all 0.2s;">6h</button>
+        <button class="bc expiry-pill" onclick="pickExpiry(this,12)" style="padding:8px 16px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;transition:all 0.2s;">12h</button>
+        <button class="bc expiry-pill on" onclick="pickExpiry(this,24)" style="padding:8px 16px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.15);color:white;font-size:0.65rem;letter-spacing:1.5px;cursor:pointer;transition:all 0.2s;">24h</button>
+      </div>
+      <button id="postBtn" onclick="submitFitCheck()" class="bc" style="padding:14px 32px;border:none;border-radius:20px;font-size:0.88rem;letter-spacing:2px;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 4px 16px rgba(0,0,0,0.3);">POST IT</button>
     </div>
-    <div id="fcErr" style="font-size:0.78rem;min-height:18px;margin-bottom:8px;"></div>
-    <div style="display:flex;gap:8px;">
-      <button id="fcSubmit" onclick="submitFitCheck()" class="bc" style="flex:1;padding:14px;border:none;border-radius:12px;font-size:0.85rem;letter-spacing:2px;cursor:pointer;">Post It</button>
-      <button onclick="closePostModal()" class="bc" style="padding:14px 20px;border:1.5px solid rgba(128,128,128,0.2);border-radius:12px;background:transparent;color:inherit;font-size:0.85rem;letter-spacing:2px;cursor:pointer;">Cancel</button>
-    </div>
+    <div id="fcErr" style="font-size:0.75rem;min-height:16px;margin-top:8px;color:#ff8a80;text-align:center;"></div>
+  </div>
+
+  <!-- Top bar: close + retake -->
+  <div style="position:absolute;top:0;left:0;right:0;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;z-index:10;">
+    <button onclick="closePost()" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);color:white;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">x</button>
+    <button id="retakeBtn" onclick="retakePhoto()" style="display:none;padding:8px 18px;border-radius:20px;border:none;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);color:white;font-size:0.7rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Retake</button>
   </div>
 </div>
 
@@ -201,7 +223,7 @@ function switchTab(tab){
   document.querySelectorAll('.tab').forEach(function(t,i){
     t.classList.toggle('on',['feed','mine','featured'][i]===tab);
   });
-  document.getElementById('fab').style.display=tab==='feed'?'flex':'none';
+  document.getElementById('fab').style.display=(tab==='feed'||tab==='mine')?'flex':'none';
   loadTab();
 }
 
@@ -335,64 +357,112 @@ async function deleteFit(id){
   loadTab();
 }
 
-// POST MODAL
-function openPostModal(){
+// ─── FULL-SCREEN POST FLOW ───
+function startPost(){
   fcPhotoData=null;fcExpiry=24;
-  document.getElementById('postModal').classList.add('open');
+  var screen=document.getElementById('postScreen');
+  screen.style.display='flex';
+  document.getElementById('postPicker').style.display='block';
+  document.getElementById('postPhoto').style.display='none';
+  document.getElementById('postGradient').style.display='none';
+  document.getElementById('postBar').style.display='none';
+  document.getElementById('retakeBtn').style.display='none';
   document.getElementById('fcCaption').value='';
-  document.getElementById('fcPreview').style.display='none';
   document.getElementById('fcErr').textContent='';
   document.getElementById('fcCamera').value='';
   document.getElementById('fcGallery').value='';
+  // Reset expiry pills
+  document.querySelectorAll('.expiry-pill').forEach(function(b){b.style.borderColor='rgba(255,255,255,0.2)';b.style.background='transparent';b.style.color='rgba(255,255,255,0.6)';b.classList.remove('on');});
+  var last=document.querySelectorAll('.expiry-pill');
+  if(last.length){var l=last[last.length-1];l.classList.add('on');l.style.borderColor='rgba(255,255,255,0.6)';l.style.background='rgba(255,255,255,0.15)';l.style.color='white';}
+  document.body.style.overflow='hidden';
 }
-function closePostModal(){document.getElementById('postModal').classList.remove('open');}
+
+function closePost(){
+  document.getElementById('postScreen').style.display='none';
+  document.body.style.overflow='';
+}
+
+function retakePhoto(){
+  fcPhotoData=null;
+  document.getElementById('postPicker').style.display='block';
+  document.getElementById('postPhoto').style.display='none';
+  document.getElementById('postGradient').style.display='none';
+  document.getElementById('postBar').style.display='none';
+  document.getElementById('retakeBtn').style.display='none';
+}
 
 function handleFcPhoto(input){
   var file=input.files&&input.files[0];
   if(!file) return;
+  // Make sure post screen is open
+  if(document.getElementById('postScreen').style.display==='none') startPost();
+
   var reader=new FileReader();
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
       var canvas=document.createElement('canvas');
-      var max=600;var w=img.width,h=img.height;
+      var max=800;var w=img.width,h=img.height;
       if(w>h){if(w>max){h=h*(max/w);w=max;}}else{if(h>max){w=w*(max/h);h=max;}}
       canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      fcPhotoData=canvas.toDataURL('image/jpeg',0.75);
-      document.getElementById('fcPreview').src=fcPhotoData;
-      document.getElementById('fcPreview').style.display='block';
+      fcPhotoData=canvas.toDataURL('image/jpeg',0.8);
+
+      // Show photo full-screen
+      document.getElementById('postPicker').style.display='none';
+      var photo=document.getElementById('postPhoto');
+      photo.src=fcPhotoData;
+      photo.style.display='block';
+      document.getElementById('postGradient').style.display='block';
+      document.getElementById('postBar').style.display='block';
+      document.getElementById('retakeBtn').style.display='block';
+
+      // Style post button
+      var postBtn=document.getElementById('postBtn');
+      postBtn.style.background=PAL.ac;
+      postBtn.style.color=PAL.bg;
+
+      // Focus caption
+      setTimeout(function(){document.getElementById('fcCaption').focus();},300);
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
+  input.value='';
 }
 
 function pickExpiry(btn,hours){
   fcExpiry=hours;
-  document.querySelectorAll('.expiry-btn').forEach(function(b){b.style.opacity='0.4';b.style.borderColor='rgba(128,128,128,0.12)';b.classList.remove('on');});
-  btn.style.opacity='1';btn.style.borderColor='currentColor';btn.classList.add('on');
+  document.querySelectorAll('.expiry-pill').forEach(function(b){b.style.borderColor='rgba(255,255,255,0.2)';b.style.background='transparent';b.style.color='rgba(255,255,255,0.6)';b.classList.remove('on');});
+  btn.classList.add('on');btn.style.borderColor='rgba(255,255,255,0.6)';btn.style.background='rgba(255,255,255,0.15)';btn.style.color='white';
 }
 
 async function submitFitCheck(){
   var err=document.getElementById('fcErr');
-  if(!fcPhotoData){err.textContent='take a photo first';err.style.color='#c44';return;}
+  if(!fcPhotoData){err.textContent='snap a photo first';return;}
   var caption=document.getElementById('fcCaption').value.trim();
-  var btn=document.getElementById('fcSubmit');
-  btn.disabled=true;btn.textContent='Posting...';
+  var btn=document.getElementById('postBtn');
+  btn.disabled=true;btn.textContent='POSTING...';btn.style.opacity='0.6';
 
   try{
     var data=await apiFetch('/api/fitcheck',{method:'POST',body:JSON.stringify({photo:fcPhotoData,caption:caption,expiryHours:fcExpiry})});
     if(data.ok){
-      closePostModal();
-      switchTab('feed');
+      // Success animation
+      btn.textContent='POSTED!';btn.style.background='#4caf50';
+      setTimeout(function(){
+        closePost();
+        switchTab('feed');
+        btn.disabled=false;btn.textContent='POST IT';btn.style.opacity='1';btn.style.background=PAL.ac;
+      },600);
     }else{
-      err.textContent=data.error||'something went wrong';err.style.color='#c44';
+      err.textContent=data.error||'something went wrong';
+      btn.disabled=false;btn.textContent='POST IT';btn.style.opacity='1';
     }
   }catch(e){
-    err.textContent='could not post — try again';err.style.color='#c44';
+    err.textContent='could not post — try again';
+    btn.disabled=false;btn.textContent='POST IT';btn.style.opacity='1';
   }
-  btn.disabled=false;btn.textContent='Post It';
 }
 
 // Auto-refresh feed every 15s
