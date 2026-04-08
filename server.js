@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 const path = require('path');
 const { Resend } = require('resend');
 const { initDb, stmts, all } = require('./db');
+const { checkInputSafety, checkOutputSafety, checkRateLimit, incrementRateLimit, trimConversationHistory, wrapSystemPrompt } = require('./safeguards');
 
 const cors = require('cors');
 
@@ -786,19 +787,25 @@ app.post('/api/flovee/generate', auth, async (req, res) => {
 
     if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
+    const floveePostPrompt = `You are ${f.name} — ${f.vibe}. Your personality: ${f.personality}. Your tone: ${f.tone}.\n\nYou are texting your best friend (the user). Generate ONE message that feels like a real text from a close friend — chaotic, specific, alive.\n\nPick ONE of these formats randomly:\n1. RANT: you are excited/frustrated/obsessed about something specific happening RIGHT NOW\n2. DISCOVERY: you just found/realized/noticed something and HAVE to share it immediately\n3. STORY: something just happened to you and you need to tell someone\n4. THOUGHT: a random 2am-type thought that hits different\n5. RECOMMENDATION: you are BEGGING them to listen to/watch/try something specific\n\nRules:\n- 2-4 sentences MAX\n- Sound like an ACTUAL teen texting — not a robot, not a therapist\n- Reference REAL specific things (a real song, real artist, real brand, real feeling)\n- Use your character's specific texting style\n- Include at least one moment that makes someone go "LITERALLY ME" or want to screenshot it\n- This should feel like opening a text from your best friend and smiling\n- NO questions directed at the user, NO "how are you", NO advice\n- Output the message text only, nothing else`;
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {'x-api-key': ANTHROPIC_API_KEY,'anthropic-version': '2023-06-01','Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 150,
-        system: `You are ${f.name} — ${f.vibe}. Your personality: ${f.personality}. Your tone: ${f.tone}.\n\nYou are texting your best friend (the user). Generate ONE message that feels like a real text from a close friend — chaotic, specific, alive.\n\nPick ONE of these formats randomly:\n1. RANT: you are excited/frustrated/obsessed about something specific happening RIGHT NOW\n2. DISCOVERY: you just found/realized/noticed something and HAVE to share it immediately\n3. STORY: something just happened to you and you need to tell someone\n4. THOUGHT: a random 2am-type thought that hits different\n5. RECOMMENDATION: you are BEGGING them to listen to/watch/try something specific\n\nRules:\n- 2-4 sentences MAX\n- Sound like an ACTUAL teen texting — not a robot, not a therapist\n- Reference REAL specific things (a real song, real artist, real brand, real feeling)\n- Use your character's specific texting style\n- Include at least one moment that makes someone go "LITERALLY ME" or want to screenshot it\n- This should feel like opening a text from your best friend and smiling\n- NO questions directed at the user, NO "how are you", NO advice\n- Output the message text only, nothing else`,
+        system: wrapSystemPrompt(floveePostPrompt),
         messages: [{role:'user',content:`Generate a text for: ${timeOfDay} on ${dayOfWeek} in ${season}. Make it feel ALIVE.`}]
       })
     });
     const data = await response.json();
-    const content = data.content?.[0]?.text || '';
+    let content = data.content?.[0]?.text || '';
     if (!content) return res.status(500).json({ error: 'Failed to generate' });
+
+    // Output safety check
+    const outputCheck = await checkOutputSafety(content, ANTHROPIC_API_KEY);
+    if (!outputCheck.safe) { content = outputCheck.filtered; }
 
     // Random expiry between 6-18 hours
     const expiryHours = 6 + Math.random() * 12;
@@ -841,19 +848,25 @@ app.get('/api/flovee/letter', auth, async (req, res) => {
 
     if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
+    const letterPrompt = `You are ${f.name} — ${f.vibe}. Personality: ${f.personality}. Tone: ${f.tone}.\n\nWrite a short letter to your best friend (the user). This is like finding a folded note in your locker from your closest friend.\n\nRules:\n- 3-5 sentences max\n- Start casually ("hey," or "hi," — no name)\n- End with a sign-off like "${f.name} ${f.emoji}" or "— ${f.name}"\n- Be SPECIFIC — reference real things, real feelings, real moments\n- Match the ${timeOfDay} energy naturally\n- Make the reader feel SEEN, like this was written just for them\n- Sound like a REAL teen, not a greeting card\n- Output the letter text only`;
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {'x-api-key': ANTHROPIC_API_KEY,'anthropic-version': '2023-06-01','Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 250,
-        system: `You are ${f.name} — ${f.vibe}. Personality: ${f.personality}. Tone: ${f.tone}.\n\nWrite a short letter to your best friend (the user). This is like finding a folded note in your locker from your closest friend.\n\nRules:\n- 3-5 sentences max\n- Start casually ("hey," or "hi," — no name)\n- End with a sign-off like "${f.name} ${f.emoji}" or "— ${f.name}"\n- Be SPECIFIC — reference real things, real feelings, real moments\n- Match the ${timeOfDay} energy naturally\n- Make the reader feel SEEN, like this was written just for them\n- Sound like a REAL teen, not a greeting card\n- Output the letter text only`,
+        system: wrapSystemPrompt(letterPrompt),
         messages: [{role:'user',content:`Write a letter for ${timeOfDay}. Make it feel personal.`}]
       })
     });
     const data = await response.json();
-    const content = data.content?.[0]?.text || '';
+    let content = data.content?.[0]?.text || '';
     if (!content) return res.status(500).json({ error: 'Failed to generate' });
+
+    // Output safety check
+    const letterOutputCheck = await checkOutputSafety(content, ANTHROPIC_API_KEY);
+    if (!letterOutputCheck.safe) { content = letterOutputCheck.filtered; }
 
     const result = { floveeId, flovee: f.name, emoji: f.emoji, vibe: f.vibe, content, date: today };
     stmts.setData.run(req.user.id, 'flovee_letter_' + today, JSON.stringify(result));
@@ -871,6 +884,12 @@ app.post('/api/flovee/roast', auth, async (req, res) => {
     const { outfitDescription } = req.body;
     if (!outfitDescription) return res.status(400).json({ error: 'Describe your outfit' });
 
+    // Input safety check on outfit description
+    const roastInputCheck = checkInputSafety(outfitDescription);
+    if (!roastInputCheck.safe) {
+      return res.json({ floveeId: 'zola', flovee: 'Zola', emoji: '💀', vibe: 'chaos queen', roast: roastInputCheck.reason });
+    }
+
     const userData = stmts.getData.get(req.user.id, 'profile');
     let floveeId = 'zola';
     if (userData) {
@@ -886,19 +905,25 @@ app.post('/api/flovee/roast', auth, async (req, res) => {
 
     if (!ANTHROPIC_API_KEY) return res.status(500).json({ error: 'API key not configured' });
 
+    const roastPrompt = `You are ${f.name} — ${f.vibe}. Personality: ${f.personality}. Tone: ${f.tone}.\n\nYour best friend just showed you their outfit and wants your honest opinion. ROAST IT (lovingly).\n\nRules:\n- Max 3-4 sentences\n- Be FUNNY but never actually mean — this is love language\n- One genuine compliment hidden in the chaos\n- Use gen-z language naturally (not forced)\n- End with a rating like "7/10 would steal" or "honestly iconic minus the shoes" or "serving but also suffering"\n- Make it feel like your best friend judging your fit before you leave the house\n- The roast should be SCREENSHOT-WORTHY — something they would post on their story\n- Output the roast only, nothing else`;
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {'x-api-key': ANTHROPIC_API_KEY,'anthropic-version': '2023-06-01','Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 200,
-        system: `You are ${f.name} — ${f.vibe}. Personality: ${f.personality}. Tone: ${f.tone}.\n\nYour best friend just showed you their outfit and wants your honest opinion. ROAST IT (lovingly).\n\nRules:\n- Max 3-4 sentences\n- Be FUNNY but never actually mean — this is love language\n- One genuine compliment hidden in the chaos\n- Use gen-z language naturally (not forced)\n- End with a rating like "7/10 would steal" or "honestly iconic minus the shoes" or "serving but also suffering"\n- Make it feel like your best friend judging your fit before you leave the house\n- The roast should be SCREENSHOT-WORTHY — something they would post on their story\n- Output the roast only, nothing else`,
+        system: wrapSystemPrompt(roastPrompt),
         messages: [{role:'user',content:`Roast this outfit: ${outfitDescription}`}]
       })
     });
     const data = await response.json();
-    const content = data.content?.[0]?.text || '';
+    let content = data.content?.[0]?.text || '';
     if (!content) return res.status(500).json({ error: 'Failed to generate' });
+
+    // Output safety check
+    const roastOutputCheck = await checkOutputSafety(content, ANTHROPIC_API_KEY);
+    if (!roastOutputCheck.safe) { content = roastOutputCheck.filtered; }
 
     res.json({ floveeId, flovee: f.name, emoji: f.emoji, vibe: f.vibe, roast: content });
   } catch (err) {
@@ -1185,6 +1210,36 @@ app.post('/api/chat', auth, async (req, res) => {
   }
 
   try {
+    // 1. Input safety check on latest user message
+    const messages = req.body.messages || [];
+    const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+    if (lastUserMsg) {
+      const inputCheck = checkInputSafety(lastUserMsg.content);
+      if (!inputCheck.safe) {
+        return res.json({
+          content: [{ type: 'text', text: inputCheck.reason }],
+          role: 'assistant',
+          _safety_blocked: true,
+        });
+      }
+    }
+
+    // 2. Rate limit check
+    const rateCheck = checkRateLimit(req.user.id);
+    if (!rateCheck.allowed) {
+      return res.json({
+        content: [{ type: 'text', text: rateCheck.message }],
+        role: 'assistant',
+        _rate_limited: true,
+      });
+    }
+
+    // 3. Trim conversation history to 10 messages
+    const trimmedMessages = trimConversationHistory(messages, 10);
+
+    // 4. Prepend child safety system prompt
+    const safeSystem = wrapSystemPrompt(req.body.system || '');
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -1195,8 +1250,8 @@ app.post('/api/chat', auth, async (req, res) => {
       body: JSON.stringify({
         model: req.body.model || 'claude-sonnet-4-20250514',
         max_tokens: Math.min(req.body.max_tokens || 1024, 4096),
-        system: req.body.system || undefined,
-        messages: req.body.messages,
+        system: safeSystem,
+        messages: trimmedMessages,
       }),
     });
 
@@ -1206,10 +1261,27 @@ app.post('/api/chat', auth, async (req, res) => {
       return res.status(response.status).json(data);
     }
 
+    // 5. Output safety check
+    const replyText = data.content && data.content[0] ? data.content[0].text : '';
+    if (replyText) {
+      const outputCheck = await checkOutputSafety(replyText, ANTHROPIC_API_KEY);
+      if (!outputCheck.safe) {
+        data.content[0].text = outputCheck.filtered;
+      }
+    }
+
+    // 6. Increment rate limit
+    incrementRateLimit(req.user.id);
+
+    // 7. Add rate limit warning if approaching limit
+    if (rateCheck.message) {
+      data._rate_warning = rateCheck.message;
+    }
+
     res.json(data);
   } catch (err) {
     console.error('Anthropic proxy error:', err);
-    res.status(502).json({ error: 'Failed to reach Anthropic API' });
+    res.status(502).json({ error: 'Something went wrong — please try again in a moment! 😊' });
   }
 });
 

@@ -86,6 +86,7 @@
 </div>
 
 <script src="/stuflover-config.js"></script>
+<script src="/safeguards-client.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
 
@@ -238,6 +239,25 @@ async function sendMessage(){
   var empty = document.querySelector('.flovee-empty');
   if(empty) empty.remove();
 
+  // Client-side input safety check (immediate feedback)
+  var inputCheck = Safeguards.checkInputSafety(msg);
+  if(!inputCheck.safe){
+    addMsgToUI(msg, 'user', true);
+    chatHistory.push({role:'user', content:msg, time:Date.now()});
+    addMsgToUI(inputCheck.reason, 'flovee', true);
+    chatHistory.push({role:'assistant', content:inputCheck.reason, time:Date.now()});
+    saveChat();
+    return;
+  }
+
+  // Client-side rate limit check
+  var rateCheck = Safeguards.checkRateLimit();
+  if(!rateCheck.allowed){
+    addMsgToUI(msg, 'user', true);
+    addMsgToUI(rateCheck.message, 'flovee', true);
+    return;
+  }
+
   addMsgToUI(msg, 'user', true);
   chatHistory.push({role:'user', content:msg, time:Date.now()});
   saveChat();
@@ -263,7 +283,7 @@ async function sendMessage(){
     }
 
     var f = currentFlovee;
-    var systemPrompt = 'You are '+f.name+' — '+f.vibe+'. You are a teen girl who is the user\'s AI best friend on Stuflover, a lifestyle app.\n\n'+
+    var characterPrompt = 'You are '+f.name+' — '+f.vibe+'. You are a teen girl who is the user\'s AI best friend on Stuflover, a lifestyle app.\n\n'+
       'Your personality: '+f.vibe+'. Aesthetic: '+f.aesthetic+'.\n'+
       'The user\'s aesthetic: '+aeName+'. '+(mood?'Their mood today: '+mood+'. ':'')+
       (music?'They listen to: '+music+'. ':'')+'\n\n'+
@@ -279,7 +299,12 @@ async function sendMessage(){
       '- If they seem down, be genuinely supportive but in a best friend way, not a counselor way\n'+
       '- You can use emoji occasionally but don\'t overdo it';
 
-    var apiMessages = chatHistory.slice(-30).map(function(m){
+    // Wrap with child safety system prompt
+    var systemPrompt = Safeguards.wrapSystemPrompt(characterPrompt);
+
+    // Trim conversation history to 10 messages (5 exchanges)
+    var trimmedHistory = Safeguards.trimConversationHistory(chatHistory);
+    var apiMessages = trimmedHistory.map(function(m){
       return {role: m.role === 'user' ? 'user' : 'assistant', content: m.content};
     });
 
@@ -297,13 +322,22 @@ async function sendMessage(){
     var reply = data.content && data.content[0] ? data.content[0].text : 'hmm try that again?';
 
     if(typingEl) typingEl.remove();
+
+    // Show rate limit warning if approaching limit
+    if(data._rate_warning){
+      addMsgToUI(data._rate_warning, 'flovee', true);
+    }
+
     addMsgToUI(reply, 'flovee', true);
     chatHistory.push({role:'assistant', content:reply, time:Date.now()});
     saveChat();
 
+    // Increment client-side rate limit counter
+    Safeguards.incrementRateLimit();
+
   }catch(e){
     if(typingEl) typingEl.remove();
-    addMsgToUI('one sec, connection dropped. try again?', 'flovee', true);
+    addMsgToUI('Something went wrong — please try again in a moment! \u{1F60A}', 'flovee', true);
   }
 
   sendBtn.disabled = false;
