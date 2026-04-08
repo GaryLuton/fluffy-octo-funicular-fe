@@ -6008,6 +6008,13 @@ var FLOVEE_DATA = {
 
 var floveeReacted = false;
 
+function getUserFloveeId(){
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
+  return aeMap[aeKey] || 'remi';
+}
+
 async function loadFloveePost(){
   var wrap = document.getElementById('floveePostWrap');
   if(!wrap || !searchPal) return;
@@ -6048,40 +6055,40 @@ async function loadFloveePost(){
       var savedReaction = localStorage.getItem('flovee_react_'+data.post.id);
 
       wrap.innerHTML = introHtml +
-        '<div style="border-radius:22px;overflow:hidden;position:relative;">'+
-          // Gradient header bar
-          '<div style="padding:14px 20px;background:'+fd.gradient+';display:flex;align-items:center;justify-content:space-between;">'+
-            '<div style="display:flex;align-items:center;gap:10px;">'+
-              '<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:1.1rem;backdrop-filter:blur(8px);">'+fd.emoji+'</div>'+
-              '<div>'+
-                '<div style="font-size:0.88rem;font-weight:700;color:'+fd.darkColor+';line-height:1.2;">'+fd.name+'</div>'+
-                '<div style="font-size:0.62rem;opacity:0.6;color:'+fd.darkColor+';">'+fd.vibe+' · your flovee</div>'+
+        '<div style="border-radius:24px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.08);">'+
+          // Big gradient header with avatar
+          '<div style="padding:24px 22px 20px;background:'+fd.gradient+';position:relative;">'+
+            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'+
+              '<div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.08);">'+fd.emoji+'</div>'+
+              '<div style="flex:1;">'+
+                '<div style="font-size:1.1rem;font-weight:800;color:'+fd.darkColor+';line-height:1.2;">'+fd.name+'</div>'+
+                '<div style="font-size:0.72rem;opacity:0.6;color:'+fd.darkColor+';margin-top:2px;">'+fd.vibe+' · your flovee</div>'+
+              '</div>'+
+              '<div style="text-align:right;">'+
+                '<div style="display:flex;align-items:center;gap:5px;justify-content:flex-end;">'+
+                  '<div style="width:7px;height:7px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
+                  '<div style="font-size:0.62rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
+                '</div>'+
               '</div>'+
             '</div>'+
-            '<div style="display:flex;align-items:center;gap:6px;">'+
-              '<div style="font-size:0.6rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
-              '<div style="width:6px;height:6px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
-            '</div>'+
+            // Message content right in the gradient
+            '<div style="font-size:1.08rem;line-height:1.8;color:'+fd.darkColor+';font-weight:500;">'+escHtml(data.post.content)+'</div>'+
           '</div>'+
           // Timer bar
           '<div style="height:3px;background:'+pal.tx+'06;">'+
             '<div style="height:100%;width:'+timerWidth+'%;background:'+fd.gradient+';border-radius:0 2px 2px 0;transition:width 1s;"></div>'+
           '</div>'+
-          // Message body
-          '<div style="padding:18px 20px;background:'+pal.tx+'04;">'+
-            '<div style="font-size:1rem;line-height:1.75;color:'+pal.tx+';">'+escHtml(data.post.content)+'</div>'+
-            // Reaction bar
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:8px;">'+
-              '<div id="floveeReactions" style="display:flex;gap:6px;">'+
-                buildReactionBtn('❤️','love',data.post.id,pal,savedReaction)+
-                buildReactionBtn('😭','crying',data.post.id,pal,savedReaction)+
-                buildReactionBtn('🔥','fire',data.post.id,pal,savedReaction)+
-                buildReactionBtn('💀','dead',data.post.id,pal,savedReaction)+
-              '</div>'+
-              '<div style="display:flex;gap:8px;align-items:center;">'+
-                '<button onclick="shareFloveePost()" style="padding:6px 14px;border-radius:16px;border:1px solid '+pal.tx+'12;background:transparent;color:'+pal.tx+';font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.4">share</button>'+
-                '<button onclick="openSection(\''+data.post.flovee_id+'_chat\')||openFloveeChat(\''+data.post.flovee_id+'\')" style="padding:6px 14px;border-radius:16px;border:none;background:'+fd.color+'40;color:'+pal.tx+';font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\''+fd.color+'60\'" onmouseout="this.style.background=\''+fd.color+'40\'">reply to '+fd.name+'</button>'+
-              '</div>'+
+          // Bottom action bar
+          '<div style="padding:14px 20px;background:'+pal.tx+'03;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'+
+            '<div id="floveeReactions" style="display:flex;gap:6px;">'+
+              buildReactionBtn('❤️','love',data.post.id,pal,savedReaction)+
+              buildReactionBtn('😭','crying',data.post.id,pal,savedReaction)+
+              buildReactionBtn('🔥','fire',data.post.id,pal,savedReaction)+
+              buildReactionBtn('💀','dead',data.post.id,pal,savedReaction)+
+            '</div>'+
+            '<div style="display:flex;gap:8px;align-items:center;">'+
+              '<button onclick="shareFloveePost()" style="padding:8px 16px;border-radius:20px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.4">share</button>'+
+              '<a href="flovee.html" style="padding:8px 18px;border-radius:20px;border:none;background:'+fd.color+';color:'+fd.darkColor+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;transition:all 0.2s;box-shadow:0 2px 8px '+fd.color+'40;" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'\'">reply to '+fd.name+'</a>'+
             '</div>'+
           '</div>'+
         '</div>';
@@ -6093,16 +6100,17 @@ async function loadFloveePost(){
       var mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
       wrap.style.display = 'block';
       wrap.innerHTML =
-        '<div style="padding:18px 20px;border-radius:18px;background:'+pal.tx+'04;border:1px dashed '+pal.tx+'08;text-align:center;">'+
-          '<div style="font-size:1.4rem;margin-bottom:6px;">'+mfd.emoji+'</div>'+
-          '<div style="font-size:0.88rem;font-weight:600;color:'+pal.tx+';margin-bottom:4px;">you missed a text from '+mfd.name+'</div>'+
-          '<div style="font-size:0.75rem;opacity:0.35;color:'+pal.tx+';line-height:1.5;">her message disappeared. she will text you again soon — don\'t miss the next one</div>'+
+        '<div style="padding:24px 22px;border-radius:22px;background:'+pal.tx+'04;border:1.5px dashed '+pal.tx+'08;text-align:center;">'+
+          '<div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">'+mfd.emoji+'</div>'+
+          '<div style="font-size:1rem;font-weight:700;color:'+pal.tx+';margin-bottom:6px;">you missed a text from '+mfd.name+'</div>'+
+          '<div style="font-size:0.8rem;opacity:0.35;color:'+pal.tx+';line-height:1.6;max-width:280px;margin:0 auto 14px;">her message disappeared. she will text you again soon — don\'t miss the next one</div>'+
+          '<a href="flovee.html" style="padding:10px 22px;border-radius:20px;border:none;background:'+mfd.color+'30;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;">chat with '+mfd.name+' while you wait</a>'+
         '</div>';
 
     } else if(data.status === 'none'){
       try{
         wrap.style.display = 'block';
-        wrap.innerHTML = '<div style="padding:16px 20px;border-radius:16px;background:'+pal.tx+'04;text-align:center;"><div style="font-size:0.8rem;opacity:0.3;color:'+pal.tx+';">your flovee is typing...</div></div>';
+        wrap.innerHTML = '<div style="padding:28px 22px;border-radius:22px;background:'+pal.tx+'04;text-align:center;"><div style="font-size:1.2rem;margin-bottom:6px;">'+((FLOVEE_DATA[getUserFloveeId()]||FLOVEE_DATA.remi).emoji)+'</div><div style="font-size:0.85rem;opacity:0.4;color:'+pal.tx+';">your flovee is typing<span style="animation:pulse 1.5s infinite;">...</span></div></div>';
         await (window._origFetch||fetch).call(window, base+'/api/flovee/generate',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
@@ -6149,12 +6157,6 @@ function shareFloveePost(){
       if(btn){ btn.textContent='copied!'; setTimeout(function(){btn.textContent='share';},1500); }
     });
   }
-}
-
-function openFloveeChat(floveeId){
-  // Find the chat section that matches, or open default chat
-  var sec = SECTIONS.find(function(s){ return s.id === 'stufloverdaily'; });
-  if(sec) openSection('stufloverdaily');
 }
 
 // Poll for flovee posts every 60 seconds
