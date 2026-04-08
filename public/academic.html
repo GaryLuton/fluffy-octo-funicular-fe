@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brain Boost — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
   <script src="stuflover-config.js"></script>
   <script src="stuflover-backend.js"></script>
   <style>
-    :root{--pink:#faf0f0;--bg:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--ac:#c87860;--terra-dark:#a86050;--ac2:#a86050;--brown:#2a1a14;--tx:#2a1a14;--white:#ffffff;--peach:#e8d5c8;}
-    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
-    *{margin:0;padding:0;box-sizing:border-box;}
-    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;
       background-image:radial-gradient(circle at 20px 20px, rgba(30,12,6,0.03) 1px, transparent 1px),
                         radial-gradient(circle at 60px 60px, rgba(30,12,6,0.02) 1px, transparent 1px);
@@ -170,16 +167,16 @@
     }
   </style>
 </head>
-<body>
+<body class="font-alt">
 
 <!-- NAV -->
-<nav id="mainNav">
-  <a href="lifestyle.html" class="logo bc">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-links">
-    <a href="lifestyle.html" class="nav-link bc">← Back</a>
-    <a href="account.html" class="nav-link bc">Account</a>
-    <a href="index.html" class="nav-link bc">Home</a>
+<nav id="mainNav" class="sl-nav">
+  <a href="lifestyle.html" class="logo bc sl-nav-logo">Stuflover</a>
+  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="nav-links sl-nav-links">
+    <a href="lifestyle.html" class="nav-link bc sl-nav-btn">← Back</a>
+    <a href="account.html" class="nav-link bc sl-nav-btn">Account</a>
+    <a href="index.html" class="nav-link bc sl-nav-btn">Home</a>
   </div>
 </nav>
 

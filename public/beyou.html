@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BeYou — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
-    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
-    *{margin:0;padding:0;box-sizing:border-box;}
-    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:color 1.2s;display:flex;flex-direction:column;position:relative;}
     .view.scrollable{overflow-y:auto;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
@@ -176,7 +174,7 @@
     }
   </style>
 </head>
-<body>
+<body class="font-alt">
 
 <!-- Animated gradient background -->
 <div id="gradientBg"></div>
@@ -185,12 +183,12 @@
 <!-- Vignette overlay -->
 <div id="vignetteOverlay"></div>
 
-<nav id="mainNav">
-  <a class="nav-logo bc" href="lifestyle.html">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-links">
-    <a class="nav-btn bc" href="account.html">Account</a>
-    <a class="nav-btn bc" href="index.html">Home</a>
+<nav id="mainNav" class="sl-nav">
+  <a class="nav-logo bc sl-nav-logo" href="lifestyle.html">Stuflover</a>
+  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="nav-links sl-nav-links">
+    <a class="nav-btn bc sl-nav-btn" href="account.html">Account</a>
+    <a class="nav-btn bc sl-nav-btn" href="index.html">Home</a>
   </div>
 </nav>
 <div class="sub-nav">
@@ -206,9 +204,9 @@
     <div class="breathe-instruction" id="breatheInstruction">Take a moment for yourself</div>
     <div class="breathe-timer" id="breatheTimer"></div>
     <div class="duration-row" id="durationRow">
-      <button class="dur-btn bc" data-dur="64" onclick="setDuration(64,this)">1 min</button>
-      <button class="dur-btn bc on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
-      <button class="dur-btn bc" data-dur="304" onclick="setDuration(304,this)">5 min</button>
+      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="64" onclick="setDuration(64,this)">1 min</button>
+      <button class="dur-btn bc sl-btn sl-btn-pill on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
+      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="304" onclick="setDuration(304,this)">5 min</button>
     </div>
     <button class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
   </div>

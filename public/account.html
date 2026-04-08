@@ -5,13 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Account — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
-    :root {
-      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
-      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
-      --brown:#1e0c06; --white:#ffffff;
-    }
-    *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;}
     h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
@@ -59,41 +54,41 @@
 </head>
 <body>
 
-<nav>
-  <a class="logo" href="lifestyle.html">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-links">
-    <a class="nav-link" href="lifestyle.html">← Back</a>
-    <a class="nav-link" href="account.html">Account</a>
-    <a class="nav-link" href="index.html">Home</a>
+<nav class="sl-nav">
+  <a class="logo sl-nav-logo" href="lifestyle.html">Stuflover</a>
+  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="nav-links sl-nav-links">
+    <a class="nav-link sl-nav-btn" href="lifestyle.html">← Back</a>
+    <a class="nav-link sl-nav-btn" href="account.html">Account</a>
+    <a class="nav-link sl-nav-btn" href="index.html">Home</a>
   </div>
 </nav>
 
 <div class="account-container">
-  <div class="welcome-card">
+  <div class="welcome-card sl-card">
     <h1 class="welcome-title" id="welcomeName">Welcome</h1>
     <div class="welcome-email" id="welcomeEmail"></div>
     <div class="welcome-joined" id="welcomeJoined"></div>
   </div>
 
-  <div class="section-card">
+  <div class="section-card sl-card">
     <h2 class="section-title">Your Style Profile</h2>
     <div class="section-desc" id="profileDesc">Your style preferences power Flovee, your shop, and your whole experience.</div>
-    <button class="btn btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
-    <button class="btn btn-outline" onclick="window.location.href='lifestyle.html'">View My Page</button>
+    <button class="btn btn-primary sl-btn sl-btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
+    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="window.location.href='lifestyle.html'">View My Page</button>
   </div>
 
-  <div class="section-card">
+  <div class="section-card sl-card">
     <h2 class="section-title">Sign Out</h2>
     <div class="section-desc">You will need to sign in again next time.</div>
-    <button class="btn btn-outline" onclick="stufloverLogout()">Sign Out</button>
+    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="stufloverLogout()">Sign Out</button>
   </div>
 
-  <div class="section-card">
+  <div class="section-card sl-card">
     <h2 class="section-title">Delete Account</h2>
     <div class="section-desc">This permanently deletes your account and all your data. This cannot be undone.</div>
     <div class="status-msg" id="deleteStatus"></div>
-    <button class="btn btn-danger" id="deleteBtn" onclick="deleteAccount()">Delete My Account</button>
+    <button class="btn btn-danger sl-btn sl-btn-danger" id="deleteBtn" onclick="deleteAccount()">Delete My Account</button>
   </div>
 </div>
 
