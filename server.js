@@ -1098,16 +1098,18 @@ app.delete('/api/collab/revoke/:id', auth, collabAuth, (req, res) => {
 
 // ─ Collab Chat ─
 app.get('/api/collab/messages', auth, collabAuth, (req, res) => {
-  const msgs = all('SELECT * FROM collab_messages ORDER BY created_at DESC LIMIT 100');
+  const channel = req.query.channel || 'general';
+  const msgs = all('SELECT * FROM collab_messages WHERE channel = ? ORDER BY created_at DESC LIMIT 100', [channel]);
   res.json({ messages: msgs.reverse() });
 });
 
 app.post('/api/collab/messages', auth, collabAuth, (req, res) => {
-  const { text } = req.body;
+  const { text, channel } = req.body;
   if (!text || !text.trim()) return res.status(400).json({ error: 'Message required' });
+  const ch = ['general','designs','ideas'].includes(channel) ? channel : 'general';
   const user = stmts.getUserById.get(req.user.id);
-  all('INSERT INTO collab_messages (user_id, username, text) VALUES (?, ?, ?)',
-    [req.user.id, user?.username || 'anon', text.trim().slice(0, 2000)]);
+  all('INSERT INTO collab_messages (user_id, username, channel, text) VALUES (?, ?, ?, ?)',
+    [req.user.id, user?.username || 'anon', ch, text.trim().slice(0, 2000)]);
   res.json({ ok: true });
 });
 

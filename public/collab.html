@@ -4,653 +4,418 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Collab — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     input,button,select,textarea{font-size:16px;}
-    body{font-family:'Space Grotesk',sans-serif;background:#f5f0ed;color:#2a1a14;min-height:100vh;overflow-x:hidden;}
+    body{font-family:'Space Grotesk',sans-serif;background:#f5f0ed;color:#2a1a14;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
-    .mono{font-family:'JetBrains Mono',monospace;}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
     /* NAV */
-    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(245,240,237,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(42,26,20,0.06);}
-    .nav-logo{font-size:1.4rem;letter-spacing:4px;text-decoration:none;color:#2a1a14;}
-    .nav-tag{font-size:0.55rem;letter-spacing:3px;padding:3px 8px;border-radius:4px;background:rgba(200,120,96,0.12);color:#c87860;margin-left:8px;vertical-align:middle;}
-    .nav-right{display:flex;gap:8px;align-items:center;}
-    .nav-btn{font-size:0.7rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:6px;border:1px solid rgba(42,26,20,0.12);color:#2a1a14;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-    .nav-btn:hover{background:rgba(42,26,20,0.04);}
-    .nav-user{font-size:0.72rem;opacity:0.4;}
+    .top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(42,26,20,0.06);flex-shrink:0;background:rgba(245,240,237,0.95);backdrop-filter:blur(12px);}
+    .top-left{display:flex;align-items:center;gap:8px;}
+    .top-logo{font-size:1.2rem;letter-spacing:3px;text-decoration:none;color:#2a1a14;}
+    .top-tag{font-size:0.5rem;letter-spacing:2px;padding:3px 8px;border-radius:4px;background:rgba(200,120,96,0.1);color:#c87860;}
+    .top-user{font-size:0.72rem;opacity:0.35;}
+    .top-btn{font-size:0.65rem;letter-spacing:2px;padding:6px 14px;border-radius:6px;border:1px solid rgba(42,26,20,0.1);background:transparent;color:#2a1a14;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all 0.15s;}
+    .top-btn:hover{background:rgba(42,26,20,0.04);}
 
-    /* ACCESS GATE */
-    #gate{display:flex;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:40px;}
-    #gate h1{font-size:2rem;margin-bottom:8px;}
-    #gate p{font-size:0.88rem;opacity:0.35;line-height:1.6;max-width:360px;margin:0 auto;}
+    /* LAYOUT */
+    .main{flex:1;display:flex;overflow:hidden;}
+    .sidebar{width:220px;border-right:1px solid rgba(42,26,20,0.06);display:flex;flex-direction:column;flex-shrink:0;background:rgba(42,26,20,0.015);}
+    .sidebar-section{padding:12px 16px;font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;opacity:0.2;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:all 0.15s;font-size:0.88rem;border-left:3px solid transparent;}
+    .sidebar-item:hover{background:rgba(42,26,20,0.03);}
+    .sidebar-item.on{background:rgba(200,120,96,0.06);border-left-color:#c87860;font-weight:600;}
+    .sidebar-item .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .sidebar-team{padding:8px 16px;}
+    .sidebar-add{width:100%;padding:8px;border:1px dashed rgba(42,26,20,0.1);border-radius:8px;background:transparent;color:#2a1a14;font-size:0.75rem;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+    .sidebar-add:hover{background:rgba(42,26,20,0.03);}
 
-    /* TABS */
-    .tabs{display:flex;gap:4px;padding:12px 24px;border-bottom:1px solid rgba(42,26,20,0.06);background:rgba(42,26,20,0.01);}
-    .tab{padding:10px 20px;border-radius:8px;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:none;background:transparent;color:rgba(42,26,20,0.3);transition:all 0.2s;}
-    .tab.on{background:rgba(42,26,20,0.06);color:#2a1a14;}
-    .tab:hover{color:#2a1a14;}
+    /* CHAT PANEL */
+    .chat-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .chat-header{padding:14px 20px;border-bottom:1px solid rgba(42,26,20,0.05);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+    .chat-header-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .chat-header-name{font-weight:700;font-size:1rem;}
+    .chat-header-desc{font-size:0.72rem;opacity:0.3;margin-left:auto;}
+    .msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+    .msgs::-webkit-scrollbar{width:3px;}
+    .msgs::-webkit-scrollbar-thumb{background:rgba(42,26,20,0.08);border-radius:2px;}
+    .msg{max-width:78%;padding:12px 16px;border-radius:18px;font-size:0.9rem;line-height:1.65;animation:fadeIn 0.2s ease;}
+    .msg.them{align-self:flex-start;background:white;border:1px solid rgba(42,26,20,0.04);border-bottom-left-radius:4px;}
+    .msg.me{align-self:flex-end;background:rgba(200,120,96,0.1);border-bottom-right-radius:4px;}
+    .msg.ai{align-self:flex-start;background:linear-gradient(135deg,rgba(120,100,200,0.08),rgba(200,120,96,0.06));border:1px solid rgba(120,100,200,0.08);border-bottom-left-radius:4px;}
+    .msg-user{font-size:0.58rem;letter-spacing:1.5px;text-transform:uppercase;opacity:0.3;margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .msg-time{font-size:0.52rem;opacity:0.18;margin-top:3px;}
+    .input-row{display:flex;gap:8px;padding:12px 20px;border-top:1px solid rgba(42,26,20,0.05);flex-shrink:0;align-items:flex-end;}
+    .input-box{flex:1;padding:11px 16px;border-radius:20px;border:1px solid rgba(42,26,20,0.08);background:white;color:#2a1a14;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;outline:none;resize:none;min-height:44px;max-height:100px;line-height:1.5;}
+    .input-box:focus{border-color:rgba(200,120,96,0.35);}
+    .send-btn{padding:11px 22px;border:none;border-radius:20px;background:#c87860;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.78rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+    .send-btn:hover{opacity:0.85;}
 
-    /* MAIN AREA */
-    #mainArea{display:none;}
-    .pane{display:none;padding:24px;max-width:900px;margin:0 auto;}
-    .pane.active{display:block;animation:fadeIn 0.3s ease both;}
+    /* GATE */
+    #gate{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;}
+    #gate h1{font-size:2rem;margin-bottom:6px;}
+    #gate p{font-size:0.85rem;opacity:0.35;line-height:1.6;max-width:340px;margin:0 auto;}
+    .gate-card{padding:28px;border-radius:16px;background:white;border:1px solid rgba(42,26,20,0.06);box-shadow:0 4px 20px rgba(42,26,20,0.05);margin-top:20px;text-align:left;}
+    .gate-tabs{display:flex;gap:0;margin-bottom:18px;border-radius:8px;overflow:hidden;border:1px solid rgba(42,26,20,0.1);}
+    .gate-tab{flex:1;padding:10px;border:none;font-size:0.7rem;letter-spacing:2px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:all 0.2s;}
+    .gate-tab.on{background:#c87860;color:white;}
+    .gate-tab:not(.on){background:transparent;color:rgba(42,26,20,0.3);}
+    .g-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid rgba(42,26,20,0.1);background:rgba(42,26,20,0.02);color:#2a1a14;font-family:'Space Grotesk',sans-serif;font-size:0.88rem;outline:none;margin-bottom:8px;}
+    .g-input:focus{border-color:rgba(200,120,96,0.4);}
+    .g-err{font-size:0.75rem;color:#c44;min-height:16px;margin-bottom:6px;}
+    .g-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#c87860;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
-    /* CHAT */
-    .chat-box{height:calc(100vh - 240px);display:flex;flex-direction:column;}
-    .chat-msgs{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:8px;}
-    .chat-msgs::-webkit-scrollbar{width:4px;}
-    .chat-msgs::-webkit-scrollbar-thumb{background:rgba(42,26,20,0.1);border-radius:2px;}
-    .chat-msg{max-width:80%;padding:12px 16px;border-radius:16px;font-size:0.88rem;line-height:1.6;animation:fadeIn 0.2s ease;}
-    .chat-msg.them{align-self:flex-start;background:rgba(42,26,20,0.04);border-bottom-left-radius:4px;}
-    .chat-msg.me{align-self:flex-end;background:rgba(200,120,96,0.12);border-bottom-right-radius:4px;}
-    .chat-msg-user{font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;opacity:0.3;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .chat-msg-time{font-size:0.55rem;opacity:0.2;margin-top:4px;}
-    .chat-input-row{display:flex;gap:8px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);}
-    .chat-input{flex:1;padding:12px 16px;border-radius:12px;border:1px solid rgba(42,26,20,0.1);background:white;color:#2a1a14;font-family:'Space Grotesk',sans-serif;font-size:0.9rem;outline:none;resize:none;min-height:46px;max-height:100px;}
-    .chat-input:focus{border-color:rgba(200,120,96,0.4);}
-    .chat-send{padding:12px 24px;border:none;border-radius:12px;background:#c87860;color:#0c0c0f;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-    .chat-send:hover{opacity:0.85;}
-
-    /* DESIGNS */
-    .design-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px;}
-    .design-card{border-radius:14px;overflow:hidden;background:white;border:1px solid rgba(42,26,20,0.06);transition:all 0.2s;box-shadow:0 2px 8px rgba(42,26,20,0.04);}
-    .design-card:hover{border-color:rgba(42,26,20,0.12);transform:translateY(-2px);box-shadow:0 6px 20px rgba(42,26,20,0.08);}
-    .design-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:rgba(42,26,20,0.03);}
-    .design-info{padding:14px 16px;}
-    .design-title{font-weight:600;margin-bottom:4px;}
-    .design-meta{font-size:0.72rem;opacity:0.3;margin-bottom:8px;}
-    .design-notes{font-size:0.82rem;opacity:0.5;line-height:1.6;margin-bottom:8px;}
-    .design-status{display:inline-block;font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .design-link{font-size:0.72rem;color:#c87860;text-decoration:none;opacity:0.7;display:inline-block;margin-top:6px;}
-    .design-link:hover{opacity:1;}
-    .design-actions{display:flex;gap:6px;margin-top:10px;}
-    .design-btn{padding:6px 12px;border-radius:6px;border:1px solid rgba(42,26,20,0.1);background:transparent;color:#2a1a14;font-size:0.6rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
-    .design-btn:hover{background:rgba(42,26,20,0.04);}
-    .design-btn.del{border-color:rgba(200,60,60,0.2);color:rgba(200,60,60,0.6);}
-    .status-idea{background:rgba(100,150,255,0.1);color:rgba(100,150,255,0.7);}
-    .status-progress{background:rgba(255,180,50,0.1);color:rgba(255,180,50,0.7);}
-    .status-review{background:rgba(200,120,96,0.15);color:#c87860;}
-    .status-done{background:rgba(80,200,100,0.1);color:rgba(80,200,100,0.7);}
-
-    /* SANDBOX */
-    .sb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:16px;}
-    .sb-card{padding:18px;border-radius:12px;background:white;border:1px solid rgba(42,26,20,0.06);cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(42,26,20,0.04);}
-    .sb-card:hover{border-color:rgba(42,26,20,0.12);background:white;box-shadow:0 6px 16px rgba(42,26,20,0.08);}
-    .sb-card-name{font-weight:600;margin-bottom:4px;}
-    .sb-card-meta{font-size:0.68rem;opacity:0.25;}
-    .sb-editor{display:none;}
-    .sb-editor.active{display:block;}
-    .sb-editor-tabs{display:flex;gap:2px;margin-bottom:0;}
-    .sb-etab{padding:8px 18px;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:none;background:rgba(42,26,20,0.03);color:rgba(42,26,20,0.3);border-radius:8px 8px 0 0;transition:all 0.15s;}
-    .sb-etab.on{background:rgba(42,26,20,0.06);color:#2a1a14;}
-    .sb-code{width:100%;min-height:200px;padding:16px;border:1px solid rgba(42,26,20,0.08);border-top:none;background:#1e1e2e;color:#cdd6f4;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.7;outline:none;resize:vertical;border-radius:0 0 8px 8px;tab-size:2;}
-    .sb-preview{width:100%;min-height:300px;border:1px solid rgba(42,26,20,0.08);border-radius:8px;margin-top:12px;background:white;}
-    .sb-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
-    .sb-bar-btn{padding:8px 18px;border-radius:8px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-
-    /* MEMBERS */
-    .member-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;background:white;border:1px solid rgba(42,26,20,0.05);margin-bottom:6px;}
-    .member-email{flex:1;font-size:0.88rem;}
-    .member-role{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .member-remove{padding:6px 12px;border-radius:6px;border:1px solid rgba(200,60,60,0.2);background:transparent;color:rgba(200,60,60,0.5);font-size:0.58rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
-
-    /* FORMS */
-    .form-row{display:flex;gap:8px;margin-bottom:12px;}
-    .form-input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(42,26,20,0.1);background:white;color:#2a1a14;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;outline:none;}
-    .form-input:focus{border-color:rgba(200,120,96,0.4);}
-    .form-btn{padding:10px 20px;border:none;border-radius:8px;background:#c87860;color:#0c0c0f;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
-    .section-title{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.2;margin-bottom:12px;}
-    .empty-state{text-align:center;padding:60px 20px;opacity:0.2;font-size:0.9rem;line-height:1.7;}
-
-    @media(max-width:600px){
-      .tabs{padding:10px 16px;overflow-x:auto;}
-      .pane{padding:16px;}
-      .design-grid{grid-template-columns:1fr;}
-      .sb-list{grid-template-columns:1fr;}
-      .chat-msg{max-width:90%;}
+    /* MOBILE */
+    @media(max-width:640px){
+      .sidebar{display:none;}
+      .top-bar{padding:10px 14px;}
+      .msgs{padding:12px 14px;}
+      .input-row{padding:10px 14px;}
+      .msg{max-width:88%;}
     }
   </style>
 </head>
 <body>
 
-<nav>
-  <div>
-    <a class="nav-logo bc" href="index.html">Stuflover</a>
-    <span class="nav-tag bc">Collab</span>
+<div class="top-bar">
+  <div class="top-left">
+    <a class="top-logo bc" href="index.html">Stuflover</a>
+    <span class="top-tag bc">Collab</span>
   </div>
-  <div class="nav-right">
-    <span class="nav-user" id="navUser"></span>
-    <a class="nav-btn" href="lifestyle.html">Site</a>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="top-user" id="navUser"></span>
+    <a class="top-btn" href="lifestyle.html">Site</a>
   </div>
-</nav>
+</div>
 
-<!-- ACCESS GATE -->
+<!-- GATE (shown when not logged in or no access) -->
 <div id="gate">
-  <div style="width:90%;max-width:400px;">
-    <h1 class="bc" id="gateTitle" style="font-size:2.4rem;margin-bottom:6px;">Collab</h1>
-    <p id="gateMsg" style="margin-bottom:24px;">checking access...</p>
-
-    <!-- Built-in login form -->
+  <div style="width:90%;max-width:380px;">
+    <h1 class="bc" id="gateTitle">Collab</h1>
+    <p id="gateMsg">checking...</p>
     <div id="gateLogin" style="display:none;">
-      <div style="padding:28px;border-radius:16px;background:white;border:1px solid rgba(42,26,20,0.06);box-shadow:0 4px 20px rgba(42,26,20,0.06);">
-        <div id="gateLoginTabs" style="display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid rgba(42,26,20,0.1);">
-          <button class="bc" onclick="gateShowLogin()" id="gateTabLogin" style="flex:1;padding:10px;border:none;background:#c87860;color:white;font-size:0.72rem;letter-spacing:2px;cursor:pointer;">Sign In</button>
-          <button class="bc" onclick="gateShowRegister()" id="gateTabReg" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(42,26,20,0.35);font-size:0.72rem;letter-spacing:2px;cursor:pointer;">Create Account</button>
+      <div class="gate-card">
+        <div class="gate-tabs">
+          <button class="gate-tab on bc" onclick="gateTab('login')">Sign In</button>
+          <button class="gate-tab bc" onclick="gateTab('register')">New Account</button>
         </div>
-
-        <!-- Login -->
         <div id="gateLoginForm">
-          <input class="form-input" id="glEmail" placeholder="email" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"/>
-          <input class="form-input" id="glPassword" type="password" placeholder="password" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"
-            onkeydown="if(event.key==='Enter')gateLogin();"/>
-          <div id="glErr" style="font-size:0.78rem;color:#ff8a80;min-height:18px;margin-bottom:8px;"></div>
-          <button class="form-btn" onclick="gateLogin()" id="glBtn" style="width:100%;">Sign In</button>
+          <input class="g-input" id="glEmail" placeholder="email" onkeydown="if(event.key==='Enter')gateLogin()"/>
+          <input class="g-input" id="glPass" type="password" placeholder="password" onkeydown="if(event.key==='Enter')gateLogin()"/>
+          <div class="g-err" id="glErr"></div>
+          <button class="g-btn" onclick="gateLogin()" id="glBtn">Sign In</button>
         </div>
-
-        <!-- Register -->
         <div id="gateRegForm" style="display:none;">
-          <input class="form-input" id="grUsername" placeholder="username" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"/>
-          <input class="form-input" id="grEmail" placeholder="email" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"/>
-          <input class="form-input" id="grPassword" type="password" placeholder="password (6+ chars)" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"/>
-          <input class="form-input" id="grConfirm" type="password" placeholder="confirm password" style="width:100%;margin-bottom:8px;background:rgba(42,26,20,0.02);"
-            onkeydown="if(event.key==='Enter')gateRegister();"/>
-          <div id="grErr" style="font-size:0.78rem;color:#ff8a80;min-height:18px;margin-bottom:8px;"></div>
-          <button class="form-btn" onclick="gateRegister()" id="grBtn" style="width:100%;">Create Account</button>
+          <input class="g-input" id="grUser" placeholder="username"/>
+          <input class="g-input" id="grEmail" placeholder="email"/>
+          <input class="g-input" id="grPass" type="password" placeholder="password (6+)"/>
+          <input class="g-input" id="grConf" type="password" placeholder="confirm password" onkeydown="if(event.key==='Enter')gateRegister()"/>
+          <div class="g-err" id="grErr"></div>
+          <button class="g-btn" onclick="gateRegister()" id="grBtn">Create Account</button>
         </div>
       </div>
     </div>
-
-    <!-- No access message (shown after login if email not whitelisted) -->
-    <div id="gateNoAccess" style="display:none;">
-      <div style="padding:20px;border-radius:12px;background:white;border:1px solid rgba(42,26,20,0.06);margin-top:16px;box-shadow:0 4px 20px rgba(42,26,20,0.06);">
-        <div style="font-size:0.82rem;opacity:0.5;line-height:1.6;">You are signed in but don't have access to this workspace. Ask the owner to add your email.</div>
-        <button class="nav-btn" onclick="stufloverLogout();location.reload();" style="margin-top:12px;">Sign out and try another account</button>
+    <div id="gateNoAccess" style="display:none;margin-top:16px;">
+      <div class="gate-card" style="text-align:center;">
+        <div style="font-size:0.85rem;opacity:0.45;line-height:1.6;">You're signed in but don't have access. Ask the owner to add your email.</div>
+        <button class="top-btn" onclick="stufloverLogout();location.reload();" style="margin-top:12px;">Try another account</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MAIN AREA (hidden until access confirmed) -->
-<div id="mainArea">
-  <div class="tabs">
-    <button class="tab on bc" onclick="switchPane('chat')">Chat</button>
-    <button class="tab bc" onclick="switchPane('designs')">Designs</button>
-    <button class="tab bc" onclick="switchPane('sandbox')">Sandbox</button>
-    <button class="tab bc" onclick="switchPane('team')">Team</button>
-  </div>
+<!-- MAIN (hidden until access confirmed) -->
+<div class="main" id="mainArea" style="display:none;">
 
-  <div class="pane active" id="paneChat">
-    <div class="chat-box">
-      <div class="chat-msgs" id="chatMsgs"></div>
-      <div class="chat-input-row">
-        <textarea class="chat-input" id="chatInput" placeholder="type something..." rows="1"
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"
-          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"></textarea>
-        <button class="chat-send" onclick="sendChatMsg()">Send</button>
-      </div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">channels</div>
+    <div class="sidebar-item on" onclick="openChannel('general')" id="ch_general">
+      <div class="dot" style="background:#c87860;"></div> General
     </div>
-  </div>
+    <div class="sidebar-item" onclick="openChannel('designs')" id="ch_designs">
+      <div class="dot" style="background:#7986cb;"></div> Designs
+    </div>
+    <div class="sidebar-item" onclick="openChannel('ideas')" id="ch_ideas">
+      <div class="dot" style="background:#81c784;"></div> Ideas
+    </div>
 
-  <div class="pane" id="paneDesigns">
-    <div class="section-title bc">Printify Designs & Ideas</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-      <button class="form-btn" onclick="openDesignForm()">+ Add Design</button>
+    <div class="sidebar-section" style="margin-top:16px;">tools</div>
+    <div class="sidebar-item" onclick="openChannel('claude')" id="ch_claude">
+      <div class="dot" style="background:#b39ddb;"></div> Ask Claude
     </div>
-    <div id="designForm" style="display:none;padding:18px;border-radius:12px;background:white;border:1px solid rgba(42,26,20,0.06);margin-bottom:16px;box-shadow:0 2px 12px rgba(42,26,20,0.05);">
-      <input class="form-input" id="dfTitle" placeholder="Design name" style="margin-bottom:8px;width:100%;"/>
-      <input class="form-input" id="dfImage" placeholder="Image URL (paste Printify preview link)" style="margin-bottom:8px;width:100%;"/>
-      <input class="form-input" id="dfLink" placeholder="Printify link (optional)" style="margin-bottom:8px;width:100%;"/>
-      <textarea class="form-input" id="dfNotes" placeholder="Notes..." style="margin-bottom:8px;width:100%;min-height:60px;resize:vertical;"></textarea>
-      <select class="form-input" id="dfStatus" style="margin-bottom:10px;width:100%;">
-        <option value="idea">Idea</option>
-        <option value="progress">In Progress</option>
-        <option value="review">Ready for Review</option>
-        <option value="done">Done</option>
-      </select>
-      <div style="display:flex;gap:8px;">
-        <button class="form-btn" onclick="saveDesign()">Save</button>
-        <button class="nav-btn" onclick="closeDesignForm()">Cancel</button>
-      </div>
-    </div>
-    <div class="design-grid" id="designGrid"></div>
-  </div>
 
-  <div class="pane" id="paneSandbox">
-    <div class="section-title bc">Sandbox — Test Updates</div>
-    <div id="sbListView">
-      <button class="form-btn" onclick="newSandbox()" style="margin-bottom:16px;">+ New Sandbox</button>
-      <div class="sb-list" id="sbList"></div>
-    </div>
-    <div class="sb-editor" id="sbEditor">
-      <div class="sb-bar">
-        <button class="sb-bar-btn" style="background:#c87860;color:#0c0c0f;" onclick="runSandbox()">Run</button>
-        <button class="sb-bar-btn" style="background:rgba(255,255,255,0.06);color:#e0ddd8;" onclick="saveSandbox()">Save</button>
-        <button class="sb-bar-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.08);color:#e0ddd8;" onclick="closeSandbox()">Back</button>
-        <span style="flex:1;"></span>
-        <span class="mono" style="font-size:0.72rem;opacity:0.3;" id="sbName"></span>
-      </div>
-      <div class="sb-editor-tabs">
-        <button class="sb-etab on" onclick="switchCodeTab('html',this)">HTML</button>
-        <button class="sb-etab" onclick="switchCodeTab('css',this)">CSS</button>
-        <button class="sb-etab" onclick="switchCodeTab('js',this)">JS</button>
-      </div>
-      <textarea class="sb-code" id="sbCodeHtml" placeholder="<!-- Write HTML here -->"></textarea>
-      <textarea class="sb-code" id="sbCodeCss" style="display:none;color:#90caf9;" placeholder="/* Write CSS here */"></textarea>
-      <textarea class="sb-code" id="sbCodeJs" style="display:none;color:#ffe082;" placeholder="// Write JS here"></textarea>
-      <div class="section-title bc" style="margin-top:16px;">Preview</div>
-      <iframe class="sb-preview" id="sbPreview" sandbox="allow-scripts"></iframe>
+    <div class="sidebar-section" style="margin-top:16px;">team</div>
+    <div class="sidebar-team" id="sidebarTeam"></div>
+    <div class="sidebar-team" id="sidebarOwnerAdd" style="display:none;">
+      <input class="g-input" id="addEmail" placeholder="add email..." style="font-size:0.78rem;padding:8px 10px;margin-bottom:0;"/>
+      <button class="sidebar-add" onclick="grantAccess()">+ Add member</button>
     </div>
   </div>
 
-  <div class="pane" id="paneTeam">
-    <div class="section-title bc">Team Members</div>
-    <div id="teamOwnerControls" style="display:none;">
-      <div class="form-row" style="margin-bottom:20px;">
-        <input class="form-input" id="grantEmail" placeholder="email to grant access"/>
-        <button class="form-btn" onclick="grantAccess()">Grant</button>
-      </div>
+  <!-- CHAT PANEL -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div class="chat-header-dot" id="chDot" style="background:#c87860;"></div>
+      <div class="chat-header-name" id="chName">General</div>
+      <div class="chat-header-desc" id="chDesc">team chat</div>
     </div>
-    <div id="teamList"></div>
+    <div class="msgs" id="chatMsgs"></div>
+    <div class="input-row">
+      <textarea class="input-box" id="chatInput" placeholder="message..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"></textarea>
+      <button class="send-btn" onclick="sendMsg()">Send</button>
+    </div>
   </div>
 </div>
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
-var myUsername = '';
-var myRole = '';
-var currentPane = 'chat';
-var chatPollInterval = null;
-var editingDesignId = null;
-var currentSandboxId = null;
-var currentCodeTab = 'html';
+var myUsername='', myRole='', currentChannel='general', chatPoll=null;
 
-async function apiFetch(url, opts) {
-  var base = window.STUFLOVER_API_URL || '';
-  var token = localStorage.getItem('stuflover_token');
-  var headers = Object.assign({'Content-Type':'application/json'}, opts && opts.headers || {});
-  if (token) headers['Authorization'] = 'Bearer ' + token;
-  var res = await (window._origFetch || fetch).call(window, base + url, Object.assign({}, opts, {headers: headers}));
-  return res.json();
+async function api(url,opts){
+  var base=window.STUFLOVER_API_URL||'';
+  var token=localStorage.getItem('stuflover_token');
+  var h=Object.assign({'Content-Type':'application/json'},opts&&opts.headers||{});
+  if(token) h['Authorization']='Bearer '+token;
+  var r=await(window._origFetch||fetch).call(window,base+url,Object.assign({},opts,{headers:h}));
+  return r.json();
+}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── INIT ───
+async function init(){
+  var token=localStorage.getItem('stuflover_token');
+  if(!token){showLogin();return;}
+  try{
+    var me=await api('/api/auth/me');
+    if(!me.user){showLogin();return;}
+    myUsername=me.user.username;
+    document.getElementById('navUser').textContent=myUsername;
+    var check=await api('/api/collab/check');
+    if(!check.access){showNoAccess(me.user.email);return;}
+    myRole=check.role;
+    document.getElementById('gate').style.display='none';
+    document.getElementById('mainArea').style.display='flex';
+    if(myRole==='owner') document.getElementById('sidebarOwnerAdd').style.display='block';
+    loadTeamSidebar();
+    openChannel('general');
+  }catch(e){showLogin();document.getElementById('gateMsg').textContent='Could not connect. Refresh to retry.';}
 }
 
-// ─── INIT ─────────────────────────────────────────
-async function init() {
-  var token = localStorage.getItem('stuflover_token');
-  if (!token) {
-    showLoginGate();
-    return;
-  }
-  try {
-    var me = await apiFetch('/api/auth/me');
-    if (!me.user) { showLoginGate(); return; }
-    myUsername = me.user.username;
-    document.getElementById('navUser').textContent = myUsername;
+function showLogin(){
+  document.getElementById('gateTitle').textContent='Collab';
+  document.getElementById('gateMsg').textContent='Sign in to your team workspace.';
+  document.getElementById('gateLogin').style.display='block';
+  document.getElementById('gateNoAccess').style.display='none';
+}
+function showNoAccess(email){
+  document.getElementById('gateTitle').textContent='No Access';
+  document.getElementById('gateMsg').textContent='Signed in as '+email;
+  document.getElementById('gateLogin').style.display='none';
+  document.getElementById('gateNoAccess').style.display='block';
+}
 
-    var check = await apiFetch('/api/collab/check');
-    if (!check.access) {
-      showNoAccess(me.user.email);
-      return;
-    }
-    myRole = check.role;
+function gateTab(t){
+  document.getElementById('gateLoginForm').style.display=t==='login'?'block':'none';
+  document.getElementById('gateRegForm').style.display=t==='register'?'block':'none';
+  document.querySelectorAll('.gate-tab').forEach(function(b,i){b.classList.toggle('on',(t==='login'&&i===0)||(t==='register'&&i===1));});
+}
 
-    // Show main area
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('mainArea').style.display = 'block';
+async function gateLogin(){
+  var e=document.getElementById('glEmail').value.trim(),p=document.getElementById('glPass').value,err=document.getElementById('glErr'),btn=document.getElementById('glBtn');
+  if(!e||!p){err.textContent='enter email and password';return;}
+  err.textContent='';btn.disabled=true;btn.textContent='...';
+  try{
+    var base=window.STUFLOVER_API_URL||'';
+    var r=await(window._origFetch||fetch).call(window,base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});
+    var d=await r.json();if(!r.ok)throw new Error(d.error||'Failed');
+    localStorage.setItem('stuflover_token',d.token);localStorage.setItem('stuflover_user',JSON.stringify(d.user));
+    init();
+  }catch(x){err.textContent=x.message;}
+  btn.disabled=false;btn.textContent='Sign In';
+}
 
-    // Show owner controls
-    if (myRole === 'owner') {
-      document.getElementById('teamOwnerControls').style.display = 'block';
-    }
+async function gateRegister(){
+  var u=document.getElementById('grUser').value.trim(),e=document.getElementById('grEmail').value.trim(),p=document.getElementById('grPass').value,c=document.getElementById('grConf').value,err=document.getElementById('grErr'),btn=document.getElementById('grBtn');
+  if(!u||!e||!p){err.textContent='all fields required';return;}
+  if(p.length<6){err.textContent='password 6+ chars';return;}
+  if(p!==c){err.textContent='passwords don\'t match';return;}
+  err.textContent='';btn.disabled=true;btn.textContent='...';
+  try{
+    var base=window.STUFLOVER_API_URL||'';
+    var r=await(window._origFetch||fetch).call(window,base+'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,email:e,password:p})});
+    var d=await r.json();if(!r.ok)throw new Error(d.error||'Failed');
+    localStorage.setItem('stuflover_token',d.token);localStorage.setItem('stuflover_user',JSON.stringify(d.user));
+    init();
+  }catch(x){err.textContent=x.message;}
+  btn.disabled=false;btn.textContent='Create Account';
+}
 
+// ─── CHANNELS ───
+var channelInfo={
+  general:{name:'General',desc:'team chat',color:'#c87860'},
+  designs:{name:'Designs',desc:'share printify designs + ideas',color:'#7986cb'},
+  ideas:{name:'Ideas',desc:'brainstorm anything',color:'#81c784'},
+  claude:{name:'Ask Claude',desc:'AI assistant for the team',color:'#b39ddb'}
+};
+
+function openChannel(ch){
+  if(chatPoll){clearInterval(chatPoll);chatPoll=null;}
+  currentChannel=ch;
+  var info=channelInfo[ch]||channelInfo.general;
+  document.getElementById('chName').textContent=info.name;
+  document.getElementById('chDesc').textContent=info.desc;
+  document.getElementById('chDot').style.background=info.color;
+  document.querySelectorAll('.sidebar-item').forEach(function(el){el.classList.remove('on');});
+  var el=document.getElementById('ch_'+ch);if(el)el.classList.add('on');
+
+  if(ch==='claude'){
+    document.getElementById('chatInput').placeholder='ask claude anything about stuflover...';
+    loadClaudeChat();
+  }else{
+    document.getElementById('chatInput').placeholder='message #'+info.name.toLowerCase()+'...';
     loadChat();
-    chatPollInterval = setInterval(loadChat, 5000);
-  } catch (e) {
-    showLoginGate();
-    document.getElementById('gateMsg').textContent = 'Could not reach the server. Try refreshing.';
+    chatPoll=setInterval(loadChat,4000);
   }
 }
 
-function showLoginGate() {
-  document.getElementById('gateTitle').textContent = 'Collab';
-  document.getElementById('gateMsg').textContent = 'Sign in to access the workspace.';
-  document.getElementById('gateLogin').style.display = 'block';
-  document.getElementById('gateNoAccess').style.display = 'none';
+// ─── TEAM CHAT ───
+var lastMsgCount={};
+async function loadChat(){
+  try{
+    var data=await api('/api/collab/messages?channel='+currentChannel);
+    var msgs=data.messages||[];
+    var key=currentChannel;
+    if(msgs.length===lastMsgCount[key])return;
+    lastMsgCount[key]=msgs.length;
+    renderMsgs(msgs);
+  }catch(e){}
 }
 
-function showNoAccess(email) {
-  document.getElementById('gateTitle').textContent = 'No Access';
-  document.getElementById('gateMsg').textContent = 'Signed in as ' + email;
-  document.getElementById('gateLogin').style.display = 'none';
-  document.getElementById('gateNoAccess').style.display = 'block';
+function renderMsgs(msgs){
+  var el=document.getElementById('chatMsgs');
+  el.innerHTML=msgs.map(function(m){
+    var isMe=m.username===myUsername;
+    var d=new Date(m.created_at+'Z');
+    var time=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+    return '<div class="msg '+(isMe?'me':'them')+'">'+
+      (!isMe?'<div class="msg-user">'+esc(m.username)+'</div>':'')+
+      esc(m.text)+
+      '<div class="msg-time">'+time+'</div>'+
+    '</div>';
+  }).join('');
+  el.scrollTop=el.scrollHeight;
 }
 
-function gateShowLogin() {
-  document.getElementById('gateLoginForm').style.display = 'block';
-  document.getElementById('gateRegForm').style.display = 'none';
-  document.getElementById('gateTabLogin').style.background = '#c87860';
-  document.getElementById('gateTabLogin').style.color = 'white';
-  document.getElementById('gateTabReg').style.background = 'transparent';
-  document.getElementById('gateTabReg').style.color = 'rgba(42,26,20,0.35)';
-}
+async function sendMsg(){
+  var input=document.getElementById('chatInput');
+  var text=input.value.trim();if(!text)return;
+  input.value='';input.style.height='auto';
 
-function gateShowRegister() {
-  document.getElementById('gateLoginForm').style.display = 'none';
-  document.getElementById('gateRegForm').style.display = 'block';
-  document.getElementById('gateTabReg').style.background = '#c87860';
-  document.getElementById('gateTabReg').style.color = 'white';
-  document.getElementById('gateTabLogin').style.background = 'transparent';
-  document.getElementById('gateTabLogin').style.color = 'rgba(42,26,20,0.35)';
-}
-
-async function gateLogin() {
-  var email = document.getElementById('glEmail').value.trim();
-  var password = document.getElementById('glPassword').value;
-  var err = document.getElementById('glErr');
-  var btn = document.getElementById('glBtn');
-  if (!email || !password) { err.textContent = 'enter email and password'; return; }
-  err.textContent = '';
-  btn.disabled = true; btn.textContent = 'Signing in...';
-
-  try {
-    var base = window.STUFLOVER_API_URL || '';
-    var res = await (window._origFetch || fetch).call(window, base + '/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, password: password })
-    });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-
-    localStorage.setItem('stuflover_token', data.token);
-    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
-    init(); // Re-run init with token
-  } catch (e) {
-    err.textContent = e.message;
+  if(currentChannel==='claude'){
+    sendClaude(text);return;
   }
-  btn.disabled = false; btn.textContent = 'Sign In';
-}
 
-async function gateRegister() {
-  var username = document.getElementById('grUsername').value.trim();
-  var email = document.getElementById('grEmail').value.trim();
-  var password = document.getElementById('grPassword').value;
-  var confirm = document.getElementById('grConfirm').value;
-  var err = document.getElementById('grErr');
-  var btn = document.getElementById('grBtn');
-  if (!username || !email || !password) { err.textContent = 'all fields required'; return; }
-  if (password.length < 6) { err.textContent = 'password must be 6+ characters'; return; }
-  if (password !== confirm) { err.textContent = 'passwords don\'t match'; return; }
-  err.textContent = '';
-  btn.disabled = true; btn.textContent = 'Creating...';
-
-  try {
-    var base = window.STUFLOVER_API_URL || '';
-    var res = await (window._origFetch || fetch).call(window, base + '/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username, email: email, password: password })
-    });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Registration failed');
-
-    localStorage.setItem('stuflover_token', data.token);
-    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
-    init(); // Re-run init with token
-  } catch (e) {
-    err.textContent = e.message;
-  }
-  btn.disabled = false; btn.textContent = 'Create Account';
-}
-
-function switchPane(pane) {
-  currentPane = pane;
-  document.querySelectorAll('.tab').forEach(function(t, i) {
-    t.classList.toggle('on', ['chat','designs','sandbox','team'][i] === pane);
-  });
-  document.querySelectorAll('.pane').forEach(function(p) { p.classList.remove('active'); });
-  document.getElementById('pane' + pane.charAt(0).toUpperCase() + pane.slice(1)).classList.add('active');
-
-  if (pane === 'designs') loadDesigns();
-  if (pane === 'sandbox') loadSandboxList();
-  if (pane === 'team') loadTeam();
-}
-
-// ─── CHAT ─────────────────────────────────────────
-var lastMsgCount = 0;
-async function loadChat() {
-  try {
-    var data = await apiFetch('/api/collab/messages');
-    var msgs = data.messages || [];
-    if (msgs.length === lastMsgCount) return;
-    lastMsgCount = msgs.length;
-
-    var el = document.getElementById('chatMsgs');
-    el.innerHTML = msgs.map(function(m) {
-      var isMe = m.username === myUsername;
-      var d = new Date(m.created_at + 'Z');
-      var time = d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
-      return '<div class="chat-msg ' + (isMe ? 'me' : 'them') + '">' +
-        (!isMe ? '<div class="chat-msg-user">' + esc(m.username) + '</div>' : '') +
-        esc(m.text) +
-        '<div class="chat-msg-time">' + time + '</div>' +
-      '</div>';
-    }).join('');
-    el.scrollTop = el.scrollHeight;
-  } catch (e) {}
-}
-
-async function sendChatMsg() {
-  var input = document.getElementById('chatInput');
-  var text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  input.style.height = 'auto';
-  await apiFetch('/api/collab/messages', {method:'POST', body: JSON.stringify({text: text})});
+  await api('/api/collab/messages',{method:'POST',body:JSON.stringify({text:text,channel:currentChannel})});
   loadChat();
 }
 
-// ─── DESIGNS ──────────────────────────────────────
-async function loadDesigns() {
-  try {
-    var data = await apiFetch('/api/collab/designs');
-    var grid = document.getElementById('designGrid');
-    if (!data.designs || !data.designs.length) {
-      grid.innerHTML = '<div class="empty-state">no designs yet — add your first one</div>';
-      return;
-    }
-    grid.innerHTML = data.designs.map(function(d) {
-      var statusClass = {idea:'status-idea',progress:'status-progress',review:'status-review',done:'status-done'}[d.status] || 'status-idea';
-      var statusLabel = {idea:'Idea',progress:'In Progress',review:'Review',done:'Done'}[d.status] || d.status;
-      return '<div class="design-card">' +
-        (d.image ? '<img class="design-img" src="' + esc(d.image) + '" onerror="this.style.display=\'none\'"/>' : '') +
-        '<div class="design-info">' +
-          '<div class="design-title">' + esc(d.title) + '</div>' +
-          '<div class="design-meta">' + esc(d.username) + ' · ' + new Date(d.created_at + 'Z').toLocaleDateString() + '</div>' +
-          (d.notes ? '<div class="design-notes">' + esc(d.notes) + '</div>' : '') +
-          '<span class="design-status ' + statusClass + '">' + statusLabel + '</span>' +
-          (d.link ? '<br/><a class="design-link" href="' + esc(d.link) + '" target="_blank" rel="noopener">Open in Printify</a>' : '') +
-          '<div class="design-actions">' +
-            '<button class="design-btn" onclick="editDesign(' + d.id + ')">Edit</button>' +
-            '<button class="design-btn del" onclick="deleteDesign(' + d.id + ')">Delete</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  } catch (e) {}
-}
+// ─── CLAUDE AI ───
+var claudeHistory=[];
 
-function openDesignForm() {
-  editingDesignId = null;
-  document.getElementById('dfTitle').value = '';
-  document.getElementById('dfImage').value = '';
-  document.getElementById('dfLink').value = '';
-  document.getElementById('dfNotes').value = '';
-  document.getElementById('dfStatus').value = 'idea';
-  document.getElementById('designForm').style.display = 'block';
-}
-
-function closeDesignForm() {
-  document.getElementById('designForm').style.display = 'none';
-  editingDesignId = null;
-}
-
-async function saveDesign() {
-  var title = document.getElementById('dfTitle').value.trim();
-  if (!title) return;
-  var body = {
-    title: title,
-    image: document.getElementById('dfImage').value.trim(),
-    link: document.getElementById('dfLink').value.trim(),
-    notes: document.getElementById('dfNotes').value.trim(),
-    status: document.getElementById('dfStatus').value
-  };
-  if (editingDesignId) {
-    await apiFetch('/api/collab/designs/' + editingDesignId, {method:'PUT', body: JSON.stringify(body)});
-  } else {
-    await apiFetch('/api/collab/designs', {method:'POST', body: JSON.stringify(body)});
+function loadClaudeChat(){
+  var saved=JSON.parse(localStorage.getItem('collab_claude')||'[]');
+  claudeHistory=saved;
+  var el=document.getElementById('chatMsgs');
+  if(!saved.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;opacity:0.25;font-size:0.88rem;line-height:1.7;">Ask Claude anything — ideas for Stuflover, help with designs, marketing copy, code questions, whatever you need.</div>';
+    return;
   }
-  closeDesignForm();
-  loadDesigns();
+  el.innerHTML=saved.map(function(m){
+    var cls=m.role==='user'?'me':'ai';
+    return '<div class="msg '+cls+'">'+
+      (m.role!=='user'?'<div class="msg-user">Claude</div>':'')+
+      esc(m.content).replace(/\n/g,'<br/>')+
+    '</div>';
+  }).join('');
+  el.scrollTop=el.scrollHeight;
 }
 
-async function editDesign(id) {
-  try {
-    var data = await apiFetch('/api/collab/designs');
-    var d = (data.designs || []).find(function(x) { return x.id === id; });
-    if (!d) return;
-    editingDesignId = id;
-    document.getElementById('dfTitle').value = d.title;
-    document.getElementById('dfImage').value = d.image || '';
-    document.getElementById('dfLink').value = d.link || '';
-    document.getElementById('dfNotes').value = d.notes || '';
-    document.getElementById('dfStatus').value = d.status || 'idea';
-    document.getElementById('designForm').style.display = 'block';
-  } catch (e) {}
+async function sendClaude(text){
+  var el=document.getElementById('chatMsgs');
+  // Add user msg
+  claudeHistory.push({role:'user',content:text});
+  el.innerHTML+='<div class="msg me">'+esc(text)+'</div>';
+  el.scrollTop=el.scrollHeight;
+
+  // Typing indicator
+  var typing=document.createElement('div');
+  typing.className='msg ai';
+  typing.style.opacity='0.4';
+  typing.style.fontStyle='italic';
+  typing.innerHTML='<div class="msg-user">Claude</div>thinking...';
+  el.appendChild(typing);
+  el.scrollTop=el.scrollHeight;
+
+  try{
+    var apiMsgs=claudeHistory.map(function(m){return{role:m.role==='user'?'user':'assistant',content:m.content};});
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are Claude, an AI assistant helping a small teen lifestyle brand called Stuflover. The team uses you for brainstorming, writing copy, planning features, design feedback, marketing ideas, and code help. Be helpful, creative, and concise. The brand aesthetic is warm, feminine, gen-z, fun. Keep responses practical and actionable.',
+        messages:apiMsgs
+      })
+    });
+    var data=await res.json();
+    var reply=data.content&&data.content[0]?data.content[0].text:'hmm, try again?';
+    typing.remove();
+    claudeHistory.push({role:'assistant',content:reply});
+    localStorage.setItem('collab_claude',JSON.stringify(claudeHistory.slice(-40)));
+    el.innerHTML+='<div class="msg ai"><div class="msg-user">Claude</div>'+esc(reply).replace(/\n/g,'<br/>')+'</div>';
+    el.scrollTop=el.scrollHeight;
+  }catch(e){
+    typing.remove();
+    el.innerHTML+='<div class="msg ai" style="opacity:0.4;"><div class="msg-user">Claude</div>could not connect — try again</div>';
+  }
 }
 
-async function deleteDesign(id) {
-  if (!confirm('Delete this design?')) return;
-  await apiFetch('/api/collab/designs/' + id, {method:'DELETE'});
-  loadDesigns();
-}
-
-// ─── SANDBOX ──────────────────────────────────────
-async function loadSandboxList() {
-  document.getElementById('sbListView').style.display = 'block';
-  document.getElementById('sbEditor').classList.remove('active');
-  try {
-    var data = await apiFetch('/api/collab/sandbox');
-    var list = document.getElementById('sbList');
-    if (!data.sandboxes || !data.sandboxes.length) {
-      list.innerHTML = '<div class="empty-state">no sandboxes yet — create one to start testing</div>';
-      return;
-    }
-    list.innerHTML = data.sandboxes.map(function(s) {
-      return '<div class="sb-card" onclick="openSandbox(' + s.id + ')">' +
-        '<div class="sb-card-name">' + esc(s.name) + '</div>' +
-        '<div class="sb-card-meta">' + esc(s.username) + ' · ' + new Date(s.updated_at + 'Z').toLocaleDateString() + '</div>' +
+// ─── TEAM SIDEBAR ───
+async function loadTeamSidebar(){
+  try{
+    var data=await api('/api/collab/members');
+    var el=document.getElementById('sidebarTeam');
+    el.innerHTML=(data.members||[]).map(function(m){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.78rem;">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:#81c784;flex-shrink:0;"></div>'+
+        '<span style="flex:1;opacity:0.6;">'+esc(m.email.split('@')[0])+'</span>'+
+        (m.role==='owner'?'<span style="font-size:0.5rem;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;">owner</span>':
+        (myRole==='owner'?'<button onclick="removeMember('+m.id+')" style="font-size:0.5rem;opacity:0.2;background:none;border:none;cursor:pointer;color:#c44;">x</button>':''))+
       '</div>';
     }).join('');
-  } catch (e) {}
+  }catch(e){}
 }
 
-async function newSandbox() {
-  var name = prompt('Sandbox name (e.g. "new homepage test")');
-  if (!name || !name.trim()) return;
-  var data = await apiFetch('/api/collab/sandbox', {method:'POST', body: JSON.stringify({name: name.trim()})});
-  if (data.id) openSandbox(data.id);
-  else loadSandboxList();
+async function grantAccess(){
+  var email=document.getElementById('addEmail').value.trim();
+  if(!email)return;
+  await api('/api/collab/grant',{method:'POST',body:JSON.stringify({email:email})});
+  document.getElementById('addEmail').value='';
+  loadTeamSidebar();
 }
 
-async function openSandbox(id) {
-  currentSandboxId = id;
-  try {
-    var data = await apiFetch('/api/collab/sandbox/' + id);
-    var sb = data.sandbox;
-    document.getElementById('sbListView').style.display = 'none';
-    document.getElementById('sbEditor').classList.add('active');
-    document.getElementById('sbName').textContent = sb.name;
-    document.getElementById('sbCodeHtml').value = sb.html || '';
-    document.getElementById('sbCodeCss').value = sb.css || '';
-    document.getElementById('sbCodeJs').value = sb.js || '';
-    switchCodeTab('html', document.querySelector('.sb-etab'));
-    runSandbox();
-  } catch (e) {}
+async function removeMember(id){
+  if(!confirm('Remove this member?'))return;
+  await api('/api/collab/revoke/'+id,{method:'DELETE'});
+  loadTeamSidebar();
 }
-
-function closeSandbox() {
-  currentSandboxId = null;
-  loadSandboxList();
-}
-
-function switchCodeTab(tab, btn) {
-  currentCodeTab = tab;
-  document.querySelectorAll('.sb-etab').forEach(function(t) { t.classList.remove('on'); });
-  btn.classList.add('on');
-  document.getElementById('sbCodeHtml').style.display = tab === 'html' ? 'block' : 'none';
-  document.getElementById('sbCodeCss').style.display = tab === 'css' ? 'block' : 'none';
-  document.getElementById('sbCodeJs').style.display = tab === 'js' ? 'block' : 'none';
-}
-
-function runSandbox() {
-  var html = document.getElementById('sbCodeHtml').value;
-  var css = document.getElementById('sbCodeCss').value;
-  var js = document.getElementById('sbCodeJs').value;
-  var iframe = document.getElementById('sbPreview');
-  var doc = '<!DOCTYPE html><html><head><style>' + css + '</style></head><body>' + html + '<script>' + js + '<\/script></body></html>';
-  iframe.srcdoc = doc;
-}
-
-async function saveSandbox() {
-  if (!currentSandboxId) return;
-  await apiFetch('/api/collab/sandbox/' + currentSandboxId, {
-    method: 'PUT',
-    body: JSON.stringify({
-      name: document.getElementById('sbName').textContent,
-      html: document.getElementById('sbCodeHtml').value,
-      css: document.getElementById('sbCodeCss').value,
-      js: document.getElementById('sbCodeJs').value
-    })
-  });
-  var btn = document.querySelector('.sb-bar-btn:nth-child(2)');
-  if (btn) { btn.textContent = 'Saved!'; setTimeout(function(){ btn.textContent = 'Save'; }, 1200); }
-}
-
-// ─── TEAM ─────────────────────────────────────────
-async function loadTeam() {
-  try {
-    var data = await apiFetch('/api/collab/members');
-    var list = document.getElementById('teamList');
-    list.innerHTML = (data.members || []).map(function(m) {
-      var isOwner = m.role === 'owner';
-      return '<div class="member-row">' +
-        '<div class="member-email">' + esc(m.email) + '</div>' +
-        '<div class="member-role">' + m.role + '</div>' +
-        (!isOwner && myRole === 'owner' ? '<button class="member-remove" onclick="removeMember(' + m.id + ')">Remove</button>' : '') +
-      '</div>';
-    }).join('');
-  } catch (e) {}
-}
-
-async function grantAccess() {
-  var email = document.getElementById('grantEmail').value.trim();
-  if (!email) return;
-  await apiFetch('/api/collab/grant', {method:'POST', body: JSON.stringify({email: email})});
-  document.getElementById('grantEmail').value = '';
-  loadTeam();
-}
-
-async function removeMember(id) {
-  if (!confirm('Remove this member?')) return;
-  await apiFetch('/api/collab/revoke/' + id, {method:'DELETE'});
-  loadTeam();
-}
-
-function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 init();
 </script>
