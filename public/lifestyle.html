@@ -17,8 +17,10 @@
     /* NAV */
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
     .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;}
-    .nav-home{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;}
-    .nav-home:hover{opacity:0.55;}
+    .nav-links{display:flex;align-items:center;gap:12px;}
+    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;color:inherit;}
+    .nav-link:hover{opacity:0.55;}
+    .nav-welcome{font-size:0.72rem;letter-spacing:2px;opacity:0.5;display:none;}
 
     /* LANDING */
     #heroSection{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 40px 80px;text-align:center;position:relative;overflow:hidden;
@@ -396,15 +398,14 @@
     /* ── HAMBURGER ── */
     .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
     .nav-toggle svg{width:22px;height:22px;display:block;}
-    .nav-right{display:flex;align-items:center;gap:12px;}
 
     @media(max-width:768px){
       nav{padding:13px 16px;}
-      .nav-right{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;align-items:stretch;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
-      .nav-right.open{display:flex;}
-      .nav-right a{display:block;padding:10px 16px;border:none;border-radius:6px;text-align:left;}
-      .nav-right a:hover{background:rgba(128,128,128,0.06);}
-      .nav-right span{display:block;padding:6px 16px;}
+      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;align-items:stretch;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+      .nav-links.open{display:flex;}
+      .nav-link{display:block;padding:10px 16px;border:none;border-radius:6px;text-align:left;}
+      .nav-link:hover{background:rgba(128,128,128,0.06);}
+      .nav-welcome{display:none !important;}
       .nav-toggle{display:block;}
       .page-header{padding:80px 16px 0;}
       .ae-title{font-size:clamp(2.4rem,9vw,5rem);}
@@ -449,7 +450,7 @@
       .opt,.opt-check{padding:14px 16px;min-height:44px;}
       .next-btn{min-height:44px;}
       .start-btn{min-height:44px;padding:16px 36px;font-size:1.1rem;}
-      .mode-pill,.nav-btn,.nav-home,.back-btn,.ffi-tab,.ffi-add-btn{min-height:44px;display:inline-flex;align-items:center;}
+      .mode-pill,.nav-btn,.nav-link,.nav-toggle,.back-btn,.ffi-tab,.ffi-add-btn{min-height:44px;display:inline-flex;align-items:center;}
       body{font-size:15px;}
       .product-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
       .fit-products-body{padding:0 16px 30px;}
@@ -900,7 +901,7 @@
     @keyframes sectionFadeIn{from{opacity:0;}to{opacity:1;}}
 
     /* Consistent button hover lift */
-    button:not(:disabled):hover, .nav-home:hover, .shop-link:hover {
+    button:not(:disabled):hover, .nav-link:hover, .shop-link:hover {
       transform:translateY(-1px);
       box-shadow:0 4px 12px rgba(0,0,0,0.10);
     }
@@ -914,12 +915,12 @@
 
 <nav id="mainNav">
   <a class="logo bc" id="navLogo" href="index.html">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-right').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-right">
-    <span id="navWelcome" class="bc" style="font-size:0.72rem;letter-spacing:2px;opacity:0.5;display:none;"></span>
-    <a class="nav-home bc" href="fitcheck.html" style="font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);">Fit Check</a>
-    <a class="nav-home bc" id="navAccount" href="account.html" style="font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);">Account</a>
-    <a class="nav-home bc" id="navHome" href="index.html">Home</a>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="nav-links">
+    <span id="navWelcome" class="nav-welcome bc"></span>
+    <a class="nav-link bc" href="fitcheck.html">Fit Check</a>
+    <a class="nav-link bc" id="navAccount" href="account.html">Account</a>
+    <a class="nav-link bc" id="navHome" href="index.html">Home</a>
   </div>
 </nav>
 
