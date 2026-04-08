@@ -162,9 +162,10 @@
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      nav ul{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;background:rgba(250,240,240,0.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(42,26,20,0.08);padding:8px 0;}
+      nav ul{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.97);backdrop-filter:blur(18px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(42,26,20,0.08);box-shadow:0 6px 20px rgba(42,26,20,0.08);}
       nav ul.open{display:flex;}
-      nav ul a{display:block;padding:14px 24px;border-bottom:1px solid rgba(30,12,6,0.05);}
+      nav ul a{display:block;padding:10px 16px;border-radius:6px;}
+      nav ul a:hover{background:rgba(42,26,20,0.04);}
       .nav-toggle{display:block;}
       .hero{padding:100px 24px 60px;flex-direction:column;}
       .hero h1{font-size:clamp(4rem,12vw,8rem);}
