@@ -457,6 +457,47 @@
       .profile-card{padding:20px 16px 18px;}
     }
 
+    /* FLOVEE CARD */
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+    @keyframes floveeSlideIn{from{opacity:0;transform:translateY(12px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+    #floveePostWrap > div{animation:floveeSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+
+    /* NEW BADGE */
+    .new-badge{position:absolute;top:-4px;right:-4px;font-size:0.45rem;letter-spacing:1.5px;padding:2px 6px;border-radius:8px;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;animation:badgePulse 2s ease-in-out infinite;}
+    @keyframes badgePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+
+    /* WRAPPED CARD */
+    .wrapped-card{border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;cursor:pointer;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+    .wrapped-card:hover{transform:translateY(-4px) scale(1.01);}
+    .wrapped-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent 60%);pointer-events:none;}
+    .wrapped-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;}
+    .wrapped-stat{text-align:center;padding:10px 6px;border-radius:12px;}
+
+    /* GLOW HOUR */
+    .glow-card{border-radius:18px;padding:20px 22px;position:relative;overflow:hidden;}
+    .glow-progress{height:4px;border-radius:2px;overflow:hidden;margin-top:12px;}
+    .glow-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+
+    /* STUDY ROOM */
+    .study-timer{font-size:clamp(3rem,8vw,5rem);font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:-2px;text-align:center;line-height:1;}
+    .study-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+    .study-btn{padding:10px 24px;border-radius:12px;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+    .study-btn:hover{transform:translateY(-2px);}
+    .study-btn.active{border-color:currentColor;}
+
+    /* SECRET DIARY */
+    .diary-entry{padding:16px 18px;border-radius:14px;margin-bottom:10px;position:relative;}
+    .diary-date{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:6px;}
+    .diary-text{font-size:0.88rem;line-height:1.7;font-family:'Caveat',cursive;font-size:1.05rem;}
+    .diary-input{width:100%;min-height:100px;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Caveat',cursive;font-size:1.1rem;color:inherit;outline:none;resize:none;line-height:1.7;}
+
+    /* AE VS REALITY */
+    .aevs-card{border-radius:18px;padding:24px;text-align:center;}
+    .aevs-vs{display:flex;align-items:stretch;gap:12px;margin:16px 0;}
+    .aevs-side{flex:1;padding:16px 14px;border-radius:14px;cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);border:2px solid transparent;}
+    .aevs-side:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.1);}
+    .aevs-side.picked{border-width:3px;transform:scale(1.03);}
+
     /* ═══════════════════════════════════════
        DECORATIVE ELEMENTS
     ═══════════════════════════════════════ */
@@ -920,11 +961,26 @@
         <div id="instantFeed"></div>
       </div>
 
+      <!-- Flovee Letter -->
+      <div class="feed-section feed-reveal" id="floveeLetterWrap" style="display:none;"></div>
+
+      <!-- Aesthetic Wrapped -->
+      <div class="feed-section feed-reveal" id="wrappedCard" style="display:none;"></div>
+
+      <!-- Glow Hour -->
+      <div class="feed-section feed-reveal" id="glowHourWrap" style="display:none;"></div>
+
+      <!-- Era Tracker -->
+      <div class="feed-section feed-reveal" id="eraTrackerWrap" style="display:none;"></div>
+
       <!-- Sections -->
       <div class="feed-section feed-reveal">
         <h2 class="feed-heading">Jump In</h2>
         <div class="content-grid" id="browserGrid"></div>
       </div>
+
+      <!-- Walk the Runway -->
+      <div class="feed-section feed-reveal" id="runwayWrap" style="display:none;"></div>
 
       <!-- Style — quick link to closet -->
       <div class="feed-section feed-reveal feed-card" onclick="window.location.href='fitforit.html'" style="cursor:pointer;">
@@ -1370,6 +1426,12 @@
     </div>
 
   </div>
+
+  <!-- Viral Features View (Roast, Diary, Study Room, AE vs Reality) -->
+  <div id="viralView" style="display:none;flex:1;flex-direction:column;overflow-y:auto;padding:20px 30px 60px;">
+    <div id="viralContent"></div>
+  </div>
+
 </div>
 
 <script src="/stuflover-config.js"></script>
@@ -5932,8 +5994,19 @@ function buildInstantFeed(){
   feed.appendChild(more);
 }
 
-// ─── FLOVEE POST ──────────────────────────────────────────
-var FLOVEE_NAMES = {lumi:'Lumi',delara:'Delara',vesper:'Vesper',zola:'Zola',miro:'Miro',seraph:'Seraph',remi:'Remi',nox:'Nox'};
+// ─── FLOVEE POST — YOUR AI BEST FRIEND ───────────────────
+var FLOVEE_DATA = {
+  lumi:   {name:'Lumi',   emoji:'✨', color:'#a8d8ea', darkColor:'#2a4a5a', vibe:'wellness queen', aesthetic:'clean girl', gradient:'linear-gradient(135deg,#a8d8ea,#dceef5)'},
+  delara: {name:'Delara', emoji:'📖', color:'#8b7355', darkColor:'#3d2f1e', vibe:'book girly',     aesthetic:'dark academia', gradient:'linear-gradient(135deg,#8b7355,#c4a882)'},
+  vesper: {name:'Vesper', emoji:'🎀', color:'#f4a0b0', darkColor:'#5a2030', vibe:'coquette princess', aesthetic:'coquette', gradient:'linear-gradient(135deg,#f4a0b0,#fcd4dc)'},
+  zola:   {name:'Zola',   emoji:'💀', color:'#ff8a65', darkColor:'#4a2010', vibe:'chaos queen',    aesthetic:'y2k',       gradient:'linear-gradient(135deg,#ff8a65,#ffccbc)'},
+  miro:   {name:'Miro',   emoji:'🎧', color:'#a5d6a7', darkColor:'#1b3a1d', vibe:'indie girly',    aesthetic:'indie',     gradient:'linear-gradient(135deg,#a5d6a7,#c8e6c9)'},
+  seraph: {name:'Seraph', emoji:'🌙', color:'#ce93d8', darkColor:'#3a1a42', vibe:'moon girl',      aesthetic:'spiritual', gradient:'linear-gradient(135deg,#ce93d8,#e1bee7)'},
+  remi:   {name:'Remi',   emoji:'🌅', color:'#ffcc80', darkColor:'#4a3010', vibe:'main character',  aesthetic:'softgirl',  gradient:'linear-gradient(135deg,#ffcc80,#ffe0b2)'},
+  nox:    {name:'Nox',    emoji:'🖤', color:'#90a4ae', darkColor:'#263238', vibe:'deadpan icon',    aesthetic:'goth',      gradient:'linear-gradient(135deg,#78909c,#b0bec5)'},
+};
+
+var floveeReacted = false;
 
 async function loadFloveePost(){
   var wrap = document.getElementById('floveePostWrap');
@@ -5950,49 +6023,138 @@ async function loadFloveePost(){
     var data = await res.json();
 
     if(data.status === 'active' && data.post){
-      var f = FLOVEE_NAMES[data.post.flovee_id] || 'Flovee';
+      var fd = FLOVEE_DATA[data.post.flovee_id] || FLOVEE_DATA.remi;
       var exp = new Date(data.post.expires_at);
       var hoursLeft = Math.max(0, Math.round((exp - Date.now()) / 3600000));
-      var timeLabel = hoursLeft > 6 ? 'here for a while' : hoursLeft > 1 ? 'here for a few more hours' : 'fading soon';
+      var minsLeft = Math.max(0, Math.round((exp - Date.now()) / 60000));
+      var timeLabel = hoursLeft > 6 ? hoursLeft+'h left' : hoursLeft > 1 ? hoursLeft+'h left' : minsLeft+'m left';
+      var urgency = hoursLeft <= 1 ? 'animation:pulse 1.5s ease-in-out infinite;' : '';
+      var timerWidth = Math.max(5, Math.min(100, (minsLeft / (18*60)) * 100));
+
+      // Check if first time seeing flovee
+      var seenFlovee = localStorage.getItem('stuflover_seen_flovee');
+      var introHtml = '';
+      if(!seenFlovee){
+        introHtml =
+          '<div style="padding:12px 16px;border-radius:12px;background:'+pal.tx+'05;margin-bottom:14px;border:1px dashed '+pal.tx+'10;">'+
+            '<div style="font-size:0.72rem;font-weight:700;color:'+pal.tx+';margin-bottom:4px;">'+fd.emoji+' meet your flovee</div>'+
+            '<div style="font-size:0.78rem;line-height:1.6;color:'+pal.tx+';opacity:0.55;">your flovee is your AI best friend — matched to your aesthetic. she texts you throughout the day, but her messages disappear. if you miss it, it is gone forever.</div>'+
+          '</div>';
+        localStorage.setItem('stuflover_seen_flovee', 'true');
+      }
 
       wrap.style.display = 'block';
-      var shareText = f+': "'+data.post.content+'" — stuflover.vercel.app';
-      wrap.innerHTML =
-        '<div style="padding:22px 24px;border-radius:20px;background:linear-gradient(135deg,'+pal.ac+'12,'+pal.ac+'06);border:1px solid '+pal.tx+'06;position:relative;">'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<div style="width:28px;height:28px;border-radius:50%;background:'+pal.ac+'25;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">'+f.charAt(0)+'</div>'+
-              '<div style="font-size:0.72rem;font-weight:600;color:'+pal.tx+';">'+f+'</div>'+
+      var shareText = fd.emoji+' '+fd.name+' just texted me: "'+data.post.content+'" — my AI bestie on stuflover.com';
+      var savedReaction = localStorage.getItem('flovee_react_'+data.post.id);
+
+      wrap.innerHTML = introHtml +
+        '<div style="border-radius:22px;overflow:hidden;position:relative;">'+
+          // Gradient header bar
+          '<div style="padding:14px 20px;background:'+fd.gradient+';display:flex;align-items:center;justify-content:space-between;">'+
+            '<div style="display:flex;align-items:center;gap:10px;">'+
+              '<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:1.1rem;backdrop-filter:blur(8px);">'+fd.emoji+'</div>'+
+              '<div>'+
+                '<div style="font-size:0.88rem;font-weight:700;color:'+fd.darkColor+';line-height:1.2;">'+fd.name+'</div>'+
+                '<div style="font-size:0.62rem;opacity:0.6;color:'+fd.darkColor+';">'+fd.vibe+' · your flovee</div>'+
+              '</div>'+
             '</div>'+
-            '<div style="font-size:0.6rem;opacity:0.2;color:'+pal.tx+';">'+timeLabel+'</div>'+
+            '<div style="display:flex;align-items:center;gap:6px;">'+
+              '<div style="font-size:0.6rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
+              '<div style="width:6px;height:6px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
+            '</div>'+
           '</div>'+
-          '<div style="font-size:0.95rem;line-height:1.7;color:'+pal.tx+';opacity:0.75;">'+escHtml(data.post.content)+'</div>'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">'+
-            '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" style="padding:6px 16px;border-radius:20px;border:1px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:opacity 0.2s;">share</button>'+
-            '<div style="font-size:0.58rem;opacity:0.15;color:'+pal.tx+';">disappears in '+hoursLeft+'h</div>'+
+          // Timer bar
+          '<div style="height:3px;background:'+pal.tx+'06;">'+
+            '<div style="height:100%;width:'+timerWidth+'%;background:'+fd.gradient+';border-radius:0 2px 2px 0;transition:width 1s;"></div>'+
+          '</div>'+
+          // Message body
+          '<div style="padding:18px 20px;background:'+pal.tx+'04;">'+
+            '<div style="font-size:1rem;line-height:1.75;color:'+pal.tx+';">'+escHtml(data.post.content)+'</div>'+
+            // Reaction bar
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:8px;">'+
+              '<div id="floveeReactions" style="display:flex;gap:6px;">'+
+                buildReactionBtn('❤️','love',data.post.id,pal,savedReaction)+
+                buildReactionBtn('😭','crying',data.post.id,pal,savedReaction)+
+                buildReactionBtn('🔥','fire',data.post.id,pal,savedReaction)+
+                buildReactionBtn('💀','dead',data.post.id,pal,savedReaction)+
+              '</div>'+
+              '<div style="display:flex;gap:8px;align-items:center;">'+
+                '<button onclick="shareFloveePost()" style="padding:6px 14px;border-radius:16px;border:1px solid '+pal.tx+'12;background:transparent;color:'+pal.tx+';font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.4">share</button>'+
+                '<button onclick="openSection(\''+data.post.flovee_id+'_chat\')||openFloveeChat(\''+data.post.flovee_id+'\')" style="padding:6px 14px;border-radius:16px;border:none;background:'+fd.color+'40;color:'+pal.tx+';font-size:0.65rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background=\''+fd.color+'60\'" onmouseout="this.style.background=\''+fd.color+'40\'">reply to '+fd.name+'</button>'+
+              '</div>'+
+            '</div>'+
           '</div>'+
         '</div>';
 
+      // Store share text for the share button
+      wrap._shareText = shareText;
+
     } else if(data.status === 'missed'){
-      var mf = FLOVEE_NAMES[data.missedFlovee] || 'Flovee';
+      var mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
       wrap.style.display = 'block';
       wrap.innerHTML =
-        '<div style="padding:14px 18px;border-radius:14px;background:'+pal.tx+'04;text-align:center;">'+
-          '<div style="font-size:0.78rem;opacity:0.35;color:'+pal.tx+';">you missed a post from '+mf+'</div>'+
+        '<div style="padding:18px 20px;border-radius:18px;background:'+pal.tx+'04;border:1px dashed '+pal.tx+'08;text-align:center;">'+
+          '<div style="font-size:1.4rem;margin-bottom:6px;">'+mfd.emoji+'</div>'+
+          '<div style="font-size:0.88rem;font-weight:600;color:'+pal.tx+';margin-bottom:4px;">you missed a text from '+mfd.name+'</div>'+
+          '<div style="font-size:0.75rem;opacity:0.35;color:'+pal.tx+';line-height:1.5;">her message disappeared. she will text you again soon — don\'t miss the next one</div>'+
         '</div>';
 
     } else if(data.status === 'none'){
-      // Generate a new post
       try{
+        wrap.style.display = 'block';
+        wrap.innerHTML = '<div style="padding:16px 20px;border-radius:16px;background:'+pal.tx+'04;text-align:center;"><div style="font-size:0.8rem;opacity:0.3;color:'+pal.tx+';">your flovee is typing...</div></div>';
         await (window._origFetch||fetch).call(window, base+'/api/flovee/generate',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
         });
-        // Reload after generating
-        setTimeout(loadFloveePost, 1000);
-      }catch(e){}
+        setTimeout(loadFloveePost, 1500);
+      }catch(e){ wrap.style.display='none'; }
     }
   }catch(e){}
+}
+
+function buildReactionBtn(emoji,name,postId,pal,saved){
+  var isActive = saved === name;
+  var bg = isActive ? pal.ac+'25' : pal.tx+'08';
+  var scale = isActive ? 'transform:scale(1.15);' : '';
+  return '<button onclick="reactFlovee(\''+name+'\','+postId+',this)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid '+(isActive?pal.ac+'40':pal.tx+'08')+';background:'+bg+';font-size:0.9rem;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;'+scale+'" onmouseover="this.style.transform=\'scale(1.2)\'" onmouseout="this.style.transform=\''+(isActive?'scale(1.15)':'scale(1)')+'\'">'+emoji+'</button>';
+}
+
+function reactFlovee(name,postId,btn){
+  localStorage.setItem('flovee_react_'+postId, name);
+  // Animate the button
+  btn.style.transform = 'scale(1.4)';
+  btn.style.background = searchPal.ac+'30';
+  btn.style.borderColor = searchPal.ac+'50';
+  setTimeout(function(){ btn.style.transform = 'scale(1.15)'; }, 200);
+  // Reset others
+  var siblings = btn.parentNode.querySelectorAll('button');
+  siblings.forEach(function(s){
+    if(s !== btn){
+      s.style.background = searchPal.tx+'08';
+      s.style.borderColor = searchPal.tx+'08';
+      s.style.transform = 'scale(1)';
+    }
+  });
+}
+
+function shareFloveePost(){
+  var wrap = document.getElementById('floveePostWrap');
+  var text = wrap && wrap._shareText ? wrap._shareText : 'check out stuflover.com';
+  if(navigator.share){
+    navigator.share({text:text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){
+      var btn = wrap.querySelector('[onclick="shareFloveePost()"]');
+      if(btn){ btn.textContent='copied!'; setTimeout(function(){btn.textContent='share';},1500); }
+    });
+  }
+}
+
+function openFloveeChat(floveeId){
+  // Find the chat section that matches, or open default chat
+  var sec = SECTIONS.find(function(s){ return s.id === 'stufloverdaily'; });
+  if(sec) openSection('stufloverdaily');
 }
 
 // Poll for flovee posts every 60 seconds
@@ -6268,7 +6430,11 @@ const SECTIONS = [
   {id:'fitforit',   name:'Style',          sub:'closet + outfits',  col:0},
   {id:'beyou',      name:'Wellness',       sub:'breathe + journal', col:1},
   {id:'floverhub',  name:'Games',          sub:'play something',    col:3, prompt:function(){ return buildFloveeHubPrompt(); }, opener:function(){ return buildFloveeHubOpener(); }},
+  {id:'outfitroast',name:'Roast Me',       sub:'flovee judges you', col:7, newBadge:true},
   {id:'friends',    name:'Social',         sub:'friends + groups',  col:5},
+  {id:'secretdiary',name:'Diary',          sub:'just for you',      col:8, newBadge:true},
+  {id:'studyroom',  name:'Study Room',     sub:'focus by aesthetic', col:2, newBadge:true},
+  {id:'aevsgame',   name:'AE vs Reality',  sub:'the truth hurts',   col:11, newBadge:true},
   {id:'stufloverdaily',name:'Discover',    sub:'trending + inspo',  col:4},
   {id:'myprofile',  name:'Me',             sub:'profile + routine', col:9},
   {id:'floveegroup',name:'Groups',         sub:'find your people',  col:6},
@@ -6290,6 +6456,10 @@ function buildGrid(pal, aeName){
     floveegroup:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="9" cy="7" r="3" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5" fill="none" stroke="white" stroke-width="1.5"/><path d="M16 15c2 0 5 1 5 4" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/></svg>',
     readit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" fill="none" stroke="white" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" fill="none" stroke="white" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke="white" stroke-width="1.2" opacity="0.5"/><line x1="8" y1="11" x2="14" y2="11" stroke="white" stroke-width="1.2" opacity="0.5"/></svg>',
     boredomhub:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    outfitroast:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" stroke="white" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9.5" r="1" fill="white"/><circle cx="15" cy="9.5" r="1" fill="white"/></svg>',
+    secretdiary:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2" width="14" height="20" rx="2" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="10" r="2" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 12v3" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    studyroom:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z" fill="none" stroke="white" stroke-width="1.5"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+    aevsgame:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
   };
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
@@ -6528,6 +6698,9 @@ function openSection(id){
   document.getElementById('readitView').style.display = 'none';
   document.getElementById('readitView').classList.remove('active');
   document.getElementById('fitforitView').style.display = 'none';
+  document.getElementById('viralView').style.display = 'none';
+  document.getElementById('viralView').classList.remove('active');
+  if(typeof studyTimerInterval!=='undefined' && studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
   currentHubGame = null;
 
   // Shop bar — always visible in fitforit
@@ -6598,6 +6771,42 @@ function openSection(id){
     document.getElementById('groupsView').style.display = 'flex';
     document.getElementById('groupsView').classList.add('active');
     loadGroups('all');
+    return;
+  } else if(sec.id === 'outfitroast'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openOutfitRoast();
+    return;
+  } else if(sec.id === 'secretdiary'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openSecretDiary();
+    return;
+  } else if(sec.id === 'studyroom'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openStudyRoom();
+    return;
+  } else if(sec.id === 'aevsgame'){
+    shopBar.style.display = 'none';
+    document.getElementById('fitLayout').style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openAeVsReality();
     return;
   } else if(sec.id === 'stufloverdaily'){
     shopBar.style.display = 'none';
@@ -7080,7 +7289,352 @@ function showShopMenu(e, item, pal){
   setTimeout(()=>{ document.addEventListener('click', ()=>menu.remove(), {once:true}); }, 50);
 }
 
+// ─── HELPER: HIDE ALL SECTION VIEWS ──────────────────────
+function hideAllViews(){
+  var ids = ['hubView','dtiView','cardGameView','profileView','routineView','friendsView','contentView','dailyView','groupsView','fgDetailView','readitView','fitforitView','viralView'];
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.style.display='none'; el.classList.remove('active'); }
+  });
+}
+
+// ─── OUTFIT ROAST ────────────────────────────────────────
+function openOutfitRoast(){
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
+  if(!vc) return;
+  // Determine user's flovee
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeMap = {kawaii:'zola',softgirl:'nox',cleangirl:'zola',coquette:'nox',goth:'zola',darkacad:'nox',grunge:'zola',y2k:'nox',street:'zola',cottage:'nox',hippie:'zola',oldmoney:'nox',preppy:'zola',indie:'nox',emo:'zola'};
+  var fid = aeMap[aeKey] || 'zola';
+  var fd = FLOVEE_DATA[fid] || FLOVEE_DATA.zola;
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:2.4rem;margin-bottom:8px;">'+fd.emoji+'</div>'+
+      '<h2 class="bc" style="font-size:clamp(1.6rem,4vw,2.2rem);color:'+pal.tx+';margin-bottom:4px;">ROAST MY FIT</h2>'+
+      '<div style="font-size:0.82rem;opacity:0.45;color:'+pal.tx+';margin-bottom:24px;line-height:1.6;">'+fd.name+' will lovingly judge your outfit. she is brutally honest but she loves you.</div>'+
+      '<textarea id="roastInput" placeholder="describe what you are wearing rn... (e.g. oversized band tee, black leggings, white air forces)" style="width:100%;min-height:90px;padding:14px 16px;border-radius:14px;border:1.5px solid '+pal.tx+'12;background:'+pal.tx+'04;font-family:Space Grotesk,sans-serif;font-size:0.92rem;color:'+pal.tx+';outline:none;resize:none;line-height:1.6;"></textarea>'+
+      '<button id="roastBtn" onclick="getOutfitRoast()" class="bc" style="width:100%;padding:16px;border:none;border-radius:14px;background:'+fd.gradient+';color:'+fd.darkColor+';font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:all 0.2s;">ROAST ME '+fd.name.toUpperCase()+'</button>'+
+      '<div id="roastResult" style="display:none;margin-top:20px;"></div>'+
+    '</div>';
+}
+
+async function getOutfitRoast(){
+  var input = document.getElementById('roastInput');
+  var btn = document.getElementById('roastBtn');
+  var result = document.getElementById('roastResult');
+  if(!input || !input.value.trim()) return;
+  var pal = searchPal;
+
+  btn.disabled = true;
+  btn.textContent = 'JUDGING...';
+  result.style.display = 'none';
+
+  var base = window.STUFLOVER_API_URL || '';
+  var token = localStorage.getItem('stuflover_token');
+  try{
+    var res = await (window._origFetch||fetch).call(window, base+'/api/flovee/roast',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({outfitDescription:input.value.trim()})
+    });
+    var data = await res.json();
+    if(data.roast){
+      var fd = FLOVEE_DATA[data.floveeId] || FLOVEE_DATA.zola;
+      var shareText = fd.emoji+' '+fd.name+' roasted my outfit: "'+data.roast+'" — get roasted at stuflover.com';
+      result.style.display = 'block';
+      result.innerHTML =
+        '<div style="padding:22px 24px;border-radius:20px;background:'+fd.gradient+';position:relative;text-align:left;">'+
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">'+
+            '<div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1rem;">'+fd.emoji+'</div>'+
+            '<div style="font-weight:700;color:'+fd.darkColor+';">'+fd.name+' says:</div>'+
+          '</div>'+
+          '<div style="font-size:1.05rem;line-height:1.75;color:'+fd.darkColor+';">'+escHtml(data.roast)+'</div>'+
+          '<div style="margin-top:14px;display:flex;gap:8px;">'+
+            '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share roast\'},1500)}.bind(this))" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.3);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">share roast</button>'+
+            '<button onclick="document.getElementById(\'roastInput\').value=\'\';document.getElementById(\'roastResult\').style.display=\'none\';" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.15);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">try again</button>'+
+          '</div>'+
+        '</div>';
+    }
+  }catch(e){
+    result.style.display = 'block';
+    result.innerHTML = '<div style="font-size:0.82rem;opacity:0.4;color:'+pal.tx+';">could not reach your flovee rn. try again in a sec.</div>';
+  }
+  btn.disabled = false;
+  btn.textContent = 'ROAST ME AGAIN';
+}
+
+// ─── SECRET DIARY ────────────────────────────────────────
+function openSecretDiary(){
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
+  if(!vc) return;
+  var entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+
+  var entriesHtml = entries.slice().reverse().slice(0,20).map(function(e){
+    var d = new Date(e.time);
+    var dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    var timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    return '<div class="diary-entry" style="background:'+pal.tx+'04;border:1px solid '+pal.tx+'06;">'+
+      '<div class="diary-date" style="color:'+pal.tx+';">'+dateStr+' at '+timeStr+'</div>'+
+      '<div class="diary-text" style="color:'+pal.tx+';">'+escHtml(e.text)+'</div>'+
+    '</div>';
+  }).join('');
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;">'+
+      '<div style="text-align:center;margin-bottom:20px;">'+
+        '<div style="font-size:2rem;margin-bottom:6px;">🔒</div>'+
+        '<h2 class="bc" style="font-size:clamp(1.5rem,4vw,2rem);color:'+pal.tx+';margin-bottom:4px;">SECRET DIARY</h2>'+
+        '<div style="font-size:0.78rem;opacity:0.4;color:'+pal.tx+';line-height:1.6;">just you. no one else can see this. ever. not even us.</div>'+
+      '</div>'+
+      '<textarea id="diaryInput" class="diary-input" style="border-color:'+pal.tx+'12;background:'+pal.tx+'04;color:'+pal.tx+';" placeholder="what is on your mind rn..."></textarea>'+
+      '<button onclick="saveDiaryEntry()" class="bc" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:all 0.2s;">save this thought</button>'+
+      '<div style="margin-top:24px;">'+
+        (entries.length > 0 ?
+          '<div style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:12px;color:'+pal.tx+';">your thoughts ('+entries.length+')</div>' + entriesHtml
+          : '<div style="text-align:center;padding:30px;opacity:0.25;font-style:italic;color:'+pal.tx+';">your first entry goes here</div>'
+        )+
+      '</div>'+
+    '</div>';
+}
+
+function saveDiaryEntry(){
+  var input = document.getElementById('diaryInput');
+  if(!input || !input.value.trim()) return;
+  var entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+  entries.push({text:input.value.trim(), time:Date.now()});
+  localStorage.setItem('stuflover_diary', JSON.stringify(entries));
+  input.value = '';
+  openSecretDiary(); // Refresh
+}
+
+// ─── STUDY ROOM ──────────────────────────────────────────
+var studyTimerInterval = null;
+var studyTimeLeft = 0;
+var studyMode = 'focus'; // focus or break
+
+function openStudyRoom(){
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
+  if(!vc) return;
+  if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
+
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeName = (typeof AE !== 'undefined' && AE[aeKey]) ? AE[aeKey].name : aeKey;
+
+  var ambients = {
+    kawaii:'lofi beats + rain sounds',softgirl:'soft piano + ambient',cleangirl:'white noise + coffee shop',
+    coquette:'french cafe + vinyl crackle',goth:'thunderstorm + dark ambient',darkacad:'library sounds + rain',
+    grunge:'lo-fi indie + vinyl',y2k:'2000s pop instrumentals',street:'chill hip hop beats',
+    cottage:'birds + gentle stream',hippie:'nature sounds + acoustic',oldmoney:'classical piano + fireplace',
+    preppy:'upbeat lofi + typing sounds',indie:'bedroom indie + rain',emo:'acoustic covers + rain'
+  };
+  var ambient = ambients[aeKey] || 'lofi beats + rain';
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">'+aeName+' study room</div>'+
+      '<div class="study-timer" id="studyTimer" style="color:'+pal.tx+';">25:00</div>'+
+      '<div id="studyModeLabel" style="font-size:0.72rem;opacity:0.4;color:'+pal.tx+';margin-top:4px;">focus time</div>'+
+      '<div style="margin:20px auto;max-width:300px;height:4px;border-radius:2px;background:'+pal.tx+'08;">'+
+        '<div id="studyProgress" style="height:100%;width:0%;background:'+pal.ac+';border-radius:2px;transition:width 1s linear;"></div>'+
+      '</div>'+
+      '<div class="study-controls">'+
+        '<button class="study-btn active bc" onclick="startStudy(25)" style="color:'+pal.tx+';border-color:'+pal.tx+'25;">25 min</button>'+
+        '<button class="study-btn bc" onclick="startStudy(45)" style="color:'+pal.tx+';border-color:'+pal.tx+'15;">45 min</button>'+
+        '<button class="study-btn bc" onclick="startStudy(60)" style="color:'+pal.tx+';border-color:'+pal.tx+'15;">60 min</button>'+
+      '</div>'+
+      '<button id="studyStartBtn" onclick="toggleStudy()" class="bc" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:14px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:20px;">start focusing</button>'+
+      '<div style="margin-top:24px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'04;text-align:left;">'+
+        '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:4px;color:'+pal.tx+';">your ambient</div>'+
+        '<div style="font-size:0.88rem;color:'+pal.tx+';opacity:0.6;">'+ambient+'</div>'+
+      '</div>'+
+      '<div style="margin-top:12px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'04;text-align:left;">'+
+        '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:4px;color:'+pal.tx+';">sessions today</div>'+
+        '<div style="font-size:0.88rem;color:'+pal.tx+';opacity:0.6;" id="studySessions">'+getStudySessions()+' completed</div>'+
+      '</div>'+
+    '</div>';
+  studyTimeLeft = 25 * 60;
+}
+
+var studyTotalTime = 25 * 60;
+function startStudy(mins){
+  if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
+  studyTimeLeft = mins * 60;
+  studyTotalTime = mins * 60;
+  studyMode = 'focus';
+  updateStudyDisplay();
+  var btns = document.querySelectorAll('.study-controls .study-btn');
+  btns.forEach(function(b){ b.classList.remove('active'); b.style.borderColor=searchPal.tx+'15'; });
+  event.target.classList.add('active');
+  event.target.style.borderColor=searchPal.tx+'25';
+  var startBtn = document.getElementById('studyStartBtn');
+  if(startBtn) startBtn.textContent = 'start focusing';
+}
+
+function toggleStudy(){
+  var btn = document.getElementById('studyStartBtn');
+  if(studyTimerInterval){
+    clearInterval(studyTimerInterval);
+    studyTimerInterval = null;
+    if(btn) btn.textContent = 'resume';
+  } else {
+    studyTimerInterval = setInterval(function(){
+      studyTimeLeft--;
+      if(studyTimeLeft <= 0){
+        clearInterval(studyTimerInterval);
+        studyTimerInterval = null;
+        if(studyMode === 'focus'){
+          incrementStudySessions();
+          studyMode = 'break';
+          studyTimeLeft = 5 * 60;
+          studyTotalTime = 5 * 60;
+          if(btn) btn.textContent = 'start break';
+          var label = document.getElementById('studyModeLabel');
+          if(label) label.textContent = 'break time — you earned it';
+          try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+        } else {
+          studyMode = 'focus';
+          studyTimeLeft = 25 * 60;
+          studyTotalTime = 25 * 60;
+          if(btn) btn.textContent = 'start focusing';
+          var label = document.getElementById('studyModeLabel');
+          if(label) label.textContent = 'focus time';
+        }
+      }
+      updateStudyDisplay();
+    }, 1000);
+    if(btn) btn.textContent = 'pause';
+    var label = document.getElementById('studyModeLabel');
+    if(label) label.textContent = studyMode === 'focus' ? 'focusing...' : 'on break...';
+  }
+}
+
+function updateStudyDisplay(){
+  var timer = document.getElementById('studyTimer');
+  var progress = document.getElementById('studyProgress');
+  if(timer){
+    var m = Math.floor(studyTimeLeft/60);
+    var s = studyTimeLeft%60;
+    timer.textContent = m+':'+(s<10?'0':'')+s;
+  }
+  if(progress){
+    var pct = ((studyTotalTime - studyTimeLeft) / studyTotalTime) * 100;
+    progress.style.width = pct+'%';
+  }
+  var sessions = document.getElementById('studySessions');
+  if(sessions) sessions.textContent = getStudySessions()+' completed';
+}
+
+function getStudySessions(){
+  var key = 'stuflover_study_'+new Date().toDateString();
+  return parseInt(localStorage.getItem(key)||'0');
+}
+function incrementStudySessions(){
+  var key = 'stuflover_study_'+new Date().toDateString();
+  var n = parseInt(localStorage.getItem(key)||'0') + 1;
+  localStorage.setItem(key, n.toString());
+}
+
+// ─── AESTHETIC VS REALITY GAME ───────────────────────────
+var aevsScore = 0;
+var aevsRound = 0;
+var aevsQuestions = [];
+
+function openAeVsReality(){
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
+  if(!vc) return;
+  aevsScore = 0;
+  aevsRound = 0;
+
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+
+  // Build questions based on aesthetic
+  aevsQuestions = [
+    {q:'friday night plans',ae:'curating a mood board and journaling by candlelight',reality:'scrolling tiktok in bed for 4 hours straight',pick:null},
+    {q:'morning routine',ae:'5am sunrise yoga, green juice, meditation',reality:'snoozing the alarm 7 times and running out with wet hair',pick:null},
+    {q:'study session',ae:'color-coded notes in a cute cafe with a latte',reality:'panicking at 11pm with 47 tabs open',pick:null},
+    {q:'closet situation',ae:'perfectly organized by color, everything fits',reality:'floor-drobe. the chair. you know the chair.',pick:null},
+    {q:'self care sunday',ae:'face mask, journaling, herbal tea, early bed',reality:'did nothing all day, called it rest, ate cereal for dinner',pick:null},
+    {q:'playlist',ae:'curated 200 songs, each one a vibe, organized by mood',reality:'the same 12 songs on repeat for 3 months',pick:null},
+    {q:'skincare routine',ae:'10 steps, all the serums, glass skin era',reality:'face wash if i remember, moisturizer sometimes',pick:null},
+    {q:'room aesthetic',ae:'pinterest-perfect, fairy lights, plants, organized desk',reality:'organized chaos. translation: chaos.',pick:null},
+  ];
+
+  showAevsRound(pal);
+}
+
+function showAevsRound(pal){
+  if(!pal) pal = searchPal;
+  var vc = document.getElementById('viralContent');
+  if(!vc) return;
+
+  if(aevsRound >= aevsQuestions.length){
+    // Show results
+    var aeCount = aevsQuestions.filter(function(q){return q.pick==='ae';}).length;
+    var realCount = aevsQuestions.filter(function(q){return q.pick==='reality';}).length;
+    var verdict = aeCount > realCount ? 'you are living the aesthetic fantasy and honestly good for you' :
+                  aeCount === realCount ? 'perfectly balanced between delulu and real — as all things should be' :
+                  'you are SO real for this. the aesthetic is aspirational and that is valid';
+    var shareText = 'i got '+aeCount+' aesthetic vs '+realCount+' reality on stuflover — '+verdict;
+
+    vc.innerHTML =
+      '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
+        '<div style="font-size:2rem;margin-bottom:8px;">'+(aeCount>realCount?'✨':'💀')+'</div>'+
+        '<h2 class="bc" style="font-size:1.8rem;color:'+pal.tx+';">YOUR RESULTS</h2>'+
+        '<div style="display:flex;gap:16px;justify-content:center;margin:20px 0;">'+
+          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.ac+'15;text-align:center;">'+
+            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+aeCount+'</div>'+
+            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">aesthetic</div>'+
+          '</div>'+
+          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.tx+'08;text-align:center;">'+
+            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+realCount+'</div>'+
+            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">reality</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:0.88rem;line-height:1.6;opacity:0.55;color:'+pal.tx+';margin-bottom:20px;">'+verdict+'</div>'+
+        '<div style="display:flex;gap:8px;justify-content:center;">'+
+          '<button onclick="openAeVsReality()" class="bc" style="padding:12px 24px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">play again</button>'+
+          '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" class="bc" style="padding:12px 24px;border:1.5px solid '+pal.tx+'15;border-radius:12px;background:transparent;color:'+pal.tx+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">share</button>'+
+        '</div>'+
+      '</div>';
+    return;
+  }
+
+  var q = aevsQuestions[aevsRound];
+  vc.innerHTML =
+    '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:6px;color:'+pal.tx+';">round '+(aevsRound+1)+' of '+aevsQuestions.length+'</div>'+
+      '<h2 class="bc" style="font-size:clamp(1.3rem,3.5vw,1.8rem);color:'+pal.tx+';margin-bottom:4px;">'+q.q.toUpperCase()+'</h2>'+
+      '<div style="font-size:0.75rem;opacity:0.35;color:'+pal.tx+';margin-bottom:20px;">which one is you? be honest.</div>'+
+      '<div class="aevs-vs">'+
+        '<div class="aevs-side" onclick="pickAevs(\'ae\')" style="background:'+pal.ac+'10;border-color:'+pal.ac+'20;border-radius:16px;">'+
+          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Aesthetic</div>'+
+          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.ae+'</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;font-size:0.65rem;opacity:0.2;font-weight:900;color:'+pal.tx+';">vs</div>'+
+        '<div class="aevs-side" onclick="pickAevs(\'reality\')" style="background:'+pal.tx+'06;border-color:'+pal.tx+'10;border-radius:16px;">'+
+          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Reality</div>'+
+          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.reality+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function pickAevs(choice){
+  aevsQuestions[aevsRound].pick = choice;
+  aevsRound++;
+  setTimeout(function(){ showAevsRound(searchPal); }, 300);
+}
+
 // ─── AUTO-LOAD SAVED PROFILE ─────────────────────────────
+// If the user already completed the quiz, skip it and show their page
 // If the user already completed the quiz, skip it and show their page
 (function autoLoad(){
   var saved;
