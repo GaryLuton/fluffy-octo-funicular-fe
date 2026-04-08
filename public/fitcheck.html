@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fit Check — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;transition:background 0.5s,color 0.5s;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
@@ -88,13 +87,13 @@
     }
   </style>
 </head>
-<body>
+<body class="font-alt">
 
-<nav id="mainNav">
-  <a class="nav-logo bc" href="index.html">Stuflover</a>
-  <div class="nav-links">
-    <a class="nav-btn bc" href="lifestyle.html">My Page</a>
-    <a class="nav-btn bc" href="account.html">Account</a>
+<nav id="mainNav" class="sl-nav">
+  <a class="nav-logo bc sl-nav-logo" href="index.html">Stuflover</a>
+  <div class="nav-links sl-nav-links">
+    <a class="nav-btn bc sl-nav-btn" href="lifestyle.html">My Page</a>
+    <a class="nav-btn bc sl-nav-btn" href="account.html">Account</a>
   </div>
 </nav>
 
@@ -104,9 +103,9 @@
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab on bc" onclick="switchTab('feed')">Feed</button>
-  <button class="tab bc" onclick="switchTab('mine')">My Checks</button>
-  <button class="tab bc" onclick="switchTab('featured')">Featured</button>
+  <button class="tab on bc sl-tab" onclick="switchTab('feed')">Feed</button>
+  <button class="tab bc sl-tab" onclick="switchTab('mine')">My Checks</button>
+  <button class="tab bc sl-tab" onclick="switchTab('featured')">Featured</button>
 </div>
 
 <div class="feed" id="feedView"></div>
