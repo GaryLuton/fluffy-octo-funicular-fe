@@ -1045,6 +1045,136 @@ app.delete('/api/fitcheck/:id', auth, (req, res) => {
   }
 });
 
+// ─── Collab Workspace ───
+
+const COLLAB_OWNER = 'chloealuton@gmail.com';
+
+// Middleware: check collab access
+function collabAuth(req, res, next) {
+  const user = stmts.getUserById.get(req.user.id);
+  if (!user) return res.status(403).json({ error: 'Not found' });
+  const access = all('SELECT * FROM collab_access WHERE LOWER(email) = LOWER(?)', [user.email]);
+  if (!access.length) return res.status(403).json({ error: 'No collab access' });
+  req.collabRole = access[0].role;
+  req.collabEmail = user.email;
+  next();
+}
+
+// Check if user has collab access
+app.get('/api/collab/check', auth, (req, res) => {
+  const user = stmts.getUserById.get(req.user.id);
+  if (!user) return res.json({ access: false });
+  const access = all('SELECT * FROM collab_access WHERE LOWER(email) = LOWER(?)', [user.email]);
+  if (!access.length) return res.json({ access: false });
+  res.json({ access: true, role: access[0].role });
+});
+
+// Get collab members (owner only)
+app.get('/api/collab/members', auth, collabAuth, (req, res) => {
+  const members = all('SELECT id, email, role, created_at FROM collab_access ORDER BY created_at');
+  res.json({ members });
+});
+
+// Grant collab access (owner only)
+app.post('/api/collab/grant', auth, collabAuth, (req, res) => {
+  if (req.collabRole !== 'owner') return res.status(403).json({ error: 'Only the owner can grant access' });
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  try {
+    all('INSERT OR IGNORE INTO collab_access (email, role, granted_by) VALUES (?, ?, ?)',
+      [email.toLowerCase().trim(), 'member', req.collabEmail]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// Revoke collab access (owner only)
+app.delete('/api/collab/revoke/:id', auth, collabAuth, (req, res) => {
+  if (req.collabRole !== 'owner') return res.status(403).json({ error: 'Only the owner can revoke access' });
+  const member = all('SELECT * FROM collab_access WHERE id = ?', [parseInt(req.params.id)]);
+  if (member.length && member[0].role === 'owner') return res.status(400).json({ error: 'Cannot remove owner' });
+  all('DELETE FROM collab_access WHERE id = ?', [parseInt(req.params.id)]);
+  res.json({ ok: true });
+});
+
+// ─ Collab Chat ─
+app.get('/api/collab/messages', auth, collabAuth, (req, res) => {
+  const msgs = all('SELECT * FROM collab_messages ORDER BY created_at DESC LIMIT 100');
+  res.json({ messages: msgs.reverse() });
+});
+
+app.post('/api/collab/messages', auth, collabAuth, (req, res) => {
+  const { text } = req.body;
+  if (!text || !text.trim()) return res.status(400).json({ error: 'Message required' });
+  const user = stmts.getUserById.get(req.user.id);
+  all('INSERT INTO collab_messages (user_id, username, text) VALUES (?, ?, ?)',
+    [req.user.id, user?.username || 'anon', text.trim().slice(0, 2000)]);
+  res.json({ ok: true });
+});
+
+// ─ Collab Designs ─
+app.get('/api/collab/designs', auth, collabAuth, (req, res) => {
+  const designs = all('SELECT * FROM collab_designs ORDER BY created_at DESC');
+  res.json({ designs });
+});
+
+app.post('/api/collab/designs', auth, collabAuth, (req, res) => {
+  const { title, image, link, notes, status } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title required' });
+  const user = stmts.getUserById.get(req.user.id);
+  const result = all(
+    'INSERT INTO collab_designs (user_id, username, title, image, link, notes, status) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id',
+    [req.user.id, user?.username || 'anon', title, image || '', link || '', notes || '', status || 'idea']
+  );
+  res.json({ ok: true, id: result[0]?.id });
+});
+
+app.put('/api/collab/designs/:id', auth, collabAuth, (req, res) => {
+  const { title, image, link, notes, status } = req.body;
+  all('UPDATE collab_designs SET title=?, image=?, link=?, notes=?, status=? WHERE id=?',
+    [title || '', image || '', link || '', notes || '', status || 'idea', parseInt(req.params.id)]);
+  res.json({ ok: true });
+});
+
+app.delete('/api/collab/designs/:id', auth, collabAuth, (req, res) => {
+  all('DELETE FROM collab_designs WHERE id = ?', [parseInt(req.params.id)]);
+  res.json({ ok: true });
+});
+
+// ─ Collab Sandbox ─
+app.get('/api/collab/sandbox', auth, collabAuth, (req, res) => {
+  const sandboxes = all('SELECT id, user_id, username, name, updated_at FROM collab_sandbox ORDER BY updated_at DESC');
+  res.json({ sandboxes });
+});
+
+app.get('/api/collab/sandbox/:id', auth, collabAuth, (req, res) => {
+  const sb = all('SELECT * FROM collab_sandbox WHERE id = ?', [parseInt(req.params.id)]);
+  if (!sb.length) return res.status(404).json({ error: 'Not found' });
+  res.json({ sandbox: sb[0] });
+});
+
+app.post('/api/collab/sandbox', auth, collabAuth, (req, res) => {
+  const { name, html, css, js } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name required' });
+  const user = stmts.getUserById.get(req.user.id);
+  const result = all(
+    'INSERT INTO collab_sandbox (user_id, username, name, html, css, js) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
+    [req.user.id, user?.username || 'anon', name, html || '', css || '', js || '']
+  );
+  res.json({ ok: true, id: result[0]?.id });
+});
+
+app.put('/api/collab/sandbox/:id', auth, collabAuth, (req, res) => {
+  const { name, html, css, js } = req.body;
+  all("UPDATE collab_sandbox SET name=?, html=?, css=?, js=?, updated_at=datetime('now') WHERE id=?",
+    [name || '', html || '', css || '', js || '', parseInt(req.params.id)]);
+  res.json({ ok: true });
+});
+
+app.delete('/api/collab/sandbox/:id', auth, collabAuth, (req, res) => {
+  all('DELETE FROM collab_sandbox WHERE id = ?', [parseInt(req.params.id)]);
+  res.json({ ok: true });
+});
+
 // ─── Anthropic API Proxy ───
 
 app.post('/api/chat', auth, async (req, res) => {
