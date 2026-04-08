@@ -6454,6 +6454,7 @@ const SECTIONS = [
   {id:'myprofile',  name:'Me',             sub:'profile + routine', col:9},
   {id:'floveegroup',name:'Groups',         sub:'find your people',  col:6},
   {id:'readit',     name:'ReadIt',         sub:'books + booktok',   col:10},
+  {id:'routine',    name:'Routine',        sub:'morning + night',   col:12},
 ];
 
 // ─── GRID LAYOUT — Chrome new tab style ─────────────────
@@ -6463,6 +6464,7 @@ function buildGrid(pal, aeName){
     fitforit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76zM10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="white" opacity="0.9"/></svg>',
     beyou:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white" opacity="0.5"/></svg>',
     myroutine:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="3" r="1" fill="white"/></svg>',
+    routine:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="3" r="1" fill="white"/></svg>',
     myprofile:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="white" stroke-width="1.5"/></svg>',
     floverhub:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.4"/></svg>',
     stufloverdaily:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="white" stroke-width="1.5"/></svg>',
@@ -6862,13 +6864,16 @@ function openSection(id){
     document.getElementById('friendsView').classList.add('active');
     openFriendsView();
     return;
-  } else if(sec.id === 'myroutine'){
+  } else if(sec.id === 'myroutine' || sec.id === 'routine'){
     shopBar.style.display = 'none';
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
     document.getElementById('profileView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
     document.getElementById('routineView').style.display = 'flex';
     document.getElementById('routineView').classList.add('active');
     openRoutineView();
