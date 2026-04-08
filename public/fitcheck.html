@@ -86,9 +86,10 @@
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
       .nav-links.open{display:flex;}
-      .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+      .nav-btn{display:block;padding:10px 16px;border:none;border-radius:6px;}
+      .nav-btn:hover{background:rgba(128,128,128,0.06);}
       .nav-toggle{display:block;}
     }
     @media(max-width:480px){

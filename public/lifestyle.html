@@ -400,10 +400,11 @@
 
     @media(max-width:768px){
       nav{padding:13px 16px;}
-      .nav-right{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(12px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;align-items:stretch;}
+      .nav-right{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;align-items:stretch;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
       .nav-right.open{display:flex;}
-      .nav-right a{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);text-align:left;}
-      .nav-right span{display:block;padding:8px 20px;}
+      .nav-right a{display:block;padding:10px 16px;border:none;border-radius:6px;text-align:left;}
+      .nav-right a:hover{background:rgba(128,128,128,0.06);}
+      .nav-right span{display:block;padding:6px 16px;}
       .nav-toggle{display:block;}
       .page-header{padding:80px 16px 0;}
       .ae-title{font-size:clamp(2.4rem,9vw,5rem);}

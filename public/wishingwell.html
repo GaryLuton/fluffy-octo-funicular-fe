@@ -55,9 +55,10 @@
     @media(max-width:900px){.products-grid{grid-template-columns:repeat(3,1fr);}}
     @media(max-width:680px){
       nav{padding:13px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);padding:8px 0;}
+      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
       .nav-links.open{display:flex;}
-      .nav-btn{display:block;padding:12px 20px;border:none;border-radius:0;border-bottom:1px solid rgba(128,128,128,0.06);}
+      .nav-btn{display:block;padding:10px 16px;border:none;border-radius:6px;}
+      .nav-btn:hover{background:rgba(128,128,128,0.06);}
       .nav-toggle{display:block;}
       .products-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
       .products-wrap,.page-header,.section-bar{padding-left:16px;padding-right:16px;}
