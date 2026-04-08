@@ -237,6 +237,32 @@ async function initDb() {
     );
   `);
 
+  // Fit Check
+  db.run(`
+    CREATE TABLE IF NOT EXISTS fit_checks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      anon_name TEXT NOT NULL,
+      photo TEXT NOT NULL,
+      caption TEXT DEFAULT '',
+      expires_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS fit_check_votes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fit_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      vote INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (fit_id) REFERENCES fit_checks(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(fit_id, user_id)
+    );
+  `);
+
   save();
   return db;
 }
