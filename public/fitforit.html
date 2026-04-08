@@ -185,8 +185,31 @@
       <h1 class="bc" style="font-size:1.6rem;letter-spacing:-0.5px;margin-bottom:2px;" id="bannerTitle">My Closet</h1>
       <div class="closet-title bc" id="closetCount" style="opacity:0.3;">0 items</div>
     </div>
-    <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()">+ Add</button>
+    <div style="display:flex;gap:8px;">
+      <label class="closet-add bc" id="snapBtn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" style="flex-shrink:0;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        Snap
+        <input type="file" accept="image/*" capture="environment" id="instantCamera" onchange="handleInstantPhoto(this)" style="display:none;"/>
+      </label>
+      <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()" style="opacity:0.5;background:transparent;border:1.5px solid rgba(128,128,128,0.2);box-shadow:none;">+ Add</button>
+    </div>
   </div>
+
+  <!-- Instant add bar (appears after snap) -->
+  <div id="instantAddBar" style="display:none;margin-bottom:16px;padding:14px 16px;border-radius:16px;overflow:hidden;animation:fadeSlideIn 0.3s ease both;">
+    <div style="display:flex;gap:10px;align-items:flex-start;">
+      <img id="instantPreview" style="width:64px;height:80px;object-fit:cover;border-radius:10px;flex-shrink:0;"/>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+        <input id="instantName" placeholder="what is it? (e.g. black crop top)" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;font-family:Space Grotesk,sans-serif;font-size:0.85rem;color:inherit;outline:none;"/>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="instantCats"></div>
+        <div style="display:flex;gap:6px;">
+          <button id="instantSave" onclick="saveInstantItem()" class="bc" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Save</button>
+          <button onclick="cancelInstant()" class="bc" style="padding:10px 16px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;background:transparent;color:inherit;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">x</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="closet-grid" id="closetGrid"></div>
 
   <!-- Outfit Builder inline below closet -->
@@ -337,7 +360,86 @@ function deleteItem(e,idx){
   renderCloset();
 }
 
-// ─── ADD ITEM ────────────────────────────────────────────
+// ─── INSTANT PHOTO ADD ───────────────────────────────────
+var instantPhotoData = null;
+var instantCatPick = '';
+
+function handleInstantPhoto(input){
+  var file = input.files && input.files[0];
+  if(!file) return;
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var canvas = document.createElement('canvas');
+      var maxSize = 400;
+      var w = img.width, h = img.height;
+      if(w > h){ if(w > maxSize){h = h*(maxSize/w); w = maxSize;} }
+      else { if(h > maxSize){w = w*(maxSize/h); h = maxSize;} }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      instantPhotoData = canvas.toDataURL('image/jpeg', 0.7);
+
+      // Show instant add bar
+      var bar = document.getElementById('instantAddBar');
+      bar.style.display = 'block';
+      bar.style.background = PAL.tx+'06';
+      bar.style.border = '1.5px solid '+PAL.tx+'08';
+      document.getElementById('instantPreview').src = instantPhotoData;
+      document.getElementById('instantName').value = '';
+      document.getElementById('instantName').style.color = PAL.tx;
+      document.getElementById('instantName').style.borderColor = PAL.tx+'15';
+      var saveBtn = document.getElementById('instantSave');
+      saveBtn.style.background = PAL.ac;
+      saveBtn.style.color = PAL.bg;
+
+      // Build category pills
+      instantCatPick = '';
+      var cats = ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
+      var catsDiv = document.getElementById('instantCats');
+      catsDiv.innerHTML = cats.map(function(c){
+        return '<button onclick="pickInstantCat(this,\''+c+'\')" style="padding:5px 12px;border-radius:12px;border:1.5px solid '+PAL.tx+'12;background:transparent;color:'+PAL.tx+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;">'+c+'</button>';
+      }).join('');
+
+      document.getElementById('instantName').focus();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function pickInstantCat(btn, cat){
+  instantCatPick = cat;
+  var siblings = btn.parentNode.querySelectorAll('button');
+  siblings.forEach(function(s){ s.style.opacity='0.4'; s.style.borderColor=PAL.tx+'12'; s.style.background='transparent'; });
+  btn.style.opacity='1';
+  btn.style.borderColor=PAL.ac;
+  btn.style.background=PAL.ac+'15';
+}
+
+function saveInstantItem(){
+  if(!instantPhotoData) return;
+  var name = document.getElementById('instantName').value.trim();
+  if(!name){ document.getElementById('instantName').style.borderColor='#c44'; return; }
+  if(!instantCatPick){ return; }
+
+  var items = getCloset();
+  items.push({url:instantPhotoData, name:name, cat:instantCatPick, added:Date.now()});
+  try{ saveCloset(items); }catch(e){ return; }
+
+  cancelInstant();
+  renderCloset();
+}
+
+function cancelInstant(){
+  instantPhotoData = null;
+  instantCatPick = '';
+  document.getElementById('instantAddBar').style.display = 'none';
+}
+
+// ─── ADD ITEM (MODAL) ───────────────────────────────────
 function openAddModal(){
   photoDataUrl = null;
   document.getElementById('addModal').classList.add('open');
