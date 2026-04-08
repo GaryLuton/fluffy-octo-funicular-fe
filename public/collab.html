@@ -129,9 +129,47 @@
 
 <!-- ACCESS GATE -->
 <div id="gate">
-  <div>
-    <h1 class="bc" id="gateTitle">Collab</h1>
-    <p id="gateMsg">checking access...</p>
+  <div style="width:90%;max-width:400px;">
+    <h1 class="bc" id="gateTitle" style="font-size:2.4rem;margin-bottom:6px;">Collab</h1>
+    <p id="gateMsg" style="margin-bottom:24px;">checking access...</p>
+
+    <!-- Built-in login form -->
+    <div id="gateLogin" style="display:none;">
+      <div style="padding:28px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);">
+        <div id="gateLoginTabs" style="display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+          <button class="bc" onclick="gateShowLogin()" id="gateTabLogin" style="flex:1;padding:10px;border:none;background:rgba(200,120,96,0.3);color:white;font-size:0.72rem;letter-spacing:2px;cursor:pointer;">Sign In</button>
+          <button class="bc" onclick="gateShowRegister()" id="gateTabReg" style="flex:1;padding:10px;border:none;background:transparent;color:rgba(255,255,255,0.3);font-size:0.72rem;letter-spacing:2px;cursor:pointer;">Create Account</button>
+        </div>
+
+        <!-- Login -->
+        <div id="gateLoginForm">
+          <input class="form-input" id="glEmail" placeholder="email" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"/>
+          <input class="form-input" id="glPassword" type="password" placeholder="password" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"
+            onkeydown="if(event.key==='Enter')gateLogin();"/>
+          <div id="glErr" style="font-size:0.78rem;color:#ff8a80;min-height:18px;margin-bottom:8px;"></div>
+          <button class="form-btn" onclick="gateLogin()" id="glBtn" style="width:100%;">Sign In</button>
+        </div>
+
+        <!-- Register -->
+        <div id="gateRegForm" style="display:none;">
+          <input class="form-input" id="grUsername" placeholder="username" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"/>
+          <input class="form-input" id="grEmail" placeholder="email" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"/>
+          <input class="form-input" id="grPassword" type="password" placeholder="password (6+ chars)" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"/>
+          <input class="form-input" id="grConfirm" type="password" placeholder="confirm password" style="width:100%;margin-bottom:8px;background:rgba(255,255,255,0.04);"
+            onkeydown="if(event.key==='Enter')gateRegister();"/>
+          <div id="grErr" style="font-size:0.78rem;color:#ff8a80;min-height:18px;margin-bottom:8px;"></div>
+          <button class="form-btn" onclick="gateRegister()" id="grBtn" style="width:100%;">Create Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No access message (shown after login if email not whitelisted) -->
+    <div id="gateNoAccess" style="display:none;">
+      <div style="padding:20px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-top:16px;">
+        <div style="font-size:0.82rem;opacity:0.5;line-height:1.6;">You are signed in but don't have access to this workspace. Ask the owner to add your email.</div>
+        <button class="nav-btn" onclick="stufloverLogout();location.reload();" style="margin-top:12px;">Sign out and try another account</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -243,18 +281,18 @@ async function apiFetch(url, opts) {
 async function init() {
   var token = localStorage.getItem('stuflover_token');
   if (!token) {
-    showGate('Sign in first', 'You need a Stuflover account to access the collab workspace.');
+    showLoginGate();
     return;
   }
   try {
     var me = await apiFetch('/api/auth/me');
-    if (!me.user) { showGate('Sign in first', 'You need a Stuflover account.'); return; }
+    if (!me.user) { showLoginGate(); return; }
     myUsername = me.user.username;
     document.getElementById('navUser').textContent = myUsername;
 
     var check = await apiFetch('/api/collab/check');
     if (!check.access) {
-      showGate('Private Workspace', 'This collab is invite only. Ask the owner to add your email.');
+      showNoAccess(me.user.email);
       return;
     }
     myRole = check.role;
@@ -271,13 +309,101 @@ async function init() {
     loadChat();
     chatPollInterval = setInterval(loadChat, 5000);
   } catch (e) {
-    showGate('Connection Error', 'Could not reach the server. Try refreshing.');
+    showLoginGate();
+    document.getElementById('gateMsg').textContent = 'Could not reach the server. Try refreshing.';
   }
 }
 
-function showGate(title, msg) {
-  document.getElementById('gateTitle').textContent = title;
-  document.getElementById('gateMsg').textContent = msg;
+function showLoginGate() {
+  document.getElementById('gateTitle').textContent = 'Collab';
+  document.getElementById('gateMsg').textContent = 'Sign in to access the workspace.';
+  document.getElementById('gateLogin').style.display = 'block';
+  document.getElementById('gateNoAccess').style.display = 'none';
+}
+
+function showNoAccess(email) {
+  document.getElementById('gateTitle').textContent = 'No Access';
+  document.getElementById('gateMsg').textContent = 'Signed in as ' + email;
+  document.getElementById('gateLogin').style.display = 'none';
+  document.getElementById('gateNoAccess').style.display = 'block';
+}
+
+function gateShowLogin() {
+  document.getElementById('gateLoginForm').style.display = 'block';
+  document.getElementById('gateRegForm').style.display = 'none';
+  document.getElementById('gateTabLogin').style.background = 'rgba(200,120,96,0.3)';
+  document.getElementById('gateTabLogin').style.color = 'white';
+  document.getElementById('gateTabReg').style.background = 'transparent';
+  document.getElementById('gateTabReg').style.color = 'rgba(255,255,255,0.3)';
+}
+
+function gateShowRegister() {
+  document.getElementById('gateLoginForm').style.display = 'none';
+  document.getElementById('gateRegForm').style.display = 'block';
+  document.getElementById('gateTabReg').style.background = 'rgba(200,120,96,0.3)';
+  document.getElementById('gateTabReg').style.color = 'white';
+  document.getElementById('gateTabLogin').style.background = 'transparent';
+  document.getElementById('gateTabLogin').style.color = 'rgba(255,255,255,0.3)';
+}
+
+async function gateLogin() {
+  var email = document.getElementById('glEmail').value.trim();
+  var password = document.getElementById('glPassword').value;
+  var err = document.getElementById('glErr');
+  var btn = document.getElementById('glBtn');
+  if (!email || !password) { err.textContent = 'enter email and password'; return; }
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Signing in...';
+
+  try {
+    var base = window.STUFLOVER_API_URL || '';
+    var res = await (window._origFetch || fetch).call(window, base + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    localStorage.setItem('stuflover_token', data.token);
+    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
+    init(); // Re-run init with token
+  } catch (e) {
+    err.textContent = e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Sign In';
+}
+
+async function gateRegister() {
+  var username = document.getElementById('grUsername').value.trim();
+  var email = document.getElementById('grEmail').value.trim();
+  var password = document.getElementById('grPassword').value;
+  var confirm = document.getElementById('grConfirm').value;
+  var err = document.getElementById('grErr');
+  var btn = document.getElementById('grBtn');
+  if (!username || !email || !password) { err.textContent = 'all fields required'; return; }
+  if (password.length < 6) { err.textContent = 'password must be 6+ characters'; return; }
+  if (password !== confirm) { err.textContent = 'passwords don\'t match'; return; }
+  err.textContent = '';
+  btn.disabled = true; btn.textContent = 'Creating...';
+
+  try {
+    var base = window.STUFLOVER_API_URL || '';
+    var res = await (window._origFetch || fetch).call(window, base + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+    localStorage.setItem('stuflover_token', data.token);
+    localStorage.setItem('stuflover_user', JSON.stringify(data.user));
+    init(); // Re-run init with token
+  } catch (e) {
+    err.textContent = e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Create Account';
 }
 
 function switchPane(pane) {
