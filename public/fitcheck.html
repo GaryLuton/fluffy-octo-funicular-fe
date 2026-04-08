@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fit Check — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    input,button,select,textarea{font-size:16px;}
+    body{font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;transition:background 0.5s,color 0.5s;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;backdrop-filter:blur(20px);border-bottom:1px solid rgba(128,128,128,0.06);}
+    .nav-logo{font-size:1.5rem;letter-spacing:4px;text-decoration:none;color:inherit;}
+    .nav-links{display:flex;gap:8px;}
+    .nav-btn{font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:6px;border:1.5px solid rgba(128,128,128,0.15);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:inherit;background:transparent;transition:opacity 0.2s;}
+    .nav-btn:hover{opacity:0.5;}
+
+    .page-header{padding:24px 20px 0;text-align:center;}
+    .page-title{font-size:clamp(2rem,6vw,3rem);letter-spacing:-1px;line-height:0.9;}
+    .page-sub{font-size:0.82rem;opacity:0.4;margin-top:6px;line-height:1.5;}
+
+    /* TABS */
+    .tabs{display:flex;gap:6px;padding:16px 20px;justify-content:center;}
+    .tab{padding:8px 18px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;opacity:0.4;transition:all 0.2s;}
+    .tab.on{opacity:1;border-color:currentColor;}
+
+    /* FEED */
+    .feed{padding:0 20px 100px;max-width:540px;margin:0 auto;}
+    .featured-section{margin-bottom:20px;}
+    .featured-label{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:10px;}
+
+    /* CARD */
+    .fc-card{border-radius:20px;overflow:hidden;margin-bottom:16px;animation:fadeIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;position:relative;}
+    .fc-photo{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+    .fc-overlay{position:absolute;bottom:0;left:0;right:0;padding:16px 18px;background:linear-gradient(transparent,rgba(0,0,0,0.6));}
+    .fc-top{position:absolute;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;}
+    .fc-badge{padding:4px 10px;border-radius:10px;font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;backdrop-filter:blur(8px);}
+    .fc-user{font-size:0.78rem;font-weight:600;color:white;}
+    .fc-caption{font-size:0.85rem;color:rgba(255,255,255,0.8);margin-top:4px;line-height:1.5;}
+    .fc-time{font-size:0.6rem;opacity:0.5;color:white;margin-top:6px;}
+    .fc-votes{display:flex;gap:8px;margin-top:12px;}
+    .fc-vote-btn{flex:1;padding:12px;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .fc-vote-btn:hover{transform:translateY(-2px);}
+    .fc-vote-btn:active{transform:scale(0.97);}
+    .fc-vote-btn.yes{background:rgba(255,255,255,0.25);color:white;}
+    .fc-vote-btn.yes.voted{background:rgba(76,175,80,0.5);color:white;}
+    .fc-vote-btn.no{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+    .fc-vote-btn.no.voted{background:rgba(158,158,158,0.4);color:white;}
+    .fc-vote-btn:disabled{cursor:default;transform:none;}
+    .fc-count{font-size:0.72rem;opacity:0.7;}
+    .fc-featured-badge{background:linear-gradient(135deg,#ffb300,#ff8f00);color:#3e2723;}
+    .fc-live-badge{background:rgba(76,175,80,0.4);}
+    .fc-expired-badge{background:rgba(158,158,158,0.4);}
+
+    /* MY CHECKS */
+    .mc-card{border-radius:16px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:center;animation:fadeIn 0.3s ease both;}
+    .mc-photo{width:64px;height:80px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+    .mc-info{flex:1;min-width:0;}
+    .mc-caption{font-size:0.85rem;font-weight:600;line-height:1.3;}
+    .mc-stats{font-size:0.75rem;opacity:0.5;margin-top:4px;}
+    .mc-bar{height:4px;border-radius:2px;margin-top:6px;overflow:hidden;}
+    .mc-bar-fill{height:100%;border-radius:2px;transition:width 0.5s;}
+    .mc-del{padding:6px 12px;border-radius:8px;border:1px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-size:0.6rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;opacity:0.3;transition:opacity 0.2s;}
+    .mc-del:hover{opacity:0.7;}
+
+    /* POST MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+    .modal-bg.open{display:flex;}
+    .modal-box{width:90%;max-width:420px;border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;}
+    .modal-box h3{font-size:1.2rem;margin-bottom:16px;}
+
+    /* FAB */
+    .fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;border:none;font-size:1.6rem;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,0.2);transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);z-index:50;display:flex;align-items:center;justify-content:center;}
+    .fab:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 10px 32px rgba(0,0,0,0.25);}
+    .fab:active{transform:scale(0.95);}
+
+    .empty{text-align:center;padding:60px 20px;opacity:0.3;font-size:0.92rem;line-height:1.7;}
+
+    @media(max-width:480px){
+      nav{padding:12px 16px;}
+      .feed{padding:0 14px 100px;}
+      .fc-overlay{padding:14px 14px;}
+    }
+  </style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a class="nav-logo bc" href="index.html">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-btn bc" href="lifestyle.html">My Page</a>
+    <a class="nav-btn bc" href="account.html">Account</a>
+  </div>
+</nav>
+
+<div class="page-header" id="pageHeader">
+  <h1 class="page-title bc" id="pageTitle">Fit Check</h1>
+  <p class="page-sub">post your fit. get honest votes. no names attached.</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab on bc" onclick="switchTab('feed')">Feed</button>
+  <button class="tab bc" onclick="switchTab('mine')">My Checks</button>
+  <button class="tab bc" onclick="switchTab('featured')">Featured</button>
+</div>
+
+<div class="feed" id="feedView"></div>
+
+<button class="fab" id="fab" onclick="openPostModal()">+</button>
+
+<!-- POST MODAL -->
+<div class="modal-bg" id="postModal">
+  <div class="modal-box" id="postModalBox">
+    <h3 class="bc">Post Your Fit</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <label style="flex:1;padding:16px;border-radius:12px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="fcCameraLabel">
+        <svg width="22" height="22" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;opacity:0.5;"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        Take Photo
+        <input type="file" accept="image/*" capture="environment" id="fcCamera" onchange="handleFcPhoto(this)" style="display:none;"/>
+      </label>
+      <label style="flex:1;padding:16px;border-radius:12px;border:2px dashed rgba(128,128,128,0.2);text-align:center;cursor:pointer;font-size:0.82rem;font-weight:600;transition:all 0.2s;" id="fcGalleryLabel">
+        <svg width="22" height="22" viewBox="0 0 24 24" style="display:block;margin:0 auto 6px;opacity:0.5;"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" opacity="0.4"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        Gallery
+        <input type="file" accept="image/*" id="fcGallery" onchange="handleFcPhoto(this)" style="display:none;"/>
+      </label>
+    </div>
+    <img id="fcPreview" style="width:100%;border-radius:12px;margin-bottom:12px;display:none;max-height:300px;object-fit:cover;"/>
+    <input id="fcCaption" placeholder="caption (optional)" maxlength="80" style="width:100%;padding:12px 14px;border:1.5px solid rgba(128,128,128,0.12);border-radius:10px;font-family:Space Grotesk,sans-serif;font-size:0.88rem;color:inherit;background:transparent;outline:none;margin-bottom:10px;"/>
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="bc expiry-btn" onclick="pickExpiry(this,6)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:0.4;transition:all 0.2s;">6h</button>
+      <button class="bc expiry-btn" onclick="pickExpiry(this,12)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:0.4;transition:all 0.2s;">12h</button>
+      <button class="bc expiry-btn on" onclick="pickExpiry(this,24)" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid currentColor;background:transparent;color:inherit;font-size:0.68rem;letter-spacing:1.5px;cursor:pointer;opacity:1;transition:all 0.2s;">24h</button>
+    </div>
+    <div id="fcErr" style="font-size:0.78rem;min-height:18px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="fcSubmit" onclick="submitFitCheck()" class="bc" style="flex:1;padding:14px;border:none;border-radius:12px;font-size:0.85rem;letter-spacing:2px;cursor:pointer;">Post It</button>
+      <button onclick="closePostModal()" class="bc" style="padding:14px 20px;border:1.5px solid rgba(128,128,128,0.2);border-radius:12px;background:transparent;color:inherit;font-size:0.85rem;letter-spacing:2px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="/stuflover-config.js"></script>
+<script src="/stuflover-backend.js"></script>
+<script>
+var PAL = {bg:'#faf0f0',tx:'#2a1a14',ac:'#c87860'};
+var currentTab = 'feed';
+var fcPhotoData = null;
+var fcExpiry = 24;
+var pollInterval = null;
+
+// Resolve palette from profile
+(function(){
+  var profile;
+  try{profile=JSON.parse(localStorage.getItem('stuflover_profile')||'null');}catch(e){profile=null;}
+  if(!profile) return;
+  var fc=profile.faveColour;var ae=profile.aesthetics||{};
+  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
+  top=top?top[0]:'softgirl';
+  function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
+  function lighten(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]+(255-c[0])*a)+toHex(c[1]+(255-c[1])*a)+toHex(c[2]+(255-c[2])*a);}catch(e){return hex;}}
+  function darken(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]*(1-a))+toHex(c[1]*(1-a))+toHex(c[2]*(1-a));}catch(e){return hex;}}
+  if(fc&&!fc.dark){PAL={bg:lighten(fc.hex,0.92),tx:darken(fc.hex,0.6),ac:fc.hex};}
+  else if(fc&&fc.dark){PAL={bg:darken(fc.hex,0.45),tx:lighten(fc.hex,0.8),ac:fc.hex};}
+  else{
+    var m={kawaii:{bg:'#fdf0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
+    PAL=m[top]||PAL;
+  }
+})();
+
+function applyStyles(){
+  document.body.style.background=PAL.bg;
+  document.body.style.color=PAL.tx;
+  document.getElementById('mainNav').style.background=PAL.bg+'f4';
+  document.getElementById('mainNav').style.borderColor=PAL.tx+'10';
+  document.querySelectorAll('.nav-btn,.nav-logo').forEach(function(e){e.style.color=PAL.tx;});
+  document.getElementById('fab').style.background=PAL.ac;
+  document.getElementById('fab').style.color=PAL.bg;
+  var mb=document.getElementById('postModalBox');
+  if(mb){mb.style.background=PAL.bg;mb.style.color=PAL.tx;}
+  var sub=document.getElementById('fcSubmit');
+  if(sub){sub.style.background=PAL.ac;sub.style.color=PAL.bg;}
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function timeLeft(expiresAt){
+  var ms=new Date(expiresAt)-Date.now();
+  if(ms<=0) return 'expired';
+  var h=Math.floor(ms/3600000);
+  var m=Math.floor((ms%3600000)/60000);
+  if(h>0) return h+'h '+m+'m left';
+  return m+'m left';
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    t.classList.toggle('on',['feed','mine','featured'][i]===tab);
+  });
+  document.getElementById('fab').style.display=tab==='feed'?'flex':'none';
+  loadTab();
+}
+
+async function apiFetch(url, opts){
+  var base=window.STUFLOVER_API_URL||'';
+  var token=localStorage.getItem('stuflover_token');
+  var headers=Object.assign({'Content-Type':'application/json'},opts&&opts.headers||{});
+  if(token) headers['Authorization']='Bearer '+token;
+  var res=await(window._origFetch||fetch).call(window,base+url,Object.assign({},opts,{headers:headers}));
+  return res.json();
+}
+
+async function loadTab(){
+  var view=document.getElementById('feedView');
+  if(currentTab==='feed') await loadFeed(view);
+  else if(currentTab==='mine') await loadMine(view);
+  else if(currentTab==='featured') await loadFeatured(view);
+}
+
+async function loadFeed(view){
+  try{
+    var data=await apiFetch('/api/fitcheck');
+    if(!data.posts||!data.posts.length){
+      view.innerHTML='<div class="empty">no fit checks yet — be the first to post yours</div>';
+      return;
+    }
+    view.innerHTML=data.posts.map(function(p,i){return renderCard(p,i);}).join('');
+  }catch(e){
+    view.innerHTML='<div class="empty">could not load feed</div>';
+  }
+}
+
+async function loadFeatured(view){
+  try{
+    var data=await apiFetch('/api/fitcheck/featured');
+    if(!data.posts||!data.posts.length){
+      view.innerHTML='<div class="empty">no featured fits yet — posts need 10+ votes with 80% yes to get featured</div>';
+      return;
+    }
+    view.innerHTML='<div class="featured-label" style="color:'+PAL.tx+'">This week\'s best fits</div>'+
+      data.posts.map(function(p,i){return renderCard(p,i,true);}).join('');
+  }catch(e){
+    view.innerHTML='<div class="empty">could not load featured</div>';
+  }
+}
+
+async function loadMine(view){
+  try{
+    var data=await apiFetch('/api/fitcheck/mine');
+    if(!data.posts||!data.posts.length){
+      view.innerHTML='<div class="empty">you haven\'t posted a fit check yet</div>';
+      return;
+    }
+    view.innerHTML=data.posts.map(function(p){
+      var total=p.yes_count+p.no_count;
+      var pct=total>0?Math.round(p.yes_count/total*100):0;
+      var isLive=new Date(p.expires_at)>new Date();
+      var statusBadge=isLive?
+        '<span class="fc-badge fc-live-badge" style="font-size:0.55rem;">Live · '+timeLeft(p.expires_at)+'</span>':
+        '<span class="fc-badge fc-expired-badge" style="font-size:0.55rem;">Expired</span>';
+      return '<div class="mc-card" style="background:'+PAL.tx+'06;border:1px solid '+PAL.tx+'06;">'+
+        '<img class="mc-photo" src="'+escHtml(p.photo)+'" alt=""/>'+
+        '<div class="mc-info">'+
+          '<div class="mc-caption" style="color:'+PAL.tx+';">'+(p.caption?escHtml(p.caption):'no caption')+'</div>'+
+          '<div class="mc-stats" style="color:'+PAL.tx+';">'+p.yes_count+' yes · '+p.no_count+' no'+(total>0?' · '+pct+'% yes':'')+'</div>'+
+          statusBadge+
+          (total>0?'<div class="mc-bar" style="background:'+PAL.tx+'08;"><div class="mc-bar-fill" style="width:'+pct+'%;background:'+PAL.ac+';"></div></div>':'')+
+        '</div>'+
+        '<button class="mc-del" style="color:'+PAL.tx+';" onclick="deleteFit('+p.id+')">Delete</button>'+
+      '</div>';
+    }).join('');
+  }catch(e){
+    view.innerHTML='<div class="empty">could not load your checks</div>';
+  }
+}
+
+function renderCard(p,i,isFeatured){
+  var total=p.yes_count+p.no_count;
+  var hasVoted=p.my_vote!==null&&p.my_vote!==undefined;
+  var votedYes=p.my_vote===1;
+  var votedNo=p.my_vote===0;
+  var tl=timeLeft(p.expires_at);
+  var isFeaturedPost=isFeatured||(total>=10&&p.yes_count/total>=0.8);
+  var delay=(i*0.06)+'s';
+
+  var yesLabel=hasVoted?p.yes_count+' YES':'YES';
+  var noLabel=hasVoted?p.no_count+' NO':'NO';
+
+  return '<div class="fc-card" style="animation-delay:'+delay+';background:'+PAL.tx+'08;">'+
+    '<img class="fc-photo" src="'+escHtml(p.photo)+'" alt="" onerror="this.style.background=\'rgba(128,128,128,0.1)\';this.style.height=\'300px\';"/>'+
+    '<div class="fc-top">'+
+      (isFeaturedPost?'<span class="fc-badge fc-featured-badge">Featured</span>':'<span></span>')+
+      '<span class="fc-badge fc-live-badge">'+tl+'</span>'+
+    '</div>'+
+    '<div class="fc-overlay">'+
+      '<div class="fc-user">'+escHtml(p.anon_name)+'</div>'+
+      (p.caption?'<div class="fc-caption">'+escHtml(p.caption)+'</div>':'')+
+      '<div class="fc-votes">'+
+        '<button class="fc-vote-btn yes'+(votedYes?' voted':'')+'" onclick="vote('+p.id+',true,this)" '+(votedYes?'disabled':'')+'>'+yesLabel+'</button>'+
+        '<button class="fc-vote-btn no'+(votedNo?' voted':'')+'" onclick="vote('+p.id+',false,this)" '+(votedNo?'disabled':'')+'>'+noLabel+'</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
+async function vote(fitId,isYes,btn){
+  var card=btn.closest('.fc-card');
+  var btns=card.querySelectorAll('.fc-vote-btn');
+  btns.forEach(function(b){b.disabled=true;});
+
+  // Animate
+  btn.style.transform='scale(1.1)';
+  setTimeout(function(){btn.style.transform='';},200);
+
+  try{
+    var data=await apiFetch('/api/fitcheck/'+fitId+'/vote',{method:'POST',body:JSON.stringify({vote:isYes})});
+    if(data.ok){
+      btns[0].className='fc-vote-btn yes'+(isYes?' voted':'');
+      btns[0].textContent=data.yes_count+' YES';
+      btns[1].className='fc-vote-btn no'+(!isYes?' voted':'');
+      btns[1].textContent=data.no_count+' NO';
+      if(isYes) btns[0].disabled=true;
+      else btns[1].disabled=true;
+    }
+  }catch(e){}
+}
+
+async function deleteFit(id){
+  if(!confirm('delete this fit check?')) return;
+  await apiFetch('/api/fitcheck/'+id,{method:'DELETE'});
+  loadTab();
+}
+
+// POST MODAL
+function openPostModal(){
+  fcPhotoData=null;fcExpiry=24;
+  document.getElementById('postModal').classList.add('open');
+  document.getElementById('fcCaption').value='';
+  document.getElementById('fcPreview').style.display='none';
+  document.getElementById('fcErr').textContent='';
+  document.getElementById('fcCamera').value='';
+  document.getElementById('fcGallery').value='';
+}
+function closePostModal(){document.getElementById('postModal').classList.remove('open');}
+
+function handleFcPhoto(input){
+  var file=input.files&&input.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var max=600;var w=img.width,h=img.height;
+      if(w>h){if(w>max){h=h*(max/w);w=max;}}else{if(h>max){w=w*(max/h);h=max;}}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      fcPhotoData=canvas.toDataURL('image/jpeg',0.75);
+      document.getElementById('fcPreview').src=fcPhotoData;
+      document.getElementById('fcPreview').style.display='block';
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function pickExpiry(btn,hours){
+  fcExpiry=hours;
+  document.querySelectorAll('.expiry-btn').forEach(function(b){b.style.opacity='0.4';b.style.borderColor='rgba(128,128,128,0.12)';b.classList.remove('on');});
+  btn.style.opacity='1';btn.style.borderColor='currentColor';btn.classList.add('on');
+}
+
+async function submitFitCheck(){
+  var err=document.getElementById('fcErr');
+  if(!fcPhotoData){err.textContent='take a photo first';err.style.color='#c44';return;}
+  var caption=document.getElementById('fcCaption').value.trim();
+  var btn=document.getElementById('fcSubmit');
+  btn.disabled=true;btn.textContent='Posting...';
+
+  try{
+    var data=await apiFetch('/api/fitcheck',{method:'POST',body:JSON.stringify({photo:fcPhotoData,caption:caption,expiryHours:fcExpiry})});
+    if(data.ok){
+      closePostModal();
+      switchTab('feed');
+    }else{
+      err.textContent=data.error||'something went wrong';err.style.color='#c44';
+    }
+  }catch(e){
+    err.textContent='could not post — try again';err.style.color='#c44';
+  }
+  btn.disabled=false;btn.textContent='Post It';
+}
+
+// Auto-refresh feed every 15s
+pollInterval=setInterval(function(){
+  if(currentTab==='feed') loadTab();
+},15000);
+
+// Track page visit
+(function(){
+  var base=window.STUFLOVER_API_URL||'';
+  var token=localStorage.getItem('stuflover_token');
+  if(token){
+    (window._origFetch||fetch).call(window,base+'/api/page-visit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({page:'fitcheck'})
+    }).catch(function(){});
+  }
+})();
+
+applyStyles();
+loadTab();
+</script>
+<script src="/stuflover-ux.js"></script>
+</body>
+</html>
