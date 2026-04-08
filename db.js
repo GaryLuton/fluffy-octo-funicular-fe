@@ -192,6 +192,14 @@ async function initDb() {
     }
   } catch (e) { /* column already exists or fresh db */ }
 
+  // Migrate: add channel to collab_messages if missing
+  try {
+    const cmCols = all("PRAGMA table_info(collab_messages)");
+    if (cmCols.length && !cmCols.some(c => c.name === 'channel')) {
+      db.run("ALTER TABLE collab_messages ADD COLUMN channel TEXT DEFAULT 'general'");
+    }
+  } catch (e) {}
+
   // Password resets
   db.run(`
     CREATE TABLE IF NOT EXISTS password_resets (
@@ -278,6 +286,7 @@ async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER NOT NULL,
       username TEXT NOT NULL,
+      channel TEXT DEFAULT 'general',
       text TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
