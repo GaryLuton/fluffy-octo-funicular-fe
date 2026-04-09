@@ -1237,8 +1237,11 @@ app.post('/api/chat', auth, async (req, res) => {
     // 3. Trim conversation history to 10 messages
     const trimmedMessages = trimConversationHistory(messages, 10);
 
-    // 4. Prepend child safety system prompt
-    const safeSystem = wrapSystemPrompt(req.body.system || '');
+    // 4. Prepend child safety system prompt, append feature-specific instructions if provided
+    const baseSystem = req.body.system || '';
+    const featurePrompt = req.body.featureSystemPrompt || '';
+    const combinedSystem = featurePrompt ? (baseSystem + '\n\n' + featurePrompt) : baseSystem;
+    const safeSystem = wrapSystemPrompt(combinedSystem);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

@@ -5713,12 +5713,12 @@ async function suggestRoutineSteps(){
   btn.textContent = 'Generating...';
 
   var aeName = resolveAeName();
-  var age = P.age || 'unknown';
   var interests = (P.interests||[]).join(', ') || 'various';
   var mood = P.moodToday || 'okay';
+  var jsonInstruction = 'IMPORTANT: Return ONLY a JSON array like [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
   var prompt = rtMode === 'morning'
-    ? 'Generate a morning routine for a '+age+' year old with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
-    : 'Generate a night routine for a '+age+' year old with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
+    ? jsonInstruction + 'Generate a morning routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
+    : jsonInstruction + 'Generate a night routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
 
   try{
     var res = await fetch('https://api.anthropic.com/v1/messages',{
@@ -5726,7 +5726,8 @@ async function suggestRoutineSteps(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:600,
-        system:'Generate a personalized routine. Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic and age.',
+        system:'Generate a personalized routine. Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic.',
+        featureSystemPrompt:'Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text.',
         messages:[{role:'user',content:prompt}]
       })
     });
@@ -5740,14 +5741,21 @@ async function suggestRoutineSteps(){
         routines[rtMode] = steps.map(function(s){ return {time:s.time||'', text:s.text||s.step||''}; });
         saveRoutines(routines);
         renderRoutineSteps();
+      } else {
+        btn.textContent = 'Failed — try again';
+        setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
       }
+    } else {
+      btn.textContent = 'Failed — try again';
+      setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
     }
   }catch(e){
     console.error('Routine generation failed:', e);
+    btn.textContent = 'Failed — try again';
+    setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
   }
 
   btn.disabled = false;
-  btn.textContent = 'Generate routine with AI';
 }
 
 // ─── MY PROFILE ──────────────────────────────────────────
