@@ -6683,6 +6683,8 @@ function openSection(id){
   const sv = document.getElementById('sectionView');
   sv.style.display = 'flex';
   sv.style.background = pal.bg;
+  sv.style.height = '';
+  sv.style.overflow = '';
 
   document.getElementById('sectionNameNav').textContent = sec.name;
   document.getElementById('sectionNameNav').style.color = pal.tx;
@@ -6794,7 +6796,8 @@ function openSection(id){
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
-    document.getElementById('sectionView').style.display = 'none';
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
     document.getElementById('viralView').style.display = 'flex';
     document.getElementById('viralView').classList.add('active');
     openOutfitRoast();
@@ -6804,7 +6807,8 @@ function openSection(id){
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
-    document.getElementById('sectionView').style.display = 'none';
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
     document.getElementById('viralView').style.display = 'flex';
     document.getElementById('viralView').classList.add('active');
     openSecretDiary();
@@ -6814,7 +6818,8 @@ function openSection(id){
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
-    document.getElementById('sectionView').style.display = 'none';
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
     document.getElementById('viralView').style.display = 'flex';
     document.getElementById('viralView').classList.add('active');
     openStudyRoom();
@@ -6824,7 +6829,8 @@ function openSection(id){
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
-    document.getElementById('sectionView').style.display = 'none';
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
     document.getElementById('viralView').style.display = 'flex';
     document.getElementById('viralView').classList.add('active');
     openAeVsReality();
