@@ -71,7 +71,7 @@
     var popup = document.createElement('div');
     popup.id = 'socialProof';
     popup.style.cssText = 'position:fixed;bottom:20px;left:20px;padding:12px 18px;border-radius:12px;background:rgba(42,26,20,0.85);color:white;font-size:0.78rem;z-index:500;backdrop-filter:blur(10px);animation:slideInLeft 0.4s ease;max-width:260px;line-height:1.5;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
-    popup.textContent = proofMsgs[Math.floor(Math.random()*proofMsgs.length)];
+    popup.textContent = msg;
     document.body.appendChild(popup);
     setTimeout(function(){ popup.style.opacity='0'; popup.style.transition='opacity 0.3s'; }, 4000);
     setTimeout(function(){ popup.remove(); }, 4500);

@@ -5715,7 +5715,7 @@ async function suggestRoutineSteps(){
   var aeName = resolveAeName();
   var interests = (P.interests||[]).join(', ') || 'various';
   var mood = P.moodToday || 'okay';
-  var jsonInstruction = 'IMPORTANT: Return ONLY a JSON array like [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
+  var jsonInstruction = 'IMPORTANT: Return ONLY a valid JSON array like [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
   var prompt = rtMode === 'morning'
     ? jsonInstruction + 'Generate a morning routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
     : jsonInstruction + 'Generate a night routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
@@ -5726,8 +5726,8 @@ async function suggestRoutineSteps(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:600,
-        system:'Generate a personalized routine. Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic.',
-        featureSystemPrompt:'Return ONLY a JSON array of objects: [{time:"7:00",text:"step description"}]. No markdown, no code fences, no other text.',
+        system:'Generate a personalized routine. Return ONLY a valid JSON array of objects: [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic.',
+        featureSystemPrompt:'Return ONLY a valid JSON array of objects: [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text.',
         messages:[{role:'user',content:prompt}]
       })
     });
@@ -5735,7 +5735,8 @@ async function suggestRoutineSteps(){
     var text = (data.content&&data.content[0]&&data.content[0].text)||'';
     var match = text.match(/\[[\s\S]*\]/);
     if(match){
-      var steps = JSON.parse(match[0]);
+      var fixedJson = match[0].replace(/(\{|,)\s*(\w+)\s*:/g, '$1"$2":');
+      var steps = JSON.parse(fixedJson);
       if(Array.isArray(steps) && steps.length > 0){
         var routines = getRoutines();
         routines[rtMode] = steps.map(function(s){ return {time:s.time||'', text:s.text||s.step||''}; });
