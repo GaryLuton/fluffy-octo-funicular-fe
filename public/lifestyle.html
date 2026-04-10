@@ -812,6 +812,7 @@
     .cw-modal-btns{display:flex;gap:8px;}
     .cw-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
     .cw-img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px;display:none;}
+    img:not([src]),img[src=""]{display:none;}
     @media(max-width:768px){.cw-grid{grid-template-columns:repeat(2,1fr);padding:10px;gap:8px;}}
 
     /* ── FRIENDS / MESSAGES ── */
@@ -1327,7 +1328,7 @@
       <div class="cw-modal-box" id="cwModalBox">
         <h3>Share a Photo</h3>
         <input id="cwUrlInput" placeholder="Paste an image URL..." oninput="previewCwImage()"/>
-        <img class="cw-img-preview" id="cwPreview"/>
+        <img class="cw-img-preview" id="cwPreview" alt="Preview"/>
         <textarea id="cwCaptionInput" placeholder="Add a caption..." rows="2" maxlength="200"></textarea>
         <input id="cwTagsInput" placeholder="Tags (e.g. aesthetic, outfit, cozy)" maxlength="100"/>
         <div class="cw-err" id="cwErr"></div>
@@ -1427,7 +1428,7 @@
       <div class="ffi-modal-box" id="ffiAddModalBox">
         <h3>Add to Closet</h3>
         <input id="ffiAddUrl" placeholder="Paste a photo URL of your item..." oninput="ffiPreviewAdd()"/>
-        <img class="ffi-modal-preview" id="ffiAddPreview"/>
+        <img class="ffi-modal-preview" id="ffiAddPreview" alt="Preview"/>
         <input id="ffiAddName" placeholder="What is it? (e.g. black crop top)"/>
         <select id="ffiAddCat"><option value="">Pick a category...</option><option value="tops">Tops</option><option value="bottoms">Bottoms</option><option value="dresses">Dresses</option><option value="outerwear">Outerwear</option><option value="shoes">Shoes</option><option value="bags">Bags</option><option value="accessories">Accessories</option></select>
         <div class="ffi-modal-err" id="ffiAddErr"></div>
