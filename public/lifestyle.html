@@ -763,6 +763,14 @@
     .fgd-add-item input{width:100%;padding:10px 14px;border:1.5px solid rgba(128,128,128,0.12);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;color:inherit;outline:none;background:transparent;margin-bottom:8px;}
     @media(max-width:768px){.fgd-store-grid{grid-template-columns:repeat(2,1fr);gap:10px;}.fgd-content{padding:14px 16px;}}
 
+    /* ── DISCOVER TAB NAV ── */
+    #discoverTabs{display:none;padding:0 24px;border-bottom:1px solid rgba(128,128,128,0.08);}
+    #discoverTabs.active{display:flex;}
+    .discover-tab{padding:10px 20px;border:none;background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;opacity:0.3;transition:opacity 0.2s;position:relative;}
+    .discover-tab:hover{opacity:0.55;}
+    .discover-tab.active{opacity:1;}
+    .discover-tab.active::after{content:'';position:absolute;bottom:0;left:20px;right:20px;height:2px;border-radius:1px;background:currentColor;}
+
     /* ── STUFLOVER DAILY (Trending/Notifications) ── */
     #dailyView{display:none;flex:1;flex-direction:column;overflow:hidden;}
     #dailyView.active{display:flex;}
@@ -1301,6 +1309,12 @@
           <button onclick="closeFgModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
         </div>
       </div>
+    </div>
+
+    <!-- Discover Tabs -->
+    <div id="discoverTabs">
+      <button class="discover-tab active bc" data-discover="trending" onclick="switchDiscoverTab('trending')">Trending</button>
+      <button class="discover-tab bc" data-discover="inspo" onclick="switchDiscoverTab('inspo')">Inspiration Board</button>
     </div>
 
     <!-- StufloverDaily Trending Feed -->
@@ -5075,6 +5089,22 @@ var sdFallbackAlerts = [
   {tag:'fashion',title:'Thrift Flip Challenge Trending',desc:'People are turning $5 thrift finds into designer-looking pieces and the glow-ups are insane.'}
 ];
 
+function switchDiscoverTab(tab){
+  var tabs = document.getElementById('discoverTabs').querySelectorAll('.discover-tab');
+  tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-discover') === tab); });
+  var dv = document.getElementById('dailyView');
+  var cv = document.getElementById('contentView');
+  if(tab === 'trending'){
+    cv.style.display = 'none'; cv.classList.remove('active');
+    dv.style.display = 'flex'; dv.classList.add('active');
+    loadDailyFeed();
+  } else {
+    dv.style.display = 'none'; dv.classList.remove('active');
+    cv.style.display = 'flex'; cv.classList.add('active');
+    openContentView();
+  }
+}
+
 async function loadDailyFeed(){
   var feed = document.getElementById('sdFeed');
   var btn = document.getElementById('sdRefreshBtn');
@@ -6768,6 +6798,8 @@ function openSection(id){
   document.getElementById('contentView').classList.remove('active');
   document.getElementById('dailyView').style.display = 'none';
   document.getElementById('dailyView').classList.remove('active');
+  document.getElementById('discoverTabs').style.display = 'none';
+  document.getElementById('discoverTabs').classList.remove('active');
   document.getElementById('groupsView').style.display = 'none';
   document.getElementById('groupsView').classList.remove('active');
   document.getElementById('fgDetailView').style.display = 'none';
@@ -6893,7 +6925,7 @@ function openSection(id){
     document.getElementById('viralView').classList.add('active');
     openAeVsReality();
     return;
-  } else if(sec.id === 'stufloverdaily'){
+  } else if(sec.id === 'stufloverdaily' || sec.id === 'contentwithit'){
     shopBar.style.display = 'none';
     document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
@@ -6902,23 +6934,10 @@ function openSection(id){
     document.getElementById('profileView').style.display = 'none';
     document.getElementById('routineView').style.display = 'none';
     document.getElementById('friendsView').style.display = 'none';
-    document.getElementById('contentView').style.display = 'none';
-    document.getElementById('dailyView').style.display = 'flex';
-    document.getElementById('dailyView').classList.add('active');
-    loadDailyFeed();
-    return;
-  } else if(sec.id === 'contentwithit'){
-    shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
-    document.getElementById('normalChat').style.display = 'none';
-    document.getElementById('hubView').style.display = 'none';
-    document.getElementById('dtiView').style.display = 'none';
-    document.getElementById('profileView').style.display = 'none';
-    document.getElementById('routineView').style.display = 'none';
-    document.getElementById('friendsView').style.display = 'none';
-    document.getElementById('contentView').style.display = 'flex';
-    document.getElementById('contentView').classList.add('active');
-    openContentView();
+    document.getElementById('discoverTabs').style.display = 'flex';
+    document.getElementById('discoverTabs').classList.add('active');
+    var defaultTab = sec.id === 'contentwithit' ? 'inspo' : 'trending';
+    switchDiscoverTab(defaultTab);
     return;
   } else if(sec.id === 'friends'){
     shopBar.style.display = 'none';
