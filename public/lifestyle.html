@@ -915,6 +915,35 @@
 
     /* Vignette overlay */
     .vignette-overlay{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at center,transparent 65%,rgba(0,0,0,0.06) 100%);}
+
+    /* ── MOBILE SETTINGS BUTTON FIX ── */
+    @media(max-width:600px){
+      #cursorSettingsBtn{
+        padding:6px 10px !important;
+        font-size:0px !important;
+        gap:0px !important;
+        bottom:12px !important;
+        right:12px !important;
+        border-radius:50% !important;
+        width:36px !important;
+        height:36px !important;
+        justify-content:center !important;
+      }
+      #cursorSettingsBtn svg{
+        width:14px !important;
+        height:14px !important;
+        flex-shrink:0;
+      }
+      #cursorPanel{
+        bottom:56px !important;
+        right:12px !important;
+        width:calc(100vw - 24px) !important;
+        max-width:280px !important;
+      }
+      #verticalFeed{
+        padding-bottom:80px !important;
+      }
+    }
   </style>
 </head>
 <body>
