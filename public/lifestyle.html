@@ -994,7 +994,7 @@
       <div class="feed-section feed-reveal" id="runwayWrap" style="display:none;"></div>
 
       <!-- Style — quick link to closet -->
-      <div class="feed-section feed-reveal feed-card" onclick="window.location.href='fitforit.html'" style="cursor:pointer;">
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('fitforit')" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:12px;">
           <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           <div>
@@ -1006,7 +1006,7 @@
       </div>
 
       <!-- Fit Check -->
-      <div class="feed-section feed-reveal feed-card" onclick="window.location.href='fitcheck.html'" style="cursor:pointer;">
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('fitcheck')" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:12px;">
           <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div>
@@ -1018,7 +1018,7 @@
       </div>
 
       <!-- Wellness -->
-      <div class="feed-section feed-reveal feed-card" onclick="window.location.href='beyou.html'" style="cursor:pointer;">
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('beyou')" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:12px;">
           <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.3"/></svg>
           <div>
@@ -1042,7 +1042,7 @@
       </div>
 
       <!-- Brain Boost -->
-      <div class="feed-section feed-reveal feed-card" onclick="window.location.href='academic.html'" style="cursor:pointer;">
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('academic')" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:12px;">
           <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><path d="M4 19.5v-15A2.5 2.5 0 016.5 2H20v20H6.5a2.5 2.5 0 010-5H20" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           <div>
@@ -1054,7 +1054,7 @@
       </div>
 
       <!-- Activities -->
-      <div class="feed-section feed-reveal feed-card" onclick="window.location.href='activities.html'" style="cursor:pointer;">
+      <div class="feed-section feed-reveal feed-card" onclick="openSection('activities')" style="cursor:pointer;">
         <div style="display:flex;align-items:center;gap:12px;">
           <svg width="24" height="24" viewBox="0 0 24 24" style="opacity:0.5;flex-shrink:0;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
           <div>
@@ -6761,6 +6761,9 @@ function restoreMessages(secId, messages, pal){
 function openSection(id){
   // Redirect to dedicated pages
   if(id === 'beyou'){ window.location.href = '/beyou.html'; return; }
+  if(id === 'fitcheck'){ window.location.href = '/fitcheck.html'; return; }
+  if(id === 'academic'){ window.location.href = '/academic.html'; return; }
+  if(id === 'activities'){ window.location.href = '/activities.html'; return; }
   const sec = SECTIONS.find(s=>s.id===id);
   if(!sec) return;
   currentSection = sec;
