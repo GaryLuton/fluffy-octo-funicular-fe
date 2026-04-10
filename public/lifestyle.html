@@ -5064,6 +5064,16 @@ function fgdBackToList(){
 
 // ─── STUFLOVER DAILY (Trending notifications) ─────────────
 var sdCache = null;
+var sdFallbackAlerts = [
+  {tag:'tiktok',title:'New Dance Trend Taking Over',desc:'Everyone is learning this viral choreography — the sound already has 50M+ uses.'},
+  {tag:'fashion',title:'Oversized Everything is Back',desc:'Baggy jeans, oversized blazers, and chunky sneakers are dominating street style this season.'},
+  {tag:'music',title:'Fresh Drops You Need to Hear',desc:'This week\'s new releases are stacked — add these to your playlist before everyone else does.'},
+  {tag:'beauty',title:'Glass Skin Routine Going Viral',desc:'A 3-step skincare hack is blowing up and the results are unreal.'},
+  {tag:'culture',title:'This Meme is Everywhere Right Now',desc:'If you haven\'t seen it yet, you will — it\'s already taken over every group chat.'},
+  {tag:'aesthetic',title:'New Core Aesthetic Alert',desc:'A fresh aesthetic is emerging and your feed is about to be full of it.'},
+  {tag:'tiktok',title:'POV Videos Hit Different',desc:'A new POV trend is making everyone emotional — the comments are wild.'},
+  {tag:'fashion',title:'Thrift Flip Challenge Trending',desc:'People are turning $5 thrift finds into designer-looking pieces and the glow-ups are insane.'}
+];
 
 async function loadDailyFeed(){
   var feed = document.getElementById('sdFeed');
@@ -5075,8 +5085,8 @@ async function loadDailyFeed(){
   btn.style.borderColor = pal.tx+'20';
   btn.style.color = pal.tx;
 
-  // Show cached while loading
-  if(sdCache && !btn.disabled){ sdCache = null; } // force refresh on button click
+  // Force refresh on button click (when not already loading)
+  if(sdCache && !btn.disabled){ sdCache = null; }
 
   if(sdCache){ renderDailyFeed(sdCache); return; }
 
@@ -5089,32 +5099,70 @@ async function loadDailyFeed(){
   var interests = (P.interests||[]).slice(0,5).join(', ')||'fashion, music';
   var age = P.age || '18-25';
 
-  try{
-    var res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST', headers:{},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1200,
-        system:'You generate a personalized trending feed for a teen/young adult. Create 8 notification-style trend alerts that feel current and relevant to their aesthetic and interests.\n\nCategories (use a mix):\n- tiktok: viral TikTok trends, dances, sounds, challenges\n- fashion: trending outfits, drops, style moments\n- music: new releases, chart news, concert announcements\n- beauty: viral products, makeup trends, skincare\n- culture: memes, shows, celebrity moments, internet drama\n- aesthetic: trending aesthetics, room decor, mood boards\n\nRules:\n- Make each alert feel like a real notification — urgent, exciting, FOMO-inducing\n- Match their aesthetic and music taste specifically\n- Use current-feeling language (but do not reference specific dates)\n- Each alert: short punchy title (under 10 words) + 1-2 sentence description\n- Mix of categories\n- Keep everything clean and appropriate for teens\n- Return ONLY a JSON array of {tag, title, desc} — no markdown, no code fences',
-        messages:[{role:'user',content:'My vibe: '+aeName+' aesthetic, age '+age+', into '+music+' and '+interests+'. Give me 8 trending alerts that I need to know about right now.'}]
-      })
-    });
-    var data = await res.json();
-    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
-    var match = text.match(/\[[\s\S]*\]/);
-    if(match){
-      var alerts = JSON.parse(match[0]);
-      if(Array.isArray(alerts) && alerts.length > 0){
-        sdCache = alerts;
-        renderDailyFeed(alerts);
-      } else {
-        feed.innerHTML = '<div class="sd-loading">Could not load trends — try refreshing</div>';
+  var maxRetries = 2;
+  var attempt = 0;
+  var success = false;
+
+  while(attempt <= maxRetries && !success){
+    try{
+      if(attempt > 0){
+        await new Promise(function(r){ setTimeout(r, 1000 * attempt); });
+        feed.innerHTML = '<div class="sd-loading">Retrying... (attempt '+(attempt+1)+'/'+(maxRetries+1)+')</div>';
       }
-    } else {
-      feed.innerHTML = '<div class="sd-loading">Could not load trends — try refreshing</div>';
+
+      var res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1200,
+          system:'You generate a personalized trending feed for a teen/young adult. Create 8 notification-style trend alerts that feel current and relevant to their aesthetic and interests.\n\nCategories (use a mix):\n- tiktok: viral TikTok trends, dances, sounds, challenges\n- fashion: trending outfits, drops, style moments\n- music: new releases, chart news, concert announcements\n- beauty: viral products, makeup trends, skincare\n- culture: memes, shows, celebrity moments, internet drama\n- aesthetic: trending aesthetics, room decor, mood boards\n\nRules:\n- Make each alert feel like a real notification — urgent, exciting, FOMO-inducing\n- Match their aesthetic and music taste specifically\n- Use current-feeling language (but do not reference specific dates)\n- Each alert: short punchy title (under 10 words) + 1-2 sentence description\n- Mix of categories\n- Keep everything clean and appropriate for teens\n- Return ONLY a JSON array of {tag, title, desc} — no markdown, no code fences',
+          messages:[{role:'user',content:'My vibe: '+aeName+' aesthetic, age '+age+', into '+music+' and '+interests+'. Give me 8 trending alerts that I need to know about right now.'}]
+        })
+      });
+
+      if(!res.ok){
+        var errData;
+        try{ errData = await res.json(); }catch(e){ errData = {}; }
+
+        // Rate-limited — don't retry, tell the user to wait
+        if(res.status === 429 || (errData && errData._rate_limited)){
+          feed.innerHTML = '<div class="sd-loading">You\'re moving too fast — try again in a minute</div>';
+          btn.disabled = false;
+          btn.textContent = 'Refresh';
+          return;
+        }
+
+        throw new Error(errData.error || 'Server returned ' + res.status);
+      }
+
+      var data = await res.json();
+      var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+      var match = text.match(/\[[\s\S]*\]/);
+      if(match){
+        var alerts = JSON.parse(match[0]);
+        if(Array.isArray(alerts) && alerts.length > 0){
+          sdCache = alerts;
+          renderDailyFeed(alerts);
+          success = true;
+        } else {
+          throw new Error('Empty alerts');
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    }catch(e){
+      attempt++;
+      if(attempt > maxRetries){
+        // All retries exhausted — show fallback trends
+        sdCache = sdFallbackAlerts;
+        renderDailyFeed(sdFallbackAlerts);
+        feed.insertAdjacentHTML('afterbegin',
+          '<div class="sd-loading" style="font-size:0.75rem;opacity:0.6;padding:6px 12px;">'+
+          'Showing general trends — hit Refresh for personalized results</div>');
+        success = true;
+      }
     }
-  }catch(e){
-    feed.innerHTML = '<div class="sd-loading">Something went wrong — try again</div>';
   }
 
   btn.disabled = false;
