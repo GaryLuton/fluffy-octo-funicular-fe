@@ -24,17 +24,6 @@
     if(btn && navigator.vibrate) navigator.vibrate(30);
   });
 
-  // 12. Time-based greeting (for homepage)
-  var wel = document.getElementById('navWelcome');
-  if(wel && wel.textContent){
-    var h = new Date().getHours();
-    var greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-    // Only prepend if not already time-based
-    if(!wel.textContent.includes('morning') && !wel.textContent.includes('afternoon') && !wel.textContent.includes('evening')){
-      wel.textContent = greet + ', ' + wel.textContent;
-    }
-  }
-
   // 13. Real activity notifications (only true stuff)
   async function showRealActivity(){
     var existing = document.getElementById('socialProof');
