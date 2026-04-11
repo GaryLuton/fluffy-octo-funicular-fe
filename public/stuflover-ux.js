@@ -28,10 +28,11 @@
   var wel = document.getElementById('navWelcome');
   if(wel && wel.textContent){
     var h = new Date().getHours();
-    var greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
-    // Only prepend if not already time-based
+    var greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    // Only apply if not already time-based
     if(!wel.textContent.includes('morning') && !wel.textContent.includes('afternoon') && !wel.textContent.includes('evening')){
-      wel.textContent = greet + ', ' + wel.textContent;
+      var name = wel.textContent.replace(/^Welcome,\s*/i, '');
+      wel.textContent = greet + ', ' + name;
     }
   }
 
