@@ -42,6 +42,9 @@
     .flovee-textarea{flex:1;padding:12px 16px;border-radius:20px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.95rem;color:inherit;outline:none;resize:none;min-height:46px;max-height:120px;line-height:1.5;transition:border-color 0.2s;}
     .flovee-textarea:focus{border-color:rgba(128,128,128,0.3);}
     .flovee-textarea::placeholder{opacity:0.3;}
+    .flovee-char-count{font-size:0.65rem;opacity:0;transition:opacity 0.2s;text-align:right;padding:2px 8px 0;font-family:'Space Grotesk',sans-serif;}
+    .flovee-char-count.visible{opacity:0.4;}
+    .flovee-char-count.warn{opacity:0.7;color:#c0392b;}
     .flovee-send{padding:12px 22px;border:none;border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
     .flovee-send:hover{transform:translateY(-1px);opacity:0.9;}
     .flovee-send:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
@@ -56,8 +59,8 @@
     .flovee-starter:hover{opacity:0.8;transform:translateY(-2px);}
 
     /* CLEAR */
-    .flovee-clear{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1px solid rgba(128,128,128,0.12);border-radius:4px;padding:4px 10px;cursor:pointer;opacity:0.2;transition:opacity 0.2s;color:inherit;}
-    .flovee-clear:hover{opacity:0.6;}
+    .flovee-clear{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.25);border-radius:6px;padding:5px 12px;cursor:pointer;opacity:0.45;transition:opacity 0.2s;color:inherit;}
+    .flovee-clear:hover{opacity:0.7;}
 
     @media(max-width:480px){
       .flovee-input-area{padding:10px 14px 16px;}
@@ -79,9 +82,12 @@
 <div class="flovee-messages" id="floveeMessages"></div>
 
 <div class="flovee-input-area">
-  <textarea class="flovee-textarea" id="chatInput" placeholder="say something..." rows="1"
-    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
-    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';"></textarea>
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <textarea class="flovee-textarea" id="chatInput" placeholder="say something..." rows="1" maxlength="500"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"
+      oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';updateCharCount();"></textarea>
+    <div class="flovee-char-count" id="charCount"></div>
+  </div>
   <button class="flovee-send bc" id="sendBtn" onclick="sendMessage()">Send</button>
 </div>
 
@@ -414,6 +420,19 @@ function scrollToBottom(){
 function saveChat(){
   var key = 'stuflover_flovee_chat_'+currentFlovee.id;
   localStorage.setItem(key, JSON.stringify({messages:chatHistory.slice(-60)}));
+}
+
+function updateCharCount(){
+  var input = document.getElementById('chatInput');
+  var counter = document.getElementById('charCount');
+  var remaining = 500 - input.value.length;
+  if(remaining <= 50){
+    counter.textContent = remaining + ' characters left';
+    counter.className = 'flovee-char-count visible' + (remaining <= 20 ? ' warn' : '');
+  } else {
+    counter.className = 'flovee-char-count';
+    counter.textContent = '';
+  }
 }
 
 function clearChat(){
