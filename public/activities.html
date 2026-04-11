@@ -405,13 +405,29 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
       const json = await resp.json();
       const text = (json.content && json.content[0] && json.content[0].text) || '';
 
-      // Parse JSON from response — handle possible markdown fences
+      // Parse JSON from response — extract JSON object even if surrounded by text
       let cleaned = text.trim();
+      // Strip markdown fences if present
       if(cleaned.startsWith('```')){
         cleaned = cleaned.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'');
       }
 
-      const data = JSON.parse(cleaned);
+      // Try to extract a JSON object from the response text
+      let data;
+      try {
+        data = JSON.parse(cleaned);
+      } catch(parseErr) {
+        // Response isn't pure JSON — try to extract a JSON object via regex
+        const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+        if(!jsonMatch) throw new Error('No JSON object found in response');
+        data = JSON.parse(jsonMatch[0]);
+      }
+
+      // Validate that the parsed data has at least one expected category key
+      const expectedKeys = ['creative','social','solo','active','chill'];
+      const hasValidKey = expectedKeys.some(function(k){ return Array.isArray(data[k]); });
+      if(!hasValidKey) throw new Error('Response JSON missing expected activity categories');
+
       renderActivities(data);
 
     } catch(err) {
