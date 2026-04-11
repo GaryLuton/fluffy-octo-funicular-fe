@@ -112,6 +112,7 @@
     .ground-step.done{opacity:1;}
     .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
     .ground-step-text{font-size:0.88rem;line-height:1.5;}
+    @keyframes journalShake{0%,100%{transform:translateX(0);}15%{transform:translateX(-6px);}30%{transform:translateX(5px);}45%{transform:translateX(-4px);}60%{transform:translateX(3px);}75%{transform:translateX(-2px);}90%{transform:translateX(1px);}}
     @keyframes checkPop{
       0%{transform:scale(0) rotate(-45deg);opacity:0;}
       50%{transform:scale(1.3) rotate(5deg);opacity:1;}
@@ -586,8 +587,22 @@ function getJournalEntries(){
 }
 
 function saveJournalEntry(){
-  var text = document.getElementById('journalText').value.trim();
-  if(!text) return;
+  var ta = document.getElementById('journalText');
+  var text = ta.value.trim();
+  if(!text){
+    ta.style.borderColor = PAL.ac;
+    ta.style.boxShadow = '0 0 0 3px ' + PAL.ac + '30';
+    ta.placeholder = 'Please write something before saving...';
+    ta.style.animation = 'journalShake 0.5s ease';
+    setTimeout(function(){
+      ta.style.borderColor = '';
+      ta.style.boxShadow = '';
+      ta.placeholder = 'Write what\'s on your mind...';
+      ta.style.animation = '';
+    }, 1500);
+    ta.focus();
+    return;
+  }
   var entries = getJournalEntries();
   entries.push({
     id: Date.now(),
