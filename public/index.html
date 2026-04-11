@@ -710,7 +710,11 @@
   var user = window.stufloverUser ? window.stufloverUser() : null;
   if(user && user.username){
     var wel = document.getElementById('navWelcome');
-    if(wel) wel.textContent = 'Welcome, ' + user.username;
+    if(wel){
+      var h = new Date().getHours();
+      var greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+      wel.textContent = greet + ', ' + user.username;
+    }
   }
 
   // ─── PARALLAX HERO ────────────────────────────────────────
