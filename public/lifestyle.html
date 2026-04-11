@@ -1133,33 +1133,13 @@
       <div class="section-name-nav serif" id="sectionNameNav"></div>
     </div>
     <div id="shopBar"></div>
-    <!-- FitforIt layout: chat + products -->
-    <div id="fitLayout" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-      <div class="chat-area" style="padding-bottom:14px;flex-shrink:0;">
-        <div class="chat-messages" id="chatMessages" style="max-height:26vh;"></div>
-        <div class="chat-input-row">
-          <textarea class="chat-input" id="chatInput" placeholder="say something..." rows="1"
-            onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
-          <button class="chat-send bc" id="chatSend" onclick="sendChat()">Send</button>
-        </div>
-      </div>
-      <div class="fit-products-header">
-        <div class="fit-products-title bc">Items For You</div>
-        <div id="productStatus" style="font-size:0.72rem;opacity:0.38;"></div>
-      </div>
-      <div class="fit-products-body">
-        <div id="productGrid" class="product-grid" style="display:none;"></div>
-        <div id="productEmpty" class="fit-empty">Ask me to style you — items will show up here</div>
-      </div>
-    </div>
-
-    <!-- All other sections: full chat -->
+    <!-- Chat area for all sections -->
     <div id="normalChat" style="display:none;flex:1;flex-direction:column;" class="chat-area">
-      <div class="chat-messages" id="chatMessages2" style="max-height:calc(100vh - 220px);"></div>
+      <div class="chat-messages" id="chatMessages" style="max-height:calc(100vh - 220px);"></div>
       <div class="chat-input-row">
-        <textarea class="chat-input" id="chatInput2" placeholder="say something..." rows="1"
-          onkeydown="handleChatKey2(event)" oninput="autoResize(this)"></textarea>
-        <button class="chat-send bc" id="chatSend2" onclick="sendChat2()">Send</button>
+        <textarea class="chat-input" id="chatInput" placeholder="say something..." rows="1"
+          onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="chat-send bc" id="chatSend" onclick="sendChat()">Send</button>
       </div>
     </div>
 
@@ -2585,7 +2565,7 @@ function buildPage(){
   document.querySelectorAll('.feed-reveal').forEach(function(el){feedObs.observe(el);});
   // Add emoji pickers to chat inputs
   var chatRow1 = document.querySelector('#normalChat .chat-input-row');
-  if(chatRow1) createEmojiPicker('chatInput2', chatRow1);
+  if(chatRow1) createEmojiPicker('chatInput', chatRow1);
 }
 
 // ─── SCRAPBOOK ───────────────────────────────────────────
@@ -3201,7 +3181,6 @@ function openHub(){
   var aeIcons = getAeIcons();
   var fName = getFloveeName();
 
-  document.getElementById('fitLayout').style.display = 'none';
   document.getElementById('normalChat').style.display = 'none';
   document.getElementById('shopBar').style.display = 'none';
   var hv = document.getElementById('hubView');
@@ -3302,11 +3281,11 @@ function startHubGame(game){
   document.getElementById('cardGameView').classList.remove('active');
   document.getElementById('normalChat').style.display = 'flex';
 
-  var send = document.getElementById('chatSend2');
+  var send = document.getElementById('chatSend');
   if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
-  var input = document.getElementById('chatInput2');
+  var input = document.getElementById('chatInput');
   if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
-  document.getElementById('chatMessages2').innerHTML='';
+  document.getElementById('chatMessages').innerHTML='';
 
   var navEl = document.getElementById('sectionNameNav');
   navEl.innerHTML = fName+' — '+game.name+' <button class="hub-back-btn" onclick="backToHub()">Games</button>';
@@ -3350,7 +3329,7 @@ function backToHub(){
   document.getElementById('dtiView').classList.remove('active');
   if(dtiTimerInterval) clearInterval(dtiTimerInterval);
   if(typeof dti2DDestroy === 'function') dti2DDestroy();
-  document.getElementById('chatMessages2').innerHTML = '';
+  document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('sectionNameNav').textContent = 'FloveeHub';
   // Clear FloveeHub game chat histories
   for(var i = localStorage.length - 1; i >= 0; i--){
@@ -6746,7 +6725,7 @@ function clearChatHistory(){
   if(!currentSection) return;
   chatHistory = [];
   localStorage.removeItem(chatKey(currentSection.id));
-  var msgsId = 'chatMessages2';
+  var msgsId = 'chatMessages';
   document.getElementById(msgsId).innerHTML='';
   var opener = buildOpener(currentSection);
   addMsg(opener,'flovee');
@@ -6779,7 +6758,7 @@ function buildPreviousContext(secId){
 }
 
 function restoreMessages(secId, messages, pal){
-  var msgsId = 'chatMessages2';
+  var msgsId = 'chatMessages';
   var container = document.getElementById(msgsId);
   if(!container) return;
 
@@ -6883,14 +6862,12 @@ function openSection(id){
   const shopBar = document.getElementById('shopBar');
   if(sec.id === 'floverhub'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('profileView').style.display = 'none';
     openHub();
     return;
   } else if(sec.id === 'myprofile'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -6901,7 +6878,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'readit'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -6918,7 +6894,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'fitforit'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -6935,7 +6910,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'floveegroup'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -6950,7 +6924,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'outfitroast'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
     document.getElementById('sectionView').style.height = 'auto';
@@ -6961,7 +6934,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'secretdiary'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
     document.getElementById('sectionView').style.height = 'auto';
@@ -6972,7 +6944,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'studyroom'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
     document.getElementById('sectionView').style.height = 'auto';
@@ -6983,7 +6954,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'aevsgame'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     hideAllViews();
     document.getElementById('sectionView').style.height = 'auto';
@@ -6994,7 +6964,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'stufloverdaily' || sec.id === 'contentwithit'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -7008,7 +6977,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'friends'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -7020,7 +6988,6 @@ function openSection(id){
     return;
   } else if(sec.id === 'myroutine' || sec.id === 'routine'){
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('hubView').style.display = 'none';
     document.getElementById('dtiView').style.display = 'none';
@@ -7032,24 +6999,14 @@ function openSection(id){
     document.getElementById('routineView').classList.add('active');
     openRoutineView();
     return;
-  } else if(sec.id === 'fitforit'){
-    shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
-    document.getElementById('normalChat').style.display = 'flex';
-    const send = document.getElementById('chatSend2');
-    if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
-    const input = document.getElementById('chatInput2');
-    if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
-    document.getElementById('chatMessages2').innerHTML='';
   } else {
     shopBar.style.display = 'none';
-    document.getElementById('fitLayout').style.display = 'none';
     document.getElementById('normalChat').style.display = 'flex';
-    const send = document.getElementById('chatSend2');
+    const send = document.getElementById('chatSend');
     if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
-    const input = document.getElementById('chatInput2');
+    const input = document.getElementById('chatInput');
     if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
-    document.getElementById('chatMessages2').innerHTML='';
+    document.getElementById('chatMessages').innerHTML='';
   }
 
   // Load saved messages or show opener
@@ -7134,8 +7091,6 @@ function goHome(){
   currentSection=null;
   currentHubGame=null;
   document.getElementById('chatMessages').innerHTML='';
-  document.getElementById('chatMessages2').innerHTML='';
-  document.getElementById('fitLayout').style.display='none';
   document.getElementById('normalChat').style.display='none';
   // Re-render scrapbook if cards are missing from DOM but cache exists
   var recB = document.getElementById('recBoard');
@@ -7179,16 +7134,7 @@ function buildOpener(sec){
   return raw.replace('{AE}', resolveAeName()).replace('{MUSIC}', P.music.slice(0,2).map(k=>ARTISTS[k]?.name||k).join(' and ')||'your music');
 }
 
-function handleChatKey2(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat2(); } }
-async function sendChat2(){
-  const input = document.getElementById('chatInput2');
-  if(!input||!currentSection) return;
-  const msg = input.value.trim();
-  if(!msg) return;
-  input.value=''; input.style.height='auto';
-  await runChat(msg, 'chatSend2');
-}
-
+function handleChatKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } }
 async function sendChat(){
   const input = document.getElementById('chatInput');
   if(!input||!currentSection) return;
@@ -7240,7 +7186,7 @@ async function runChat(msg, sendBtnId){
 }
 
 function addMsg(text, roleClass){
-  const msgsId = 'chatMessages2';
+  const msgsId = 'chatMessages';
   const msgs = document.getElementById(msgsId);
   if(!msgs) return null;
   const pal = searchPal;
@@ -7285,9 +7231,6 @@ function getShopSearchUrl(shop) {
   return map[shop] || 'https://www.asos.com/search/?q=';
 }
 
-function handleChatKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); }
-}
 function autoResize(el){
   el.style.height='auto';
   el.style.height=Math.min(el.scrollHeight,120)+'px';
