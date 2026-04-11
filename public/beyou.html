@@ -279,6 +279,7 @@
     <div class="complete-stat" id="completeStat"></div>
     <button class="complete-btn bc" onclick="resetBreathe()">Again</button>
     <button class="complete-btn bc" onclick="switchMode('reflect')" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Reflect</button>
+    <button class="complete-btn bc" onclick="window.location.href='index.html'" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Done</button>
   </div>
 </div>
 
@@ -441,6 +442,7 @@ function finishBreathe(){
   btns[0].style.background = PAL.ac;
   btns[0].style.color = PAL.bg;
   btns[1].style.color = PAL.tx;
+  btns[2].style.color = PAL.tx;
 
   showView('completeView');
   document.getElementById('modeBar').classList.remove('hidden');
