@@ -690,7 +690,8 @@
     .ri-modal-box .ri-err{font-size:0.78rem;min-height:18px;margin-bottom:8px;}
     .ri-modal-btns{display:flex;gap:8px;}
     .ri-modal-btns button{padding:10px 24px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
-    .ri-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.25;font-style:italic;padding:40px;text-align:center;}
+    .ri-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.25;font-style:italic;padding:40px;text-align:center;}
+    .ri-empty.has-error{opacity:0.5;font-style:normal;}
 
     /* ── FLOVEE GROUPS ── */
     #groupsView{display:none;flex:1;flex-direction:column;overflow:hidden;}
@@ -712,7 +713,8 @@
     .fg-card-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;transition:opacity 0.15s;}
     .fg-card-btn:hover{opacity:0.7;}
     .fg-card-btn.joined{background:transparent !important;border:1.5px solid rgba(128,128,128,0.2);}
-    .fg-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;text-align:center;padding:40px;}
+    .fg-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.3;font-style:italic;text-align:center;padding:40px;}
+    .fg-empty.has-error{opacity:0.5;font-style:normal;}
     .fg-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
     .fg-modal.open{display:flex;}
     .fg-modal-box{padding:28px;border-radius:16px;width:90%;max-width:380px;}
@@ -789,7 +791,8 @@
     .sd-card-desc{font-size:0.8rem;opacity:0.5;line-height:1.55;}
     .sd-card-time{font-size:0.62rem;opacity:0.25;margin-top:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;}
     .sd-card.unread{border-left:3px solid;}
-    .sd-loading{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;}
+    .sd-loading{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.3;font-style:italic;}
+    .sd-loading.has-error{opacity:0.5;font-style:normal;}
 
     /* ── CONTENT WITH IT (Pinterest board) ── */
     #contentView{display:none;flex:1;flex-direction:column;overflow:hidden;}
@@ -809,7 +812,10 @@
     .cw-card-likes{display:flex;align-items:center;gap:4px;cursor:pointer;transition:opacity 0.15s;}
     .cw-card-likes:hover{opacity:0.7;}
     .cw-card-likes.liked{opacity:1;color:inherit;}
-    .cw-empty{flex:1;display:flex;align-items:center;justify-content:center;opacity:0.3;font-style:italic;padding:40px;text-align:center;}
+    .cw-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.3;font-style:italic;padding:40px;text-align:center;}
+    .cw-empty.has-error{opacity:0.5;font-style:normal;}
+    .section-retry-btn{margin-top:12px;padding:8px 20px;border:1.5px solid rgba(128,128,128,0.2);border-radius:8px;background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.7;transition:opacity 0.2s;}
+    .section-retry-btn:hover{opacity:1;}
     .cw-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
     .cw-modal.open{display:flex;}
     .cw-modal-box{padding:28px;border-radius:16px;width:90%;max-width:400px;}
@@ -1283,7 +1289,7 @@
         </div>
         <button class="ri-new-btn bc" id="riNewBtn" onclick="openRiModal()">New Post</button>
       </div>
-      <div class="ri-feed" id="riFeed"><div class="ri-empty">Loading...</div></div>
+      <div class="ri-feed" id="riFeed"></div>
       <div class="ri-detail" id="riDetail"></div>
     </div>
     <div class="ri-modal" id="riModal">
@@ -1323,9 +1329,7 @@
         </div>
         <button class="fg-create-btn bc" id="fgCreateBtn" onclick="openFgModal()">Create Group</button>
       </div>
-      <div class="fg-list" id="fgList">
-        <div class="fg-empty">Loading communities...</div>
-      </div>
+      <div class="fg-list" id="fgList"></div>
     </div>
     <div class="fg-modal" id="fgModal">
       <div class="fg-modal-box" id="fgModalBox">
@@ -1352,9 +1356,7 @@
         <div class="sd-title bc">Trending Now</div>
         <button class="sd-refresh bc" id="sdRefreshBtn" onclick="loadDailyFeed()">Refresh</button>
       </div>
-      <div class="sd-feed" id="sdFeed">
-        <div class="sd-loading">Loading what is trending...</div>
-      </div>
+      <div class="sd-feed" id="sdFeed"></div>
     </div>
 
     <!-- ContentWithIt Pinterest Board -->
@@ -1363,9 +1365,7 @@
         <div class="cw-title bc">Inspiration Board</div>
         <button class="cw-post-btn bc" id="cwPostBtn" onclick="openCwModal()">Share a Photo</button>
       </div>
-      <div class="cw-grid" id="cwGrid">
-        <div class="cw-empty">Loading your board...</div>
-      </div>
+      <div class="cw-grid" id="cwGrid"></div>
     </div>
     <div class="cw-modal" id="cwModal">
       <div class="cw-modal-box" id="cwModalBox">
@@ -4605,6 +4605,25 @@ function dtiNextRound(){
   dtiInit();
 }
 
+// ─── FETCH WITH TIMEOUT UTILITY ──────────────────────────
+function fetchWithTimeout(fetchFn, path, opts, timeoutMs){
+  timeoutMs = timeoutMs || 10000;
+  return new Promise(function(resolve, reject){
+    var timedOut = false;
+    var timer = setTimeout(function(){
+      timedOut = true;
+      reject(new Error('Request timed out'));
+    }, timeoutMs);
+    fetchFn(path, opts).then(function(res){
+      clearTimeout(timer);
+      if(!timedOut) resolve(res);
+    }).catch(function(err){
+      clearTimeout(timer);
+      if(!timedOut) reject(err);
+    });
+  });
+}
+
 // ─── READIT (Book community) ─────────────────────────────
 var riTab = 'new';
 
@@ -4647,10 +4666,10 @@ async function loadRiFeed(){
 
   feed.innerHTML = '<div class="ri-empty">Loading...</div>';
   try{
-    var res = await riFetch('/api/books/posts?page=0',{headers:riHeaders()});
+    var res = await fetchWithTimeout(riFetch, '/api/books/posts?page=0',{headers:riHeaders()}, 10000);
     if(!res.ok){
       var errData = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
-      feed.innerHTML = '<div class="ri-empty">'+escHtml(errData.error||'Could not load')+'</div>';
+      feed.innerHTML = '<div class="ri-empty has-error">'+escHtml(errData.error||'Could not load posts')+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
       return;
     }
     var data = await res.json();
@@ -4687,7 +4706,8 @@ async function loadRiFeed(){
       feed.appendChild(card);
     });
   }catch(e){
-    feed.innerHTML = '<div class="ri-empty">Could not load</div>';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load posts — check your connection';
+    feed.innerHTML = '<div class="ri-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
   }
 }
 
@@ -4818,7 +4838,11 @@ async function loadGroups(tab){
 
   list.innerHTML = '<div class="fg-empty">Loading...</div>';
   try{
-    var res = await fgFetch('/api/groups',{headers:fgHeaders()});
+    var res = await fetchWithTimeout(fgFetch, '/api/groups',{headers:fgHeaders()}, 10000);
+    if(!res.ok){
+      list.innerHTML = '<div class="fg-empty has-error">Could not load communities (server error)<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
+      return;
+    }
     var data = await res.json();
     var groups = data.groups||[];
     if(tab==='mine') groups = groups.filter(function(g){return g.joined;});
@@ -4851,7 +4875,8 @@ async function loadGroups(tab){
       list.appendChild(card);
     });
   }catch(e){
-    list.innerHTML = '<div class="fg-empty">Could not load groups</div>';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load communities — check your connection';
+    list.innerHTML = '<div class="fg-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
   }
 }
 
@@ -5169,9 +5194,12 @@ async function loadDailyFeed(){
         feed.innerHTML = '<div class="sd-loading">Retrying... (attempt '+(attempt+1)+'/'+(maxRetries+1)+')</div>';
       }
 
+      var sdController = new AbortController();
+      var sdTimer = setTimeout(function(){ sdController.abort(); }, 10000);
       var res = await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
+        signal: sdController.signal,
         body:JSON.stringify({
           model:'claude-sonnet-4-20250514',
           max_tokens:1200,
@@ -5179,6 +5207,7 @@ async function loadDailyFeed(){
           messages:[{role:'user',content:'My vibe: '+aeName+' aesthetic, age '+age+', into '+music+' and '+interests+'. Give me 8 trending alerts that I need to know about right now.'}]
         })
       });
+      clearTimeout(sdTimer);
 
       if(!res.ok){
         var errData;
@@ -5186,7 +5215,7 @@ async function loadDailyFeed(){
 
         // Rate-limited — don't retry, tell the user to wait
         if(res.status === 429 || (errData && errData._rate_limited)){
-          feed.innerHTML = '<div class="sd-loading">You\'re moving too fast — try again in a minute</div>';
+          feed.innerHTML = '<div class="sd-loading has-error">You\'re moving too fast — try again in a minute<button class="section-retry-btn" onclick="loadDailyFeed()">Retry</button></div>';
           btn.disabled = false;
           btn.textContent = 'Refresh';
           return;
@@ -5282,8 +5311,13 @@ async function openContentView(){
 async function loadCwFeed(){
   var grid = document.getElementById('cwGrid');
   var pal = searchPal;
+  grid.innerHTML = '<div class="cw-empty">Loading your board...</div>';
   try{
-    var res = await cwFetch('/api/posts?page=0',{headers:cwHeaders()});
+    var res = await fetchWithTimeout(cwFetch, '/api/posts?page=0',{headers:cwHeaders()}, 10000);
+    if(!res.ok){
+      grid.innerHTML = '<div class="cw-empty has-error">Could not load board (server error)<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
+      return;
+    }
     var data = await res.json();
     if(!data.posts || data.posts.length === 0){
       grid.innerHTML = '<div class="cw-empty">No posts yet — be the first to share!</div>';
@@ -5312,7 +5346,8 @@ async function loadCwFeed(){
       grid.appendChild(card);
     });
   }catch(e){
-    grid.innerHTML = '<div class="cw-empty">Could not load — check your connection</div>';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load board — check your connection';
+    grid.innerHTML = '<div class="cw-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
   }
 }
 
