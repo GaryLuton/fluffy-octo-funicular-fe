@@ -174,6 +174,16 @@ function loadSavedChat(){
   var saved;
   try { saved = JSON.parse(localStorage.getItem(key)||'null'); } catch(e) { saved=null; }
 
+  // Check if user arrived via "reply" from a flovee post
+  var replyData = null;
+  try {
+    var raw = localStorage.getItem('stuflover_flovee_reply');
+    if (raw) {
+      replyData = JSON.parse(raw);
+      localStorage.removeItem('stuflover_flovee_reply'); // consume it once
+    }
+  } catch(e) {}
+
   var msgs = document.getElementById('floveeMessages');
 
   if(saved && saved.messages && saved.messages.length > 0){
@@ -190,8 +200,17 @@ function loadSavedChat(){
     });
     scrollToBottom();
   } else {
-    // Show empty state with conversation starters
-    showEmptyState();
+    if (replyData && replyData.content) {
+      // User tapped reply on a specific post — seed the chat with it
+      showEmptyState();
+      // Inject the flovee's post as the opening message from the flovee
+      var openingMsg = replyData.content;
+      addMsgToUI(openingMsg, 'flovee', true);
+      chatHistory.push({ role: 'assistant', content: openingMsg, time: Date.now() });
+      saveChat();
+    } else {
+      showEmptyState();
+    }
   }
 }
 
@@ -289,10 +308,19 @@ async function sendMessage(){
     }
 
     var f = currentFlovee;
+
+    // If the first message in chatHistory looks like a flovee post (assistant-first),
+    // include it as context so the flovee knows she already sent it
+    var openingContext = '';
+    if (chatHistory.length > 0 && chatHistory[0].role === 'assistant') {
+      openingContext = '\nContext: you already texted the user this message that they are replying to: "' + chatHistory[0].content + '"\n';
+    }
+
     var characterPrompt = 'You are '+f.name+' — '+f.vibe+'. You are a teen girl who is the user\'s AI best friend on Stuflover, a lifestyle app.\n\n'+
       'Your personality: '+f.vibe+'. Aesthetic: '+f.aesthetic+'.\n'+
       'The user\'s aesthetic: '+aeName+'. '+(mood?'Their mood today: '+mood+'. ':'')+
-      (music?'They listen to: '+music+'. ':'')+'\n\n'+
+      (music?'They listen to: '+music+'. ':'')+
+      openingContext+'\n\n'+
       'RULES:\n'+
       '- Talk like an ACTUAL teen best friend texting — not a therapist, not a chatbot\n'+
       '- Use lowercase, abbreviations, gen-z language NATURALLY (not forced)\n'+
