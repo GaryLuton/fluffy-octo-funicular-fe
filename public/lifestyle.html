@@ -102,7 +102,7 @@
 
     /* VERTICAL FEED */
     .feed-section{margin-bottom:20px;}
-    .feed-heading{font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.25;margin-bottom:10px;}
+    .feed-heading{font-size:0.85rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.55;margin-bottom:10px;}
     .feed-card{padding:22px 24px;border-radius:18px;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);}
     .feed-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.06);}
     .feed-card:active{transform:scale(0.98);}
@@ -6105,7 +6105,7 @@ function buildInstantFeed(){
     if(item.type === 'tot'){
       // This or That — two tappable buttons
       card.innerHTML =
-        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">This or That</div>'+
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.55;color:'+pal.tx+';margin-bottom:8px;">This or That</div>'+
         '<div style="display:flex;gap:8px;">'+
           '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.nextElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[0])+'</button>'+
           '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.previousElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[1])+'</button>'+
@@ -6113,12 +6113,12 @@ function buildInstantFeed(){
 
     } else if(item.type === 'challenge'){
       card.innerHTML =
-        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">Mini Challenge</div>'+
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.55;color:'+pal.tx+';margin-bottom:8px;">Mini Challenge</div>'+
         '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;">'+escHtml(item.text)+'</div>';
 
     } else if(item.type === 'rate'){
       card.innerHTML =
-        '<div style="font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;color:'+pal.tx+';margin-bottom:8px;">Quick Rate</div>'+
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.55;color:'+pal.tx+';margin-bottom:8px;">Quick Rate</div>'+
         '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;margin-bottom:10px;">'+escHtml(item.prompt)+'</div>'+
         '<div style="display:flex;gap:4px;">'+
         [1,2,3,4,5,6,7,8,9,10].map(function(n){
