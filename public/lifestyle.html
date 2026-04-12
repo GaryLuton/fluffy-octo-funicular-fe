@@ -6159,7 +6159,9 @@ function getUserFloveeId(){
   return aeMap[aeKey] || 'remi';
 }
 
+var _floveeTimerInterval = null;
 async function loadFloveePost(){
+  if(_floveeTimerInterval){ clearInterval(_floveeTimerInterval); _floveeTimerInterval = null; }
   var wrap = document.getElementById('floveePostWrap');
   if(!wrap || !searchPal) return;
   var pal = searchPal;
@@ -6210,8 +6212,8 @@ async function loadFloveePost(){
               '</div>'+
               '<div style="text-align:right;">'+
                 '<div style="display:flex;align-items:center;gap:5px;justify-content:flex-end;">'+
-                  '<div style="width:7px;height:7px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
-                  '<div style="font-size:0.62rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
+                  '<div id="floveeTimerDot" style="width:7px;height:7px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
+                  '<div id="floveeTimerLabel" style="font-size:0.62rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
                 '</div>'+
               '</div>'+
             '</div>'+
@@ -6220,7 +6222,7 @@ async function loadFloveePost(){
           '</div>'+
           // Timer bar
           '<div style="height:3px;background:'+pal.tx+'06;">'+
-            '<div style="height:100%;width:'+timerWidth+'%;background:'+fd.gradient+';border-radius:0 2px 2px 0;transition:width 1s;"></div>'+
+            '<div id="floveeTimerFill" style="height:100%;width:'+timerWidth+'%;background:'+fd.gradient+';border-radius:0 2px 2px 0;transition:width 1s;"></div>'+
           '</div>'+
           // Bottom action bar
           '<div style="padding:14px 20px;background:'+pal.tx+'03;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'+
@@ -6239,6 +6241,36 @@ async function loadFloveePost(){
 
       // Store share text for the share button
       wrap._shareText = shareText;
+
+      // Live countdown timer — update every 30s, reload when expired
+      var _floveeExpiry = exp.getTime();
+      _floveeTimerInterval = setInterval(function(){
+        var now = Date.now();
+        var msLeft = _floveeExpiry - now;
+        if(msLeft <= 0){
+          clearInterval(_floveeTimerInterval);
+          _floveeTimerInterval = null;
+          loadFloveePost();
+          return;
+        }
+        var h = Math.max(0, Math.round(msLeft / 3600000));
+        var m = Math.max(0, Math.round(msLeft / 60000));
+        var label = h > 6 ? h+'h left' : h > 1 ? h+'h left' : m+'m left';
+        var dot = document.getElementById('floveeTimerDot');
+        var lbl = document.getElementById('floveeTimerLabel');
+        var fill = document.getElementById('floveeTimerFill');
+        if(lbl) lbl.textContent = label;
+        if(dot){
+          dot.style.background = h<=1?'#ef5350':h<=3?'#ff9800':'#4caf50';
+          dot.style.animation = h<=1?'pulse 1s infinite':'';
+        }
+        if(lbl){
+          lbl.style.animation = h<=1?'pulse 1.5s ease-in-out infinite':'';
+        }
+        if(fill){
+          fill.style.width = Math.max(5, Math.min(100, (m / (18*60)) * 100))+'%';
+        }
+      }, 30000);
 
     } else if(data.status === 'missed'){
       var mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
