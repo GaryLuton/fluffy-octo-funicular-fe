@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Your Flovee — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     input,button,select,textarea{font-size:16px;}
-    body{font-family:'Space Grotesk',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;transition:background 0.6s,color 0.6s;}
+    body{font-family:'Space Grotesk',sans-serif;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;transition:background 0.6s,color 0.6s;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     /* NAV */
@@ -38,7 +38,7 @@
     .fmsg-date{text-align:center;font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.2;padding:12px 0 4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
 
     /* INPUT */
-    .flovee-input-area{padding:12px 20px 20px;border-top:1px solid rgba(128,128,128,0.06);flex-shrink:0;display:flex;gap:10px;align-items:flex-end;}
+    .flovee-input-area{padding:12px 20px calc(20px + env(safe-area-inset-bottom, 0px));border-top:1px solid rgba(128,128,128,0.06);flex-shrink:0;display:flex;gap:10px;align-items:flex-end;position:sticky;bottom:0;z-index:10;}
     .flovee-textarea{flex:1;padding:12px 16px;border-radius:20px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Space Grotesk',sans-serif;font-size:0.95rem;color:inherit;outline:none;resize:none;min-height:46px;max-height:120px;line-height:1.5;transition:border-color 0.2s;}
     .flovee-textarea:focus{border-color:rgba(128,128,128,0.3);}
     .flovee-textarea::placeholder{opacity:0.3;}
@@ -63,7 +63,7 @@
     .flovee-clear:hover{opacity:0.7;}
 
     @media(max-width:480px){
-      .flovee-input-area{padding:10px 14px 16px;}
+      .flovee-input-area{padding:10px 14px calc(16px + env(safe-area-inset-bottom, 0px));}
       .flovee-messages{padding:12px 14px;}
       .fmsg{max-width:88%;padding:12px 16px;font-size:0.92rem;}
       .flovee-send{padding:12px 16px;font-size:0.78rem;}
@@ -158,7 +158,9 @@ function init(){
 
   // Header border
   header.style.borderColor = currentFlovee.tx+'08';
-  document.querySelector('.flovee-input-area').style.borderColor = currentFlovee.tx+'08';
+  var inputArea = document.querySelector('.flovee-input-area');
+  inputArea.style.borderColor = currentFlovee.tx+'08';
+  inputArea.style.background = currentFlovee.bg;
 
   // Scrollbar
   var style = document.createElement('style');
@@ -585,6 +587,17 @@ function clearChat(){
     }).catch(function(){});
   }
 })();
+
+// Keep chat bar visible when mobile keyboard opens
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', function(){
+    document.body.style.height = window.visualViewport.height + 'px';
+    scrollToBottom();
+  });
+  window.visualViewport.addEventListener('scroll', function(){
+    document.body.style.height = window.visualViewport.height + 'px';
+  });
+}
 
 init();
 
