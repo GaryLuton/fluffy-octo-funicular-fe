@@ -109,6 +109,23 @@
     bar.style.width = pct + '%';
   });
 
+  // 17. Close mobile nav menu on navigation
+  function closeNavMenu(){
+    document.querySelectorAll('.nav-links,nav ul').forEach(function(el){
+      el.classList.remove('open');
+    });
+  }
+  // Close when any link inside the nav menu is clicked
+  document.addEventListener('click', function(e){
+    if(e.target.closest('.nav-links a,.nav-links .nav-link,nav ul a')){
+      closeNavMenu();
+    }
+  });
+  // Close when page is restored from bfcache
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted) closeNavMenu();
+  });
+
   // CSS for animations
   var css = document.createElement('style');
   css.textContent = '@keyframes slideInLeft{from{transform:translateX(-100%);opacity:0;}to{transform:translateX(0);opacity:1;}}';
