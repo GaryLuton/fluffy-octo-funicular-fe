@@ -6322,6 +6322,14 @@ function reactFlovee(name,postId,btn){
       s.style.transform = 'scale(1)';
     }
   });
+  // Navigate to flovee chat with the emoji reaction as context
+  var wrap = document.getElementById('floveePostWrap');
+  if(wrap && wrap._replyData){
+    var replyData = JSON.parse(JSON.stringify(wrap._replyData));
+    replyData.reaction = name;
+    localStorage.setItem('stuflover_flovee_reply', JSON.stringify(replyData));
+  }
+  setTimeout(function(){ window.location.href = 'flovee.html'; }, 350);
 }
 
 function shareFloveePost(){

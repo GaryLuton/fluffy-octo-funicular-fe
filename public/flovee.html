@@ -199,15 +199,35 @@ function loadSavedChat(){
       addMsgToUI(m.content, m.role === 'user' ? 'user' : 'flovee', false);
     });
     scrollToBottom();
+    // If user reacted with an emoji from a flovee post, append it to existing chat
+    if (replyData && replyData.reaction) {
+      var reactionMap = {love:'❤️', crying:'😭', fire:'🔥', dead:'💀'};
+      var reactionEmoji = reactionMap[replyData.reaction] || replyData.reaction;
+      addMsgToUI(reactionEmoji, 'user', true);
+      chatHistory.push({ role: 'user', content: reactionEmoji, time: Date.now() });
+      saveChat();
+      triggerReactionReply(reactionEmoji);
+    }
   } else {
     if (replyData && replyData.content) {
-      // User tapped reply on a specific post — seed the chat with it
+      // User tapped reply or reacted on a specific post — seed the chat with it
       showEmptyState();
       // Inject the flovee's post as the opening message from the flovee
       var openingMsg = replyData.content;
       addMsgToUI(openingMsg, 'flovee', true);
       chatHistory.push({ role: 'assistant', content: openingMsg, time: Date.now() });
-      saveChat();
+      // If user reacted with an emoji, send that as their first message
+      if (replyData.reaction) {
+        var reactionMap = {love:'❤️', crying:'😭', fire:'🔥', dead:'💀'};
+        var reactionEmoji = reactionMap[replyData.reaction] || replyData.reaction;
+        addMsgToUI(reactionEmoji, 'user', true);
+        chatHistory.push({ role: 'user', content: reactionEmoji, time: Date.now() });
+        saveChat();
+        // Trigger the flovee to respond to the reaction
+        triggerReactionReply(reactionEmoji);
+      } else {
+        saveChat();
+      }
     } else {
       showEmptyState();
     }
@@ -367,6 +387,87 @@ async function sendMessage(){
     saveChat();
 
     // Increment client-side rate limit counter
+    Safeguards.incrementRateLimit();
+
+  }catch(e){
+    if(typingEl) typingEl.remove();
+    addMsgToUI('Something went wrong — please try again in a moment! \u{1F60A}', 'flovee', true);
+  }
+
+  sendBtn.disabled = false;
+  document.getElementById('chatInput').focus();
+}
+
+async function triggerReactionReply(reactionEmoji){
+  var sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+
+  var typingEl = addMsgToUI(currentFlovee.name+' is typing...', 'flovee typing', true);
+
+  try{
+    var profile;
+    try { profile = JSON.parse(localStorage.getItem('stuflover_profile')||'null'); } catch(e) { profile=null; }
+
+    var aeName = 'softgirl';
+    var music = '';
+    var mood = '';
+    if(profile){
+      var sorted = Object.entries(profile.aesthetics||{}).sort(function(a,b){return b[1]-a[1];});
+      if(sorted.length > 0) aeName = sorted[0][0];
+      mood = profile.moodToday || '';
+      music = (profile.music||[]).join(', ');
+    }
+
+    var f = currentFlovee;
+
+    var openingContext = '';
+    if (chatHistory.length > 0 && chatHistory[0].role === 'assistant') {
+      openingContext = '\nContext: you already texted the user this message: "' + chatHistory[0].content + '". They reacted with ' + reactionEmoji + '. Respond naturally to their reaction — acknowledge what they felt about your message.\n';
+    }
+
+    var characterPrompt = 'You are '+f.name+' — '+f.vibe+'. You are a teen girl who is the user\'s AI best friend on Stuflover, a lifestyle app.\n\n'+
+      'Your personality: '+f.vibe+'. Aesthetic: '+f.aesthetic+'.\n'+
+      'The user\'s aesthetic: '+aeName+'. '+(mood?'Their mood today: '+mood+'. ':'')+
+      (music?'They listen to: '+music+'. ':'')+
+      openingContext+'\n\n'+
+      'RULES:\n'+
+      '- Talk like an ACTUAL teen best friend texting — not a therapist, not a chatbot\n'+
+      '- Use lowercase, abbreviations, gen-z language NATURALLY (not forced)\n'+
+      '- Be warm, specific, and real\n'+
+      '- Reference real things (songs, artists, brands, shows, trends)\n'+
+      '- Keep responses 1-4 sentences usually. Longer only if they ask something deep\n'+
+      '- NEVER say "as an AI" or "I\'m here for you" or therapist-speak\n'+
+      '- Have OPINIONS. Agree, disagree, tease, joke, be real\n'+
+      '- Remember what they said earlier in the conversation and reference it\n'+
+      '- If they seem down, be genuinely supportive but in a best friend way, not a counselor way\n'+
+      '- You can use emoji occasionally but don\'t overdo it';
+
+    var systemPrompt = Safeguards.wrapSystemPrompt(characterPrompt);
+
+    var trimmedHistory = Safeguards.trimConversationHistory(chatHistory);
+    var apiMessages = trimmedHistory.map(function(m){
+      return {role: m.role === 'user' ? 'user' : 'assistant', content: m.content};
+    });
+
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:systemPrompt,
+        messages:apiMessages
+      })
+    });
+    var data = await res.json();
+    var reply = data.content && data.content[0] ? data.content[0].text : 'hmm try that again?';
+
+    if(typingEl) typingEl.remove();
+
+    addMsgToUI(reply, 'flovee', true);
+    chatHistory.push({role:'assistant', content:reply, time:Date.now()});
+    saveChat();
+
     Safeguards.incrementRateLimit();
 
   }catch(e){
