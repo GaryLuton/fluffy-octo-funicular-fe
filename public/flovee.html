@@ -588,17 +588,6 @@ function clearChat(){
   }
 })();
 
-// Keep chat bar visible when mobile keyboard opens
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize', function(){
-    document.body.style.height = window.visualViewport.height + 'px';
-    scrollToBottom();
-  });
-  window.visualViewport.addEventListener('scroll', function(){
-    document.body.style.height = window.visualViewport.height + 'px';
-  });
-}
-
 init();
 
 </script>
