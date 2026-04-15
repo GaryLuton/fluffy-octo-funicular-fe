@@ -77,6 +77,25 @@
     .g-err{font-size:0.75rem;color:#c44;min-height:16px;margin-bottom:6px;}
     .g-btn{width:100%;padding:12px;border:none;border-radius:10px;background:#8c64c8;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 
+    /* DRAW CANVAS */
+    .draw-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .draw-toolbar{display:flex;align-items:center;gap:6px;padding:10px 16px;border-bottom:1px solid rgba(42,26,20,0.06);flex-wrap:wrap;flex-shrink:0;}
+    .draw-btn{width:36px;height:36px;border-radius:10px;border:2px solid transparent;background:rgba(42,26,20,0.04);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:#2a1a14;}
+    .draw-btn:hover{background:rgba(42,26,20,0.08);}
+    .draw-btn.on{border-color:#8c64c8;background:rgba(140,100,200,0.1);}
+    .draw-sep{width:1px;height:24px;background:rgba(42,26,20,0.06);margin:0 4px;}
+    .draw-color{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:all 0.15s;}
+    .draw-color:hover{transform:scale(1.15);}
+    .draw-color.on{border-color:#2a1a14;transform:scale(1.15);}
+    .draw-size{width:60px;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(42,26,20,0.1);outline:none;cursor:pointer;}
+    .draw-size::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#8c64c8;cursor:pointer;}
+    .draw-canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;background:repeating-conic-gradient(rgba(42,26,20,0.03) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px;overflow:auto;padding:16px;}
+    .draw-canvas-wrap canvas{border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.08);cursor:crosshair;touch-action:none;}
+    .draw-bottom{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid rgba(42,26,20,0.06);flex-shrink:0;}
+    .draw-bottom-btn{padding:8px 18px;border-radius:8px;border:1px solid rgba(42,26,20,0.1);background:transparent;color:#2a1a14;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.15s;}
+    .draw-bottom-btn:hover{background:rgba(42,26,20,0.04);}
+    .draw-bottom-btn.primary{background:#8c64c8;color:white;border-color:#8c64c8;}
+
     @media(max-width:640px){
       .sidebar{position:fixed;left:-260px;top:0;bottom:0;z-index:300;width:250px;transition:left 0.25s ease;box-shadow:4px 0 20px rgba(0,0,0,0.1);background:#faf5f2;}
       .sidebar.open{left:0;}.sidebar-overlay.open{display:block;}.mobile-menu-btn{display:block;}
@@ -159,6 +178,11 @@
       <div class="dot" style="background:#4caf50;"></div> Tasks
     </div>
 
+    <div class="sidebar-section" style="margin-top:12px;">studio</div>
+    <div class="sidebar-item" onclick="openChannel('draw')" id="ch_draw">
+      <div class="dot" style="background:#e040fb;"></div> Draw
+    </div>
+
     <div class="sidebar-section" style="margin-top:12px;">ai employees</div>
     <div class="sidebar-item" onclick="openChannel('suki')" id="ch_suki">
       <div class="avatar" style="background:linear-gradient(135deg,#f48fb1,#f06292);">🎨</div>
@@ -199,6 +223,36 @@
       <div class="chat-header-working" id="chWorking" style="display:none;">working...</div>
     </div>
     <div class="msgs" id="chatMsgs"></div>
+
+    <!-- DRAWING CANVAS (hidden until Draw channel selected) -->
+    <div class="draw-wrap" id="drawWrap" style="display:none;">
+      <div class="draw-toolbar" id="drawToolbar">
+        <button class="draw-btn on" onclick="setTool('pen',this)" title="Pen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
+        <button class="draw-btn" onclick="setTool('eraser',this)" title="Eraser"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l9-9 8 8-4 4z"/><path d="M6 11l4 4"/></svg></button>
+        <button class="draw-btn" onclick="setTool('line',this)" title="Line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg></button>
+        <button class="draw-btn" onclick="setTool('rect',this)" title="Rectangle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
+        <button class="draw-btn" onclick="setTool('circle',this)" title="Circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></button>
+        <div class="draw-sep"></div>
+        <input type="range" class="draw-size" min="1" max="30" value="3" oninput="drawSize=+this.value" title="Brush size"/>
+        <div class="draw-sep"></div>
+        <div id="drawColors" style="display:flex;gap:4px;"></div>
+        <input type="color" id="drawCustomColor" value="#2a1a14" onchange="pickColor(this.value)" style="width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;padding:0;background:transparent;"/>
+        <div style="flex:1;"></div>
+        <button class="draw-btn" onclick="undoDraw()" title="Undo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg></button>
+        <button class="draw-btn" onclick="clearCanvas()" title="Clear"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="draw-canvas-wrap" id="drawCanvasWrap">
+        <canvas id="drawCanvas" width="1200" height="800"></canvas>
+      </div>
+      <div class="draw-bottom">
+        <button class="draw-bottom-btn" onclick="saveDrawing()">Save to Gallery</button>
+        <button class="draw-bottom-btn" onclick="exportDrawing()">Download PNG</button>
+        <button class="draw-bottom-btn primary" onclick="shareDrawing()">Share in Chat</button>
+        <div style="flex:1;"></div>
+        <span style="font-size:0.68rem;opacity:0.2;" id="canvasSize">1200 x 800</span>
+      </div>
+    </div>
+
     <div class="input-row" id="inputRow">
       <label style="padding:8px;cursor:pointer;opacity:0.3;flex-shrink:0;" title="Share image">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -345,13 +399,26 @@ function openChannel(ch){
     return;
   }
 
-  var info=channelInfo[ch]||channelInfo.general;
-  document.getElementById('chAvatar').style.background=info.bg;
-  document.getElementById('chAvatar').innerHTML=info.avatar;
-  document.getElementById('chName').textContent=info.name;
-  document.getElementById('chDesc').textContent=info.desc;
+  // Hide/show draw canvas
+  document.getElementById('drawWrap').style.display='none';
+  document.getElementById('chatMsgs').style.display='flex';
 
-  if(ch==='tasks'){
+  var info=channelInfo[ch]||channelInfo.general;
+  document.getElementById('chAvatar').style.background=info.bg||'#e06080';
+  document.getElementById('chAvatar').innerHTML=info.avatar||'💬';
+  document.getElementById('chName').textContent=info.name||ch;
+  document.getElementById('chDesc').textContent=info.desc||'';
+
+  if(ch==='draw'){
+    document.getElementById('chAvatar').style.background='#e040fb';
+    document.getElementById('chAvatar').innerHTML='✏️';
+    document.getElementById('chName').textContent='Draw';
+    document.getElementById('chDesc').textContent='digital canvas';
+    inputRow.style.display='none';
+    document.getElementById('chatMsgs').style.display='none';
+    document.getElementById('drawWrap').style.display='flex';
+    if(!canvasInited){initCanvas();canvasInited=true;}
+  } else if(ch==='tasks'){
     inputRow.style.display='none';
     loadTasks();
   } else {
@@ -515,6 +582,180 @@ async function loadTeamSidebar(){
 }
 async function grantAccess(){var email=document.getElementById('addEmail').value.trim();if(!email)return;await api('/api/collab/grant',{method:'POST',body:JSON.stringify({email:email})});document.getElementById('addEmail').value='';loadTeamSidebar();}
 async function removeMember(id){if(!confirm('Remove?'))return;await api('/api/collab/revoke/'+id,{method:'DELETE'});loadTeamSidebar();}
+
+// ─── DRAWING CANVAS ───
+var drawCanvas, drawCtx, drawTool='pen', drawColor='#2a1a14', drawSize=3;
+var isDrawing=false, drawHistory=[], drawHistoryIdx=-1;
+var shapeStart=null;
+
+var DRAW_COLORS=['#2a1a14','#e53935','#ff9800','#ffeb3b','#4caf50','#2196f3','#9c27b0','#e91e63','#795548','#607d8b','#ffffff'];
+
+function initCanvas(){
+  drawCanvas=document.getElementById('drawCanvas');
+  drawCtx=drawCanvas.getContext('2d');
+  drawCtx.fillStyle='#ffffff';
+  drawCtx.fillRect(0,0,drawCanvas.width,drawCanvas.height);
+  saveHistory();
+
+  // Color swatches
+  var cd=document.getElementById('drawColors');
+  cd.innerHTML=DRAW_COLORS.map(function(c,i){
+    return '<div class="draw-color'+(i===0?' on':'')+'" style="background:'+c+';'+(c==='#ffffff'?'border:2px solid rgba(42,26,20,0.15);':'border:2px solid transparent;')+'" onclick="pickColor(\''+c+'\',this)"></div>';
+  }).join('');
+
+  // Load saved drawing
+  var saved=localStorage.getItem('dd_canvas');
+  if(saved){
+    var img=new Image();
+    img.onload=function(){drawCtx.drawImage(img,0,0);saveHistory();};
+    img.src=saved;
+  }
+
+  // Events
+  drawCanvas.addEventListener('pointerdown',drawStart);
+  drawCanvas.addEventListener('pointermove',drawMove);
+  drawCanvas.addEventListener('pointerup',drawEnd);
+  drawCanvas.addEventListener('pointerleave',drawEnd);
+}
+
+function setTool(tool,btn){
+  drawTool=tool;
+  document.querySelectorAll('.draw-toolbar .draw-btn').forEach(function(b){b.classList.remove('on');});
+  if(btn) btn.classList.add('on');
+}
+
+function pickColor(c,el){
+  drawColor=c;
+  document.getElementById('drawCustomColor').value=c;
+  document.querySelectorAll('.draw-color').forEach(function(d){d.classList.remove('on');});
+  if(el) el.classList.add('on');
+}
+
+function getPos(e){
+  var r=drawCanvas.getBoundingClientRect();
+  var sx=drawCanvas.width/r.width;
+  var sy=drawCanvas.height/r.height;
+  return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy};
+}
+
+function drawStart(e){
+  e.preventDefault();
+  isDrawing=true;
+  var p=getPos(e);
+  if(drawTool==='pen'||drawTool==='eraser'){
+    drawCtx.beginPath();
+    drawCtx.moveTo(p.x,p.y);
+    drawCtx.lineCap='round';
+    drawCtx.lineJoin='round';
+    drawCtx.lineWidth=drawTool==='eraser'?drawSize*4:drawSize;
+    drawCtx.strokeStyle=drawTool==='eraser'?'#ffffff':drawColor;
+    drawCtx.globalCompositeOperation=drawTool==='eraser'?'destination-out':'source-over';
+    // Draw a dot for single clicks
+    drawCtx.lineTo(p.x+0.1,p.y+0.1);
+    drawCtx.stroke();
+  } else {
+    shapeStart=p;
+    // Save snapshot for shape preview
+    drawHistory.push(drawCanvas.toDataURL());
+    drawHistoryIdx=drawHistory.length-1;
+  }
+}
+
+function drawMove(e){
+  if(!isDrawing)return;
+  e.preventDefault();
+  var p=getPos(e);
+  if(drawTool==='pen'||drawTool==='eraser'){
+    drawCtx.lineTo(p.x,p.y);
+    drawCtx.stroke();
+  } else if(shapeStart){
+    // Restore snapshot and preview shape
+    var img=new Image();
+    var dataUrl=drawHistory[drawHistoryIdx];
+    img.onload=function(){
+      drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
+      drawCtx.drawImage(img,0,0);
+      drawCtx.strokeStyle=drawColor;
+      drawCtx.lineWidth=drawSize;
+      drawCtx.lineCap='round';
+      drawCtx.beginPath();
+      if(drawTool==='line'){
+        drawCtx.moveTo(shapeStart.x,shapeStart.y);
+        drawCtx.lineTo(p.x,p.y);
+      } else if(drawTool==='rect'){
+        drawCtx.rect(shapeStart.x,shapeStart.y,p.x-shapeStart.x,p.y-shapeStart.y);
+      } else if(drawTool==='circle'){
+        var rx=Math.abs(p.x-shapeStart.x)/2;
+        var ry=Math.abs(p.y-shapeStart.y)/2;
+        var cx=shapeStart.x+((p.x-shapeStart.x)/2);
+        var cy=shapeStart.y+((p.y-shapeStart.y)/2);
+        drawCtx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+      }
+      drawCtx.stroke();
+    };
+    img.src=dataUrl;
+  }
+}
+
+function drawEnd(e){
+  if(!isDrawing)return;
+  isDrawing=false;
+  drawCtx.globalCompositeOperation='source-over';
+  shapeStart=null;
+  saveHistory();
+  // Auto-save
+  localStorage.setItem('dd_canvas',drawCanvas.toDataURL());
+}
+
+function saveHistory(){
+  // Trim future history on new action
+  if(drawHistoryIdx<drawHistory.length-1){
+    drawHistory=drawHistory.slice(0,drawHistoryIdx+1);
+  }
+  drawHistory.push(drawCanvas.toDataURL());
+  if(drawHistory.length>30) drawHistory.shift();
+  drawHistoryIdx=drawHistory.length-1;
+}
+
+function undoDraw(){
+  if(drawHistoryIdx<=0)return;
+  drawHistoryIdx--;
+  var img=new Image();
+  img.onload=function(){drawCtx.clearRect(0,0,drawCanvas.width,drawCanvas.height);drawCtx.drawImage(img,0,0);localStorage.setItem('dd_canvas',drawCanvas.toDataURL());};
+  img.src=drawHistory[drawHistoryIdx];
+}
+
+function clearCanvas(){
+  if(!confirm('Clear the canvas?'))return;
+  drawCtx.fillStyle='#ffffff';
+  drawCtx.fillRect(0,0,drawCanvas.width,drawCanvas.height);
+  saveHistory();
+  localStorage.setItem('dd_canvas',drawCanvas.toDataURL());
+}
+
+function exportDrawing(){
+  var link=document.createElement('a');
+  link.download='digitaldraw-'+Date.now()+'.png';
+  link.href=drawCanvas.toDataURL('image/png');
+  link.click();
+}
+
+function saveDrawing(){
+  var gallery=JSON.parse(localStorage.getItem('dd_gallery')||'[]');
+  gallery.unshift({data:drawCanvas.toDataURL('image/jpeg',0.8),date:Date.now(),by:myUsername});
+  if(gallery.length>20) gallery=gallery.slice(0,20);
+  localStorage.setItem('dd_gallery',JSON.stringify(gallery));
+  var btn=event.target;btn.textContent='Saved!';setTimeout(function(){btn.textContent='Save to Gallery';},1200);
+}
+
+function shareDrawing(){
+  var dataUrl=drawCanvas.toDataURL('image/jpeg',0.8);
+  api('/api/collab/messages',{method:'POST',body:JSON.stringify({text:dataUrl,channel:'art'})}).then(function(){
+    var btn=event.target;btn.textContent='Shared!';setTimeout(function(){btn.textContent='Share in Chat';},1200);
+  });
+}
+
+var canvasInited=false;
 
 if(sessionStorage.getItem('collab_auth')==='1') init();
 </script></body></html>
