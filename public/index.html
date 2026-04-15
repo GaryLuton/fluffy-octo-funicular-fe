@@ -326,6 +326,83 @@
   </div>
 </div>
 
+<!-- CREATOR POSTS FEED -->
+<style>
+  .creator-feed{padding:60px 40px;background:linear-gradient(135deg,var(--peach) 0%,var(--pink-mid) 50%,var(--pink-light) 100%);position:relative;overflow:hidden;}
+  .creator-feed::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(200,120,96,0.1),transparent 70%);}
+  .creator-feed-header{text-align:center;margin-bottom:32px;position:relative;z-index:1;}
+  .creator-feed-header .tag{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;color:var(--terracotta);margin-bottom:6px;}
+  .creator-feed-header h2{font-size:clamp(2rem,6vw,3.5rem);letter-spacing:-0.5px;}
+  .creator-feed-header p{font-size:0.92rem;color:rgba(42,26,20,0.5);margin-top:8px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.7;}
+  .creator-feed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;max-width:1000px;margin:0 auto;position:relative;z-index:1;}
+  .cf-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 20px rgba(30,12,6,0.08);border:1px solid rgba(42,26,20,0.04);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer;text-decoration:none;color:var(--brown);}
+  .cf-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(30,12,6,0.15);}
+  .cf-card-cover{width:100%;height:180px;object-fit:cover;display:block;}
+  .cf-card-body{padding:20px 22px 24px;}
+  .cf-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+  .cf-cat{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(200,120,96,0.12);color:var(--terracotta);}
+  .cf-cat.cf-pinned{background:rgba(200,120,96,0.25);}
+  .cf-date{font-size:0.7rem;color:rgba(42,26,20,0.3);}
+  .cf-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.3rem;letter-spacing:0.5px;line-height:1.2;margin-bottom:6px;}
+  .cf-excerpt{font-size:0.85rem;color:rgba(42,26,20,0.5);line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .cf-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid rgba(42,26,20,0.06);}
+  .cf-like-btn{background:none;border:none;cursor:pointer;font-size:0.8rem;color:var(--terracotta);font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:20px;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+  .cf-like-btn:hover{background:rgba(200,120,96,0.1);}
+  .cf-like-btn.liked{color:white;background:var(--terracotta);}
+  .cf-like-count{font-size:0.75rem;color:rgba(42,26,20,0.35);}
+  .cf-empty{text-align:center;padding:40px;color:rgba(42,26,20,0.35);grid-column:1/-1;}
+  .cf-empty span{font-size:2.5rem;display:block;margin-bottom:10px;}
+  @media(max-width:700px){.creator-feed-grid{grid-template-columns:1fr;max-width:440px;} .creator-feed{padding:40px 20px;}}
+
+  /* Post detail modal */
+  .cf-detail-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(42,26,20,0.5);backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding:60px 20px 20px;overflow-y:auto;}
+  .cf-detail-overlay.open{display:flex;}
+  .cf-detail{background:white;border-radius:24px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(30,12,6,0.25);animation:cfIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;overflow:hidden;}
+  @keyframes cfIn{from{opacity:0;transform:translateY(30px) scale(0.96);}to{opacity:1;transform:none;}}
+  .cf-detail-cover{width:100%;max-height:300px;object-fit:cover;display:block;}
+  .cf-detail-inner{padding:32px;}
+  .cf-detail-inner .cf-cat{margin-bottom:12px;display:inline-block;}
+  .cf-detail-inner h2{font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:6px;text-transform:none;line-height:1.15;}
+  .cf-detail-date{font-size:0.78rem;color:rgba(42,26,20,0.3);margin-bottom:20px;display:block;}
+  .cf-detail-body{font-size:1rem;line-height:1.85;color:rgba(42,26,20,0.7);white-space:pre-wrap;word-wrap:break-word;}
+  .cf-detail-close{position:absolute;top:16px;right:16px;width:36px;height:36px;background:rgba(42,26,20,0.7);color:white;border:none;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+  .cf-detail-close:hover{background:rgba(42,26,20,0.9);}
+  .cf-detail-footer{display:flex;align-items:center;gap:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(42,26,20,0.08);}
+  @media(max-width:500px){.cf-detail-inner{padding:20px;}}
+</style>
+
+<div class="creator-feed" id="creatorFeed">
+  <div class="creator-feed-header reveal sl-reveal">
+    <div class="tag">From the Creator</div>
+    <h2>Chloe's Corner</h2>
+    <p>Updates, thoughts, and behind-the-scenes from the person who built this whole thing.</p>
+  </div>
+  <div class="creator-feed-grid" id="creatorFeedGrid">
+    <div class="cf-empty" id="cfEmpty" style="display:none;">
+      <span>&#128140;</span>
+      <p>No posts yet — stay tuned!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Creator Post Detail Modal -->
+<div class="cf-detail-overlay" id="cfDetailOverlay" onclick="if(event.target===this)closeCfDetail()">
+  <div class="cf-detail" style="position:relative;">
+    <button class="cf-detail-close" onclick="closeCfDetail()">&#10005;</button>
+    <img id="cfDetailCover" class="cf-detail-cover" src="" alt="" style="display:none;"/>
+    <div class="cf-detail-inner">
+      <span class="cf-cat" id="cfDetailCat"></span>
+      <h2 id="cfDetailTitle"></h2>
+      <span class="cf-detail-date" id="cfDetailDate"></span>
+      <div class="cf-detail-body" id="cfDetailBody"></div>
+      <div class="cf-detail-footer">
+        <button class="cf-like-btn" id="cfDetailLikeBtn" onclick="toggleCfDetailLike()">&#9825; Like</button>
+        <span class="cf-like-count" id="cfDetailLikeCount"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="viral" id="viral" style="padding:60px;">
   <h2 class="reveal sl-reveal" style="margin-bottom:12px;">Your Vibe, Your Feed</h2>
   <p class="reveal sl-reveal" style="margin-bottom:0;">Add your favourite outfit and beauty videos. We will find more that match your style.</p>
@@ -732,6 +809,117 @@
         });
       }
     }, {passive: true});
+  })();
+
+  // ─── CREATOR POSTS FEED ──────────────────────────────────
+  (function(){
+    var API_BASE = window.STUFLOVER_API_URL || '';
+    var token = localStorage.getItem('stuflover_token') || '';
+    if (!token) return;
+    var cfPosts = [];
+    var cfLikedIds = [];
+    var cfDetailPost = null;
+
+    function cfHeaders() {
+      return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+    }
+
+    function cfEsc(s) {
+      if (!s) return '';
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function loadCreatorFeed() {
+      fetch(API_BASE + '/api/creator/posts?limit=6', { headers: cfHeaders() })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          cfPosts = data.posts || [];
+          cfLikedIds = data.likedIds || [];
+          renderCreatorFeed();
+        }).catch(function() {});
+    }
+
+    function renderCreatorFeed() {
+      var grid = document.getElementById('creatorFeedGrid');
+      var empty = document.getElementById('cfEmpty');
+      var section = document.getElementById('creatorFeed');
+      if (cfPosts.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = 'block';
+      empty.style.display = 'none';
+      grid.innerHTML = cfPosts.map(function(p) {
+        var date = new Date(p.created_at + 'Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        var excerpt = p.body.length > 150 ? p.body.substring(0, 150) + '...' : p.body;
+        var liked = cfLikedIds.indexOf(p.id) !== -1;
+        var coverHtml = p.cover_image
+          ? '<img class="cf-card-cover" src="' + cfEsc(p.cover_image) + '" alt="" onerror="this.style.display=\'none\'"/>'
+          : '';
+        var pinBadge = p.pinned ? '<span class="cf-cat cf-pinned">Pinned</span>' : '';
+        return '<div class="cf-card" onclick="openCfDetail(' + p.id + ')">' +
+          coverHtml +
+          '<div class="cf-card-body">' +
+            '<div class="cf-card-meta">' +
+              pinBadge +
+              '<span class="cf-cat">' + cfEsc(p.category) + '</span>' +
+              '<span class="cf-date">' + date + '</span>' +
+            '</div>' +
+            '<div class="cf-title">' + cfEsc(p.title) + '</div>' +
+            '<div class="cf-excerpt">' + cfEsc(excerpt) + '</div>' +
+            '<div class="cf-footer">' +
+              '<button class="cf-like-btn' + (liked ? ' liked' : '') + '" onclick="event.stopPropagation();toggleCfLike(' + p.id + ')">' +
+                (liked ? '&#9829; Liked' : '&#9825; Like') +
+              '</button>' +
+              '<span class="cf-like-count">' + (p.likes || 0) + ' likes</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    window.toggleCfLike = function(postId) {
+      var liked = cfLikedIds.indexOf(postId) !== -1;
+      var method = liked ? 'DELETE' : 'POST';
+      fetch(API_BASE + '/api/creator/posts/' + postId + '/like', { method: method, headers: cfHeaders() })
+        .then(function() { loadCreatorFeed(); })
+        .catch(function() {});
+    };
+
+    window.openCfDetail = function(postId) {
+      var p = cfPosts.find(function(x) { return x.id === postId; });
+      if (!p) return;
+      cfDetailPost = p;
+      var cover = document.getElementById('cfDetailCover');
+      if (p.cover_image) { cover.src = p.cover_image; cover.style.display = 'block'; }
+      else { cover.style.display = 'none'; }
+      document.getElementById('cfDetailCat').textContent = p.category;
+      document.getElementById('cfDetailTitle').textContent = p.title;
+      document.getElementById('cfDetailDate').textContent = new Date(p.created_at + 'Z').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('cfDetailBody').textContent = p.body;
+      var liked = cfLikedIds.indexOf(p.id) !== -1;
+      var likeBtn = document.getElementById('cfDetailLikeBtn');
+      likeBtn.innerHTML = liked ? '&#9829; Liked' : '&#9825; Like';
+      likeBtn.className = 'cf-like-btn' + (liked ? ' liked' : '');
+      document.getElementById('cfDetailLikeCount').textContent = (p.likes || 0) + ' likes';
+      document.getElementById('cfDetailOverlay').classList.add('open');
+    };
+
+    window.closeCfDetail = function() {
+      document.getElementById('cfDetailOverlay').classList.remove('open');
+      cfDetailPost = null;
+    };
+
+    window.toggleCfDetailLike = function() {
+      if (!cfDetailPost) return;
+      toggleCfLike(cfDetailPost.id);
+      // Refresh the detail after a tick
+      setTimeout(function() {
+        if (cfDetailPost) openCfDetail(cfDetailPost.id);
+      }, 300);
+    };
+
+    loadCreatorFeed();
   })();
 </script>
 <script src="/stuflover-ux.js"></script>

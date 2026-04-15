@@ -319,6 +319,33 @@ async function initDb() {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+  // Creator posts (only chloealuton@gmail.com can write, everyone can read)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS creator_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      cover_image TEXT DEFAULT '',
+      category TEXT DEFAULT 'update',
+      pinned INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS creator_post_likes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      post_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (post_id) REFERENCES creator_posts(id) ON DELETE CASCADE,
+      UNIQUE(user_id, post_id)
+    );
+  `);
+
   // Seed the owner
   try {
     db.run("INSERT OR IGNORE INTO collab_access (email, role, granted_by) VALUES ('chloealuton@gmail.com', 'owner', 'system')");
@@ -746,6 +773,53 @@ const stmts = {
   },
   cleanExpiredPosts: {
     run: () => run("DELETE FROM flovee_posts WHERE expires_at < datetime('now','-24 hours')"),
+  },
+  // Creator Posts
+  createCreatorPost: {
+    run: (userId, title, body, coverImage, category) => run(
+      'INSERT INTO creator_posts (user_id, title, body, cover_image, category) VALUES (?,?,?,?,?)',
+      [userId, title, body, coverImage || '', category || 'update']
+    ),
+  },
+  getCreatorPosts: {
+    all: (limit, offset) => all(
+      `SELECT cp.id, cp.title, cp.body, cp.cover_image, cp.category, cp.pinned, cp.created_at, cp.updated_at, u.username,
+       (SELECT COUNT(*) FROM creator_post_likes WHERE post_id = cp.id) as likes
+       FROM creator_posts cp JOIN users u ON u.id = cp.user_id
+       ORDER BY cp.pinned DESC, cp.created_at DESC LIMIT ? OFFSET ?`, [limit || 20, offset || 0]
+    ),
+  },
+  getCreatorPost: {
+    get: (postId) => get(
+      `SELECT cp.*, u.username,
+       (SELECT COUNT(*) FROM creator_post_likes WHERE post_id = cp.id) as likes
+       FROM creator_posts cp JOIN users u ON u.id = cp.user_id WHERE cp.id = ?`, [postId]
+    ),
+  },
+  updateCreatorPost: {
+    run: (postId, title, body, coverImage, category) => run(
+      "UPDATE creator_posts SET title=?, body=?, cover_image=?, category=?, updated_at=datetime('now') WHERE id=?",
+      [title, body, coverImage || '', category || 'update', postId]
+    ),
+  },
+  deleteCreatorPost: {
+    run: (postId) => run('DELETE FROM creator_posts WHERE id = ?', [postId]),
+  },
+  toggleCreatorPostPin: {
+    run: (postId, pinned) => run('UPDATE creator_posts SET pinned = ? WHERE id = ?', [pinned, postId]),
+  },
+  likeCreatorPost: {
+    run: (userId, postId) => run(
+      'INSERT OR IGNORE INTO creator_post_likes (user_id, post_id) VALUES (?, ?)', [userId, postId]
+    ),
+  },
+  unlikeCreatorPost: {
+    run: (userId, postId) => run(
+      'DELETE FROM creator_post_likes WHERE user_id = ? AND post_id = ?', [userId, postId]
+    ),
+  },
+  getUserCreatorLikes: {
+    all: (userId) => all('SELECT post_id FROM creator_post_likes WHERE user_id = ?', [userId]),
   },
 };
 
