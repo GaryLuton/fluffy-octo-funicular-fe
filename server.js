@@ -1202,6 +1202,90 @@ app.delete('/api/collab/sandbox/:id', auth, collabAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── Creator Posts (only chloealuton@gmail.com can write) ───
+
+const CREATOR_EMAIL = 'chloealuton@gmail.com';
+
+function creatorAuth(req, res, next) {
+  const user = stmts.getUserById.get(req.user.id);
+  if (!user) return res.status(403).json({ error: 'Not found' });
+  const userEmail = stmts.getUserByEmail.get(user.email);
+  if (!userEmail || userEmail.email.toLowerCase() !== CREATOR_EMAIL) {
+    return res.status(403).json({ error: 'Creator access only' });
+  }
+  next();
+}
+
+// Check if current user is the creator
+app.get('/api/creator/check', auth, (req, res) => {
+  const user = stmts.getUserById.get(req.user.id);
+  if (!user) return res.json({ isCreator: false });
+  const full = stmts.getUserByEmail.get(user.email);
+  res.json({ isCreator: full && full.email.toLowerCase() === CREATOR_EMAIL });
+});
+
+// Get all creator posts (public for logged-in users)
+app.get('/api/creator/posts', auth, (req, res) => {
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = parseInt(req.query.offset) || 0;
+  const posts = stmts.getCreatorPosts.all(limit, offset);
+  const likes = stmts.getUserCreatorLikes.all(req.user.id);
+  const likedIds = likes.map(l => l.post_id);
+  res.json({ posts, likedIds });
+});
+
+// Get single creator post
+app.get('/api/creator/posts/:id', auth, (req, res) => {
+  const post = stmts.getCreatorPost.get(parseInt(req.params.id));
+  if (!post) return res.status(404).json({ error: 'Post not found' });
+  const likes = stmts.getUserCreatorLikes.all(req.user.id);
+  const liked = likes.some(l => l.post_id === post.id);
+  res.json({ post, liked });
+});
+
+// Create creator post (creator only)
+app.post('/api/creator/posts', auth, creatorAuth, (req, res) => {
+  const { title, body, cover_image, category } = req.body;
+  if (!title || !body) return res.status(400).json({ error: 'Title and body required' });
+  if (title.length > 200) return res.status(400).json({ error: 'Title too long (200 chars max)' });
+  if (body.length > 10000) return res.status(400).json({ error: 'Body too long (10000 chars max)' });
+  const result = stmts.createCreatorPost.run(req.user.id, title, body, cover_image || '', category || 'update');
+  res.status(201).json({ ok: true, id: result.lastInsertRowid });
+});
+
+// Update creator post (creator only)
+app.put('/api/creator/posts/:id', auth, creatorAuth, (req, res) => {
+  const { title, body, cover_image, category } = req.body;
+  if (!title || !body) return res.status(400).json({ error: 'Title and body required' });
+  stmts.updateCreatorPost.run(parseInt(req.params.id), title, body, cover_image || '', category || 'update');
+  res.json({ ok: true });
+});
+
+// Delete creator post (creator only)
+app.delete('/api/creator/posts/:id', auth, creatorAuth, (req, res) => {
+  stmts.deleteCreatorPost.run(parseInt(req.params.id));
+  res.json({ ok: true });
+});
+
+// Pin/unpin creator post (creator only)
+app.put('/api/creator/posts/:id/pin', auth, creatorAuth, (req, res) => {
+  const { pinned } = req.body;
+  stmts.toggleCreatorPostPin.run(parseInt(req.params.id), pinned ? 1 : 0);
+  res.json({ ok: true });
+});
+
+// Like a creator post (any user)
+app.post('/api/creator/posts/:id/like', auth, (req, res) => {
+  stmts.likeCreatorPost.run(req.user.id, parseInt(req.params.id));
+  res.json({ ok: true });
+});
+
+// Unlike a creator post (any user)
+app.delete('/api/creator/posts/:id/like', auth, (req, res) => {
+  stmts.unlikeCreatorPost.run(req.user.id, parseInt(req.params.id));
+  res.json({ ok: true });
+});
+
 // ─── Anthropic API Proxy ───
 
 app.post('/api/chat', auth, async (req, res) => {
