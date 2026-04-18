@@ -73,7 +73,6 @@
 <body>
 
 <div class="flovee-nav">
-  <a href="lifestyle.html" class="flovee-back bc" onclick="event.preventDefault();history.back();">← Back</a>
   <button class="flovee-clear" id="clearBtn" onclick="clearChat()">Clear chat</button>
 </div>
 
@@ -145,8 +144,6 @@ function init(){
   var nav = document.querySelector('.flovee-nav');
   nav.style.background = currentFlovee.bg;
   nav.style.borderColor = currentFlovee.tx+'10';
-  document.querySelector('.flovee-back').style.color = currentFlovee.tx;
-  document.querySelector('.flovee-back').style.borderColor = currentFlovee.tx+'20';
 
   // Style input
   var textarea = document.getElementById('chatInput');
