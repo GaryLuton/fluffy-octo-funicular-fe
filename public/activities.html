@@ -232,7 +232,7 @@
     <input class="search-input" id="searchInput" type="search" placeholder="Search activities…" autocomplete="off" />
   </div>
   <div class="chip-row" id="chipRow"></div>
-  <button class="refresh-btn" id="refreshBtn" onclick="generateActivities()" style="margin-left:auto;">
+  <button class="refresh-btn" id="refreshBtn" onclick="generateActivities(true)" style="margin-left:auto;">
     <span class="refresh-icon">&#x21bb;</span> New Ideas
   </button>
 </div>
@@ -605,7 +605,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
 
   // ─── GENERATE ───
   let generating = false;
-  window.generateActivities = async function(){
+  window.generateActivities = async function(userInitiated){
     if(generating) return;
     generating = true;
     const btn = document.getElementById('refreshBtn');
@@ -660,7 +660,11 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
 
     } catch(err) {
       console.error('Activities generation failed:', err);
-      container.innerHTML = '<div class="loading-msg" style="opacity:0.6;">Something went wrong generating activities.<br><br>Try hitting Refresh again!</div>';
+      if (userInitiated) {
+        container.innerHTML = '<div class="loading-msg" style="opacity:0.6;">Something went wrong generating activities.<br><br>Try hitting Refresh again!</div>';
+      } else {
+        container.innerHTML = '';
+      }
     }
 
     btn.disabled = false;
