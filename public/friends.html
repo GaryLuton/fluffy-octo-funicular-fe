@@ -25,7 +25,10 @@
     .contacts-list{flex:1;overflow-y:auto;}
     .contact-item{padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.12s;border-bottom:1px solid rgba(128,128,128,0.04);}
     .contact-item:hover,.contact-item.active{background:rgba(128,128,128,0.08);}
+    .contact-item.pinned{border-bottom:1px solid rgba(128,128,128,0.16);}
+    .contact-pin-label{font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.45;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:2px;}
     .contact-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;flex-shrink:0;color:white;}
+    .contact-avatar.flovee{font-size:1.3rem;}
     .contact-info{flex:1;min-width:0;}
     .contact-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .contact-preview{font-size:0.75rem;opacity:0.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
@@ -173,7 +176,7 @@
     <div class="no-chat" id="noChatState">
       <div class="no-chat-icon">...</div>
       <div class="no-chat-title bc">Select a conversation</div>
-      <div class="no-chat-sub">Pick a friend from the left or add a new one to start chatting</div>
+      <div class="no-chat-sub">Chat with your Flovee or pick a friend from the left to start a conversation</div>
     </div>
     <div id="activeChatState" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
       <div class="chat-header" id="chatHeader"></div>
@@ -240,6 +243,7 @@
 </div>
 
 <script src="/stuflover-config.js"></script>
+<script src="/safeguards-client.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
 
@@ -264,6 +268,35 @@ const floveeName=FLOVEE_NAMES[topAe]||'Flo';
 const aeName=(()=>{const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};return m[topAe]||'Your Style';})();
 const social=profile?.social||'ambivert';
 const mood=profile?.moodToday||'okay';
+
+// ─── FLOVEE CHAT CHARACTER (merged from flovee.html) ──────
+const FLOVEE_DATA={
+  lumi:   {name:'Lumi',   emoji:'\u2728',vibe:'wellness queen',     aesthetic:'clean girl'},
+  delara: {name:'Delara', emoji:'\u{1F4D6}',vibe:'book girly',       aesthetic:'dark academia'},
+  vesper: {name:'Vesper', emoji:'\u{1F380}',vibe:'coquette princess',aesthetic:'coquette'},
+  zola:   {name:'Zola',   emoji:'\u{1F480}',vibe:'chaos queen',      aesthetic:'y2k'},
+  miro:   {name:'Miro',   emoji:'\u{1F3A7}',vibe:'indie girly',      aesthetic:'indie'},
+  seraph: {name:'Seraph', emoji:'\u{1F319}',vibe:'moon girl',        aesthetic:'spiritual'},
+  remi:   {name:'Remi',   emoji:'\u{1F305}',vibe:'main character',   aesthetic:'softgirl'},
+  nox:    {name:'Nox',    emoji:'\u{1F5A4}',vibe:'deadpan icon',     aesthetic:'goth'}
+};
+const FLOVEE_AE_MAP={kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
+const FLOVEE_STARTERS={
+  lumi:['what skincare should i try?','i need a morning routine','rate my aesthetic','help me feel put together'],
+  delara:['recommend me a book','i need a study playlist','what should i journal about?','tell me something deep'],
+  vesper:['i need outfit inspo','how do i romanticize my life?','tell me something pretty','i want a glow up'],
+  zola:['roast me lovingly','make me laugh rn','what trend should i try?','give me a hot take'],
+  miro:['put me onto new music','what should i thrift?','give me a creative idea','what is underrated rn?'],
+  seraph:['do a tarot reading for me','what does the universe want me to know?','i need a sign','what crystal should i get?'],
+  remi:['how do i be more main character?','give me a pep talk','romanticize my day','what movie fits my vibe?'],
+  nox:['give me honest advice','what do you really think?','tell me something real','i need a reality check']
+};
+const floveeId=FLOVEE_AE_MAP[topAe]||'remi';
+const floveeChar={...FLOVEE_DATA[floveeId],id:floveeId};
+const FLOVEE_CONTACT_ID='flovee:'+floveeId;
+const FLOVEE_CHAT_KEY='stuflover_flovee_chat_'+floveeId;
+let floveeHistory=(()=>{try{const raw=JSON.parse(localStorage.getItem(FLOVEE_CHAT_KEY)||'null');return raw&&Array.isArray(raw.messages)?raw.messages:[];}catch(e){return[];}})();
+function saveFloveeHistory(){try{localStorage.setItem(FLOVEE_CHAT_KEY,JSON.stringify({messages:floveeHistory.slice(-60)}));}catch(e){}}
 
 // ─── DATA ─────────────────────────────────────────────────
 let contacts=(()=>{try{return JSON.parse(localStorage.getItem('stuflover_contacts')||'[]');}catch(e){return[];}})();
@@ -306,14 +339,33 @@ function applyStyles(){
 }
 
 // ─── CONTACTS LIST ────────────────────────────────────────
+function renderFloveeRow(filter){
+  if(filter && !floveeChar.name.toLowerCase().includes(filter.toLowerCase())) return '';
+  const last=floveeHistory[floveeHistory.length-1];
+  const preview=last?((last.role==='user'?'You: ':'')+last.content):`${floveeChar.vibe} \u2022 your AI friend`;
+  const time=last?formatTime(last.time):'';
+  const isActive=activeContactId===FLOVEE_CONTACT_ID;
+  return `<div class="contact-item pinned ${isActive?'active':''}" onclick="openChat('${FLOVEE_CONTACT_ID}')"
+    style="${isActive?'background:'+PAL.ac+'18':''}" id="ci-${FLOVEE_CONTACT_ID}">
+    <div class="contact-avatar flovee" style="background:${PAL.ac}">${floveeChar.emoji}</div>
+    <div class="contact-info">
+      <div class="contact-name" style="color:${PAL.tx}">${floveeChar.name}</div>
+      <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
+      <div class="contact-pin-label" style="color:${PAL.tx}">Flovee \u2022 your AI friend</div>
+    </div>
+    <div class="contact-time" style="color:${PAL.tx}">${time}</div>
+  </div>`;
+}
+
 function renderContacts(filter=''){
   const list=document.getElementById('contactsList');
   const filtered=contacts.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()));
-  if(filtered.length===0){
+  const floveeRow=renderFloveeRow(filter);
+  if(filtered.length===0 && !floveeRow){
     list.innerHTML=`<div style="padding:32px 20px;text-align:center;opacity:0.3;font-size:0.85rem;line-height:1.7">${contacts.length===0?'Add a friend to get started':'No matches'}</div>`;
     return;
   }
-  list.innerHTML=filtered.map(c=>{
+  const friendRows=filtered.map(c=>{
     const msgs=conversations[c.id]||[];
     const last=msgs[msgs.length-1];
     const preview=last?(last.from==='me'?'You: ':'')+last.text:'Start a conversation';
@@ -324,12 +376,15 @@ function renderContacts(filter=''){
       <div class="contact-avatar" style="background:${getAvatarCol(c.id)}">${getInitials(c.name)}</div>
       <div class="contact-info">
         <div class="contact-name" style="color:${PAL.tx}">${c.name}</div>
-        <div class="contact-preview" style="color:${PAL.tx}">${preview}</div>
+        <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
       </div>
       <div class="contact-time" style="color:${PAL.tx}">${time}</div>
     </div>`;
   }).join('');
+  list.innerHTML=floveeRow+friendRows;
 }
+
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function filterContacts(val){ renderContacts(val); }
 
@@ -345,6 +400,12 @@ function formatTime(ts){
 // ─── OPEN CHAT ────────────────────────────────────────────
 function openChat(id){
   activeContactId=id;
+
+  if(id===FLOVEE_CONTACT_ID){
+    openFloveeChat();
+    return;
+  }
+
   const contact=contacts.find(c=>c.id===id);
   if(!contact) return;
 
@@ -368,6 +429,12 @@ function openChat(id){
   // Show chat panel on mobile
   document.getElementById('chatPanel').classList.add('mobile-active');
 
+  // Restore help chips for friend chats
+  const chipsRow=document.getElementById('helpChips');
+  if(chipsRow) chipsRow.style.display='';
+  const input=document.getElementById('chatInput');
+  if(input) input.placeholder='Message...';
+
   renderMessages();
   updateFloveePanel(contact);
   renderContacts();
@@ -376,8 +443,92 @@ function openChat(id){
   setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
 }
 
+// ─── OPEN FLOVEE CHAT (AI character) ──────────────────────
+function openFloveeChat(){
+  document.getElementById('noChatState').style.display='none';
+  const acs=document.getElementById('activeChatState');
+  acs.style.display='flex';
+
+  document.getElementById('chatHeader').innerHTML=`
+    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
+    <div class="chat-header-avatar flovee" style="background:${PAL.ac};font-size:1.2rem">${floveeChar.emoji}</div>
+    <div>
+      <div class="chat-header-name" style="color:${PAL.tx}">${floveeChar.name}</div>
+      <div class="chat-header-status" style="color:${PAL.tx}">${floveeChar.vibe} \u2022 your AI friend</div>
+    </div>
+    <div class="chat-header-actions">
+      <button class="header-action-btn bc" onclick="clearFloveeChat()" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
+    </div>`;
+  document.getElementById('chatPanel').classList.add('mobile-active');
+
+  // Hide friend-chat help chips, set Flovee placeholder
+  const chipsRow=document.getElementById('helpChips');
+  if(chipsRow) chipsRow.style.display='none';
+  const input=document.getElementById('chatInput');
+  if(input) input.placeholder=`say something to ${floveeChar.name}...`;
+
+  renderFloveeMessages();
+  updateFloveeSidePanel();
+  renderContacts();
+  setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
+}
+
+function renderFloveeMessages(){
+  const container=document.getElementById('chatMsgs');
+  if(floveeHistory.length===0){
+    const starters=(FLOVEE_STARTERS[floveeChar.id]||FLOVEE_STARTERS.remi);
+    container.innerHTML=`
+      <div class="no-chat" style="opacity:0.9;padding:24px 12px">
+        <div class="no-chat-icon" style="opacity:0.7">${floveeChar.emoji}</div>
+        <div class="no-chat-title bc" style="color:${PAL.tx}">this is ${floveeChar.name}</div>
+        <div class="no-chat-sub" style="color:${PAL.tx};max-width:300px">${floveeChar.vibe}. matched to your aesthetic. she remembers your conversations and actually gets you. say anything.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px">
+          ${starters.map(s=>`<button class="help-chip bc" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')" style="color:${PAL.tx};border-color:${PAL.tx}22">${s}</button>`).join('')}
+        </div>
+      </div>`;
+    return;
+  }
+  container.innerHTML=floveeHistory.map((m,i)=>{
+    const isMe=m.role==='user';
+    const showDate=i===0||new Date(m.time).toDateString()!==new Date(floveeHistory[i-1].time).toDateString();
+    const date=showDate?`<div class="chat-date" style="color:${PAL.tx}">${new Date(m.time).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`:'';
+    const bubbleBg=isMe?PAL.ac:PAL.tx+'14';
+    const bubbleTx=isMe?PAL.bg:PAL.tx;
+    return `${date}<div class="bubble-wrap ${isMe?'me':'them'}">
+      <div class="bubble" style="background:${bubbleBg};color:${bubbleTx}">${escapeHtml(m.content)}</div>
+      <div class="bubble-time" style="color:${PAL.tx}">${formatTime(m.time)}</div>
+    </div>`;
+  }).join('');
+  container.scrollTop=container.scrollHeight;
+}
+
+function sendFloveeStarter(text){
+  const input=document.getElementById('chatInput');
+  if(input){ input.value=text; autoResize(input); input.focus(); }
+  sendMessage();
+}
+
+function updateFloveeSidePanel(){
+  const body=document.getElementById('floveeBody');
+  body.innerHTML=`
+    <div class="flovee-section">
+      <div class="flovee-section-label bc" style="color:${PAL.tx}">About ${floveeChar.name}</div>
+      <div class="flovee-advice" style="border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c">
+        ${floveeChar.vibe} \u2022 ${floveeChar.aesthetic} aesthetic. Matched to your ${aeName} vibe. Talk like a best friend \u2014 she remembers everything you say.
+      </div>
+    </div>
+    <div class="flovee-section">
+      <div class="flovee-section-label bc" style="color:${PAL.tx}">Try saying</div>
+      ${(FLOVEE_STARTERS[floveeChar.id]||FLOVEE_STARTERS.remi).map(s=>`
+        <div class="flovee-card" style="border-color:${PAL.tx}12;background:transparent;cursor:pointer;" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')">
+          <div class="flovee-card-text" style="color:${PAL.tx}">${s}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
 // ─── RENDER MESSAGES ─────────────────────────────────────
 function renderMessages(){
+  if(activeContactId===FLOVEE_CONTACT_ID){ renderFloveeMessages(); return; }
   const msgs=conversations[activeContactId]||[];
   const contact=contacts.find(c=>c.id===activeContactId);
   const container=document.getElementById('chatMsgs');
@@ -419,12 +570,116 @@ function sendMessage(){
   if(!text||!activeContactId) return;
   input.value=''; input.style.height='auto';
 
+  if(activeContactId===FLOVEE_CONTACT_ID){
+    sendFloveeMessage(text);
+    return;
+  }
+
   if(!conversations[activeContactId]) conversations[activeContactId]=[];
   conversations[activeContactId].push({from:'me',text,ts:Date.now()});
   saveData();
   renderMessages();
   renderContacts();
   clearTypingTimer();
+}
+
+// ─── SEND TO FLOVEE (AI) ──────────────────────────────────
+async function sendFloveeMessage(text){
+  // Clear empty-state if visible
+  const container=document.getElementById('chatMsgs');
+  const empty=container.querySelector('.no-chat');
+  if(empty) empty.remove();
+
+  const safe=window.Safeguards;
+
+  if(safe){
+    const inputCheck=safe.checkInputSafety(text);
+    if(!inputCheck.safe){
+      floveeHistory.push({role:'user',content:text,time:Date.now()});
+      floveeHistory.push({role:'assistant',content:inputCheck.reason,time:Date.now()});
+      saveFloveeHistory();
+      renderFloveeMessages();
+      renderContacts();
+      return;
+    }
+    const rateCheck=safe.checkRateLimit();
+    if(!rateCheck.allowed){
+      floveeHistory.push({role:'user',content:text,time:Date.now()});
+      floveeHistory.push({role:'assistant',content:rateCheck.message,time:Date.now()});
+      saveFloveeHistory();
+      renderFloveeMessages();
+      renderContacts();
+      return;
+    }
+  }
+
+  floveeHistory.push({role:'user',content:text,time:Date.now()});
+  saveFloveeHistory();
+  renderFloveeMessages();
+  renderContacts();
+
+  // Typing indicator
+  const typingDiv=document.createElement('div');
+  typingDiv.className='bubble-wrap them';
+  typingDiv.innerHTML=`<div class="bubble" style="background:${PAL.tx}10;color:${PAL.tx};font-style:italic;opacity:0.6">${floveeChar.name} is typing...</div>`;
+  container.appendChild(typingDiv);
+  container.scrollTop=container.scrollHeight;
+
+  try{
+    const characterPrompt=`You are ${floveeChar.name} \u2014 ${floveeChar.vibe}. You are a teen girl who is the user's AI best friend on Stuflover, a lifestyle app.\n\n`+
+      `Your personality: ${floveeChar.vibe}. Aesthetic: ${floveeChar.aesthetic}.\n`+
+      `The user's aesthetic: ${aeName}. ${mood?'Their mood today: '+mood+'. ':''}`+
+      `\n\nRULES:\n`+
+      `- Talk like an ACTUAL teen best friend texting \u2014 not a therapist, not a chatbot\n`+
+      `- Use lowercase, abbreviations, gen-z language NATURALLY (not forced)\n`+
+      `- Be warm, specific, and real\n`+
+      `- Reference real things (songs, artists, brands, shows, trends)\n`+
+      `- Keep responses 1-4 sentences usually. Longer only if they ask something deep\n`+
+      `- NEVER say "as an AI" or "I'm here for you" or therapist-speak\n`+
+      `- Have OPINIONS. Agree, disagree, tease, joke, be real\n`+
+      `- Remember what they said earlier in the conversation and reference it\n`+
+      `- If they seem down, be genuinely supportive but in a best friend way, not a counselor way\n`+
+      `- You can use emoji occasionally but don't overdo it`;
+
+    const systemPrompt=safe?safe.wrapSystemPrompt(characterPrompt):characterPrompt;
+    const trimmed=safe?safe.trimConversationHistory(floveeHistory):floveeHistory.slice(-10);
+    const apiMessages=trimmed.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content}));
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:systemPrompt,
+        messages:apiMessages
+      })
+    });
+    const data=await res.json();
+    const reply=(data.content&&data.content[0]&&data.content[0].text)||'hmm try that again?';
+
+    typingDiv.remove();
+    floveeHistory.push({role:'assistant',content:reply,time:Date.now()});
+    saveFloveeHistory();
+    renderFloveeMessages();
+    renderContacts();
+
+    if(safe) safe.incrementRateLimit();
+  }catch(e){
+    typingDiv.remove();
+    floveeHistory.push({role:'assistant',content:'Something went wrong \u2014 try again in a moment! \u{1F60A}',time:Date.now()});
+    saveFloveeHistory();
+    renderFloveeMessages();
+    renderContacts();
+  }
+}
+
+function clearFloveeChat(){
+  if(!confirm(`Clear your chat with ${floveeChar.name}?`)) return;
+  floveeHistory=[];
+  try{localStorage.removeItem(FLOVEE_CHAT_KEY);}catch(e){}
+  renderFloveeMessages();
+  renderContacts();
 }
 
 function handleMsgKey(e){
@@ -773,9 +1028,13 @@ function handleUrlParams(){
       }
     }
   }
-  // Clean URL so refresh doesn't re-fire.
+  const wantFlovee=p.get('flovee')==='1'||p.get('chat')==='flovee';
+  if(wantFlovee){ openChat(FLOVEE_CONTACT_ID); }
+  // Clean one-shot URL params (invite/add) so refresh doesn't re-fire them.
+  // Keep ?flovee=1 so refresh keeps Flovee chat open and the Flovee nav tab stays active.
   if((invite||add) && window.history && window.history.replaceState){
-    window.history.replaceState({},'',window.location.pathname);
+    const remaining=wantFlovee?'?flovee=1':'';
+    window.history.replaceState({},'',window.location.pathname+remaining);
   }
 }
 
