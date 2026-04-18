@@ -3305,6 +3305,7 @@ function openHub(){
 
   document.getElementById('normalChat').style.display = 'none';
   document.getElementById('shopBar').style.display = 'none';
+  document.getElementById('sectionNameNav').textContent = '';
   var hv = document.getElementById('hubView');
   hv.style.display = 'flex';
   hv.classList.add('active');
@@ -3377,7 +3378,7 @@ function startHubGame(game){
     document.getElementById('dtiView').style.display = 'flex';
     document.getElementById('dtiView').classList.add('active');
     var navEl = document.getElementById('sectionNameNav');
-    navEl.innerHTML = 'Dress To Impress <button class="hub-back-btn" onclick="backToHub()">Games</button>';
+    navEl.textContent = 'Dress To Impress';
     dtiInit();
     return;
   }
@@ -3391,7 +3392,7 @@ function startHubGame(game){
     document.getElementById('cardGameView').style.background = pal.bg;
     document.getElementById('cardGameView').style.color = pal.tx;
     var navEl = document.getElementById('sectionNameNav');
-    navEl.innerHTML = game.name+' <button class="hub-back-btn" onclick="backToHub()">Games</button>';
+    navEl.textContent = game.name;
     cgInit(game);
     return;
   }
@@ -3410,7 +3411,7 @@ function startHubGame(game){
   document.getElementById('chatMessages').innerHTML='';
 
   var navEl = document.getElementById('sectionNameNav');
-  navEl.innerHTML = fName+' — '+game.name+' <button class="hub-back-btn" onclick="backToHub()">Games</button>';
+  navEl.textContent = fName+' — '+game.name;
 
   // Override the section prompt temporarily
   sec._origPrompt = sec.prompt;
