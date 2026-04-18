@@ -73,6 +73,13 @@
 }
 
 
+/* ── LEGACY NAV SUPPRESSION ───────────────────────────────
+   Each page used to render its own top bar. The shared
+   stuflover-nav.js replaces them, but it runs late enough
+   that the old bars can flash briefly. Hide them as soon as
+   this stylesheet loads so the swap is invisible. */
+nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }
+
 /* ── RESET & BASE ─────────────────────────────────────────── */
 *, *::before, *::after {
   margin: 0;

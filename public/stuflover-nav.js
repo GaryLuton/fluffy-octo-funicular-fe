@@ -278,6 +278,8 @@
   function injectStyles() {
     if (document.getElementById('sl-nav-styles')) return;
     var css = '\
+/* Hide legacy per-page nav immediately so it never flashes before sl-top-nav mounts. */\
+nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }\
 :root { --sl-nav-h: 60px; --sl-tabs-h: 62px; }\
 body { padding-top: var(--sl-nav-h); }\
 #sl-top-nav {\
@@ -465,6 +467,11 @@ body { padding-top: var(--sl-nav-h); }\
     removeLegacyNav();
     buildNav();
   }
+
+  // Inject nav styles ASAP (synchronously at script eval) so legacy nav never
+  // paints before sl-top-nav mounts. Safe because we append to document.head
+  // or documentElement.
+  injectStyles();
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount);
