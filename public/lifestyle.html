@@ -1531,6 +1531,18 @@
 <script src="/dti2d.js"></script>
 <script>
 
+// ─── NAV TAB HELPER ─────────────────────────────────────
+// stuflover-nav.js is deferred, so this inline script runs before
+// window.StufloverNav is defined. Setting the override directly means
+// buildNav picks up the right tab when it mounts later; calling
+// setActiveTab too updates the DOM if the nav is already mounted.
+function slSetNavTab(id){
+  window.__slActiveTabOverride = id || null;
+  if(window.StufloverNav && window.StufloverNav.setActiveTab){
+    window.StufloverNav.setActiveTab(id);
+  }
+}
+
 // ─── ALL DATA + QUIZ JS (preserved from original) ────────
 // ─── PROFILE ─────────────────────────────────────────────
 // Every dimension tracked independently — no single answer decides anything
@@ -7028,6 +7040,7 @@ function openSection(id){
     shopBar.style.display = 'none';
     document.getElementById('normalChat').style.display = 'none';
     document.getElementById('profileView').style.display = 'none';
+    slSetNavTab('play');
     openHub();
     return;
   } else if(sec.id === 'myprofile'){
@@ -7229,6 +7242,7 @@ function doShopSearch(){
 }
 
 function goHome(){
+  slSetNavTab('mypage');
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('sectionView').style.display = 'none';
   // Restore settings button

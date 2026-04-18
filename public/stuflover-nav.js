@@ -242,6 +242,9 @@
   }
 
   function activeTabId() {
+    // A page can override the active tab (e.g. lifestyle.html stays on
+    // "Play" while a game is open, even though the URL is lifestyle.html).
+    if (window.__slActiveTabOverride) return window.__slActiveTabOverride;
     var file = currentFile();
     for (var i = 0; i < TABS.length; i++) {
       if (TABS[i].match.indexOf(file) !== -1) return TABS[i].id;
@@ -478,4 +481,20 @@ body { padding-top: var(--sl-nav-h); }\
   } else {
     mount();
   }
+
+  // Public API: lets a page override which tab is highlighted when the URL
+  // alone isn't enough (e.g. lifestyle.html shows a game and should stay on
+  // the Play tab, not My Page). Safe to call before or after the nav mounts.
+  function setActiveTab(id) {
+    window.__slActiveTabOverride = id || null;
+    var tabs = document.querySelectorAll('#sl-top-nav .sl-tab, #sl-bottom-tabs .sl-tab');
+    tabs.forEach(function (el) {
+      var isActive = el.getAttribute('data-tab') === id;
+      el.classList.toggle('is-active', isActive);
+      if (isActive) el.setAttribute('aria-current', 'page');
+      else el.removeAttribute('aria-current');
+    });
+  }
+  window.StufloverNav = window.StufloverNav || {};
+  window.StufloverNav.setActiveTab = setActiveTab;
 })();
