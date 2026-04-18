@@ -69,6 +69,10 @@
     .rail-scroller .activity-card{flex:0 0 260px;scroll-snap-align:start;margin:0;}
     .activity-card.is-filtered{display:none;}
 
+    /* GAMES RAIL — wrap onto multiple rows instead of horizontal scroll */
+    #gamesRailScroller{flex-wrap:wrap;overflow-x:visible;scroll-snap-type:none;}
+    #gamesRailScroller .activity-card{flex:1 1 240px;max-width:320px;scroll-snap-align:none;}
+
     /* CARD FOOTER (Play together button) */
     .card-foot{display:flex;align-items:center;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(30,12,6,0.08);}
     .play-together{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;color:var(--tx);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.62rem;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:background 0.2s,border-color 0.2s;}
