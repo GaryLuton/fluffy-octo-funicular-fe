@@ -22,6 +22,9 @@
     :root{--pink:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--brown:#2a1a14;--white:#fff;}
     html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
+    .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--brown);color:var(--white);padding:10px 16px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;border-radius:0 0 6px 0;}
+    .skip-link:focus{left:0;outline:3px solid var(--terra);outline-offset:2px;}
+    .site-footer{padding:32px 20px;text-align:center;border-top:1px solid rgba(30,12,6,0.08);font-size:0.85rem;color:rgba(30,12,6,0.6);letter-spacing:1px;}
     input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;transition:background 0.8s,color 0.8s;line-height:1.6;font-size:15px;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
@@ -115,7 +118,7 @@
 
     /* VERTICAL FEED */
     .feed-section{margin-bottom:20px;}
-    .feed-heading{font-size:0.85rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.55;margin-bottom:10px;}
+    .feed-heading{font-size:1.1rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:1;margin-bottom:10px;}
     .feed-card{padding:22px 24px;border-radius:18px;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);}
     .feed-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.06);}
     .feed-card:active{transform:scale(0.98);}
@@ -990,8 +993,10 @@
 </head>
 <body>
 
+<a href="#mainContent" class="skip-link">Skip to main content</a>
 
-<nav id="mainNav">
+<header role="banner">
+<nav id="mainNav" aria-label="Primary">
   <a class="logo bc" id="navLogo" href="index.html" onclick="event.preventDefault(); goHome();">Stuflover</a>
   <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
@@ -1002,6 +1007,9 @@
     <a class="nav-link bc" id="navHome" href="index.html" onclick="event.preventDefault(); goHome();">Home</a>
   </div>
 </nav>
+</header>
+
+<main id="mainContent">
 
 <!-- LANDING -->
 <div id="heroSection">
@@ -1320,10 +1328,10 @@
           <option value="haul">Book Haul</option>
           <option value="quote">Favourite Quote</option>
         </select>
-        <input id="riTitle" placeholder="Post title..." maxlength="200"/>
-        <input id="riBookTitle" placeholder="Book title (optional)..." maxlength="200"/>
-        <input id="riBookAuthor" placeholder="Author (optional)..." maxlength="100"/>
-        <input id="riImageUrl" placeholder="Cover image URL (optional)..."/>
+        <input id="riTitle" aria-label="Post title" placeholder="Post title..." maxlength="200"/>
+        <input id="riBookTitle" aria-label="Book title (optional)" placeholder="Book title (optional)..." maxlength="200"/>
+        <input id="riBookAuthor" aria-label="Book author (optional)" placeholder="Author (optional)..." maxlength="100"/>
+        <input id="riImageUrl" aria-label="Cover image URL (optional)" placeholder="Cover image URL (optional)..."/>
         <textarea id="riBody" placeholder="What are your thoughts?" rows="4" maxlength="2000"></textarea>
         <div class="ri-err" id="riErr"></div>
         <div class="ri-modal-btns">
@@ -1350,7 +1358,7 @@
     <div class="fg-modal" id="fgModal">
       <div class="fg-modal-box" id="fgModalBox">
         <h3>Create a Group</h3>
-        <input id="fgNameInput" placeholder="Group name..." maxlength="40"/>
+        <input id="fgNameInput" aria-label="Group name" placeholder="Group name..." maxlength="40"/>
         <textarea id="fgDescInput" placeholder="What is this group about?" rows="2" maxlength="200"></textarea>
         <div class="fg-err" id="fgErr"></div>
         <div class="fg-modal-btns">
@@ -1386,10 +1394,10 @@
     <div class="cw-modal" id="cwModal">
       <div class="cw-modal-box" id="cwModalBox">
         <h3>Share a Photo</h3>
-        <input id="cwUrlInput" placeholder="Paste an image URL..." oninput="previewCwImage()"/>
+        <input id="cwUrlInput" aria-label="Image URL" placeholder="Paste an image URL..." oninput="previewCwImage()"/>
         <img class="cw-img-preview" id="cwPreview" alt="Preview"/>
         <textarea id="cwCaptionInput" placeholder="Add a caption..." rows="2" maxlength="200"></textarea>
-        <input id="cwTagsInput" placeholder="Tags (e.g. aesthetic, outfit, cozy)" maxlength="100"/>
+        <input id="cwTagsInput" aria-label="Tags" placeholder="Tags (e.g. aesthetic, outfit, cozy)" maxlength="100"/>
         <div class="cw-err" id="cwErr"></div>
         <div class="cw-modal-btns">
           <button id="cwSubmitBtn" onclick="submitCwPost()">Post</button>
@@ -1414,7 +1422,7 @@
         <div class="fr-profile-panel" id="frProfile"></div>
         <div class="fr-msgs" id="frMsgs" style="display:none;"></div>
         <div class="fr-input-row" id="frInputRow" style="display:none;">
-          <input class="fr-input" id="frInput" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendFrMsg()"/>
+          <input class="fr-input" id="frInput" aria-label="Message" placeholder="Type a message..." maxlength="500" onkeydown="if(event.key==='Enter')sendFrMsg()"/>
           <button class="fr-send bc" id="frSendBtn" onclick="sendFrMsg()">Send</button>
         </div>
       </div>
@@ -1422,7 +1430,7 @@
     <div class="fr-add-modal" id="frAddModal">
       <div class="fr-add-box" id="frAddBox">
         <h3>Add a Friend</h3>
-        <input id="frAddInput" placeholder="Enter their username..." onkeydown="if(event.key==='Enter')sendFrRequest()"/>
+        <input id="frAddInput" aria-label="Username" placeholder="Enter their username..." onkeydown="if(event.key==='Enter')sendFrRequest()"/>
         <div class="fr-add-err" id="frAddErr"></div>
         <button id="frAddSubmit" onclick="sendFrRequest()">Send Request</button>
         <button onclick="closeFrAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
@@ -1440,8 +1448,8 @@
           <div class="routine-col-title bc" id="rtColTitle">My Morning Routine</div>
           <div class="routine-steps" id="rtSteps"></div>
           <div class="routine-add-row">
-            <input class="routine-add-time" id="rtAddTime" placeholder="7:00" maxlength="5"/>
-            <input class="routine-add-input" id="rtAddText" placeholder="Add a step..." onkeydown="if(event.key==='Enter')addRoutineStep()"/>
+            <input class="routine-add-time" id="rtAddTime" aria-label="Time (e.g. 7:00)" placeholder="7:00" maxlength="5"/>
+            <input class="routine-add-input" id="rtAddText" aria-label="Routine step description" placeholder="Add a step..." onkeydown="if(event.key==='Enter')addRoutineStep()"/>
             <button class="routine-add-btn bc" id="rtAddBtn" onclick="addRoutineStep()">Add</button>
           </div>
           <button class="routine-suggest-btn" id="rtSuggestBtn" onclick="suggestRoutineSteps()">Generate routine with AI</button>
@@ -1486,9 +1494,9 @@
     <div class="ffi-modal-bg" id="ffiAddModal">
       <div class="ffi-modal-box" id="ffiAddModalBox">
         <h3>Add to Closet</h3>
-        <input id="ffiAddUrl" placeholder="Paste a photo URL of your item..." oninput="ffiPreviewAdd()"/>
+        <input id="ffiAddUrl" aria-label="Item photo URL" placeholder="Paste a photo URL of your item..." oninput="ffiPreviewAdd()"/>
         <img class="ffi-modal-preview" id="ffiAddPreview" alt="Preview"/>
-        <input id="ffiAddName" placeholder="What is it? (e.g. black crop top)"/>
+        <input id="ffiAddName" aria-label="Item description" placeholder="What is it? (e.g. black crop top)"/>
         <select id="ffiAddCat"><option value="">Pick a category...</option><option value="tops">Tops</option><option value="bottoms">Bottoms</option><option value="dresses">Dresses</option><option value="outerwear">Outerwear</option><option value="shoes">Shoes</option><option value="bags">Bags</option><option value="accessories">Accessories</option></select>
         <div class="ffi-modal-err" id="ffiAddErr"></div>
         <div style="display:flex;gap:8px;">
@@ -1506,6 +1514,12 @@
   </div>
 
 </div>
+
+</main>
+
+<footer role="contentinfo" class="site-footer">
+  <p>your vibe, your rules</p>
+</footer>
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
@@ -6504,8 +6518,12 @@ function createEmojiPicker(inputId, parentEl){
   wrap.style.cssText = 'position:relative;display:inline-block;';
   var btn = document.createElement('button');
   btn.className = 'emoji-btn';
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>';
+  btn.type = 'button';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>';
   btn.title = 'Stuf Emojis';
+  btn.setAttribute('aria-label', 'Insert emoji');
+  btn.setAttribute('aria-haspopup', 'true');
+  btn.setAttribute('aria-expanded', 'false');
   var picker = document.createElement('div');
   picker.className = 'emoji-picker';
   picker.style.background = searchPal.bg;
@@ -6514,12 +6532,12 @@ function createEmojiPicker(inputId, parentEl){
   for(var cat in CUSTOM_EMOJIS){
     html += '<div class="emoji-picker-label">'+cat+'</div><div class="emoji-picker-grid">';
     CUSTOM_EMOJIS[cat].forEach(function(em){
-      html += '<button class="emoji-pick" title="'+em.code+'" data-code="'+em.code+'" data-input="'+inputId+'">'+em.display+'</button>';
+      html += '<button type="button" class="emoji-pick" title="'+em.code+'" aria-label="Insert '+em.code.replace(/:/g,'')+' emoji" data-code="'+em.code+'" data-input="'+inputId+'">'+em.display.replace('<svg ','<svg aria-hidden="true" focusable="false" ')+'</button>';
     });
     html += '</div>';
   }
   picker.innerHTML = html;
-  btn.onclick = function(e){e.stopPropagation();picker.classList.toggle('open');};
+  btn.onclick = function(e){e.stopPropagation();picker.classList.toggle('open');btn.setAttribute('aria-expanded', picker.classList.contains('open') ? 'true' : 'false');};
   picker.querySelectorAll || (picker.innerHTML = html); // ensure parsed
   wrap.appendChild(btn);
   wrap.appendChild(picker);
