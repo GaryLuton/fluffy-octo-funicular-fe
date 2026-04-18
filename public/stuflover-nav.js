@@ -11,7 +11,7 @@
   var TABS = [
     { id: 'mypage',   label: 'My Page', href: 'lifestyle.html',  match: ['lifestyle.html'],                 icon: iconHome },
     { id: 'play',     label: 'Play',    href: 'activities.html', match: ['activities.html','fitcheck.html','fitforit.html','catalog.html','beyou.html','collab.html','academic.html','wishingwell.html'], icon: iconPlay },
-    { id: 'flovee',   label: 'Flovee',  href: 'flovee.html',     match: ['flovee.html'],                    icon: iconSpark, smart: true },
+    { id: 'flovee',   label: 'Flovee',  href: 'friends.html?flovee=1', match: ['flovee.html'],             icon: iconSpark, smart: true },
     { id: 'friends',  label: 'Friends', href: 'friends.html',    match: ['friends.html'],                   icon: iconUsers },
     { id: 'me',       label: 'Me',      href: 'account.html',    match: ['account.html','auth.html'],       icon: iconUser }
   ];
@@ -29,6 +29,7 @@
 
   function activeTabId() {
     var file = currentFile();
+    if (file === 'friends.html' && inFloveeMode()) return 'flovee';
     for (var i = 0; i < TABS.length; i++) {
       if (TABS[i].match.indexOf(file) !== -1) return TABS[i].id;
     }
@@ -49,6 +50,14 @@
     // Me tab: unauthed → auth page.
     if (tab.id === 'me' && !isAuthed()) return 'auth.html';
     return tab.href;
+  }
+
+  // Mark Flovee tab active when Friends page is opened with ?flovee=1.
+  function inFloveeMode() {
+    try {
+      var p = new URLSearchParams(location.search || '');
+      return p.get('flovee') === '1' || p.get('chat') === 'flovee';
+    } catch (e) { return false; }
   }
 
   function removeLegacyNav() {
