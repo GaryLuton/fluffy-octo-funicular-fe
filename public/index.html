@@ -167,8 +167,9 @@
       nav ul a{display:block;padding:10px 16px;border-radius:6px;}
       nav ul a:hover{background:rgba(42,26,20,0.04);}
       .nav-toggle{display:block;}
-      .hero{padding:100px 24px 60px;flex-direction:column;}
-      .hero h1{font-size:clamp(4rem,12vw,8rem);}
+      .hero{padding:100px 24px 60px !important;flex-direction:column;}
+      .hero h1{font-size:clamp(3.5rem,11vw,6rem) !important;letter-spacing:-2px !important;}
+      .hero-sub,.hero p{font-size:1rem !important;}
       .hero-circle{position:relative;right:auto;top:auto;transform:none;margin-top:36px;width:200px;height:200px;}
       .flower{display:none;}
       .hero-circle{display:none;}
@@ -190,7 +191,8 @@
       .footer-logo{font-size:2.6rem;}
     }
     @media(max-width:480px){
-      .hero h1{font-size:clamp(3rem,14vw,5rem);}
+      .hero h1{font-size:clamp(2.6rem,13vw,4.2rem) !important;letter-spacing:-1.5px !important;}
+      .hero-sub,.hero p{font-size:0.95rem !important;}
       .hero-circle{width:160px;height:160px;}
       .video-grid{grid-template-columns:1fr;}
       .boredom-card{padding:20px 18px 24px;min-height:140px;}
