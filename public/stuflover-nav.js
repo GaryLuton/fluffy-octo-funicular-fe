@@ -71,7 +71,7 @@ body { padding-top: var(--sl-nav-h); }\
 #sl-top-nav {\
   position: fixed; top: 0; left: 0; right: 0; height: var(--sl-nav-h);\
   display: flex; align-items: center; justify-content: space-between;\
-  padding: 0 24px; z-index: 300;\
+  gap: 12px; padding: 0 24px; z-index: 300;\
   background: rgba(250, 240, 240, 0.82); backdrop-filter: blur(18px) saturate(1.4);\
   -webkit-backdrop-filter: blur(18px) saturate(1.4);\
   border-bottom: 1px solid rgba(42, 26, 20, 0.08);\
@@ -79,46 +79,54 @@ body { padding-top: var(--sl-nav-h); }\
 #sl-top-nav .sl-logo {\
   font-family: "Barlow Condensed", sans-serif; font-weight: 900;\
   font-size: 1.4rem; letter-spacing: 3px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none;\
+  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
 }\
-#sl-top-nav .sl-left { display: flex; align-items: center; gap: 14px; }\
+#sl-top-nav .sl-left { display: flex; align-items: center; gap: 14px; min-width: 0; }\
 #sl-top-nav .sl-back-chip {\
   display: inline-flex; align-items: center; gap: 6px;\
   padding: 7px 14px; border-radius: 999px;\
   border: 1.5px solid rgba(42, 26, 20, 0.12);\
   font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
   font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none;\
+  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
   transition: border-color 180ms ease, background 180ms ease;\
 }\
 #sl-top-nav .sl-back-chip:hover {\
   border-color: var(--sl-tx, #2a1a14);\
   background: rgba(42, 26, 20, 0.04);\
 }\
-#sl-top-nav .sl-tabs { display: flex; gap: 4px; }\
+#sl-top-nav .sl-tabs { display: flex; gap: 4px; flex-wrap: nowrap; }\
 #sl-top-nav .sl-tab {\
   display: inline-flex; align-items: center; gap: 8px;\
   padding: 10px 18px; border-radius: 999px;\
   font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
   font-size: 0.82rem; letter-spacing: 2.5px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none;\
+  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
   transition: background 180ms ease, color 180ms ease;\
 }\
 #sl-top-nav .sl-tab:hover { background: rgba(42, 26, 20, 0.06); }\
 #sl-top-nav .sl-tab.is-active {\
   background: var(--sl-ac, #c87860); color: #fff;\
 }\
-#sl-top-nav .sl-tab svg { width: 16px; height: 16px; }\
+#sl-top-nav .sl-tab svg { width: 16px; height: 16px; flex-shrink: 0; }\
 #sl-top-nav .sl-user {\
   font-family: "Barlow Condensed", sans-serif; font-weight: 700;\
   font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
-  color: rgba(42, 26, 20, 0.55);\
+  color: rgba(42, 26, 20, 0.55); white-space: nowrap;\
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis;\
 }\
 #sl-bottom-tabs { display: none; }\
+/* Tablet / narrow desktop — drop the user greeting and tighten tab padding so tabs don\'t collide */\
+@media (max-width: 999px) {\
+  #sl-top-nav .sl-user { display: none; }\
+  #sl-top-nav .sl-tab { padding: 9px 12px; letter-spacing: 1.5px; font-size: 0.78rem; gap: 6px; }\
+  #sl-top-nav .sl-tab svg { width: 15px; height: 15px; }\
+}\
+/* Mobile — swap top tabs for a bottom tab bar */\
 @media (max-width: 760px) {\
-  body { padding-top: var(--sl-nav-h); padding-bottom: var(--sl-tabs-h); }\
+  body { padding-top: var(--sl-nav-h); padding-bottom: calc(var(--sl-tabs-h) + env(safe-area-inset-bottom, 0px)); }\
   #sl-top-nav { padding: 0 16px; }\
-  #sl-top-nav .sl-tabs, #sl-top-nav .sl-user { display: none; }\
+  #sl-top-nav .sl-tabs { display: none; }\
   #sl-bottom-tabs {\
     display: grid; grid-template-columns: repeat(5, 1fr);\
     position: fixed; bottom: 0; left: 0; right: 0; height: var(--sl-tabs-h);\
@@ -129,13 +137,31 @@ body { padding-top: var(--sl-nav-h); }\
   }\
   #sl-bottom-tabs .sl-tab {\
     display: flex; flex-direction: column; align-items: center; justify-content: center;\
-    gap: 3px; text-decoration: none; color: var(--sl-tx, #2a1a14);\
+    gap: 3px; padding: 4px 2px; text-decoration: none; color: var(--sl-tx, #2a1a14);\
     font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
     font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase;\
     opacity: 0.55; transition: opacity 150ms ease, color 150ms ease;\
+    min-width: 0;\
   }\
-  #sl-bottom-tabs .sl-tab svg { width: 22px; height: 22px; }\
+  #sl-bottom-tabs .sl-tab span {\
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;\
+  }\
+  #sl-bottom-tabs .sl-tab svg { width: 22px; height: 22px; flex-shrink: 0; }\
   #sl-bottom-tabs .sl-tab.is-active { opacity: 1; color: var(--sl-ac, #c87860); }\
+}\
+/* Small phones — tighten logo and hide back-chip label; bottom tab labels get smaller */\
+@media (max-width: 480px) {\
+  #sl-top-nav { padding: 0 12px; gap: 8px; }\
+  #sl-top-nav .sl-logo { font-size: 1.2rem; letter-spacing: 2px; }\
+  #sl-top-nav .sl-back-chip { padding: 6px 10px; font-size: 0.65rem; letter-spacing: 1.5px; }\
+  #sl-bottom-tabs .sl-tab { letter-spacing: 1px; font-size: 0.58rem; }\
+  #sl-bottom-tabs .sl-tab svg { width: 20px; height: 20px; }\
+}\
+/* Very small phones — icon-only bottom tabs so labels never collide */\
+@media (max-width: 360px) {\
+  #sl-top-nav .sl-logo { font-size: 1.1rem; letter-spacing: 1.5px; }\
+  #sl-bottom-tabs .sl-tab span { display: none; }\
+  #sl-bottom-tabs .sl-tab svg { width: 24px; height: 24px; }\
 }\
 ';
     var style = document.createElement('style');
