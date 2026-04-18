@@ -36,7 +36,49 @@
     @keyframes floatSpark{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(-18px) rotate(12deg);}}
 
     /* Ensure all main content sits above background decorations */
-    nav, .hero, .refresh-row, #activitiesContainer{position:relative;z-index:1;}
+    nav, .hero, .refresh-row, .activities-toolbar, #activitiesContainer{position:relative;z-index:1;}
+
+    /* TOOLBAR (search + chips) */
+    .activities-toolbar{max-width:1100px;margin:0 auto 24px;padding:0 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+    .search-wrap{position:relative;flex:1;min-width:220px;max-width:360px;}
+    .search-input{width:100%;padding:13px 16px 13px 42px;border:1.5px solid rgba(30,12,6,0.12);border-radius:999px;background:rgba(255,255,255,0.65);font-family:'Space Grotesk',sans-serif;font-size:0.95rem;color:var(--tx);outline:none;transition:border-color 0.2s,background 0.2s,box-shadow 0.2s;}
+    .search-input::placeholder{color:var(--tx);opacity:0.35;}
+    .search-input:focus{border-color:var(--ac);background:#fff;box-shadow:0 0 0 4px rgba(200,120,96,0.1);}
+    .search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;opacity:0.4;pointer-events:none;}
+    .chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s,border-color 0.2s,transform 0.2s;}
+    .chip:hover{border-color:var(--tx);transform:translateY(-1px);}
+    .chip.is-active{background:var(--ac);color:#fff;border-color:var(--ac);}
+    .chip-emoji{font-size:0.9rem;}
+
+    /* RAILS */
+    .rail{max-width:1100px;margin:0 auto;padding:0 40px 44px;}
+    .rail-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;position:relative;}
+    .rail-header::after{content:'';position:absolute;bottom:0;left:0;height:3px;width:60px;border-radius:3px;background:linear-gradient(90deg,var(--ac),transparent);opacity:0.6;transition:width 0.4s ease;}
+    .rail:hover .rail-header::after{width:120px;opacity:0.8;}
+    .rail-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);display:flex;align-items:center;gap:12px;}
+    .rail-count{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);opacity:0.35;}
+    .rail-scroller{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:4px;padding:8px 4px 16px;margin:0 -4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(30,12,6,0.15) transparent;}
+    .rail-scroller::-webkit-scrollbar{height:6px;}
+    .rail-scroller::-webkit-scrollbar-thumb{background:rgba(30,12,6,0.15);border-radius:3px;}
+    .rail-scroller::-webkit-scrollbar-thumb:hover{background:rgba(30,12,6,0.28);}
+    .rail.is-hidden{display:none;}
+    .rail-empty{font-family:'Space Grotesk',sans-serif;font-size:0.9rem;color:var(--tx);opacity:0.4;padding:12px 4px;font-style:italic;}
+
+    /* RAIL CARDS (override grid-mode card sizing) */
+    .rail-scroller .activity-card{flex:0 0 260px;scroll-snap-align:start;margin:0;}
+    .activity-card.is-filtered{display:none;}
+
+    /* TILE ANIMATIONS — gentle idle float on the category dot */
+    .card-tag{position:relative;}
+    .activity-card:hover .card-tag{animation:tagPop 0.45s ease;}
+    @keyframes tagPop{0%{transform:scale(1);}50%{transform:scale(1.14);}100%{transform:scale(1);}}
+    .card-pulse{position:absolute;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:var(--ac);opacity:0.55;animation:pulseDot 2.6s ease-in-out infinite;}
+    @keyframes pulseDot{0%,100%{transform:scale(1);opacity:0.55;}50%{transform:scale(1.5);opacity:0.15;}}
+
+    /* Empty-results state (no match) */
+    .no-results{text-align:center;padding:60px 40px;font-family:'Space Grotesk',sans-serif;color:var(--tx);opacity:0.45;font-size:1rem;}
+    .no-results strong{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:8px;font-size:1.1rem;color:var(--ac);opacity:0.85;}
 
     /* NAV */
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
@@ -117,6 +159,10 @@
       .hero{padding:100px 24px 40px;}
       .hero-sub{font-size:0.88rem;}
       .refresh-row{padding:16px 20px;}
+      .activities-toolbar{padding:0 24px;gap:12px;}
+      .rail{padding:0 24px 36px;}
+      .rail-scroller .activity-card{flex:0 0 230px;}
+      .rail-title{font-size:1.15rem;letter-spacing:2.5px;}
     }
     @media(max-width:480px){
       .hero h1{font-size:clamp(2.2rem,11vw,3.5rem);}
@@ -128,6 +174,12 @@
       .nav-link,.nav-toggle{min-height:44px;display:flex;align-items:center;}
       .cat-label{font-size:1.2rem;letter-spacing:3px;}
       body{font-size:15px;}
+      .activities-toolbar{padding:0 16px;}
+      .search-wrap{max-width:none;width:100%;}
+      .rail{padding:0 16px 28px;}
+      .rail-scroller{padding-left:0;}
+      .rail-scroller .activity-card{flex:0 0 82vw;min-height:130px;}
+      .chip{padding:9px 13px;font-size:0.68rem;}
     }
   </style>
 </head>
@@ -169,9 +221,14 @@
   <p class="hero-sub" id="heroSub">these ideas are so specific to your vibe it is actually scary. you are welcome.</p>
 </div>
 
-<div class="refresh-row">
-  <button class="refresh-btn" id="refreshBtn" onclick="generateActivities()">
-    <span class="refresh-icon">&#x21bb;</span> Give Me New Ideas
+<div class="activities-toolbar" id="activitiesToolbar" style="display:none;">
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="search-input" id="searchInput" type="search" placeholder="Search activities…" autocomplete="off" />
+  </div>
+  <div class="chip-row" id="chipRow"></div>
+  <button class="refresh-btn" id="refreshBtn" onclick="generateActivities()" style="margin-left:auto;">
+    <span class="refresh-icon">&#x21bb;</span> New Ideas
   </button>
 </div>
 
@@ -271,12 +328,25 @@
 
   // ─── CATEGORIES CONFIG ───
   const CATEGORIES = [
-    {key:'creative', label:'Make Something', emoji:'🎨'},
-    {key:'social',   label:'With Friends', emoji:'👯'},
-    {key:'solo',     label:'Me Time', emoji:'🧘'},
-    {key:'active',   label:'Move', emoji:'🏃'},
-    {key:'chill',    label:'Reset', emoji:'😌'},
+    {key:'creative', label:'Make Something', chip:'Make',        emoji:'🎨'},
+    {key:'social',   label:'With Friends',   chip:'With Friends',emoji:'👯'},
+    {key:'solo',     label:'Me Time',        chip:'Me Time',     emoji:'🧘'},
+    {key:'active',   label:'Move',           chip:'Move',        emoji:'🏃'},
+    {key:'chill',    label:'Reset',          chip:'Reset',       emoji:'😌'},
   ];
+
+  // ─── FLOVEE MAPPING (mirrors flovee.html) ───
+  const FLOVEE_MAP = {kawaii:'Lumi',softgirl:'Vesper',cleangirl:'Lumi',coquette:'Vesper',goth:'Nox',darkacad:'Delara',grunge:'Nox',y2k:'Zola',street:'Miro',cottage:'Seraph',hippie:'Seraph',oldmoney:'Delara',preppy:'Lumi',indie:'Miro',emo:'Nox'};
+  function floveeName(){
+    if(!profile || !profile.aesthetics) return null;
+    const sorted = Object.entries(profile.aesthetics).sort((a,b)=>b[1]-a[1]);
+    const top = sorted[0] && sorted[0][0];
+    return FLOVEE_MAP[top] || null;
+  }
+
+  // ─── FILTER STATE ───
+  const filterState = { category: 'all', query: '' };
+  let lastData = null; // most recent API result, for re-renders on filter change
 
   // ─── BUILD PROMPT ───
   function buildPrompt(){
@@ -321,60 +391,168 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
   }
 
   // ─── RENDER ───
+  function buildCard(item, cat, idx){
+    const card = document.createElement('div');
+    card.className = 'activity-card';
+    card.setAttribute('data-cat', cat.key);
+    card.setAttribute('data-search', (item.title + ' ' + item.desc).toLowerCase());
+    card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
+    card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
+    card.style.animationDelay = (Math.min(idx, 10) * 0.06) + 's';
+
+    const tag = document.createElement('span');
+    tag.className = 'card-tag';
+    tag.textContent = cat.chip;
+    tag.style.background = pal.ac;
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = item.title;
+    title.style.color = pal.tx;
+
+    const desc = document.createElement('div');
+    desc.className = 'card-desc';
+    desc.textContent = item.desc;
+    desc.style.color = pal.tx;
+
+    card.appendChild(tag);
+    card.appendChild(title);
+    card.appendChild(desc);
+    return card;
+  }
+
+  function buildRail(id, title, items, catByKey){
+    const rail = document.createElement('section');
+    rail.className = 'rail';
+    rail.setAttribute('data-rail', id);
+
+    const header = document.createElement('div');
+    header.className = 'rail-header';
+    const h = document.createElement('div');
+    h.className = 'rail-title';
+    h.innerHTML = title;
+    h.style.color = pal.ac;
+    header.appendChild(h);
+    const count = document.createElement('span');
+    count.className = 'rail-count';
+    count.textContent = items.length + ' idea' + (items.length === 1 ? '' : 's');
+    header.appendChild(count);
+    rail.appendChild(header);
+
+    const scroller = document.createElement('div');
+    scroller.className = 'rail-scroller';
+    items.forEach(function(pair, i){
+      scroller.appendChild(buildCard(pair.item, catByKey[pair.cat] || pair.cat, i));
+    });
+    rail.appendChild(scroller);
+    return rail;
+  }
+
   function renderActivities(data){
+    lastData = data;
     const container = document.getElementById('activitiesContainer');
     container.innerHTML = '';
-    var globalCardIdx = 0;
 
+    const catByKey = {};
+    CATEGORIES.forEach(function(c){ catByKey[c.key] = c; });
+
+    // "Because you're [Flovee]" — one top pick from each category that has items.
+    const picks = [];
+    CATEGORIES.forEach(function(c){
+      const items = data[c.key];
+      if (items && items.length) picks.push({cat: c.key, item: items[0]});
+    });
+    const who = floveeName();
+    if (picks.length >= 3) {
+      const heading = who ? ('Because you\'re <strong>' + who + '</strong>') : 'Handpicked for you';
+      container.appendChild(buildRail('picks', heading, picks, catByKey));
+    }
+
+    // One rail per category.
     CATEGORIES.forEach(function(cat){
       const items = data[cat.key];
-      if(!items || !items.length) return;
+      if (!items || !items.length) return;
+      const railItems = items.map(function(it){ return {cat: cat.key, item: it}; });
+      container.appendChild(buildRail(cat.key, '<span class="cat-emoji">' + cat.emoji + '</span> ' + cat.label, railItems, catByKey));
+    });
 
-      const section = document.createElement('div');
-      section.className = 'category';
+    applyFilters();
+  }
 
-      const label = document.createElement('div');
-      label.className = 'cat-label';
-      label.innerHTML = '<span class="cat-emoji">' + cat.emoji + '</span> ' + cat.label;
-      label.style.color = pal.ac;
-      section.appendChild(label);
+  // ─── FILTER + SEARCH ───
+  function applyFilters(){
+    const q = filterState.query.trim().toLowerCase();
+    const cat = filterState.category;
+    const rails = document.querySelectorAll('#activitiesContainer .rail');
+    let anyVisible = false;
 
-      const row = document.createElement('div');
-      row.className = 'cards-row';
+    rails.forEach(function(rail){
+      const railId = rail.getAttribute('data-rail');
+      // Category filter hides whole rails except "picks" (always shown unless empty after search).
+      const catHide = (cat !== 'all' && railId !== 'picks' && railId !== cat);
+      let visibleCards = 0;
 
-      items.forEach(function(item){
-        const card = document.createElement('div');
-        card.className = 'activity-card';
-        card.setAttribute('data-cat', cat.key);
-        card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
-        card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
-        card.style.animationDelay = (globalCardIdx * 0.08) + 's';
-        globalCardIdx++;
-
-        const tag = document.createElement('span');
-        tag.className = 'card-tag';
-        tag.textContent = cat.label;
-        tag.style.background = pal.ac;
-
-        const title = document.createElement('div');
-        title.className = 'card-title';
-        title.textContent = item.title;
-        title.style.color = pal.tx;
-
-        const desc = document.createElement('div');
-        desc.className = 'card-desc';
-        desc.textContent = item.desc;
-        desc.style.color = pal.tx;
-
-        card.appendChild(tag);
-        card.appendChild(title);
-        card.appendChild(desc);
-        row.appendChild(card);
+      rail.querySelectorAll('.activity-card').forEach(function(card){
+        const cardCat = card.getAttribute('data-cat');
+        const text = card.getAttribute('data-search') || '';
+        const matchesCat = (cat === 'all') || (railId === 'picks' ? cardCat === cat : true);
+        const matchesQ = !q || text.indexOf(q) !== -1;
+        const show = !catHide && matchesCat && matchesQ;
+        card.classList.toggle('is-filtered', !show);
+        if (show) visibleCards++;
       });
 
-      section.appendChild(row);
-      container.appendChild(section);
+      const emptyPicks = railId === 'picks' && visibleCards === 0;
+      rail.classList.toggle('is-hidden', catHide || emptyPicks || visibleCards === 0);
+      if (!rail.classList.contains('is-hidden')) anyVisible = true;
     });
+
+    // Empty-results state
+    let empty = document.getElementById('noResults');
+    if (!anyVisible) {
+      if (!empty) {
+        empty = document.createElement('div');
+        empty.className = 'no-results';
+        empty.id = 'noResults';
+        empty.innerHTML = '<strong>Nothing matches</strong>Try clearing the search or picking a different filter.';
+        document.getElementById('activitiesContainer').appendChild(empty);
+      }
+    } else if (empty) {
+      empty.remove();
+    }
+  }
+
+  function buildToolbar(){
+    const chipRow = document.getElementById('chipRow');
+    if (!chipRow || chipRow.childElementCount) return;
+
+    function makeChip(filterKey, label, emoji){
+      const b = document.createElement('button');
+      b.className = 'chip' + (filterState.category === filterKey ? ' is-active' : '');
+      b.setAttribute('data-filter', filterKey);
+      b.innerHTML = (emoji ? '<span class="chip-emoji">' + emoji + '</span>' : '') + label;
+      b.addEventListener('click', function(){
+        filterState.category = filterKey;
+        chipRow.querySelectorAll('.chip').forEach(function(c){ c.classList.toggle('is-active', c.getAttribute('data-filter') === filterKey); });
+        applyFilters();
+      });
+      return b;
+    }
+
+    chipRow.appendChild(makeChip('all', 'All'));
+    CATEGORIES.forEach(function(c){ chipRow.appendChild(makeChip(c.key, c.chip, c.emoji)); });
+
+    const search = document.getElementById('searchInput');
+    if (search) {
+      let t;
+      search.addEventListener('input', function(){
+        clearTimeout(t);
+        t = setTimeout(function(){
+          filterState.query = search.value || '';
+          applyFilters();
+        }, 120);
+      });
+    }
   }
 
   // ─── GENERATE ───
@@ -429,6 +607,8 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
       if(!hasValidKey) throw new Error('Response JSON missing expected activity categories');
 
       renderActivities(data);
+      buildToolbar();
+      document.getElementById('activitiesToolbar').style.display = 'flex';
 
     } catch(err) {
       console.error('Activities generation failed:', err);
@@ -436,7 +616,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     }
 
     btn.disabled = false;
-    btn.innerHTML = '<span class="refresh-icon">&#x21bb;</span> Refresh Activities';
+    btn.innerHTML = '<span class="refresh-icon">&#x21bb;</span> New Ideas';
     generating = false;
   };
 
