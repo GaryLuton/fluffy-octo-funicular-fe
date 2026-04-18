@@ -69,6 +69,17 @@
     .rail-scroller .activity-card{flex:0 0 260px;scroll-snap-align:start;margin:0;}
     .activity-card.is-filtered{display:none;}
 
+    /* CARD FOOTER (Play together button) */
+    .card-foot{display:flex;align-items:center;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(30,12,6,0.08);}
+    .play-together{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;color:var(--tx);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.62rem;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:background 0.2s,border-color 0.2s;}
+    .play-together:hover{background:var(--ac);color:#fff;border-color:var(--ac);}
+    .play-together svg{width:12px;height:12px;}
+
+    /* Pinned card (built-in activities like Draw Together) */
+    .activity-card.pinned{cursor:pointer;}
+    .activity-card.pinned:hover{transform:translateY(-8px) scale(1.02);}
+    .pin-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(30,12,6,0.08);color:var(--tx);opacity:0.6;margin-left:6px;}
+
     /* TILE ANIMATIONS — gentle idle float on the category dot */
     .card-tag{position:relative;}
     .activity-card:hover .card-tag{animation:tagPop 0.45s ease;}
@@ -393,7 +404,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
   // ─── RENDER ───
   function buildCard(item, cat, idx){
     const card = document.createElement('div');
-    card.className = 'activity-card';
+    card.className = 'activity-card' + (item.pinned ? ' pinned' : '');
     card.setAttribute('data-cat', cat.key);
     card.setAttribute('data-search', (item.title + ' ' + item.desc).toLowerCase());
     card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
@@ -409,6 +420,12 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     title.className = 'card-title';
     title.textContent = item.title;
     title.style.color = pal.tx;
+    if (item.pinned) {
+      const badge = document.createElement('span');
+      badge.className = 'pin-badge';
+      badge.textContent = 'Built in';
+      title.appendChild(badge);
+    }
 
     const desc = document.createElement('div');
     desc.className = 'card-desc';
@@ -418,8 +435,37 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     card.appendChild(tag);
     card.appendChild(title);
     card.appendChild(desc);
+
+    // Footer: "Play together" chip (or direct link for pinned items).
+    const foot = document.createElement('div');
+    foot.className = 'card-foot';
+    const cta = document.createElement('a');
+    cta.className = 'play-together';
+    if (item.href) {
+      cta.href = item.href;
+      cta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg> Open';
+    } else {
+      const params = new URLSearchParams({ invite: item.title, cat: cat.key });
+      cta.href = 'friends.html?' + params.toString();
+      cta.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 11a5 5 0 1 0-10 0M3 21a5 5 0 0 1 10 0M15 14v6M12 17h6"/></svg> Play together';
+    }
+    cta.style.color = pal.tx;
+    foot.appendChild(cta);
+    card.appendChild(foot);
+
+    if (item.pinned && item.href) {
+      card.addEventListener('click', function(e){
+        if (e.target.closest('.play-together')) return;
+        window.location.href = item.href;
+      });
+    }
     return card;
   }
+
+  // Static "built-in" pinned activities that always appear in the picks rail.
+  const PINNED_PICKS = [
+    {cat:'social', item:{title:'Draw Together', desc:'Co-draw anime portraits live with a friend.', href:'collab.html', pinned:true}},
+  ];
 
   function buildRail(id, title, items, catByKey){
     const rail = document.createElement('section');
@@ -456,8 +502,8 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     const catByKey = {};
     CATEGORIES.forEach(function(c){ catByKey[c.key] = c; });
 
-    // "Because you're [Flovee]" — one top pick from each category that has items.
-    const picks = [];
+    // "Because you're [Flovee]" — pinned built-ins first, then top pick from each category.
+    const picks = PINNED_PICKS.slice();
     CATEGORIES.forEach(function(c){
       const items = data[c.key];
       if (items && items.length) picks.push({cat: c.key, item: items[0]});

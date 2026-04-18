@@ -47,7 +47,20 @@
   }
 
   // ─── Auth Gate ───
-  if (!getToken() && !window.location.pathname.includes('auth.html')) {
+  // Pages accessible without an account — quiz/landing + low-stakes previews
+  // so a curious visitor can experience something before signing up.
+  var PUBLIC_PAGES = [
+    'auth.html',
+    'reset-password.html',
+    'index.html',
+    'beyou.html',
+    'parents.html',
+  ];
+  var currentPath = window.location.pathname || '';
+  var isPublic = currentPath === '/' || PUBLIC_PAGES.some(function (p) {
+    return currentPath.indexOf(p) !== -1;
+  });
+  if (!getToken() && !isPublic) {
     window.location.href = '/auth.html';
   }
 
