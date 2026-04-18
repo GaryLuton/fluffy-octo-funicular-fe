@@ -59,7 +59,20 @@
 
   function apply(s) {
     s = s || load();
-    var preset = PRESETS[s.preset] || PRESETS['default'];
+    var preset;
+    if (s.customPreset && typeof s.customPreset === 'object' && s.customPreset.bg) {
+      var cp = s.customPreset;
+      preset = {
+        name: cp.name || 'Custom',
+        bg: cp.bg,
+        bgMid: cp.bgMid || shade(cp.bg, -0.06),
+        accent: cp.accent,
+        tx: cp.tx,
+        surface: cp.surface || '#ffffff'
+      };
+    } else {
+      preset = PRESETS[s.preset] || PRESETS['default'];
+    }
     var accent = s.accent || preset.accent;
     var accentDark = shade(accent, -0.2);
 
@@ -132,13 +145,35 @@
     injectThemeStyles();
   }
 
+  function getPalette() {
+    var s = load();
+    var preset;
+    if (s.customPreset && s.customPreset.bg) {
+      preset = s.customPreset;
+    } else {
+      preset = PRESETS[s.preset] || PRESETS['default'];
+    }
+    var accent = s.accent || preset.accent;
+    return {
+      bg: preset.bg,
+      bgMid: preset.bgMid || shade(preset.bg, -0.06),
+      ac: accent,
+      ac2: shade(accent, -0.2),
+      tx: preset.tx,
+      surface: preset.surface || '#ffffff',
+      isCustom: hasCustom()
+    };
+  }
+
   window.StufloverTheme = {
     PRESETS: PRESETS,
     TEXT_SIZES: TEXT_SIZES,
     load: load,
     apply: apply,
+    getPalette: getPalette,
     update: function (partial) {
       var s = load();
+      if (partial && partial.preset && !partial.customPreset) s.customPreset = null;
       for (var k in partial) s[k] = partial[k];
       save(s);
       apply(s);
