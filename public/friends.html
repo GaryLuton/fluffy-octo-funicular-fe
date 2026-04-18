@@ -100,7 +100,26 @@
     /* ── ADD CONTACT MODAL ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;}
     .modal-overlay.open{display:flex;}
-    .modal{width:360px;border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:16px;}
+    .modal{width:380px;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto;}
+
+    /* Share link section inside add modal */
+    .share-sec{padding:14px;border-radius:10px;border:1.5px dashed rgba(128,128,128,0.18);display:flex;flex-direction:column;gap:10px;}
+    .share-sec-title{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.4;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .share-link-row{display:flex;gap:8px;}
+    .share-link-row input{flex:1;padding:9px 12px;border-radius:6px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(128,128,128,0.05);color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.78rem;outline:none;}
+    .share-copy-btn{padding:9px 14px;border-radius:6px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;}
+    .share-copy-btn:hover{opacity:0.8;}
+    .share-qr-wrap{display:flex;align-items:center;gap:12px;}
+    .share-qr{width:96px;height:96px;border-radius:8px;background:#fff;padding:6px;box-shadow:0 2px 10px rgba(0,0,0,0.08);flex-shrink:0;}
+    .share-hint{font-size:0.72rem;line-height:1.55;opacity:0.55;}
+    .share-disabled{font-size:0.72rem;opacity:0.5;font-style:italic;line-height:1.5;}
+    .modal-or{text-align:center;font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin:2px 0;}
+
+    /* Invite banner (from activities.html ?invite=...) */
+    .invite-banner{padding:10px 14px;border-radius:8px;margin:10px 12px;display:flex;align-items:center;gap:10px;font-size:0.78rem;line-height:1.5;}
+    .invite-banner strong{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;display:block;font-size:0.6rem;opacity:0.55;margin-bottom:2px;}
+    .invite-banner .invite-close{background:none;border:none;color:inherit;opacity:0.5;cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 8px;margin-left:auto;}
+    .invite-banner .invite-close:hover{opacity:1;}
     .modal-title{font-size:1.2rem;font-weight:700;margin-bottom:4px;}
     .modal-input{width:100%;padding:11px 14px;font-size:0.92rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.18);border-radius:8px;background:rgba(128,128,128,0.04);color:inherit;outline:none;transition:border-color 0.2s;}
     .modal-input:focus{border-color:rgba(128,128,128,0.38);}
@@ -145,6 +164,7 @@
     <div class="contacts-search">
       <input id="searchInput" placeholder="Search..." oninput="filterContacts(this.value)"/>
     </div>
+    <div id="inviteBanner" style="display:none;"></div>
     <div class="contacts-list" id="contactsList"></div>
   </div>
 
@@ -191,6 +211,14 @@
 <div class="modal-overlay" id="addModal">
   <div class="modal" id="modalBox">
     <div class="modal-title bc">Add a Friend</div>
+
+    <div class="share-sec" id="shareSec">
+      <div class="share-sec-title">Your share link</div>
+      <div id="shareContent"></div>
+    </div>
+
+    <div class="modal-or">or add by name</div>
+
     <input class="modal-input" id="nameInput" placeholder="Their name..." maxlength="30"
       onkeydown="if(event.key==='Enter') saveContact()"/>
     <div style="display:flex;flex-direction:column;gap:6px;">
@@ -231,9 +259,9 @@ function resolvePalette(){
 const PAL=resolvePalette();
 
 const FLOVEE_NAMES={kawaii:'Luna',softgirl:'Rosie',cleangirl:'Nora',coquette:'Coco',goth:'Raven',darkacad:'Lyra',grunge:'Sid',y2k:'Stacy',street:'Ace',cottage:'Wren',hippie:'Sage',oldmoney:'Eloise',preppy:'Blair',tomato:'Bea',indie:'Wren',emo:'Ember'};
-const top=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-const floveeName=FLOVEE_NAMES[top]||'Flo';
-const aeName=(()=>{const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};return m[top]||'Your Style';})();
+const topAe=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+const floveeName=FLOVEE_NAMES[topAe]||'Flo';
+const aeName=(()=>{const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};return m[topAe]||'Your Style';})();
 const social=profile?.social||'ambivert';
 const mood=profile?.moodToday||'okay';
 
@@ -677,9 +705,100 @@ function clearChat(id){
 function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
 function closeMobileChat(){ document.getElementById('chatPanel').classList.remove('mobile-active'); }
 
+// ─── URL PARAM HANDLING (invite / add link) ───────────────
+let pendingInvite=null;
+function getMyUsername(){
+  try{ const u=JSON.parse(localStorage.getItem('stuflover_user')||'null'); return u&&u.username?u.username:null; }catch(e){ return null; }
+}
+function buildShareSection(){
+  const host=document.getElementById('shareContent');
+  if(!host) return;
+  const username=getMyUsername();
+  if(!username){
+    host.innerHTML='<div class="share-disabled">Sign in to get a shareable link you can send friends — they\u2019ll land right in your friends list ready to chat.</div>';
+    return;
+  }
+  const link=window.location.origin+'/friends.html?add='+encodeURIComponent(username);
+  const qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data='+encodeURIComponent(link);
+  host.innerHTML=`
+    <div class="share-qr-wrap">
+      <img class="share-qr" src="${qrSrc}" alt="QR code for your share link" loading="lazy"
+        onerror="this.style.display='none';"/>
+      <div class="share-hint">Scan or send this link. Anyone who opens it lands here with your name ready to add.</div>
+    </div>
+    <div class="share-link-row">
+      <input id="shareLinkInput" type="text" readonly value="${link}"/>
+      <button class="share-copy-btn bc" id="shareCopyBtn" onclick="copyShareLink(this)" style="background:${PAL.ac};color:${PAL.bg};">Copy</button>
+    </div>`;
+}
+function copyShareLink(btn){
+  const i=document.getElementById('shareLinkInput');
+  if(!i) return;
+  const text=i.value;
+  const done=()=>{ const t=btn.textContent; btn.textContent='Copied'; setTimeout(()=>{ btn.textContent=t; },1400); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done,()=>{ i.select(); document.execCommand('copy'); done(); });
+  }else{
+    i.select(); document.execCommand('copy'); done();
+  }
+}
+
+function showInviteBanner(title){
+  const b=document.getElementById('inviteBanner');
+  if(!b) return;
+  b.style.background=PAL.ac+'1a';
+  b.style.color=PAL.tx;
+  b.style.display='flex';
+  b.className='invite-banner';
+  b.innerHTML=`<div style="flex:1;min-width:0;"><strong>Invite a friend</strong>${title}</div>
+    <button class="invite-close" onclick="dismissInvite()">\u00d7</button>`;
+}
+function dismissInvite(){ pendingInvite=null; const b=document.getElementById('inviteBanner'); if(b){ b.style.display='none'; b.innerHTML=''; } }
+
+function handleUrlParams(){
+  const p=new URLSearchParams(window.location.search);
+  const invite=p.get('invite');
+  if(invite){
+    pendingInvite={title:invite,cat:p.get('cat')||''};
+    showInviteBanner(invite);
+  }
+  const add=p.get('add');
+  if(add){
+    const name=add.trim().slice(0,30);
+    if(name){
+      const dup=contacts.find(c=>c.name.toLowerCase()===name.toLowerCase());
+      if(!dup){
+        openAddModal();
+        setTimeout(()=>{ const i=document.getElementById('nameInput'); if(i){ i.value=name; } },120);
+      }
+    }
+  }
+  // Clean URL so refresh doesn't re-fire.
+  if((invite||add) && window.history && window.history.replaceState){
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+
+// Patch openChat to prefill an invite message if pendingInvite is set.
+const _openChatOrig=openChat;
+openChat=function(id){
+  _openChatOrig(id);
+  if(pendingInvite){
+    const input=document.getElementById('chatInput');
+    if(input && !input.value){
+      input.value='hey! wanna '+pendingInvite.title.toLowerCase()+' together?';
+      autoResize(input);
+      input.focus();
+    }
+    dismissInvite();
+  }
+};
+
 // ─── INIT ─────────────────────────────────────────────────
 applyStyles();
+buildShareSection();
 renderContacts();
+handleUrlParams();
 
 // Add default contacts if none
 if(contacts.length===0){
