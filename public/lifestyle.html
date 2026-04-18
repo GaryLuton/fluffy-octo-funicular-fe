@@ -2562,7 +2562,18 @@ function buildPage(){
 
   // Auto-open section from deep link
   var autoOpen = localStorage.getItem('stuflover_open_section');
-  if(autoOpen){ localStorage.removeItem('stuflover_open_section'); setTimeout(function(){ openSection(autoOpen); },300); }
+  var autoGame = localStorage.getItem('stuflover_open_game');
+  if(autoOpen){
+    localStorage.removeItem('stuflover_open_section');
+    localStorage.removeItem('stuflover_open_game');
+    setTimeout(function(){
+      openSection(autoOpen);
+      if(autoGame && autoOpen === 'floverhub' && typeof HUB_GAMES !== 'undefined'){
+        var targetGame = HUB_GAMES.find(function(g){ return g.id === autoGame; });
+        if(targetGame) setTimeout(function(){ startHubGame(targetGame); }, 120);
+      }
+    },300);
+  }
 
   // Style story bar
   document.querySelectorAll('.story-avatar').forEach(function(a){ a.style.background=searchPal.bg; a.style.color=searchPal.tx; });

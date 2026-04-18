@@ -36,7 +36,7 @@
     @keyframes floatSpark{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(-18px) rotate(12deg);}}
 
     /* Ensure all main content sits above background decorations */
-    nav, .hero, .refresh-row, .activities-toolbar, #activitiesContainer{position:relative;z-index:1;}
+    nav, .hero, .refresh-row, .activities-toolbar, #activitiesContainer, #gamesRail{position:relative;z-index:1;}
 
     /* TOOLBAR (search + chips) */
     .activities-toolbar{max-width:1100px;margin:0 auto 24px;padding:0 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
@@ -242,6 +242,14 @@
     <span class="refresh-icon">&#x21bb;</span> New Ideas
   </button>
 </div>
+
+<section class="rail" id="gamesRail" aria-label="Games">
+  <div class="rail-header">
+    <div class="rail-title" id="gamesRailTitle"><span class="cat-emoji">🎮</span> Games</div>
+    <span class="rail-count" id="gamesRailCount"></span>
+  </div>
+  <div class="rail-scroller" id="gamesRailScroller"></div>
+</section>
 
 <div id="activitiesContainer">
   <div class="loading-msg" id="loadingMsg">
@@ -666,12 +674,76 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     generating = false;
   };
 
+  // ─── GAMES RAIL (always visible, deep-links into lifestyle.html#floverhub) ───
+  const GAMES = [
+    {id:'dti',            name:'Dress To Impress', desc:'Build an outfit for a theme.',          emoji:'👗'},
+    {id:'ratethis',       name:'Rate the Look',    desc:'Rate outfits — real or fake?',          emoji:'💖'},
+    {id:'stylechallenge', name:'Style Challenge',  desc:'Wild constraints, build an outfit.',    emoji:'⚡'},
+    {id:'thisorthat',     name:'This or That',     desc:'Two cards — tap your pick.',            emoji:'🔀'},
+    {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices.',                   emoji:'⚖️'},
+    {id:'aestheticquiz',  name:'Aesthetic Quiz',   desc:'Discover your secret aesthetic.',       emoji:'🎨'},
+    {id:'trivia',         name:'Trivia Battle',    desc:'Pop culture questions.',                emoji:'❓'},
+  ];
+
+  function buildGameTile(game, idx){
+    const card = document.createElement('a');
+    card.className = 'activity-card pinned';
+    card.href = 'lifestyle.html';
+    card.setAttribute('data-cat', 'games');
+    card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
+    card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
+    card.style.animationDelay = (Math.min(idx, 10) * 0.06) + 's';
+    card.style.textDecoration = 'none';
+    card.style.color = pal.tx;
+
+    const tag = document.createElement('span');
+    tag.className = 'card-tag';
+    tag.textContent = 'Play';
+    tag.style.background = pal.ac;
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.innerHTML = '<span style="margin-right:6px;">' + game.emoji + '</span>' + game.name;
+    title.style.color = pal.tx;
+
+    const desc = document.createElement('div');
+    desc.className = 'card-desc';
+    desc.textContent = game.desc;
+    desc.style.color = pal.tx;
+
+    card.appendChild(tag);
+    card.appendChild(title);
+    card.appendChild(desc);
+
+    card.addEventListener('click', function(){
+      try {
+        localStorage.setItem('stuflover_open_section', 'floverhub');
+        localStorage.setItem('stuflover_open_game', game.id);
+      } catch(e){}
+    });
+    return card;
+  }
+
+  function renderGamesRail(){
+    const rail = document.getElementById('gamesRail');
+    const title = document.getElementById('gamesRailTitle');
+    const count = document.getElementById('gamesRailCount');
+    const scroller = document.getElementById('gamesRailScroller');
+    if(!rail || !scroller) return;
+    title.style.color = pal.ac;
+    count.style.color = pal.tx;
+    count.textContent = GAMES.length + ' games';
+    scroller.innerHTML = '';
+    GAMES.forEach(function(g, i){ scroller.appendChild(buildGameTile(g, i)); });
+  }
+  renderGamesRail();
+
   // ─── AUTO-GENERATE ON LOAD (only if quiz completed) ───
   var savedProfile = JSON.parse(localStorage.getItem('stuflover_profile')||'null');
   if(savedProfile && savedProfile.aesthetics && Object.keys(savedProfile.aesthetics).length > 0){
     generateActivities();
   } else {
-    document.getElementById('activitiesContainer').innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:0.4;"><p style="font-size:1.1rem;margin-bottom:16px;">Take the quiz first to get personalized activities</p><a href="lifestyle.html" style="color:var(--ac);font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Take the Quiz</a></div>';
+    document.getElementById('activitiesContainer').innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:0.4;"><p style="font-size:1.1rem;margin-bottom:16px;">Take the quiz to also get personalized activity ideas</p><a href="lifestyle.html" style="color:var(--ac);font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Take the Quiz</a></div>';
   }
 
 })();
