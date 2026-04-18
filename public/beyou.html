@@ -301,6 +301,30 @@
 var profile = (function(){ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
 
 function resolvePalette(){
+  // The Me page / quiz stores a site-wide theme. Prefer it so this page
+  // matches whatever the user picked there.
+  try {
+    var themeState = JSON.parse(localStorage.getItem('stuflover_theme')||'null');
+    if (themeState) {
+      if (themeState.customPreset && themeState.customPreset.bg) {
+        var cp = themeState.customPreset;
+        return { bg: cp.bg, tx: cp.tx, ac: themeState.accent || cp.accent };
+      }
+      var PRESETS = {
+        'default': { bg: '#faf0f0', accent: '#c87860', tx: '#2a1a14' },
+        'rose':    { bg: '#fbe8ec', accent: '#d84a6b', tx: '#2a0e18' },
+        'mint':    { bg: '#e8f5ef', accent: '#3fa874', tx: '#0e2419' },
+        'lilac':   { bg: '#f0e8fa', accent: '#8a5fd8', tx: '#1a0c2a' },
+        'ocean':   { bg: '#e4f1f8', accent: '#2e86b8', tx: '#0c1a24' },
+        'sunset':  { bg: '#fcead2', accent: '#e07b3c', tx: '#2a140a' },
+        'mono':    { bg: '#f5f5f5', accent: '#333333', tx: '#111111' },
+        'dark':    { bg: '#1a1418', accent: '#e08a95', tx: '#f5e8e8' }
+      };
+      var p = PRESETS[themeState.preset];
+      if (p) return { bg: p.bg, tx: p.tx, ac: themeState.accent || p.accent };
+    }
+  } catch(e) {}
+
   var fc=profile&&profile.faveColour; var ae=(profile&&profile.aesthetics)||{};
   var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
   top=top?top[0]:'softgirl';

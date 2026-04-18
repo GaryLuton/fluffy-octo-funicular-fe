@@ -64,7 +64,20 @@
 
   function apply(s) {
     s = s || load();
-    var preset = PRESETS[s.preset] || PRESETS['default'];
+    var preset;
+    if (s.customPreset && typeof s.customPreset === 'object' && s.customPreset.bg) {
+      var cp = s.customPreset;
+      preset = {
+        name: cp.name || 'Custom',
+        bg: cp.bg,
+        bgMid: cp.bgMid || shade(cp.bg, -0.06),
+        accent: cp.accent,
+        tx: cp.tx,
+        surface: cp.surface || '#ffffff'
+      };
+    } else {
+      preset = PRESETS[s.preset] || PRESETS['default'];
+    }
     var accent = s.accent || preset.accent;
     var accentDark = shade(accent, -0.2);
 
@@ -127,6 +140,27 @@
       + '  color: var(--sl-tx) !important;'
       + '}'
       + 'html[data-sl-custom="on"] a { color: var(--sl-ac); }'
+      /* Top nav — force consistent themed background on every page. */
+      + 'html[data-sl-custom="on"] #sl-top-nav {'
+      + '  background: color-mix(in srgb, var(--sl-bg) 82%, transparent) !important;'
+      + '  border-bottom-color: color-mix(in srgb, var(--sl-tx) 10%, transparent) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] #sl-bottom-tabs {'
+      + '  background: color-mix(in srgb, var(--sl-bg) 92%, transparent) !important;'
+      + '  border-top-color: color-mix(in srgb, var(--sl-tx) 10%, transparent) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] #sl-top-nav .sl-logo,'
+      + 'html[data-sl-custom="on"] #sl-top-nav .sl-tab,'
+      + 'html[data-sl-custom="on"] #sl-top-nav .sl-back-chip,'
+      + 'html[data-sl-custom="on"] #sl-bottom-tabs .sl-tab {'
+      + '  color: var(--sl-tx) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] #sl-top-nav .sl-tab.is-active {'
+      + '  background: var(--sl-ac) !important; color: var(--sl-surface) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] #sl-bottom-tabs .sl-tab.is-active {'
+      + '  color: var(--sl-ac) !important;'
+      + '}'
       + 'html[data-sl-motion="off"] *, html[data-sl-motion="off"] *::before, html[data-sl-motion="off"] *::after {'
       + '  animation-duration: 0ms !important; animation-delay: 0ms !important;'
       + '  transition-duration: 0ms !important; transition-delay: 0ms !important;'
@@ -144,13 +178,38 @@
     injectThemeStyles();
   }
 
+  function getPalette() {
+    var s = load();
+    var preset;
+    if (s.customPreset && s.customPreset.bg) {
+      preset = s.customPreset;
+    } else {
+      preset = PRESETS[s.preset] || PRESETS['default'];
+    }
+    var accent = s.accent || preset.accent;
+    return {
+      bg: preset.bg,
+      bgMid: preset.bgMid || shade(preset.bg, -0.06),
+      ac: accent,
+      ac2: shade(accent, -0.2),
+      tx: preset.tx,
+      surface: preset.surface || '#ffffff',
+      isCustom: hasCustom()
+    };
+  }
+
   window.StufloverTheme = {
     PRESETS: PRESETS,
     TEXT_SIZES: TEXT_SIZES,
     load: load,
     apply: apply,
+    getPalette: getPalette,
     update: function (partial) {
       var s = load();
+      // If a preset is being chosen explicitly and no custom palette is
+      // provided in the same update, clear any prior custom palette so the
+      // chosen preset takes effect.
+      if (partial && partial.preset && !partial.customPreset) s.customPreset = null;
       for (var k in partial) s[k] = partial[k];
       save(s);
       apply(s);

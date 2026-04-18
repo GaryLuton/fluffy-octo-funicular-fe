@@ -2517,6 +2517,42 @@ function buildPage(){
     }));
   }catch(e){}
 
+  // Apply the quiz-derived palette as the user's site-wide theme so every
+  // page (Play, Friends, Me, etc.) reflects their aesthetic. This is
+  // overridden if the user later picks a different preset on the Me page.
+  try {
+    var surface = '#ffffff';
+    // Dark backgrounds need a dark surface so cards remain readable.
+    var bgHex = pal.bg.replace('#','');
+    if (bgHex.length === 6) {
+      var r = parseInt(bgHex.substr(0,2),16),
+          g = parseInt(bgHex.substr(2,2),16),
+          b = parseInt(bgHex.substr(4,2),16);
+      var lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+      if (lum < 0.35) surface = lightenHex(pal.bg, 0.12);
+    }
+    var themeState = {
+      preset: 'quiz',
+      accent: null,
+      textSize: 'default',
+      motion: true,
+      texture: true,
+      source: 'quiz',
+      customPreset: {
+        name: aeName || 'Your Vibe',
+        bg: pal.bg,
+        bgMid: pal.ac2 || lightenHex(pal.bg, -0.05),
+        accent: pal.ac,
+        tx: pal.tx,
+        surface: surface
+      }
+    };
+    localStorage.setItem('stuflover_theme', JSON.stringify(themeState));
+    if (window.StufloverTheme && typeof window.StufloverTheme.apply === 'function') {
+      window.StufloverTheme.apply(themeState);
+    }
+  } catch(e) {}
+
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
 

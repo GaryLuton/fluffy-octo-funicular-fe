@@ -187,8 +187,31 @@ var fcPhotoData = null;
 var fcExpiry = 24;
 var pollInterval = null;
 
-// Resolve palette from profile
+// Resolve palette: prefer site-wide theme (Me page / quiz), else profile.
 (function(){
+  try {
+    var ts = JSON.parse(localStorage.getItem('stuflover_theme')||'null');
+    if (ts) {
+      if (ts.customPreset && ts.customPreset.bg) {
+        var cp = ts.customPreset;
+        PAL = { bg: cp.bg, tx: cp.tx, ac: ts.accent || cp.accent };
+        return;
+      }
+      var _P = {
+        'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
+        'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
+        'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
+        'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},
+        'ocean':{bg:'#e4f1f8',accent:'#2e86b8',tx:'#0c1a24'},
+        'sunset':{bg:'#fcead2',accent:'#e07b3c',tx:'#2a140a'},
+        'mono':{bg:'#f5f5f5',accent:'#333333',tx:'#111111'},
+        'dark':{bg:'#1a1418',accent:'#e08a95',tx:'#f5e8e8'}
+      };
+      var _p = _P[ts.preset];
+      if (_p) { PAL = { bg: _p.bg, tx: _p.tx, ac: ts.accent || _p.accent }; return; }
+    }
+  } catch(e) {}
+
   var profile;
   try{profile=JSON.parse(localStorage.getItem('stuflover_profile')||'null');}catch(e){profile=null;}
   if(!profile) return;

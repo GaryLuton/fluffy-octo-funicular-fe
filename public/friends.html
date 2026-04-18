@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Friends — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:background 0.5s,color 0.5s;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--sl-bg);color:var(--sl-tx);overflow:hidden;height:100vh;transition:background 0.5s,color 0.5s;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     /* ── LAYOUT ── */
@@ -253,6 +254,28 @@ function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);ret
 function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a);}catch(e){return hex;}}
 function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a));}catch(e){return hex;}}
 function resolvePalette(){
+  // Prefer the site-wide theme set via the Me page or quiz completion.
+  try {
+    const ts = JSON.parse(localStorage.getItem('stuflover_theme')||'null');
+    if (ts) {
+      if (ts.customPreset && ts.customPreset.bg) {
+        const cp = ts.customPreset;
+        return { bg: cp.bg, tx: cp.tx, ac: ts.accent || cp.accent };
+      }
+      const _P = {
+        'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
+        'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
+        'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
+        'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},
+        'ocean':{bg:'#e4f1f8',accent:'#2e86b8',tx:'#0c1a24'},
+        'sunset':{bg:'#fcead2',accent:'#e07b3c',tx:'#2a140a'},
+        'mono':{bg:'#f5f5f5',accent:'#333333',tx:'#111111'},
+        'dark':{bg:'#1a1418',accent:'#e08a95',tx:'#f5e8e8'}
+      };
+      const p = _P[ts.preset];
+      if (p) return { bg: p.bg, tx: p.tx, ac: ts.accent || p.accent };
+    }
+  } catch(e) {}
   const fc=profile?.faveColour;const ae=profile?.aesthetics||{};
   const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
   if(fc&&!fc.dark)return{bg:lightenH(fc.hex,0.88),tx:darkenH(fc.hex,0.55),ac:fc.hex};
