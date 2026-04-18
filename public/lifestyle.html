@@ -30,6 +30,11 @@
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     .serif{font-family:'Barlow Condensed',sans-serif;font-weight:900;}
 
+    /* Hide legacy per-page nav — sl-top-nav (injected by stuflover-nav.js)
+       replaces it. Doing this in CSS stops the old bar from flashing before
+       the swap. */
+    nav#mainNav, nav.sl-nav, .top-bar{display:none !important;}
+
     /* NAV */
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
     .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;}
@@ -2553,6 +2558,27 @@ function buildPage(){
     }
   } catch(e) {}
 
+  // Deep-link: if we arrived with a section/game to auto-open, prep the
+  // target view BEFORE fading in, so the user never sees My Page flash
+  // before the game loads.
+  var preAutoOpen = null, preAutoGame = null;
+  try {
+    preAutoOpen = localStorage.getItem('stuflover_open_section');
+    preAutoGame = localStorage.getItem('stuflover_open_game');
+  } catch(e){}
+  if(preAutoOpen){
+    try {
+      localStorage.removeItem('stuflover_open_section');
+      localStorage.removeItem('stuflover_open_game');
+    } catch(e){}
+    document.getElementById('homeView').style.display = 'none';
+    try { openSection(preAutoOpen); } catch(e){ console.error('auto-open section failed', e); }
+    if(preAutoGame && preAutoOpen === 'floverhub' && typeof HUB_GAMES !== 'undefined'){
+      var _targetGame = HUB_GAMES.find(function(g){ return g.id === preAutoGame; });
+      if(_targetGame) { try { startHubGame(_targetGame); } catch(e){ console.error('auto-open game failed', e); } }
+    }
+  }
+
   document.getElementById('lifestylePage').classList.add('active');
   window.scrollTo(0,0);
 
@@ -2623,20 +2649,7 @@ function buildPage(){
   // Load flovee post
   loadFloveePost();
 
-  // Auto-open section from deep link
-  var autoOpen = localStorage.getItem('stuflover_open_section');
-  var autoGame = localStorage.getItem('stuflover_open_game');
-  if(autoOpen){
-    localStorage.removeItem('stuflover_open_section');
-    localStorage.removeItem('stuflover_open_game');
-    setTimeout(function(){
-      openSection(autoOpen);
-      if(autoGame && autoOpen === 'floverhub' && typeof HUB_GAMES !== 'undefined'){
-        var targetGame = HUB_GAMES.find(function(g){ return g.id === autoGame; });
-        if(targetGame) setTimeout(function(){ startHubGame(targetGame); }, 120);
-      }
-    },300);
-  }
+  // Auto-open was handled before fade-in (see above) to prevent flashing.
 
   // Style story bar
   document.querySelectorAll('.story-avatar').forEach(function(a){ a.style.background=searchPal.bg; a.style.color=searchPal.tx; });
