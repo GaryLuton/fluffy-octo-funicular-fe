@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Account — Stuflover</title>
+  <title>Me — Stuflover</title>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
@@ -45,6 +45,39 @@
 
     .status-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;text-align:center;}
 
+    .me-eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:6px;font-size:0.72rem;color:var(--terracotta);text-transform:uppercase;margin-bottom:8px;}
+    .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+    .theme-swatch{cursor:pointer;border:2px solid transparent;border-radius:14px;padding:10px 8px 12px;background:rgba(30,12,6,0.04);display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color 0.15s,transform 0.15s;}
+    .theme-swatch:hover{transform:translateY(-2px);}
+    .theme-swatch.is-selected{border-color:var(--terracotta);background:rgba(200,120,96,0.1);}
+    .theme-swatch-ring{width:100%;aspect-ratio:1/1;border-radius:12px;display:flex;overflow:hidden;box-shadow:0 2px 8px rgba(30,12,6,0.08);}
+    .theme-swatch-ring span{flex:1;}
+    .theme-swatch-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1.5px;font-size:0.66rem;text-transform:uppercase;text-align:center;color:var(--brown);line-height:1.1;}
+    .accent-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+    .accent-row label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.78rem;text-transform:uppercase;color:var(--brown);}
+    .accent-row input[type="color"]{width:44px;height:44px;border:2px solid rgba(30,12,6,0.12);border-radius:10px;background:none;cursor:pointer;padding:2px;}
+    .accent-row button{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.72rem;text-transform:uppercase;background:transparent;border:1.5px solid rgba(30,12,6,0.15);color:var(--brown);padding:8px 14px;border-radius:8px;cursor:pointer;}
+    .accent-row button:hover{border-color:var(--brown);}
+    .segmented{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+    .segmented button{flex:1;min-width:64px;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1.5px;font-size:0.72rem;text-transform:uppercase;background:rgba(30,12,6,0.04);border:1.5px solid transparent;color:var(--brown);padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s,border-color 0.15s;}
+    .segmented button:hover{background:rgba(30,12,6,0.07);}
+    .segmented button.is-selected{background:var(--terracotta);color:#fff;border-color:var(--terracotta);}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-top:1px solid rgba(30,12,6,0.06);}
+    .toggle-row:first-of-type{border-top:none;}
+    .toggle-text strong{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;font-size:0.82rem;text-transform:uppercase;color:var(--brown);margin-bottom:2px;}
+    .toggle-text span{font-size:0.78rem;color:rgba(30,12,6,0.5);line-height:1.5;}
+    .switch{position:relative;width:46px;height:26px;flex-shrink:0;}
+    .switch input{opacity:0;width:0;height:0;}
+    .switch-slider{position:absolute;inset:0;background:rgba(30,12,6,0.2);border-radius:999px;cursor:pointer;transition:background 0.2s;}
+    .switch-slider::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform 0.2s;}
+    .switch input:checked + .switch-slider{background:var(--terracotta);}
+    .switch input:checked + .switch-slider::before{transform:translateX(20px);}
+    .field-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.78rem;text-transform:uppercase;color:var(--brown);margin-bottom:8px;}
+
+    @media(max-width:480px){
+      .theme-grid{grid-template-columns:repeat(2,1fr);}
+    }
+
     @media(max-width:768px){
       nav{padding:14px 20px;}
       .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(30,12,6,0.07);box-shadow:0 6px 20px rgba(30,12,6,0.08);}
@@ -72,6 +105,7 @@
 
 <div class="account-container">
   <div class="welcome-card sl-card">
+    <div class="me-eyebrow">Me</div>
     <h1 class="welcome-title" id="welcomeName">Welcome</h1>
     <div class="welcome-email" id="welcomeEmail"></div>
     <div class="welcome-joined" id="welcomeJoined"></div>
@@ -82,6 +116,40 @@
     <div class="section-desc" id="profileDesc">Your style preferences power Flovee, your shop, and your whole experience.</div>
     <button class="btn btn-primary sl-btn sl-btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
     <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="window.location.href='lifestyle.html'">View My Page</button>
+  </div>
+
+  <div class="section-card sl-card" id="appearanceCard">
+    <h2 class="section-title">Appearance &amp; Experience</h2>
+    <div class="section-desc">Pick a color theme, tweak your accent, and tune motion and sizing. Changes apply everywhere on the site.</div>
+
+    <div class="field-label">Color theme</div>
+    <div class="theme-grid" id="themeGrid"></div>
+
+    <div class="field-label">Accent color</div>
+    <div class="accent-row">
+      <input type="color" id="accentInput" aria-label="Custom accent color"/>
+      <span id="accentHex" style="font-family:monospace;font-size:0.82rem;color:rgba(30,12,6,0.55);"></span>
+      <button type="button" id="accentReset">Use theme default</button>
+    </div>
+
+    <div class="field-label" style="margin-top:4px;">Text size</div>
+    <div class="segmented" id="textSize" role="group" aria-label="Text size">
+      <button type="button" data-val="small">Small</button>
+      <button type="button" data-val="default">Default</button>
+      <button type="button" data-val="large">Large</button>
+      <button type="button" data-val="xlarge">X-Large</button>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-text"><strong>Motion</strong><span>Animations and transitions across the site.</span></div>
+      <label class="switch"><input type="checkbox" id="motionToggle"/><span class="switch-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-text"><strong>Background texture</strong><span>Subtle dot grid behind the page.</span></div>
+      <label class="switch"><input type="checkbox" id="textureToggle"/><span class="switch-slider"></span></label>
+    </div>
+
+    <button class="btn btn-outline sl-btn sl-btn-secondary" id="themeResetBtn" style="margin-top:16px;">Reset to defaults</button>
   </div>
 
   <div class="section-card sl-card">
@@ -165,6 +233,98 @@ function retakeQuiz() {
   }
   window.location.href = '/lifestyle.html';
 }
+
+// ── Appearance & Experience controls ───────────────────────
+(function setupAppearance(){
+  function ready(fn){ if(window.StufloverTheme) return fn(); setTimeout(function(){ ready(fn); }, 30); }
+  ready(function(){
+    var T = window.StufloverTheme;
+    var state = T.load();
+
+    // Build theme swatches
+    var grid = document.getElementById('themeGrid');
+    grid.innerHTML = '';
+    Object.keys(T.PRESETS).forEach(function(key){
+      var p = T.PRESETS[key];
+      var el = document.createElement('div');
+      el.className = 'theme-swatch' + (state.preset === key ? ' is-selected' : '');
+      el.setAttribute('data-preset', key);
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.innerHTML = '<div class="theme-swatch-ring">'
+        + '<span style="background:' + p.bg + '"></span>'
+        + '<span style="background:' + p.bgMid + '"></span>'
+        + '<span style="background:' + p.accent + '"></span>'
+        + '<span style="background:' + p.tx + '"></span>'
+        + '</div>'
+        + '<div class="theme-swatch-label">' + p.name + '</div>';
+      el.addEventListener('click', function(){
+        state = T.update({ preset: key, accent: null });
+        syncUI();
+      });
+      el.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+      });
+      grid.appendChild(el);
+    });
+
+    var accentInput = document.getElementById('accentInput');
+    var accentHex = document.getElementById('accentHex');
+    var accentReset = document.getElementById('accentReset');
+
+    accentInput.addEventListener('input', function(){
+      state = T.update({ accent: accentInput.value });
+      syncUI();
+    });
+    accentReset.addEventListener('click', function(){
+      state = T.update({ accent: null });
+      syncUI();
+    });
+
+    var sizeGroup = document.getElementById('textSize');
+    sizeGroup.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        state = T.update({ textSize: b.getAttribute('data-val') });
+        syncUI();
+      });
+    });
+
+    var motionToggle = document.getElementById('motionToggle');
+    motionToggle.addEventListener('change', function(){
+      state = T.update({ motion: motionToggle.checked });
+    });
+    var textureToggle = document.getElementById('textureToggle');
+    textureToggle.addEventListener('change', function(){
+      state = T.update({ texture: textureToggle.checked });
+    });
+
+    document.getElementById('themeResetBtn').addEventListener('click', function(){
+      state = T.reset();
+      syncUI();
+    });
+
+    function currentAccentHex(){
+      var preset = T.PRESETS[state.preset] || T.PRESETS['default'];
+      return state.accent || preset.accent;
+    }
+
+    function syncUI(){
+      document.querySelectorAll('.theme-swatch').forEach(function(el){
+        el.classList.toggle('is-selected', el.getAttribute('data-preset') === state.preset);
+      });
+      var hex = currentAccentHex();
+      accentInput.value = hex;
+      accentHex.textContent = hex.toUpperCase() + (state.accent ? '' : ' (theme)');
+      sizeGroup.querySelectorAll('button').forEach(function(b){
+        b.classList.toggle('is-selected', b.getAttribute('data-val') === state.textSize);
+      });
+      motionToggle.checked = !!state.motion;
+      textureToggle.checked = !!state.texture;
+    }
+
+    syncUI();
+  });
+})();
 
 async function deleteAccount() {
   if (!confirm('Are you sure? This will permanently delete your account and all your data.')) return;
