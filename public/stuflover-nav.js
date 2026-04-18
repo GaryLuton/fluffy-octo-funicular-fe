@@ -31,6 +31,10 @@
     return { preset: 'default', accent: null, textSize: 'default', motion: true, texture: true };
   }
 
+  function hasCustom() {
+    try { return !!localStorage.getItem(STORAGE_KEY); } catch (e) { return false; }
+  }
+
   function load() {
     try {
       var s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -81,11 +85,17 @@
     // Page-local aliases used by individual pages that redefine vars
     r.style.setProperty('--pink-light', preset.bg);
     r.style.setProperty('--pink-mid', preset.bgMid);
+    r.style.setProperty('--pink', preset.bg);
     r.style.setProperty('--peach', preset.bgMid);
     r.style.setProperty('--terracotta', accent);
     r.style.setProperty('--terracotta-dark', accentDark);
     r.style.setProperty('--brown', preset.tx);
     r.style.setProperty('--white', preset.surface);
+    // Short aliases used by activities.html and aesthetic pages
+    r.style.setProperty('--bg', preset.bg);
+    r.style.setProperty('--tx', preset.tx);
+    r.style.setProperty('--ac', accent);
+    r.style.setProperty('--ac2', accentDark);
 
     var mult = TEXT_SIZES[s.textSize] || 1.0;
     r.style.setProperty('font-size', (16 * mult) + 'px');
@@ -93,13 +103,30 @@
     r.setAttribute('data-sl-theme', s.preset);
     r.setAttribute('data-sl-motion', s.motion ? 'on' : 'off');
     r.setAttribute('data-sl-texture', s.texture ? 'on' : 'off');
+    // Only force the body/text overrides when the user has actively chosen
+    // settings — otherwise per-page aesthetic (PAL) palettes keep working.
+    if (hasCustom()) r.setAttribute('data-sl-custom', 'on');
+    else r.removeAttribute('data-sl-custom');
   }
 
   apply();
 
   function injectThemeStyles() {
     if (document.getElementById('sl-theme-styles')) return;
+    // These use !important so they override per-page inline styles set by
+    // aesthetic/PAL scripts (e.g. document.body.style.background = ...).
     var css = ''
+      + 'html[data-sl-custom="on"] body {'
+      + '  background-color: var(--sl-bg) !important;'
+      + '  color: var(--sl-tx) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] h1, html[data-sl-custom="on"] h2,'
+      + 'html[data-sl-custom="on"] h3, html[data-sl-custom="on"] h4,'
+      + 'html[data-sl-custom="on"] h5, html[data-sl-custom="on"] h6,'
+      + 'html[data-sl-custom="on"] .bc, html[data-sl-custom="on"] .logo {'
+      + '  color: var(--sl-tx) !important;'
+      + '}'
+      + 'html[data-sl-custom="on"] a { color: var(--sl-ac); }'
       + 'html[data-sl-motion="off"] *, html[data-sl-motion="off"] *::before, html[data-sl-motion="off"] *::after {'
       + '  animation-duration: 0ms !important; animation-delay: 0ms !important;'
       + '  transition-duration: 0ms !important; transition-delay: 0ms !important;'
