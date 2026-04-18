@@ -963,8 +963,15 @@
         max-width:280px !important;
       }
       #verticalFeed{
-        padding-bottom:80px !important;
+        padding-bottom:120px !important;
       }
+    }
+
+    /* Yield the Settings pill when hovering interactive CTAs so it never obscures clicks. */
+    body:has(#floveePostWrap button:hover) #cursorSettingsBtn,
+    body:has(.feed-section button:hover) #cursorSettingsBtn{
+      opacity:0.25;
+      pointer-events:none;
     }
   </style>
 </head>
@@ -1012,7 +1019,7 @@
     </div>
 
     <!-- Vertical feed -->
-    <div id="verticalFeed" style="position:relative;z-index:2;max-width:540px;margin:0 auto;padding:0 20px 60px;">
+    <div id="verticalFeed" style="position:relative;z-index:2;max-width:540px;margin:0 auto;padding:0 20px 120px;">
 
       <!-- Flovee Post (disappearing) -->
       <div class="feed-section feed-reveal" id="floveePostWrap" style="display:none;"></div>
