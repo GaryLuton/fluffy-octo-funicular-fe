@@ -35,6 +35,14 @@
     return null;
   }
 
+  function isPlayChild() {
+    var file = currentFile();
+    if (file === 'activities.html') return false;
+    var playTab = null;
+    for (var i = 0; i < TABS.length; i++) if (TABS[i].id === 'play') { playTab = TABS[i]; break; }
+    return !!playTab && playTab.match.indexOf(file) !== -1;
+  }
+
   function hrefFor(tab) {
     // Flovee tab: route quiz-less users to the quiz instead of a blank chat.
     if (tab.smart && tab.id === 'flovee' && !getProfile()) return 'index.html#quiz';
@@ -72,6 +80,20 @@ body { padding-top: var(--sl-nav-h); }\
   font-family: "Barlow Condensed", sans-serif; font-weight: 900;\
   font-size: 1.4rem; letter-spacing: 3px; text-transform: uppercase;\
   color: var(--sl-tx, #2a1a14); text-decoration: none;\
+}\
+#sl-top-nav .sl-left { display: flex; align-items: center; gap: 14px; }\
+#sl-top-nav .sl-back-chip {\
+  display: inline-flex; align-items: center; gap: 6px;\
+  padding: 7px 14px; border-radius: 999px;\
+  border: 1.5px solid rgba(42, 26, 20, 0.12);\
+  font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
+  font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
+  color: var(--sl-tx, #2a1a14); text-decoration: none;\
+  transition: border-color 180ms ease, background 180ms ease;\
+}\
+#sl-top-nav .sl-back-chip:hover {\
+  border-color: var(--sl-tx, #2a1a14);\
+  background: rgba(42, 26, 20, 0.04);\
 }\
 #sl-top-nav .sl-tabs { display: flex; gap: 4px; }\
 #sl-top-nav .sl-tab {\
@@ -142,11 +164,23 @@ body { padding-top: var(--sl-nav-h); }\
     top.id = 'sl-top-nav';
     top.setAttribute('aria-label', 'Main');
 
+    var left = document.createElement('div');
+    left.className = 'sl-left';
     var logo = document.createElement('a');
     logo.className = 'sl-logo';
     logo.href = 'index.html';
     logo.textContent = 'Stuflover';
-    top.appendChild(logo);
+    left.appendChild(logo);
+
+    if (isPlayChild()) {
+      var back = document.createElement('a');
+      back.className = 'sl-back-chip';
+      back.href = 'activities.html';
+      back.setAttribute('aria-label', 'Back to Play');
+      back.textContent = '← Play';
+      left.appendChild(back);
+    }
+    top.appendChild(left);
 
     var tabsWrap = document.createElement('div');
     tabsWrap.className = 'sl-tabs';
