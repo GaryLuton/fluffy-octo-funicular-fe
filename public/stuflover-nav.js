@@ -1,6 +1,6 @@
 /* ============================================================
    STUFLOVER SHARED NAV
-   Injects a consistent 5-tab nav on every page.
+   Injects a consistent 4-tab nav on every page.
    Desktop: sticky top bar. Mobile: top logo + bottom tab bar.
    Idempotent — safe to include multiple times.
    ============================================================ */
@@ -11,15 +11,10 @@
   var TABS = [
     { id: 'mypage',   label: 'My Page', href: 'lifestyle.html',  match: ['lifestyle.html'],                 icon: iconHome },
     { id: 'play',     label: 'Play',    href: 'activities.html', match: ['activities.html','fitcheck.html','fitforit.html','catalog.html','beyou.html','collab.html','academic.html','wishingwell.html'], icon: iconPlay },
-    { id: 'flovee',   label: 'Flovee',  href: 'friends.html?flovee=1', match: ['flovee.html'],             icon: iconSpark, smart: true },
-    { id: 'friends',  label: 'Friends', href: 'friends.html',    match: ['friends.html'],                   icon: iconUsers },
+    { id: 'friends',  label: 'Friends', href: 'friends.html',    match: ['friends.html','flovee.html'],     icon: iconUsers },
     { id: 'me',       label: 'Me',      href: 'account.html',    match: ['account.html','auth.html'],       icon: iconUser }
   ];
 
-  function getProfile() {
-    try { return JSON.parse(localStorage.getItem('stuflover_profile') || 'null'); }
-    catch (e) { return null; }
-  }
   function isAuthed() { return !!localStorage.getItem('stuflover_token'); }
 
   function currentFile() {
@@ -29,7 +24,6 @@
 
   function activeTabId() {
     var file = currentFile();
-    if (file === 'friends.html' && inFloveeMode()) return 'flovee';
     for (var i = 0; i < TABS.length; i++) {
       if (TABS[i].match.indexOf(file) !== -1) return TABS[i].id;
     }
@@ -45,19 +39,9 @@
   }
 
   function hrefFor(tab) {
-    // Flovee tab: route quiz-less users to the quiz instead of a blank chat.
-    if (tab.smart && tab.id === 'flovee' && !getProfile()) return 'index.html#quiz';
     // Me tab: unauthed → auth page.
     if (tab.id === 'me' && !isAuthed()) return 'auth.html';
     return tab.href;
-  }
-
-  // Mark Flovee tab active when Friends page is opened with ?flovee=1.
-  function inFloveeMode() {
-    try {
-      var p = new URLSearchParams(location.search || '');
-      return p.get('flovee') === '1' || p.get('chat') === 'flovee';
-    } catch (e) { return false; }
   }
 
   function removeLegacyNav() {
@@ -137,7 +121,7 @@ body { padding-top: var(--sl-nav-h); }\
   #sl-top-nav { padding: 0 16px; }\
   #sl-top-nav .sl-tabs { display: none; }\
   #sl-bottom-tabs {\
-    display: grid; grid-template-columns: repeat(5, 1fr);\
+    display: grid; grid-template-columns: repeat(4, 1fr);\
     position: fixed; bottom: 0; left: 0; right: 0; height: var(--sl-tabs-h);\
     background: rgba(250, 240, 240, 0.92); backdrop-filter: blur(18px) saturate(1.4);\
     -webkit-backdrop-filter: blur(18px) saturate(1.4);\
@@ -254,7 +238,6 @@ body { padding-top: var(--sl-nav-h); }\
   }
   function iconHome()  { return svg('M3 11l9-8 9 8v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z'); }
   function iconPlay()  { return svg('M8 5v14l11-7z'); }
-  function iconSpark() { return svg('M12 2l2.4 6.4L21 11l-6.6 2.6L12 20l-2.4-6.4L3 11l6.6-2.6z'); }
   function iconUsers() { return svg('M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a7 7 0 0 1 14 0M21 21a5 5 0 0 0-4-4.9'); }
   function iconUser()  { return svg('M20 21a8 8 0 0 0-16 0M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'); }
 
