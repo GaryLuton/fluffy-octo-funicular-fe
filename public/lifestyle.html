@@ -3916,8 +3916,8 @@ function cgShowFinal(earlyEnd){
   nextBtn.onclick = function(){ cgInit(cgState.game); };
   var endBtn = document.getElementById('cgEndBtn');
   if(endBtn){
-    endBtn.textContent = 'Back to Hub';
-    endBtn.onclick = function(){ backToHub(); };
+    endBtn.textContent = 'Back to Games';
+    endBtn.onclick = function(){ window.location.href = 'games.html'; };
     endBtn.style.display = 'inline-block';
   }
 }
