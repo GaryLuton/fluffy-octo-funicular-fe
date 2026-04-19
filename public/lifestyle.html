@@ -33,14 +33,24 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Satisfy&family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    :root{--pink:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--brown:#2a1a14;--white:#fff;}
+    :root{
+      /* Cozy pastel palette (Stuf Lifestyle Redesign). Legacy var names retained
+         so the rest of the stylesheet and the runtime quiz-theme transitions
+         keep working; they now resolve to the new pastel shades. */
+      --pink:#FEF9F5;--pink-mid:#F5D4C2;--terra:#E8A0BD;--brown:#4A3F50;--white:#fff;
+      --cream:#FEF9F5;--soft-white:#FFFCFA;--rose:#E8A0BD;--blush:#F4C4D8;
+      --peach:#F5D4C2;--mint:#D4EAE0;--lavender:#E4D9F0;--sky:#D9E8F5;
+      --yellow:#F5E8C8;--ink:#4A3F50;
+    }
     html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
     .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--brown);color:var(--white);padding:10px 16px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;border-radius:0 0 6px 0;}
     .skip-link:focus{left:0;outline:3px solid var(--terra);outline-offset:2px;}
-    .site-footer{padding:32px 20px;text-align:center;border-top:1px solid rgba(30,12,6,0.08);font-size:0.85rem;color:rgba(30,12,6,0.6);letter-spacing:1px;}
+    .site-footer{padding:32px 20px;text-align:center;border-top:1px solid rgba(232,160,189,0.2);font-size:0.85rem;color:rgba(74,63,80,0.6);letter-spacing:1px;font-family:'Quicksand','Space Grotesk',sans-serif;}
+    .site-footer .heart{display:inline-block;color:var(--rose);animation:heartPulse 2s ease-in-out infinite;}
+    @keyframes heartPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
     input,button,select,textarea{font-size:16px;}
-    body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;transition:background 0.8s,color 0.8s;line-height:1.6;font-size:15px;}
+    body{font-family:'Quicksand','Space Grotesk',sans-serif;background:linear-gradient(135deg,var(--cream) 0%,var(--soft-white) 50%,var(--sky) 100%);color:var(--ink);overflow-x:hidden;transition:background 0.8s,color 0.8s;line-height:1.6;font-size:15px;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     .serif{font-family:'Barlow Condensed',sans-serif;font-weight:900;}
 
@@ -57,15 +67,18 @@
     .nav-link:hover{opacity:0.55;}
     .nav-welcome{font-size:0.72rem;letter-spacing:2px;opacity:0.5;display:none;}
 
-    /* LANDING */
+    /* LANDING — cozy pastel hero */
     #heroSection{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 40px 80px;text-align:center;position:relative;overflow:hidden;
-      background:linear-gradient(180deg,var(--pink-mid) 0%,var(--pink) 40%,var(--white) 100%);}
-    #heroSection::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(200,120,96,0.06) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(200,120,96,0.04) 0%,transparent 50%);pointer-events:none;}
-    #heroSection h1{font-size:clamp(5rem,16vw,12rem);line-height:0.82;color:var(--brown);letter-spacing:-4px;position:relative;}
-    .hero-sub{font-size:1.1rem;color:rgba(30,12,6,0.45);margin-top:20px;max-width:380px;line-height:1.9;position:relative;}
-    .hero-hook{font-size:0.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--terra);margin-top:10px;opacity:0.6;font-family:'Barlow Condensed',sans-serif;font-weight:900;position:relative;}
-    .start-btn{margin-top:36px;font-size:1.4rem;letter-spacing:4px;background:var(--terra);color:white;border:none;border-radius:50px;padding:20px 60px;cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;box-shadow:0 6px 24px rgba(200,120,96,0.3);position:relative;}
-    .start-btn:hover{background:#a8644a;transform:translateY(-4px) scale(1.03);box-shadow:0 10px 36px rgba(200,120,96,0.4);}
+      background:linear-gradient(135deg,var(--blush) 0%,var(--rose) 50%,var(--peach) 100%);
+      color:white;}
+    #heroSection::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,0.25) 0%,transparent 55%),radial-gradient(circle at 70% 80%,rgba(255,255,255,0.18) 0%,transparent 55%);pointer-events:none;}
+    #heroSection::after{content:'♡';position:absolute;top:24%;right:12%;font-size:4rem;color:rgba(255,255,255,0.35);animation:heartFloat 4s ease-in-out infinite;pointer-events:none;}
+    @keyframes heartFloat{0%,100%{transform:translateY(0) rotate(-6deg);}50%{transform:translateY(-14px) rotate(6deg);}}
+    #heroSection h1{font-family:'Comfortaa','Quicksand',sans-serif;font-weight:700;font-size:clamp(3rem,9vw,6rem);line-height:1.1;color:white;letter-spacing:-1px;position:relative;text-shadow:0 2px 10px rgba(0,0,0,0.12);text-transform:none;}
+    .hero-sub{font-size:1.1rem;color:rgba(255,255,255,0.92);margin-top:22px;max-width:500px;line-height:1.7;position:relative;}
+    .hero-hook{font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.8);margin-top:10px;opacity:0.95;font-family:'Comfortaa','Quicksand',sans-serif;font-weight:600;position:relative;}
+    .start-btn{margin-top:30px;font-size:1rem;letter-spacing:2px;background:white;color:var(--rose);border:none;border-radius:50px;padding:16px 40px;cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);font-family:'Comfortaa','Quicksand',sans-serif;font-weight:700;text-transform:lowercase;box-shadow:0 8px 24px rgba(0,0,0,0.12);position:relative;}
+    .start-btn:hover{background:var(--cream);color:var(--ink);transform:translateY(-4px) scale(1.03);box-shadow:0 12px 32px rgba(0,0,0,0.18);}
 
     /* QUIZ */
     #quizWrap{display:none;min-height:100vh;background:var(--white);padding:110px 40px 80px;flex-direction:column;align-items:center;}
@@ -80,17 +93,17 @@
     .q-text{font-size:clamp(1.8rem,4vw,2.8rem);color:var(--brown);line-height:1.1;margin-bottom:10px;letter-spacing:-0.5px;}
     .q-hint{font-size:0.82rem;color:rgba(30,12,6,0.3);margin-bottom:28px;font-style:italic;font-family:'Caveat',cursive;font-size:1rem;}
     .opts-single{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .opt{padding:18px 22px;border-radius:14px;border:2px solid rgba(30,12,6,0.06);background:var(--white);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.95rem;color:var(--brown);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;}
-    .opt:hover{border-color:var(--terra);background:var(--pink-mid);transform:translateY(-2px);box-shadow:0 4px 16px rgba(200,120,96,0.12);}
+    .opt{padding:18px 22px;border-radius:20px;border:2px solid rgba(232,160,189,0.15);background:var(--white);font-family:'Quicksand','Space Grotesk',sans-serif;font-weight:500;font-size:0.95rem;color:var(--ink);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;}
+    .opt:hover{border-color:var(--rose);background:var(--blush);transform:translateY(-2px);box-shadow:0 6px 18px rgba(232,160,189,0.18);}
     .opt:active{transform:scale(0.97);}
     .opts-multi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-    .opt-check{padding:16px 20px;border-radius:14px;border:2px solid rgba(30,12,6,0.06);background:var(--white);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.93rem;color:var(--brown);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;position:relative;}
-    .opt-check:hover{border-color:rgba(200,120,96,0.3);transform:translateY(-2px);}
+    .opt-check{padding:16px 20px;border-radius:20px;border:2px solid rgba(232,160,189,0.15);background:var(--white);font-family:'Quicksand','Space Grotesk',sans-serif;font-weight:500;font-size:0.93rem;color:var(--ink);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;position:relative;}
+    .opt-check:hover{border-color:rgba(232,160,189,0.45);transform:translateY(-2px);}
     .opt-check:active{transform:scale(0.97);}
-    .opt-check.on{border-color:var(--terra);background:linear-gradient(135deg,var(--pink),rgba(240,221,214,0.5));box-shadow:0 2px 12px rgba(200,120,96,0.1);}
-    .opt-check.on::after{content:"";position:absolute;top:12px;right:14px;width:18px;height:18px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;}
-    .next-btn{width:100%;padding:18px;background:var(--terra);color:white;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.05rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.25s;margin-top:8px;box-shadow:0 4px 16px rgba(200,120,96,0.2);}
-    .next-btn:hover{background:#a8644a;transform:translateY(-2px);box-shadow:0 6px 20px rgba(200,120,96,0.3);}
+    .opt-check.on{border-color:var(--rose);background:linear-gradient(135deg,var(--blush),var(--peach));box-shadow:0 4px 16px rgba(232,160,189,0.2);}
+    .opt-check.on::after{content:"";position:absolute;top:12px;right:14px;width:18px;height:18px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;}
+    .next-btn{width:100%;padding:18px;background:linear-gradient(135deg,var(--rose),var(--blush));color:white;border:none;border-radius:24px;font-family:'Comfortaa','Quicksand',sans-serif;font-weight:700;font-size:1rem;letter-spacing:2px;text-transform:lowercase;cursor:pointer;transition:all 0.25s;margin-top:8px;box-shadow:0 6px 20px rgba(232,160,189,0.3);}
+    .next-btn:hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,160,189,0.4);}
     .next-btn:disabled{opacity:0.2;cursor:not-allowed;transform:none;box-shadow:none;}
 
     /* ═══════════════════════════════════════
@@ -138,8 +151,8 @@
     /* VERTICAL FEED */
     .feed-section{margin-bottom:20px;}
     .feed-heading{font-size:1.1rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:1;margin-bottom:10px;}
-    .feed-card{padding:22px 24px;border-radius:18px;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);}
-    .feed-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,0.06);}
+    .feed-card{padding:24px 26px;border-radius:28px;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);border:1px solid rgba(232,160,189,0.12);background:rgba(255,252,250,0.7);backdrop-filter:blur(6px);box-shadow:0 4px 16px rgba(0,0,0,0.04);}
+    .feed-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(232,160,189,0.2);}
     .feed-card:active{transform:scale(0.98);}
     .feed-desc{font-size:0.88rem;opacity:0.5;line-height:1.6;margin-bottom:12px;}
     .feed-cta{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;opacity:1;}
@@ -1558,7 +1571,7 @@
 </main>
 
 <footer role="contentinfo" class="site-footer">
-  <p>your vibe, your rules</p>
+  <p>made w/ <span class="heart" aria-hidden="true">♡</span> for u · your vibe, your rules</p>
 </footer>
 
 <script src="/stuflover-config.js"></script>
