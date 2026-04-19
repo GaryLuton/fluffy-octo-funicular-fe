@@ -55,8 +55,9 @@
     'index.html',
     'beyou.html',
     'parents.html',
-    // Anyone can take the quiz; sign-in is required only to reveal the result.
-    'lifestyle.html',
+    // Anyone can take the quiz; sign-in is required only to reveal the result
+    // (which lives on lifestyle.html — that page is gated separately).
+    'quiz.html',
   ];
   var currentPath = window.location.pathname || '';
   var isPublic = currentPath === '/' || PUBLIC_PAGES.some(function (p) {

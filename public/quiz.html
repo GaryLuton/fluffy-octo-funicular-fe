@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Take the Quiz — Stuflover</title>
+  <meta name="description" content="Find your aesthetic with a 2-minute quiz and get a personalised Stuflover page."/>
+  <link rel="canonical" href="https://stuflover.com/quiz.html"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Stuflover"/>
+  <meta property="og:title" content="Take the Quiz — Stuflover"/>
+  <meta property="og:description" content="2 minutes. A few honest answers. Then we build you a page so personal it is scary accurate."/>
+  <meta property="og:url" content="https://stuflover.com/quiz.html"/>
+  <meta property="og:image" content="https://stuflover.com/favicon.svg"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="Take the Quiz — Stuflover"/>
+  <meta name="twitter:description" content="2 minutes. A few honest answers. Then we build you a page so personal it is scary accurate."/>
+  <meta name="twitter:image" content="https://stuflover.com/favicon.svg"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--pink:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--brown:#2a1a14;--white:#fff;}
+    html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--brown);color:var(--white);padding:10px 16px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;border-radius:0 0 6px 0;}
+    .skip-link:focus{left:0;outline:3px solid var(--terra);outline-offset:2px;}
+    input,button,select,textarea{font-size:16px;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;line-height:1.6;font-size:15px;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    /* Hide legacy per-page nav — sl-top-nav (injected by stuflover-nav.js) replaces it. */
+    nav#mainNav, nav.sl-nav, .top-bar{display:none !important;}
+
+    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);}
+    .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;}
+    .nav-links{display:flex;align-items:center;gap:12px;}
+    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;color:inherit;}
+    .nav-link:hover{opacity:0.55;}
+
+    /* LANDING */
+    #heroSection{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 40px 80px;text-align:center;position:relative;overflow:hidden;
+      background:linear-gradient(180deg,var(--pink-mid) 0%,var(--pink) 40%,var(--white) 100%);}
+    #heroSection::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(200,120,96,0.06) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(200,120,96,0.04) 0%,transparent 50%);pointer-events:none;}
+    #heroSection h1{font-size:clamp(5rem,16vw,12rem);line-height:0.82;color:var(--brown);letter-spacing:-4px;position:relative;}
+    .hero-sub{font-size:1.1rem;color:rgba(30,12,6,0.45);margin-top:20px;max-width:380px;line-height:1.9;position:relative;}
+    .hero-hook{font-size:0.72rem;letter-spacing:4px;text-transform:uppercase;color:var(--terra);margin-top:10px;opacity:0.6;font-family:'Barlow Condensed',sans-serif;font-weight:900;position:relative;}
+    .start-btn{margin-top:36px;font-size:1.4rem;letter-spacing:4px;background:var(--terra);color:white;border:none;border-radius:50px;padding:20px 60px;cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;box-shadow:0 6px 24px rgba(200,120,96,0.3);position:relative;}
+    .start-btn:hover{background:#a8644a;transform:translateY(-4px) scale(1.03);box-shadow:0 10px 36px rgba(200,120,96,0.4);}
+
+    /* QUIZ */
+    #quizWrap{display:none;min-height:100vh;background:var(--white);padding:110px 40px 80px;flex-direction:column;align-items:center;}
+    #quizWrap.active{display:flex;animation:sectionFadeIn 0.4s ease both;}
+    .quiz-inner{width:100%;max-width:700px;margin:0 auto;}
+    .progress-track{width:100%;height:4px;background:rgba(30,12,6,0.05);margin-bottom:12px;overflow:hidden;border-radius:2px;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--terra),var(--pink-mid));transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);border-radius:2px;}
+    .progress-label{font-size:0.68rem;letter-spacing:3px;text-transform:uppercase;color:rgba(30,12,6,0.25);margin-bottom:44px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .q-anim{animation:fadeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1) both;}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(20px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes sectionFadeIn{from{opacity:0;}to{opacity:1;}}
+    .q-cat{font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;color:var(--terra);margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .q-text{font-size:clamp(1.8rem,4vw,2.8rem);color:var(--brown);line-height:1.1;margin-bottom:10px;letter-spacing:-0.5px;}
+    .q-hint{font-size:0.82rem;color:rgba(30,12,6,0.3);margin-bottom:28px;font-style:italic;font-family:'Caveat',cursive;font-size:1rem;}
+    .opts-single{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .opt{padding:18px 22px;border-radius:14px;border:2px solid rgba(30,12,6,0.06);background:var(--white);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.95rem;color:var(--brown);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;}
+    .opt:hover{border-color:var(--terra);background:var(--pink-mid);transform:translateY(-2px);box-shadow:0 4px 16px rgba(200,120,96,0.12);}
+    .opt:active{transform:scale(0.97);}
+    .opts-multi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .opt-check{padding:16px 20px;border-radius:14px;border:2px solid rgba(30,12,6,0.06);background:var(--white);font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:0.93rem;color:var(--brown);text-align:left;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);line-height:1.5;position:relative;}
+    .opt-check:hover{border-color:rgba(200,120,96,0.3);transform:translateY(-2px);}
+    .opt-check:active{transform:scale(0.97);}
+    .opt-check.on{border-color:var(--terra);background:linear-gradient(135deg,var(--pink),rgba(240,221,214,0.5));box-shadow:0 2px 12px rgba(200,120,96,0.1);}
+    .opt-check.on::after{content:"";position:absolute;top:12px;right:14px;width:18px;height:18px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;}
+    .next-btn{width:100%;padding:18px;background:var(--terra);color:white;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.05rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.25s;margin-top:8px;box-shadow:0 4px 16px rgba(200,120,96,0.2);}
+    .next-btn:hover{background:#a8644a;transform:translateY(-2px);box-shadow:0 6px 20px rgba(200,120,96,0.3);}
+    .next-btn:disabled{opacity:0.2;cursor:not-allowed;transform:none;box-shadow:none;}
+
+    @media(max-width:768px){
+      #heroSection{padding:100px 20px 60px;}
+      #heroSection h1{font-size:clamp(3rem,11vw,5rem);letter-spacing:-2px;}
+      .hero-sub{font-size:0.98rem;}
+      .start-btn{padding:16px 40px;font-size:1.2rem;}
+      .opts-single,.opts-multi{grid-template-columns:1fr;}
+      .q-text{font-size:clamp(1.5rem,4vw,1.9rem);}
+      #quizWrap{padding:90px 20px 60px;}
+    }
+    @media(max-width:480px){
+      #heroSection h1{font-size:clamp(2.4rem,12vw,3.8rem);letter-spacing:-1.5px;}
+      .hero-sub{font-size:0.92rem;}
+      #quizWrap{padding:80px 16px 60px;}
+      .q-text{font-size:clamp(1.3rem,4vw,1.7rem);}
+      .opt,.opt-check{padding:14px 16px;min-height:44px;}
+      .next-btn{min-height:44px;}
+      .start-btn{min-height:44px;padding:16px 36px;font-size:1.1rem;}
+    }
+  </style>
+</head>
+<body>
+
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+
+<header role="banner">
+<nav id="mainNav" aria-label="Primary">
+  <a class="logo bc" id="navLogo" href="index.html">Stuflover</a>
+  <div class="nav-links">
+    <a class="nav-link bc" href="index.html">← Back</a>
+  </div>
+</nav>
+</header>
+
+<main id="mainContent">
+
+<!-- LANDING -->
+<div id="heroSection">
+  <div class="hero-hook">this will change your phone forever</div>
+  <h1 class="bc">Find<br>Your<br>Aesthetic</h1>
+  <p class="hero-sub">2 minutes. a few honest answers. then we build you a page so personal it is literally scary accurate.</p>
+  <button class="start-btn bc" onclick="startQuiz()">Let's Go</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizWrap">
+  <div class="quiz-inner">
+    <div class="progress-track"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+    <div class="progress-label bc" id="pLabel">Getting to know you...</div>
+    <div id="qArea"></div>
+  </div>
+</div>
+
+</main>
+
+<script src="/stuflover-backend.js"></script>
+<script>
+const P = {
+  aesthetics: {},  // scored from ALL answers combined
+  music: [],
+  interests: [],
+  social: null,
+  age: null,              // age range
+  gender: null,           // gender identity
+  // Rich contextual data from specific questions
+  faveColour: null,       // {hex, name, dark}
+  faveShop: null,
+  friendGroup: null,
+  energyWord: null,
+  moodToday: null,
+  phoneScreen: null,      // what's on their phone
+  saturdayMorning: null,  // what they do Saturday morning
+  coffeeOrder: null,      // coffee / drink order
+  notesApp: null,         // what their notes app is like
+  lastBought: null,       // last thing they bought for themselves
+  extraTags: [],
+  answered: new Set(),
+};
+const COLOURS = {
+  pink:    {hex:"#ffb3c6",name:"Pink",       dark:false},
+  red:     {hex:"#e03050",name:"Red",        dark:false},
+  orange:  {hex:"#e06820",name:"Orange",     dark:false},
+  yellow:  {hex:"#f0c030",name:"Yellow",     dark:false},
+  green:   {hex:"#40a050",name:"Green",      dark:false},
+  sage:    {hex:"#88a878",name:"Sage Green", dark:false},
+  blue:    {hex:"#3060c0",name:"Blue",       dark:false},
+  purple:  {hex:"#8040c0",name:"Purple",     dark:false},
+  black:   {hex:"#181018",name:"Black",      dark:true},
+  white:   {hex:"#f8f4f0",name:"White",      dark:false},
+  brown:   {hex:"#a06030",name:"Brown",      dark:false},
+  beige:   {hex:"#e8d8b8",name:"Beige",      dark:false},
+  lilac:   {hex:"#c8a8e0",name:"Lilac",      dark:false},
+  hotpink: {hex:"#ff4080",name:"Hot Pink",   dark:false},
+  navy:    {hex:"#182858",name:"Navy",       dark:true},
+  terra:   {hex:"#c05030",name:"Terracotta", dark:false},
+};
+
+
+// ─── AESTHETICS ───────────────────────────────────────────
+// Each aesthetic has a default chat font. If the user hasn't explicitly
+// picked one we apply this on quiz completion so every aesthetic ships
+// with its own set colours, fonts and flovee.
+const AE_FONTS = {
+  kawaii:'cute',      softgirl:'cute',      cleangirl:'default',
+  coquette:'fancy',   goth:'default',       darkacad:'default',
+  grunge:'default',   y2k:'round',          street:'default',
+  cottage:'handwritten', hippie:'handwritten', oldmoney:'default',
+  preppy:'default',   tomato:'handwritten', indie:'default',
+  emo:'default',      ballet:'fancy',
+};
+
+const AE = {
+  kawaii:      {name:"Kawaii",        quote:"Be so cute they cannot handle it."},
+  softgirl:    {name:"Soft Girl",     quote:"Be so soft they underestimate you. Then bloom."},
+  cleangirl:   {name:"Clean Girl",    quote:"The most luxurious thing you can be is unbothered."},
+  coquette:    {name:"Coquette",      quote:"She moved through the world like she was always arriving."},
+  goth:        {name:"Goth",          quote:"I am not dark. I am depth."},
+  darkacad:    {name:"Dark Academia", quote:"I am homesick for a place I am not sure even exists."},
+  grunge:      {name:"Grunge",        quote:"Here we are now. Entertain us."},
+  y2k:         {name:"Y2K",           quote:"She was low-rise and unapologetic and the world was not ready."},
+  street:      {name:"Streetwear",    quote:"Style is a way to say who you are without having to speak."},
+  cottage:     {name:"Cottagecore",   quote:"She had wildflowers in her hair and mud on her boots."},
+  hippie:      {name:"Hippie",        quote:"She turned her can'ts into cans and her dreams into plans."},
+  oldmoney:    {name:"Old Money",     quote:"True luxury is being able to move through the world unhurried."},
+  preppy:      {name:"Preppy",        quote:"She looked like she had never not known what she was doing."},
+  tomato:      {name:"Tomato Girl",   quote:"She smelled like sunshine and stayed like the sea."},
+  indie:       {name:"Indie Alt",     quote:"She had the kind of taste that could not be bought or taught."},
+  emo:         {name:"Emo",           quote:"I am not okay and that is okay."},
+  ballet:      {name:"Balletcore",    quote:"She moved like a poem that had not been written yet."},
+};
+
+
+const ARTISTS = {
+  katseye:    {name:"Katseye",          tracks:[{t:"Debut",d:"3:12"},{t:"Touch",d:"2:58"},{t:"Gnarly",d:"3:04"}]},
+  newjeans:   {name:"NewJeans",         tracks:[{t:"Super Shy",d:"3:01"},{t:"Hype Boy",d:"3:01"},{t:"OMG",d:"3:10"}]},
+  illit:      {name:"ILLIT",            tracks:[{t:"Magnetic",d:"3:04"},{t:"Lucky Girl",d:"3:10"},{t:"My World",d:"2:58"}]},
+  lesserafim: {name:"LE SSERAFIM",      tracks:[{t:"Antifragile",d:"2:57"},{t:"UNFORGIVEN",d:"3:39"},{t:"Easy",d:"3:05"}]},
+  aespa:      {name:"aespa",            tracks:[{t:"Supernova",d:"3:18"},{t:"Drama",d:"3:04"},{t:"Spicy",d:"3:15"}]},
+  sabrina:    {name:"Sabrina Carpenter",tracks:[{t:"Espresso",d:"2:55"},{t:"Please Please Please",d:"3:06"},{t:"Taste",d:"3:08"}]},
+  olivia:     {name:"Olivia Rodrigo",   tracks:[{t:"vampire",d:"3:39"},{t:"good 4 u",d:"2:58"},{t:"brutal",d:"2:17"}]},
+  taylor:     {name:"Taylor Swift",     tracks:[{t:"Cruel Summer",d:"2:58"},{t:"august",d:"4:21"},{t:"Anti-Hero",d:"3:20"}]},
+  sza:        {name:"SZA",              tracks:[{t:"Saturn",d:"3:37"},{t:"Kill Bill",d:"2:34"},{t:"Snooze",d:"3:31"}]},
+  doja:       {name:"Doja Cat",         tracks:[{t:"Agora Hills",d:"3:13"},{t:"Say So",d:"3:57"},{t:"Woman",d:"2:52"}]},
+  chappell:   {name:"Chappell Roan",    tracks:[{t:"Good Luck, Babe!",d:"3:38"},{t:"Pink Pony Club",d:"4:43"},{t:"Red Wine Supernova",d:"3:24"}]},
+  charli:     {name:"Charli XCX",       tracks:[{t:"Apple",d:"2:33"},{t:"Von dutch",d:"2:47"},{t:"360",d:"2:52"}]},
+  fleetwood:  {name:"Fleetwood Mac",    tracks:[{t:"Dreams",d:"4:14"},{t:"The Chain",d:"4:29"},{t:"Rhiannon",d:"4:11"}]},
+  phoebe:     {name:"Phoebe Bridgers",  tracks:[{t:"Garden Song",d:"3:38"},{t:"Moon Song",d:"3:35"},{t:"Savior Complex",d:"4:00"}]},
+  lana:       {name:"Lana Del Rey",     tracks:[{t:"Summertime Sadness",d:"4:25"},{t:"Young and Beautiful",d:"3:39"},{t:"Video Games",d:"4:41"}]},
+  mcr:        {name:"My Chemical Romance",tracks:[{t:"Welcome to the Black Parade",d:"5:11"},{t:"Helena",d:"3:21"},{t:"Famous Last Words",d:"5:06"}]},
+  paramore:   {name:"Paramore",         tracks:[{t:"Misery Business",d:"3:31"},{t:"Decode",d:"4:41"},{t:"Hard Times",d:"3:45"}]},
+  beabadoobee:{name:"Beabadoobee",      tracks:[{t:"Death Bed",d:"3:05"},{t:"See Through",d:"3:09"},{t:"Coffee",d:"2:41"}]},
+  arctic:     {name:"Arctic Monkeys",   tracks:[{t:"Do I Wanna Know?",d:"4:32"},{t:"R U Mine?",d:"3:21"},{t:"505",d:"4:13"}]},
+  nirvana:    {name:"Nirvana",          tracks:[{t:"Smells Like Teen Spirit",d:"5:01"},{t:"Come As You Are",d:"3:38"},{t:"Heart-Shaped Box",d:"4:41"}]},
+  mitski:     {name:"Mitski",           tracks:[{t:"Nobody",d:"3:13"},{t:"Washing Machine Heart",d:"2:53"},{t:"Your Best American Girl",d:"4:10"}]},
+  billie:     {name:"Billie Eilish",    tracks:[{t:"bad guy",d:"3:14"},{t:"What Was I Made For?",d:"3:42"},{t:"Ocean Eyes",d:"3:20"}]},
+};
+const CORE_IDS = [
+  "q_age","q_mood","q_fave_colour","q_music","q_interests",
+  "q_room","q_shoes","q_friday","q_fave_shop","q_energy_word"
+];
+
+const QS = [
+  {id:"q_age", cat:"ABOUT YOU", multi:false,
+   text:"How old are you?",
+   opts:[
+     {t:"Under 18",     ae:{}, ag:"under-18"},
+     {t:"18–25",        ae:{}, ag:"18-25"},
+     {t:"26–35",        ae:{}, ag:"26-35"},
+     {t:"36–50",        ae:{}, ag:"36-50"},
+     {t:"50+",          ae:{}, ag:"50+"},
+   ]
+  },
+
+  {id:"q_gender", cat:"ABOUT YOU", multi:false,
+   text:"What style do you shop for?",
+   hint:"This helps us personalise your recommendations.",
+   opts:[
+     {t:"Women's",       ae:{}, gn:"womens"},
+     {t:"Men's",         ae:{}, gn:"mens"},
+     {t:"Unisex / All",  ae:{}, gn:"unisex"},
+   ]
+  },
+
+  {id:"q_mood", cat:"RIGHT NOW", multi:false,
+   text:"How are you actually feeling today?",
+   opts:[
+     {t:"Good — genuinely in a good place",       ae:{softgirl:1,cleangirl:1},              md:"good"},
+     {t:"Creative — my brain will not stop",      ae:{indie:2,darkacad:1},                  md:"creative"},
+     {t:"A bit low honestly",                     ae:{goth:1,darkacad:1,emo:1},             md:"low"},
+     {t:"Hyped — ready for something",            ae:{y2k:1,street:1,kawaii:1},             md:"hyped"},
+     {t:"Cosy and calm",                          ae:{softgirl:1,cottage:1},                md:"cosy"},
+     {t:"Honestly just tired",                   ae:{grunge:1,indie:1},                    md:"tired"},
+   ]
+  },
+
+  {id:"q_saturday", cat:"YOUR SATURDAY MORNING", multi:false,
+   text:"Last Saturday morning — what did you actually do?",
+   hint:"Be specific. This one matters.",
+   opts:[
+     {t:"Stayed in bed scrolling until noon, no regrets",              ae:{grunge:1,indie:1,y2k:1},           sm:"bed_scroll"},
+     {t:"Up early, skincare, maybe a workout, felt productive",        ae:{cleangirl:2,preppy:1},             sm:"productive"},
+     {t:"Made tea or coffee slowly, listened to music, unhurried",     ae:{cottage:2,darkacad:1,softgirl:1},  sm:"slow_morning"},
+     {t:"Got ready properly and went somewhere — cafe, market, out",   ae:{coquette:1,tomato:2,oldmoney:1},   sm:"out_early"},
+     {t:"Was deep in something creative — art, writing, a project",   ae:{indie:2,darkacad:2},               sm:"creative_morning"},
+     {t:"Honestly I do not remember — it blurs into the week",        ae:{grunge:1,indie:1},                 sm:"blur"},
+   ]
+  },
+
+  {id:"q_music", cat:"YOUR MUSIC", multi:true,
+   hint:"Pick everything actually in your rotation right now.",
+   text:"Which artists are you actually listening to?",
+   opts:[
+     {t:"Katseye",              mu:"katseye",    ae:{kawaii:2,softgirl:1}},
+     {t:"NewJeans",             mu:"newjeans",   ae:{kawaii:2,softgirl:1}},
+     {t:"ILLIT",                mu:"illit",      ae:{kawaii:2,softgirl:1}},
+     {t:"LE SSERAFIM",          mu:"lesserafim", ae:{kawaii:1,street:1}},
+     {t:"aespa",                mu:"aespa",      ae:{kawaii:1,y2k:1}},
+     {t:"Sabrina Carpenter",    mu:"sabrina",    ae:{softgirl:2,coquette:1}},
+     {t:"Olivia Rodrigo",       mu:"olivia",     ae:{softgirl:2,indie:1}},
+     {t:"Taylor Swift",         mu:"taylor",     ae:{softgirl:1,preppy:1}},
+     {t:"SZA",                  mu:"sza",        ae:{street:1,indie:2}},
+     {t:"Doja Cat",             mu:"doja",       ae:{y2k:1,street:2}},
+     {t:"Chappell Roan",        mu:"chappell",   ae:{indie:2,coquette:1}},
+     {t:"Charli XCX",           mu:"charli",     ae:{y2k:1,street:1,indie:1}},
+     {t:"Fleetwood Mac",        mu:"fleetwood",  ae:{cottage:2,hippie:1}},
+     {t:"Phoebe Bridgers",      mu:"phoebe",     ae:{indie:2,darkacad:1}},
+     {t:"Lana Del Rey",         mu:"lana",       ae:{darkacad:2,coquette:1}},
+     {t:"MCR / Fall Out Boy",   mu:"mcr",        ae:{goth:2,grunge:1,emo:2}},
+     {t:"Paramore",             mu:"paramore",   ae:{goth:1,grunge:1,indie:1,emo:1}},
+     {t:"Beabadoobee",          mu:"beabadoobee",ae:{indie:2,grunge:1}},
+     {t:"Arctic Monkeys",       mu:"arctic",     ae:{indie:2,grunge:1}},
+     {t:"Nirvana",              mu:"nirvana",    ae:{grunge:3,indie:1}},
+     {t:"Mitski",               mu:"mitski",     ae:{indie:2,darkacad:1}},
+     {t:"Billie Eilish",        mu:"billie",     ae:{indie:1,goth:1}},
+     {t:"Someone else",         mu:"_custom",    ae:{},              isCustom:true},
+   ]
+  },
+
+  {id:"q_interests", cat:"YOUR INTERESTS", multi:true,
+   hint:"Pick everything genuinely part of your life.",
+   text:"What do you actually spend time on?",
+   opts:[
+     {t:"Reading books",            in:"reading",     ae:{darkacad:1,indie:1}},
+     {t:"Watching YouTube",         in:"youtube",     ae:{indie:1}},
+     {t:"Art or drawing",           in:"art",         ae:{indie:1,kawaii:1}},
+     {t:"Fashion and getting dressed",in:"fashion",   ae:{coquette:1,cleangirl:1}},
+     {t:"Sport or working out",     in:"sport",       ae:{cleangirl:1,preppy:1}},
+     {t:"Gaming",                   in:"gaming",      ae:{indie:1}},
+     {t:"Cooking or baking",        in:"cooking",     ae:{cottage:1,hippie:1}},
+     {t:"Photography or film",      in:"photography", ae:{indie:1,darkacad:1}},
+     {t:"Writing",                  in:"writing",     ae:{darkacad:1,indie:1}},
+     {t:"Making music",             in:"music_make",  ae:{indie:1,grunge:1}},
+     {t:"Dance",                    in:"dance",       ae:{kawaii:1,street:1}},
+     {t:"Travel",                   in:"travel",      ae:{tomato:1,hippie:1}},
+     {t:"Film and TV",              in:"film_tv",     ae:{indie:1,darkacad:1}},
+     {t:"Skincare",                 in:"skincare",    ae:{cleangirl:1,softgirl:1}},
+     {t:"Anime",                    in:"anime",       ae:{kawaii:1}},
+     {t:"Thrifting",                in:"thrifting",   ae:{indie:1,grunge:1}},
+     {t:"Journalling",              in:"journalling", ae:{darkacad:1,softgirl:1}},
+   ]
+  },
+
+  {id:"q_fave_colour", cat:"YOUR COLOUR", multi:false,
+   text:"What is your favourite colour?",
+   opts:[
+     {t:"Pink or hot pink",      ae:{kawaii:2,softgirl:2,coquette:1},    col:"pink"},
+     {t:"Black",                 ae:{goth:3,grunge:2,darkacad:1},        col:"black"},
+     {t:"Purple or lilac",       ae:{kawaii:1,indie:1,y2k:1},            col:"purple"},
+     {t:"Green — any shade",     ae:{cottage:2,hippie:2},                col:"green"},
+     {t:"Blue or navy",          ae:{preppy:2,cleangirl:1,oldmoney:1},   col:"blue"},
+     {t:"Red or terracotta",     ae:{tomato:2,coquette:1},               col:"terra"},
+     {t:"White, beige or cream", ae:{cleangirl:2,oldmoney:2},            col:"beige"},
+     {t:"Yellow or orange",      ae:{hippie:2,cottage:1},                col:"yellow"},
+     {t:"Sage or olive green",   ae:{cottage:2,tomato:1,indie:1},        col:"sage"},
+     {t:"Navy or dark blue",     ae:{preppy:2,oldmoney:2,darkacad:1},    col:"navy"},
+   ]
+  },
+
+  {id:"q_phone_screen", cat:"YOUR PHONE", multi:false,
+   text:"What is on your phone screen right now — honestly?",
+   opts:[
+     {t:"Fancams, kpop edits, group content",          ae:{kawaii:3,softgirl:1},   ph:"kpop"},
+     {t:"Aesthetic photos, moodboard saves, Pinterest", ae:{coquette:2,softgirl:1},ph:"aesthetic"},
+     {t:"Tumblr, Reddit or a niche forum",             ae:{darkacad:2,indie:2,goth:1},ph:"deep_web"},
+     {t:"TikTok FYP — just scrolling",                 ae:{y2k:1,street:1,softgirl:1},ph:"tiktok"},
+     {t:"YouTube — something long playing in the background",ae:{indie:1,darkacad:1,cottage:1},ph:"youtube"},
+     {t:"Notes app or a writing app",                  ae:{darkacad:2,indie:1},     ph:"writing"},
+     {t:"Group chat chaos with my friends",            ae:{y2k:1,street:1},         ph:"chat"},
+     {t:"Spotify or music apps",                       ae:{indie:1,grunge:1,goth:1},ph:"music"},
+   ]
+  },
+
+  {id:"q_coffee", cat:"YOUR ORDER", multi:false,
+   text:"What are you actually ordering at a cafe?",
+   opts:[
+     {t:"Iced matcha or strawberry latte — something pink or green",ae:{kawaii:2,softgirl:2,cleangirl:1},   co:"matcha"},
+     {t:"Just a flat white or americano — nothing fussy",           ae:{darkacad:2,grunge:1,oldmoney:1},    co:"black"},
+     {t:"Complicated iced drink with syrups and oat milk",          ae:{y2k:1,softgirl:1,cleangirl:1},      co:"fancy"},
+     {t:"Herbal tea or something calming",                          ae:{cottage:2,hippie:2},                co:"tea"},
+     {t:"I do not really do cafes — I eat at home",                ae:{cottage:2,grunge:1},                co:"home"},
+     {t:"Whatever is most expensive and interesting",               ae:{oldmoney:2,coquette:1},             co:"expensive"},
+   ]
+  },
+
+  {id:"q_room", cat:"YOUR SPACE", multi:false,
+   text:"Your room actually looks like:",
+   opts:[
+     {t:"Pink, stickers, fairy lights, organised chaos of cute things",ae:{kawaii:3,softgirl:2},       rv:"kawaii", et:["room_kawaii"]},
+     {t:"Dark walls, books stacked, candles, one lamp, moody",        ae:{darkacad:3,goth:2,indie:1},  rv:"dark",   et:["room_dark"]},
+     {t:"Plants, linen, natural light, genuinely calm",               ae:{cottage:3,hippie:1,tomato:1},rv:"cottage",et:["room_cottage"]},
+     {t:"Minimal, neutral, everything exactly in its place",          ae:{cleangirl:2,oldmoney:2},     rv:"clean",  et:["room_clean"]},
+     {t:"Posters everywhere, clothes on floor, maximum personality",  ae:{grunge:2,indie:2,y2k:1},    rv:"chaos",  et:["room_chaos"]},
+     {t:"Maximalist, curated, lots happening but it works",           ae:{y2k:2,coquette:2},           rv:"maximal",et:["room_maximal"]},
+   ],
+   unlocks:{kawaii:["q_cute_depth"],dark:["q_dark_depth"],cottage:["q_nature_depth"],chaos:["q_alt_depth"],clean:["q_clean_depth"]}
+  },
+
+  {id:"q_friday", cat:"FRIDAY NIGHT", multi:false,
+   text:"9pm on a Friday — where are you?",
+   opts:[
+     {t:"In my room doing something I genuinely love",          ae:{darkacad:1,indie:1,kawaii:1},  so:"introvert"},
+     {t:"At a gig, show or the front of something live",        ae:{goth:2,grunge:2,indie:1},      so:"extrovert"},
+     {t:"Fully dressed up, going out, completely in my element",ae:{y2k:2,coquette:1,street:1},   so:"extrovert"},
+     {t:"Sofa, snacks, film — perfectly content",               ae:{cottage:1,softgirl:1,grunge:1},so:"introvert"},
+     {t:"With a small group of people I actually like",         ae:{indie:1,oldmoney:1},           so:"ambivert"},
+   ]
+  },
+
+  {id:"q_notes_app", cat:"YOUR NOTES APP", multi:false,
+   text:"Your notes app is mostly:",
+   opts:[
+     {t:"Unfinished ideas, song lyrics I liked, thoughts at 2am", ae:{indie:2,darkacad:2,emo:1},   na:"chaotic_creative"},
+     {t:"To-do lists, plans, organised sections",                  ae:{cleangirl:2,preppy:1},        na:"organised"},
+     {t:"Literally empty — I never use it",                       ae:{grunge:2,street:1},           na:"empty"},
+     {t:"Journal entries, emotional processing paragraphs",       ae:{softgirl:1,darkacad:2},       na:"journal"},
+     {t:"Outfit inspo, aesthetic notes, things I want to buy",    ae:{coquette:2,y2k:1,kawaii:1},  na:"aesthetic"},
+     {t:"Recipe ideas, things I want to cook or bake",            ae:{cottage:2,hippie:1},          na:"foodie"},
+   ]
+  },
+
+  {id:"q_shoes", cat:"YOUR SHOES", multi:false,
+   text:"What are you wearing on your feet most days?",
+   opts:[
+     {t:"Mary Janes, ballet flats or anything with a bow",          ae:{kawaii:2,coquette:2,softgirl:1}},
+     {t:"Doc Martens, chunky boots or anything heavy",              ae:{goth:2,grunge:2,darkacad:1}},
+     {t:"Fresh trainers — specific colourways, the box is kept",    ae:{street:3,y2k:1}},
+     {t:"White trainers, loafers or anything clean and classic",    ae:{preppy:2,cleangirl:2,oldmoney:1}},
+     {t:"Sandals, birkenstocks or as little as possible",           ae:{cottage:1,hippie:2,tomato:2}},
+     {t:"Platform boots, heels or anything with actual height",     ae:{y2k:2,coquette:1,grunge:1}},
+   ]
+  },
+
+  {id:"q_last_bought", cat:"YOUR SPENDING", multi:false,
+   text:"Last thing you actually bought for yourself:",
+   opts:[
+     {t:"Something for my appearance — clothes, beauty, skincare",  ae:{coquette:1,cleangirl:1,kawaii:1},  lb:"appearance"},
+     {t:"A book, a record or something for a creative hobby",       ae:{indie:2,darkacad:2},               lb:"creative"},
+     {t:"Food, a coffee, something to eat or drink",                ae:{cottage:1,tomato:1,grunge:1},      lb:"food"},
+     {t:"Something for my phone or tech",                           ae:{street:1,y2k:1},                   lb:"tech"},
+     {t:"Something small and cute — sticker, keyring, accessory",  ae:{kawaii:3,softgirl:1},              lb:"cute"},
+     {t:"I genuinely cannot remember — I spend without tracking",   ae:{grunge:1,indie:1},                 lb:"forgettable"},
+   ]
+  },
+
+  {id:"q_friend_group", cat:"YOUR PEOPLE", multi:false,
+   text:"Your friend group dynamic:",
+   opts:[
+     {t:"We bond over artists, fandoms, music — that is our thing",  ae:{kawaii:2,softgirl:1},  fg:"fandom"},
+     {t:"Creative types — we make things, go to gigs, share inspo", ae:{indie:2,darkacad:1},   fg:"creative"},
+     {t:"Athletic or outdoorsy — we do stuff together",             ae:{preppy:1,street:1},    fg:"sporty"},
+     {t:"All very aesthetic — strong personal styles across everyone",ae:{coquette:1,cleangirl:1},fg:"aesthetic"},
+     {t:"Chaotic energy — no plans, always fun, rarely organised",  ae:{y2k:1,grunge:1},       fg:"chaotic"},
+     {t:"Very small and close — deep conversations over big groups", ae:{indie:1,darkacad:1},   fg:"close"},
+     {t:"Mainly online — my closest people are not nearby",         ae:{kawaii:1,indie:1},     fg:"online"},
+   ]
+  },
+
+  {id:"q_fave_shop", cat:"WHERE YOU SHOP", multi:false,
+   text:"Where do you actually shop for clothes most?",
+   hint:"This is used to personalise your page — not to define your aesthetic.",
+   opts:[
+     {t:"Depop or Vinted — second-hand always",       ae:{indie:1,grunge:1,hippie:1},  shop:"Depop / Vinted"},
+     {t:"ASOS or H&M — accessible and easy",          ae:{y2k:1,softgirl:1},           shop:"ASOS / H&M"},
+     {t:"Urban Outfitters",                           ae:{indie:1,grunge:1,y2k:1},     shop:"Urban Outfitters"},
+     {t:"Sezane, Rouje or similar",                   ae:{coquette:2,oldmoney:1},      shop:"Sezane / Rouje"},
+     {t:"Nike, New Balance or sportswear brands",     ae:{street:2},                   shop:"Nike / NB"},
+     {t:"Charity shops and vintage markets",          ae:{indie:1,grunge:1,hippie:1},  shop:"Charity Shops"},
+     {t:"Brandy Melville or similar soft-girl spots", ae:{softgirl:2,kawaii:1},        shop:"Brandy Melville"},
+     {t:"Princess Polly or trend-led sites",          ae:{y2k:2,softgirl:1},           shop:"Princess Polly"},
+     {t:"I honestly do not have one — it varies",     ae:{indie:1},                    shop:"No favourite"},
+   ]
+  },
+
+  {id:"q_dream_job", cat:"YOUR FUTURE", multi:false,
+   text:"What is your dream job?",
+   hint:"No wrong answers — just what calls to you.",
+   opts:[
+     {t:"Creative director — running the vision",            ae:{indie:2,coquette:1,cleangirl:1},   dj:"creative_director"},
+     {t:"Influencer or content creator",                     ae:{y2k:2,softgirl:1,kawaii:1},         dj:"influencer"},
+     {t:"Doctor, scientist or something that helps people",  ae:{cleangirl:1,preppy:1},              dj:"doctor"},
+     {t:"Teacher or professor — sharing knowledge",          ae:{darkacad:2,cottage:1},              dj:"teacher"},
+     {t:"Artist — painter, illustrator, something visual",   ae:{indie:2,kawaii:1},                  dj:"artist"},
+     {t:"Musician or something in the music industry",       ae:{grunge:2,indie:1,goth:1},          dj:"musician"},
+     {t:"Entrepreneur — building my own thing",              ae:{street:2,oldmoney:1},               dj:"entrepreneur"},
+     {t:"Athlete or fitness coach",                          ae:{preppy:2,street:1},                 dj:"athlete"},
+   ]
+  },
+
+  {id:"q_weekend_plan", cat:"YOUR WEEKENDS", multi:false,
+   text:"Pick your ideal weekend plan:",
+   opts:[
+     {t:"Shopping with friends — trying things on, getting food after",  ae:{y2k:1,coquette:1,softgirl:1},     wp:"shopping"},
+     {t:"Cosy day in — blankets, candles, comfort content",             ae:{cottage:2,softgirl:1},             wp:"cosy_in"},
+     {t:"Going to a concert or live show",                              ae:{indie:2,grunge:1,goth:1},          wp:"concert"},
+     {t:"Exploring nature — a walk, a hike, being outside",             ae:{cottage:1,hippie:2,tomato:1},      wp:"nature"},
+     {t:"Creating something — art, music, writing, a project",          ae:{indie:2,darkacad:1},               wp:"creating"},
+     {t:"Gaming all day — no interruptions",                            ae:{indie:1,grunge:1},                 wp:"gaming"},
+     {t:"Studying or working on something I care about",                ae:{darkacad:2,cleangirl:1,preppy:1},  wp:"studying"},
+     {t:"Baking or cooking something from scratch",                     ae:{cottage:2,hippie:1},               wp:"baking"},
+   ]
+  },
+
+  {id:"q_wallpaper", cat:"YOUR PHONE", multi:false,
+   text:"What is your phone wallpaper usually?",
+   opts:[
+     {t:"An aesthetic photo — moody, curated, very specific vibe",  ae:{coquette:2,indie:1,darkacad:1},    wp2:"aesthetic"},
+     {t:"My pet — obviously",                                      ae:{cottage:1,softgirl:1,kawaii:1},     wp2:"pet"},
+     {t:"My favourite artist or a concert photo",                   ae:{indie:2,grunge:1,goth:1},          wp2:"artist"},
+     {t:"Nature — sky, ocean, flowers, something peaceful",         ae:{cottage:2,hippie:1},               wp2:"nature"},
+     {t:"Anime or cartoon character",                               ae:{kawaii:3},                          wp2:"anime"},
+     {t:"Solid colour or a simple gradient — clean vibes",          ae:{cleangirl:2,oldmoney:1},           wp2:"solid"},
+     {t:"A photo of me and my friends",                             ae:{preppy:1,y2k:1,softgirl:1},       wp2:"friends"},
+   ]
+  },
+
+  {id:"q_energy_word", cat:"LAST ONE", multi:false,
+   text:"One word — which is actually you?",
+   opts:[
+     {t:"Soft",     ae:{softgirl:2,kawaii:1,ballet:1},  ew:"Soft"},
+     {t:"Intense",  ae:{goth:2,darkacad:2},              ew:"Intense"},
+     {t:"Free",     ae:{hippie:2,cottage:1,indie:1},     ew:"Free"},
+     {t:"Refined",  ae:{oldmoney:2,cleangirl:1},         ew:"Refined"},
+     {t:"Bold",     ae:{street:2,y2k:1},                 ew:"Bold"},
+     {t:"Real",     ae:{indie:2,grunge:2},               ew:"Real"},
+     {t:"Romantic", ae:{coquette:2,cottage:1},           ew:"Romantic"},
+     {t:"Chaotic",  ae:{y2k:1,grunge:1,hippie:1},        ew:"Chaotic"},
+   ]
+  },
+
+  // Depth questions — unlocked by room answer
+  {id:"q_cute_depth", cat:"YOUR KAWAII SIDE", multi:false,
+   text:"How far does the kawaii go?",
+   opts:[
+     {t:"All the way — stickers, plushies, the full thing",              ae:{kawaii:3},         et:["kawaii_full"]},
+     {t:"Cute but also kind of dark — pastel goth energy",              ae:{kawaii:2,goth:2},  et:["pastel_goth"]},
+     {t:"Soft and cute but not excessively so",                         ae:{softgirl:2,kawaii:1}},
+     {t:"Cute room but my style is actually quite different",           ae:{kawaii:1}},
+   ]
+  },
+  {id:"q_dark_depth", cat:"YOUR DARK SIDE", multi:false,
+   text:"Dark room — but which direction?",
+   opts:[
+     {t:"Dark academia — the books, candles, intellectual vibe",       ae:{darkacad:3},       et:["dark_academic"]},
+     {t:"Goth — fully committed, black everything, liner always",      ae:{goth:3},           et:["full_goth"]},
+     {t:"Emo energy — the music, the feelings, all of it",             ae:{emo:3,goth:1},     et:["emo_core"]},
+     {t:"Dark but also soft — dark feminine or dark coquette",         ae:{goth:2,coquette:2},et:["dark_fem"]},
+   ]
+  },
+  {id:"q_nature_depth", cat:"YOUR COTTAGE SIDE", multi:false,
+   text:"How deep does the cottagecore go?",
+   opts:[
+     {t:"All the way — I want a garden and I bake my own bread",       ae:{cottage:3},        et:["full_cottage"]},
+     {t:"I love the aesthetic but I am not actually growing anything", ae:{cottage:2,indie:1}},
+     {t:"Natural and earthy but very much a city person",             ae:{tomato:2,indie:1}},
+     {t:"Calm room but my actual style is something else",            ae:{indie:1}},
+   ]
+  },
+  {id:"q_alt_depth", cat:"YOUR ALT SIDE", multi:false,
+   text:"Poster wall, chaotic room — which direction?",
+   opts:[
+     {t:"Grunge — flannel, docs, zero effort, all second-hand",       ae:{grunge:3},         et:["full_grunge"]},
+     {t:"Indie and vintage — thrifted, 35mm camera, ahead of trends", ae:{indie:3},          et:["full_indie"]},
+     {t:"Y2K chaos — posters are Bratz and 2000s icons",             ae:{y2k:3},            et:["y2k_chaos"]},
+     {t:"Just chaotic — not one specific thing",                      ae:{indie:1,grunge:1}},
+   ]
+  },
+  {id:"q_clean_depth", cat:"YOUR CLEAN SIDE", multi:false,
+   text:"Minimal room — which flavour?",
+   opts:[
+     {t:"That girl era — workouts, green drinks, skin first",         ae:{cleangirl:3},      et:["that_girl"]},
+     {t:"Old money / quiet luxury — understated but expensive",       ae:{oldmoney:3},       et:["quiet_luxury"]},
+     {t:"Preppy — plaid, polo, classic all the way",                 ae:{preppy:3},         et:["full_preppy"]},
+     {t:"Clean but with something soft or romantic underneath",       ae:{cleangirl:2,coquette:1,softgirl:1}},
+   ]
+  },
+];
+// ─── ENGINE ──────────────────────────────────────────────
+let queue=[], multiSel=[], qCount=0;
+Object.keys(AE).forEach(k=>P.aesthetics[k]=0);
+
+function initQ(){ queue=[...CORE_IDS]; }
+function getQ(id){ return QS.find(q=>q.id===id); }
+
+function shouldContinue(){
+  // Quiz is always exactly 10 questions — no more, no less.
+  return qCount < 10;
+}
+
+function nextId(){
+  while(queue.length>0){ const id=queue.shift(); if(!P.answered.has(id)) return id; }
+  return null;
+}
+
+function startQuiz(){
+  // Reset all state for fresh quiz
+  qCount=0;
+  Object.keys(AE).forEach(k=>P.aesthetics[k]=0);
+  P.music=[]; P.interests=[]; P.social=null;
+  P.age=null; P.gender=null;
+  P.faveColour=null; P.faveShop=null; P.friendGroup=null;
+  P.energyWord=null; P.moodToday=null; P.phoneScreen=null;
+  P.saturdayMorning=null; P.coffeeOrder=null; P.notesApp=null;
+  P.lastBought=null; P.dreamJob=null; P.weekendPlan=null; P.wallpaper=null;
+  P.extraTags=[]; P.answered=new Set();
+  queue=[];
+  document.getElementById('heroSection').style.display='none';
+  document.getElementById('quizWrap').classList.add('active');
+  initQ(); renderNext();
+}
+
+function renderNext(){
+  if(!shouldContinue()){ buildPage(); return; }
+  const id=nextId();
+  if(!id){ buildPage(); return; }
+  renderQ(id);
+}
+
+function renderQ(id){
+  const q=getQ(id); if(!q){renderNext();return;}
+  P.answered.add(id); qCount++;
+  document.getElementById('pFill').style.width=((qCount/10)*100)+'%';
+  document.getElementById('pLabel').textContent=`Question ${qCount} of 10`;
+  multiSel=[];
+  const area=document.getElementById('qArea');
+  area.className='q-anim';
+  if(q.multi){
+    const hintHtml = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
+    const optsHtml = q.opts.map((o,i)=>{
+      if(o.isCustom){
+        return '<button class="opt-check" id="mc'+i+'" onclick="togCustom('+i+',\''+id+'\')">'+o.t+'</button>';
+      }
+      return '<button class="opt-check" id="mc'+i+'" onclick="tog('+i+')">'+o.t+'</button>';
+    }).join('');
+    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml+'<div class="opts-multi" id="mGrid">'+optsHtml+'</div><div id="customInputWrap" style="display:none;margin-bottom:12px;"><input type="text" id="customArtistInput" placeholder="Type your artist name..." style="width:100%;padding:14px 18px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.12);font-family:Space Grotesk,sans-serif;font-size:0.95rem;outline:none;background:transparent;color:inherit;"/></div><button class="next-btn bc" id="nBtn" onclick="submitMulti(\''+id+'\')">Continue</button>';
+    document.getElementById('nBtn').disabled = true;
+  } else {
+    const hintHtml2 = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
+    const optsHtml2 = q.opts.map((o,i)=>'<button class="opt" onclick="pickSingle(\''+id+'\','+i+')">'+o.t+'</button>').join('');
+    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml2+'<div class="opts-single">'+optsHtml2+'</div>';
+  }
+}
+
+function tog(i){
+  const btn=document.getElementById('mc'+i);
+  if(multiSel.includes(i)){multiSel=multiSel.filter(x=>x!==i);btn.classList.remove('on');}
+  else{multiSel.push(i);btn.classList.add('on');}
+  document.getElementById('nBtn').disabled=multiSel.length===0;
+}
+
+function togCustom(i, qid){
+  tog(i);
+  var wrap = document.getElementById('customInputWrap');
+  if(multiSel.includes(i)){
+    wrap.style.display='block';
+    document.getElementById('customArtistInput').focus();
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function submitMulti(qid){
+  const q=getQ(qid);
+  multiSel.forEach(function(i){
+    var opt = q.opts[i];
+    if(opt.isCustom){
+      var customName = (document.getElementById('customArtistInput')||{}).value||'';
+      customName = customName.trim();
+      if(customName){
+        P.music.push('custom');
+        if(!P.customArtists) P.customArtists = [];
+        P.customArtists.push(customName);
+        if(typeof ARTISTS !== 'undefined') ARTISTS['custom'] = {name:customName};
+      }
+    } else {
+      applyOpt(opt);
+    }
+  });
+  renderNext();
+}
+
+function pickSingle(qid,i){
+  const q=getQ(qid); const opt=q.opts[i]; applyOpt(opt);
+  renderNext();
+}
+
+function applyOpt(opt){
+  if(opt.ae) Object.entries(opt.ae).forEach(([k,v])=>{P.aesthetics[k]=(P.aesthetics[k]||0)+v;});
+  if(opt.mu&&!P.music.includes(opt.mu)) P.music.push(opt.mu);
+  if(opt.in&&!P.interests.includes(opt.in)) P.interests.push(opt.in);
+  if(opt.so&&!P.social) P.social=opt.so;
+  if(opt.et) opt.et.forEach(t=>{if(!P.extraTags.includes(t)) P.extraTags.push(t);});
+  if(opt.ag) P.age=opt.ag;
+  if(opt.gn) P.gender=opt.gn;
+  if(opt.md) P.moodToday=opt.md;
+  if(opt.col) P.faveColour=COLOURS[opt.col]||null;
+  if(opt.shop) P.faveShop=opt.shop;
+  if(opt.fg) P.friendGroup=opt.fg;
+  if(opt.ew) P.energyWord=opt.ew;
+  if(opt.ph) P.phoneScreen=opt.ph;
+  if(opt.sm) P.saturdayMorning=opt.sm;
+  if(opt.co) P.coffeeOrder=opt.co;
+  if(opt.na) P.notesApp=opt.na;
+  if(opt.lb) P.lastBought=opt.lb;
+  if(opt.dj) P.dreamJob=opt.dj;
+  if(opt.wp) P.weekendPlan=opt.wp;
+  if(opt.wp2) P.wallpaper=opt.wp2;
+}
+
+// ─── RESOLVE AESTHETIC NAME (lightweight, mirrors lifestyle.html) ──
+function resolveAeName(){
+  const ae=P.aesthetics; const et=P.extraTags;
+  const sorted=Object.entries(ae).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0]?.[0]; const sec=sorted[1]?.[0];
+  const nm=k=>AE[k]?.name||k;
+  if(et.includes('pastel_goth')) return "Pastel Goth";
+  if(et.includes('dark_fem')) return "Dark Feminine";
+  if(et.includes('emo_core')) return "Emo";
+  if(et.includes('quiet_luxury')) return "Quiet Luxury";
+  if(et.includes('that_girl')) return "That Girl";
+  if(et.includes('full_preppy')) return "Preppy";
+  if(et.includes('full_grunge')) return "Grunge";
+  if(et.includes('full_indie')) return "Indie Alt";
+  if(et.includes('y2k_chaos')) return "Y2K";
+  if(et.includes('full_cottage')) return "Cottagecore";
+  if(et.includes('dark_academic')) return "Dark Academia";
+  if(et.includes('full_goth')) return "Goth";
+  if(et.includes('kawaii_full')) return "Kawaii";
+  if(sec&&(ae[sec]||0)>=(ae[top]||0)*0.62&&nm(top)!==nm(sec)){
+    return nm(top)+' × '+nm(sec);
+  }
+  return nm(top)||'Soft Girl';
+}
+
+// ─── FINISH QUIZ ──────────────────────────────────────────
+// Snapshot the quiz, then route based on auth state:
+//  - logged in  → save profile, go to lifestyle.html (the result page)
+//  - anonymous  → park snapshot, go to /auth.html?quiz=1 to sign in
+function buildPage(){
+  document.getElementById('pFill').style.width='100%';
+
+  const aeName = resolveAeName();
+  const sorted = Object.entries(P.aesthetics).sort((a,b)=>b[1]-a[1]);
+  const topK = sorted[0]?.[0] || 'softgirl';
+
+  var quizSnapshot = {
+    aesthetics:P.aesthetics,music:P.music,interests:P.interests,
+    social:P.social,age:P.age,gender:P.gender,
+    faveColour:P.faveColour,faveShop:P.faveShop,
+    friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
+    phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
+    coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
+    dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
+    customArtists:P.customArtists||[],
+    extraTags:P.extraTags,
+    aesthetic:aeName,aestheticKey:topK
+  };
+
+  if(!localStorage.getItem('stuflover_token')){
+    try{ localStorage.setItem('stuflover_pending_quiz', JSON.stringify(quizSnapshot)); }catch(e){}
+    window.location.href = '/auth.html?quiz=1';
+    return;
+  }
+
+  try{ localStorage.setItem('stuflover_profile', JSON.stringify(quizSnapshot)); }catch(e){}
+  window.location.href = '/lifestyle.html';
+}
+
+// Auto-start the quiz on page load — the hero is just a brief intro.
+// Users came here by clicking "Take the Quiz", so don't make them click again.
+// (Comment out this line if you want the hero "Let's Go" button as the trigger.)
+// startQuiz();
+</script>
+
+<script src="/stuflover-ux.js"></script>
+<script src="/stuflover-nav.js" defer></script>
+</body>
+</html>
