@@ -210,7 +210,7 @@
 
   var TABS = [
     { id: 'mypage',   label: 'My Page', href: 'lifestyle.html',  match: ['lifestyle.html'],                 icon: iconHome },
-    { id: 'play',     label: 'Play',    href: 'activities.html', match: ['activities.html','fitcheck.html','fitforit.html','catalog.html','beyou.html','collab.html','academic.html','wishingwell.html'], icon: iconPlay },
+    { id: 'play',     label: 'Play',    href: 'activities.html', match: ['activities.html','games.html','fitcheck.html','fitforit.html','catalog.html','beyou.html','collab.html','academic.html','wishingwell.html'], icon: iconPlay },
     { id: 'friends',  label: 'Friends', href: 'friends.html',    match: ['friends.html','flovee.html'],     icon: iconUsers },
     { id: 'me',       label: 'Me',      href: 'account.html',    match: ['account.html','auth.html'],       icon: iconUser }
   ];
