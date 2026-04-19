@@ -659,8 +659,27 @@ app.post('/api/games/:id/score', auth, (req, res) => {
   }
   stmts.insertGameScore.run(req.user.id, gameId, score);
   const best = stmts.getUserBestScore.get(req.user.id, gameId);
-  res.json({ ok: true, best: (best && best.best) || score });
+  const unlocked = checkAchievements(req.user.id, gameId);
+  res.json({ ok: true, best: (best && best.best) || score, unlocked });
 });
+
+function checkAchievements(userId, gameId) {
+  const newly = [];
+  const tryUnlock = (code) => {
+    const r = stmts.unlockAchievement.run(userId, code);
+    if (r.changes > 0) newly.push(code);
+  };
+  tryUnlock('first_score');
+  const overall = stmts.getUserBestOverall.get(userId);
+  const top = (overall && overall.best) || 0;
+  if (top >= 100) tryUnlock('score_100');
+  if (top >= 500) tryUnlock('score_500');
+  const distinct = stmts.countDistinctGamesPlayed.get(userId);
+  if (distinct && distinct.n >= VALID_GAME_IDS.size) tryUnlock('played_all_games');
+  const topRow = stmts.getTopScores.all(gameId, 1)[0];
+  if (topRow && topRow.user_id === userId) tryUnlock('top_of_leaderboard');
+  return newly;
+}
 
 app.get('/api/games/:id/leaderboard', auth, (req, res) => {
   const gameId = req.params.id;
@@ -684,6 +703,11 @@ app.get('/api/games/:id/my-scores', auth, (req, res) => {
   const scores = stmts.getUserScores.all(req.user.id, gameId);
   const best = stmts.getUserBestScore.get(req.user.id, gameId);
   res.json({ scores, best: (best && best.best) || 0 });
+});
+
+app.get('/api/achievements/mine', auth, (req, res) => {
+  const achievements = stmts.getUserAchievements.all(req.user.id);
+  res.json({ achievements });
 });
 
 // ─── Admin Routes ───

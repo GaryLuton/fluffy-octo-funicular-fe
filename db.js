@@ -338,6 +338,18 @@ async function initDb() {
   db.run(`CREATE INDEX IF NOT EXISTS idx_game_scores_game ON game_scores(game_id, score DESC)`);
   db.run(`CREATE INDEX IF NOT EXISTS idx_game_scores_user ON game_scores(user_id, game_id)`);
 
+  // Achievements
+  db.run(`
+    CREATE TABLE IF NOT EXISTS achievements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      code TEXT NOT NULL,
+      unlocked_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(user_id, code)
+    );
+  `);
+
   save();
   return db;
 }
@@ -808,6 +820,31 @@ const stmts = {
     get: (userId, gameId) => get(
       'SELECT MAX(score) as best FROM game_scores WHERE user_id = ? AND game_id = ?',
       [userId, gameId]
+    ),
+  },
+  getUserBestOverall: {
+    get: (userId) => get(
+      'SELECT MAX(score) as best FROM game_scores WHERE user_id = ?',
+      [userId]
+    ),
+  },
+  countDistinctGamesPlayed: {
+    get: (userId) => get(
+      'SELECT COUNT(DISTINCT game_id) as n FROM game_scores WHERE user_id = ?',
+      [userId]
+    ),
+  },
+  // Achievements
+  unlockAchievement: {
+    run: (userId, code) => run(
+      'INSERT OR IGNORE INTO achievements (user_id, code) VALUES (?, ?)',
+      [userId, code]
+    ),
+  },
+  getUserAchievements: {
+    all: (userId) => all(
+      'SELECT code, unlocked_at FROM achievements WHERE user_id = ? ORDER BY unlocked_at ASC',
+      [userId]
     ),
   },
 };
