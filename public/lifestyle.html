@@ -3674,6 +3674,15 @@ function backToHub(){
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
   if(dtiTimerInterval) clearInterval(dtiTimerInterval);
+  if(dtiState && dtiState.totalScore > 0){
+    postGameScore('dti', dtiState.totalScore);
+    dtiState.totalScore = 0;
+    dtiState.round = 1;
+  }
+  if(!cgState.ended && cgState.score > 0){
+    postGameScore(cgState.game && cgState.game.id, cgState.score);
+    cgState.ended = true;
+  }
   if(typeof dti2DDestroy === 'function') dti2DDestroy();
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('sectionNameNav').textContent = 'FloveeHub';
@@ -3938,7 +3947,6 @@ function cgPickChoice(letter, el){
   el.style.borderColor = pal.ac;
   cgState.score += 10;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
-  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   fb.textContent = cgState.data.funFact || 'Good pick!';
   fb.style.background = pal.ac+'12';
@@ -3967,7 +3975,6 @@ function cgPickQuiz(idx, el){
   el.style.borderColor = pal.ac;
   cgState.score += 10;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
-  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var aesthetic = (cgState.data.aesthetics||[])[idx] || 'mysterious';
   var fb = document.getElementById('cgFeedback');
   fb.textContent = 'That answer gives you: '+aesthetic+' energy';
@@ -3994,7 +4001,6 @@ function cgPickTrivia(idx, el){
     if(allCards[correct]) allCards[correct].classList.add('correct');
   }
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
-  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   var isLast = cgState.game && cgState.game.id === 'trivia' && cgState.round >= TRIVIA_MAX_ROUNDS;
   fb.textContent = (idx===correct?'Correct! ':'Wrong! ')+(cgState.data.explanation||'');
@@ -4025,7 +4031,6 @@ function cgRate(rating){
   else points = 10;
   cgState.score += points;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
-  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   fb.textContent = (isReal?'This was REAL! ':'This was MADE UP! ')+cgState.data.reveal+' (+'+points+' pts)';
   fb.style.background = pal.ac+'12';
@@ -4056,7 +4061,6 @@ async function cgSubmitChallenge(){
       var result = JSON.parse(match[0]);
       cgState.score += (result.score||15);
       document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
-      postGameScore(cgState.game && cgState.game.id, cgState.score);
       var fb = document.getElementById('cgFeedback');
       fb.textContent = (result.score||15)+'/30 — '+(result.feedback||'Not bad!');
       fb.style.background = pal.ac+'12';
@@ -4866,9 +4870,11 @@ function dtiRenderSkinPicker(){
   });
 }
 
-function dtiInit(){
+function dtiInit(continueGame){
   var pal = searchPal;
-  dtiState = {round: dtiState.round||1, totalScore:dtiState.totalScore||0, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:DTI_TOTAL_TIME, skinIdx:dtiState.skinIdx||1};
+  var round = continueGame ? (dtiState.round || 1) : 1;
+  var totalScore = continueGame ? (dtiState.totalScore || 0) : 0;
+  dtiState = {round: round, totalScore: totalScore, theme:'', picks:{hair:null,tops:null,bottoms:null,shoes:null,accessories:null}, timeLeft:DTI_TOTAL_TIME, skinIdx:dtiState.skinIdx||1};
 
   // Render skin picker and set skin
   dtiRenderSkinPicker();
@@ -5087,17 +5093,16 @@ async function dtiSubmit(){
       dtiState.totalScore += pts;
       dtiShowResult(stars, result.title||'Not bad!', result.message||'', outfitStr);
     } else {
-      dtiShowResult(3, 'Hmm let me think...', 'I could not quite judge this one. Let us say 3 stars!', outfitStr);
       dtiState.totalScore += 60;
+      dtiShowResult(3, 'Hmm let me think...', 'I could not quite judge this one. Let us say 3 stars!', outfitStr);
     }
   }catch(e){
-    dtiShowResult(3, 'Runway technical difficulties', 'Something went wrong but you looked great. 3 stars!', outfitStr);
     dtiState.totalScore += 60;
+    dtiShowResult(3, 'Runway technical difficulties', 'Something went wrong but you looked great. 3 stars!', outfitStr);
   }
 
   document.getElementById('dtiSubmitBtn').disabled = false;
   document.getElementById('dtiSubmitBtn').textContent = 'Walk the Runway';
-  postGameScore('dti', dtiState.totalScore);
 }
 
 function dtiShowResult(stars, title, msg, outfit){
@@ -5131,11 +5136,12 @@ function dtiShowResult(stars, title, msg, outfit){
 function dtiNextRound(){
   dtiState.round++;
   dtiState.picks = {hair:null,tops:null,bottoms:null,shoes:null,accessories:null};
-  dtiInit();
+  dtiInit(true);
 }
 
 function dtiEndGame(){
   if(dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval = null; }
+  postGameScore('dti', dtiState.totalScore);
   window.location.href = 'games.html';
 }
 
