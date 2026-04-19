@@ -5,6 +5,24 @@
    Idempotent — safe to include multiple times.
    ============================================================ */
 
+/* ── View Transition interrupt guard ──────────────────────────
+   @view-transition { navigation: auto } below drives automatic
+   cross-document transitions. When a user clicks a second link
+   before the first transition settles, Chrome rejects the in-flight
+   transition promise with an AbortError that can surface as an
+   uncaught rejection in DevTools. Swallow only that error.
+   ============================================================ */
+(function(){
+  if (window.__sluVtGuard) return;
+  window.__sluVtGuard = true;
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e && e.reason;
+    if (!r) return;
+    var name = r.name || (r.constructor && r.constructor.name) || '';
+    if (name === 'AbortError') e.preventDefault();
+  });
+})();
+
 /* ── SITE THEME / EXPERIENCE SYSTEM ───────────────────────────
    Applies user-chosen colors and experience settings (text size,
    motion, texture) site-wide. Settings live in localStorage so
