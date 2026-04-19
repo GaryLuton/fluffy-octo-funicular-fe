@@ -385,6 +385,16 @@
     .cg-feedback.visible{display:block;}
     .cg-next{padding:12px 36px;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:16px;transition:all 0.2s;}
     .cg-next:hover{transform:translateY(-2px);opacity:0.9;}
+    .cg-end{padding:10px 26px;background:transparent;border:1.5px solid currentColor;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:12px;opacity:0.55;transition:all 0.2s;color:inherit;}
+    .cg-end:hover{opacity:1;transform:translateY(-1px);}
+    .cg-final{width:100%;max-width:420px;border-radius:20px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;animation:fadeSlideIn 0.4s ease both;}
+    .cg-final-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:3.4rem;line-height:1;letter-spacing:1px;}
+    .cg-final-sub{font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;opacity:0.55;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+    .cg-final-correct{margin-top:14px;font-size:1.05rem;font-weight:600;opacity:0.85;}
+    .cg-final-msg{margin-top:6px;font-size:0.85rem;opacity:0.7;line-height:1.5;}
+    .cg-confetti-container{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;overflow:hidden;}
+    .cg-confetti-piece{position:absolute;top:-24px;width:10px;height:14px;opacity:0.95;animation:cgConfettiFall linear forwards;}
+    @keyframes cgConfettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(108vh) rotate(720deg);opacity:0;}}
     .cg-loading{opacity:0.3;font-style:italic;padding:40px;text-align:center;}
     .cg-rate-card{width:100%;max-width:420px;border-radius:18px;padding:24px 22px;line-height:1.7;font-size:0.92rem;margin-bottom:16px;}
     .cg-rate-stars{display:flex;gap:6px;justify-content:center;margin-top:12px;}
@@ -1260,6 +1270,7 @@
       <div class="cg-cards" id="cgCards"></div>
       <div class="cg-feedback" id="cgFeedback"></div>
       <button class="cg-next bc" id="cgNextBtn" onclick="cgNextRound()" style="display:none;">Next</button>
+      <button class="cg-end bc" id="cgEndBtn" onclick="cgEndGame()" style="display:none;">End Game</button>
     </div>
 
     <!-- FloveeHub game platform -->
@@ -3547,18 +3558,36 @@ function backToHub(){
 }
 
 // ─── CARD GAME ENGINE ─────────────────────────────────────
-var cgState = {game:null, round:1, score:0, answered:false, data:null};
+var TRIVIA_MAX_ROUNDS = 10;
+var cgState = {game:null, round:1, score:0, correct:0, answered:false, data:null, ended:false};
+
+function cgRoundLabel(){
+  if(cgState.game && cgState.game.id === 'trivia'){
+    return 'Question '+cgState.round+' / '+TRIVIA_MAX_ROUNDS;
+  }
+  return 'Round '+cgState.round;
+}
 
 function cgInit(game){
-  cgState = {game:game, round:1, score:0, answered:false, data:null};
+  cgState = {game:game, round:1, score:0, correct:0, answered:false, data:null, ended:false};
   var pal = searchPal;
   document.getElementById('cgGameName').textContent = game.name;
   document.getElementById('cgScore').textContent = 'Score: 0';
   document.getElementById('cgScore').style.color = pal.tx;
-  document.getElementById('cgRound').textContent = 'Round 1';
-  document.getElementById('cgNextBtn').style.background = pal.ac;
-  document.getElementById('cgNextBtn').style.color = pal.bg;
-  document.getElementById('cgNextBtn').style.display = 'none';
+  document.getElementById('cgRound').textContent = cgRoundLabel();
+  var nextBtn = document.getElementById('cgNextBtn');
+  nextBtn.style.background = pal.ac;
+  nextBtn.style.color = pal.bg;
+  nextBtn.style.display = 'none';
+  nextBtn.textContent = 'Next';
+  nextBtn.onclick = cgNextRound;
+  var endBtn = document.getElementById('cgEndBtn');
+  if(endBtn){
+    endBtn.textContent = 'End Game';
+    endBtn.onclick = cgEndGame;
+    endBtn.style.color = pal.tx;
+    endBtn.style.display = (game.id === 'trivia') ? 'inline-block' : 'none';
+  }
   document.getElementById('cgFeedback').style.display = 'none';
   cgLoadRound();
 }
@@ -3761,6 +3790,8 @@ function cgPickTrivia(idx, el){
   if(idx === correct){
     el.classList.add('correct');
     cgState.score += 20;
+    cgState.correct = (cgState.correct || 0) + 1;
+    cgConfetti();
   } else {
     el.classList.add('wrong');
     if(allCards[correct]) allCards[correct].classList.add('correct');
@@ -3768,12 +3799,15 @@ function cgPickTrivia(idx, el){
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
   postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
+  var isLast = cgState.game && cgState.game.id === 'trivia' && cgState.round >= TRIVIA_MAX_ROUNDS;
   fb.textContent = (idx===correct?'Correct! ':'Wrong! ')+(cgState.data.explanation||'');
   fb.style.background = (idx===correct?'rgba(76,175,80,0.1)':'rgba(239,83,80,0.1)');
   fb.style.color = pal.tx;
   fb.style.display = 'block';
   fb.classList.add('visible');
-  document.getElementById('cgNextBtn').style.display = 'inline-block';
+  var nextBtn = document.getElementById('cgNextBtn');
+  nextBtn.textContent = isLast ? 'See Final Score' : 'Next';
+  nextBtn.style.display = 'inline-block';
 }
 
 function cgRate(rating){
@@ -3834,9 +3868,78 @@ async function cgSubmitChallenge(){
 }
 
 function cgNextRound(){
+  if(cgState.game && cgState.game.id === 'trivia' && cgState.round >= TRIVIA_MAX_ROUNDS){
+    cgShowFinal();
+    return;
+  }
   cgState.round++;
-  document.getElementById('cgRound').textContent = 'Round '+cgState.round;
+  document.getElementById('cgRound').textContent = cgRoundLabel();
   cgLoadRound();
+}
+
+function cgEndGame(){
+  if(cgState.ended) return;
+  cgShowFinal(true);
+}
+
+function cgShowFinal(earlyEnd){
+  cgState.ended = true;
+  var pal = searchPal;
+  var total = TRIVIA_MAX_ROUNDS;
+  var played = Math.min(cgState.round - (cgState.answered ? 0 : 1), total);
+  if(played < 0) played = 0;
+  var correct = cgState.correct || 0;
+  var score = cgState.score;
+  var msg;
+  if(score >= 160) msg = 'Trivia legend.';
+  else if(score >= 100) msg = 'Solid run!';
+  else if(score >= 40) msg = 'Nice try — level up next time.';
+  else msg = 'Better luck next round.';
+  postGameScore(cgState.game && cgState.game.id, score);
+  document.getElementById('cgQuestion').textContent = earlyEnd ? 'Game Ended' : 'Game Over!';
+  document.getElementById('cgQuestion').style.color = pal.tx;
+  document.getElementById('cgRound').textContent = earlyEnd ? 'Ended early' : 'Final';
+  var cards = document.getElementById('cgCards');
+  cards.innerHTML =
+    '<div class="cg-final" style="color:'+pal.tx+';background:'+pal.ac+'12;">'+
+      '<div class="cg-final-sub">Final Score</div>'+
+      '<div class="cg-final-score" style="color:'+pal.ac+'">'+score+'</div>'+
+      '<div class="cg-final-correct">'+correct+' / '+(earlyEnd?played:total)+' correct</div>'+
+      '<div class="cg-final-msg">'+msg+'</div>'+
+    '</div>';
+  var fb = document.getElementById('cgFeedback');
+  fb.style.display = 'none';
+  fb.classList.remove('visible');
+  var nextBtn = document.getElementById('cgNextBtn');
+  nextBtn.textContent = 'Play Again';
+  nextBtn.style.display = 'inline-block';
+  nextBtn.onclick = function(){ cgInit(cgState.game); };
+  var endBtn = document.getElementById('cgEndBtn');
+  if(endBtn){
+    endBtn.textContent = 'Back to Hub';
+    endBtn.onclick = function(){ backToHub(); };
+    endBtn.style.display = 'inline-block';
+  }
+}
+
+function cgConfetti(){
+  var container = document.createElement('div');
+  container.className = 'cg-confetti-container';
+  document.body.appendChild(container);
+  var colors = ['#ff5252','#ffd54f','#69f0ae','#40c4ff','#e040fb','#ffab40','#ff80ab','#b388ff'];
+  var N = 90;
+  for(var i=0;i<N;i++){
+    var p = document.createElement('div');
+    p.className = 'cg-confetti-piece';
+    p.style.left = (Math.random()*100)+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (1.6 + Math.random()*1.8)+'s';
+    p.style.animationDelay = (Math.random()*0.25)+'s';
+    p.style.borderRadius = (Math.random()<0.5) ? '2px' : '50%';
+    p.style.transform = 'rotate('+Math.floor(Math.random()*360)+'deg)';
+    container.appendChild(p);
+  }
+  setTimeout(function(){ if(container.parentNode) container.parentNode.removeChild(container); }, 4200);
 }
 
 // ─── DTI GAME ENGINE ─────────────────────────────────────
