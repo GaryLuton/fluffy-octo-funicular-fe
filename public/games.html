@@ -24,6 +24,18 @@
 
     #gamesGrid{max-width:1100px;margin:0 auto;padding:20px 40px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
     .games-empty{grid-column:1/-1;text-align:center;padding:60px 20px;font-size:0.95rem;opacity:0.5;}
+    .cat-label{grid-column:1/-1;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;padding:16px 0 4px;color:var(--tx);}
+    .cat-label.has-rule{border-top:1px solid rgba(42,26,20,0.05);}
+    .game-tile{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;transition:transform 0.2s,box-shadow 0.2s;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+    .game-tile:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.12);}
+    .game-tile:active{transform:scale(0.97);}
+    .game-thumb{aspect-ratio:1.4/1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(200,120,96,0.15),rgba(200,120,96,0.04));}
+    .game-thumb svg{width:44px;height:44px;color:var(--ac);}
+    .game-info{padding:12px 14px;}
+    .game-name{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:3px;}
+    .game-desc{font-size:0.72rem;opacity:0.42;line-height:1.5;}
+    .game-best{font-size:0.62rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0;margin-top:6px;color:var(--ac);transition:opacity 0.3s;}
+    .game-best.visible{opacity:0.8;}
 
     @media(max-width:768px){
       .hero{padding:100px 24px 20px;}
@@ -47,14 +59,79 @@
   <p class="hero-sub">Pick a game, set a high score.</p>
 </section>
 
-<div id="gamesGrid">
-  <div class="games-empty">Loading…</div>
-</div>
+<div id="gamesGrid"></div>
 
 <script>
   if(!localStorage.getItem('stuflover_token')){
     window.location.href = '/auth.html';
   }
+</script>
+<script>
+(function(){
+  var ICONS = {
+    hanger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c0 .8-.5 1.4-1.4 1.7L3 14h18L12 9.7"/></svg>',
+    heart:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.8 8.7 2.3 5 6 5c2.1 0 3.5 1.1 4.5 2.5C11.5 6.1 12.9 5 15 5c3.7 0 5.2 3.7 3.5 7-2.5 4.5-9.5 9-9.5 9z"/></svg>',
+    bolt:   '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13,2 3,14 11,14 9,22 21,10 13,10"/></svg>',
+    arrows: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 21l-4-4 4-4"/></svg>',
+    scale:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 21h14M5 7l-3 7h6zM19 7l-3 7h6zM5 7h14"/></svg>',
+    palette:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.6-1.4-.4-.4-.6-.9-.6-1.4 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 22 10.6 8.6 8.6 0 0 0 12 2zM6 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
+    question:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>',
+  };
+
+  var GAMES = [
+    {category:'Fashion', items:[
+      {id:'dti',            name:'Dress To Impress', desc:'Build an outfit for a theme',     icon:'hanger'},
+      {id:'ratethis',       name:'Rate the Look',    desc:'Rate outfits — real or fake?',   icon:'heart'},
+      {id:'stylechallenge', name:'Style Challenge',  desc:'Wild constraints — build an outfit', icon:'bolt'},
+    ]},
+    {category:'Quick', items:[
+      {id:'thisorthat',     name:'This or That',     desc:'Two cards — tap your pick',      icon:'arrows'},
+      {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices',             icon:'scale'},
+    ]},
+    {category:'Quizzes', items:[
+      {id:'aestheticquiz',  name:'Aesthetic Quiz',   desc:'Discover your secret aesthetic', icon:'palette'},
+      {id:'trivia',         name:'Trivia Battle',    desc:'Pop culture questions',          icon:'question'},
+    ]},
+  ];
+
+  var grid = document.getElementById('gamesGrid');
+  var first = true;
+  GAMES.forEach(function(group){
+    var label = document.createElement('div');
+    label.className = 'cat-label' + (first ? '' : ' has-rule');
+    label.textContent = group.category;
+    grid.appendChild(label);
+    first = false;
+    group.items.forEach(function(g){
+      var tile = document.createElement('a');
+      tile.className = 'game-tile';
+      tile.href = 'lifestyle.html#game=' + encodeURIComponent(g.id);
+      tile.innerHTML =
+        '<div class="game-thumb">' + (ICONS[g.icon] || '') + '</div>' +
+        '<div class="game-info">' +
+          '<div class="game-name"></div>' +
+          '<div class="game-desc"></div>' +
+          '<div class="game-best" data-game-id="' + g.id + '"></div>' +
+        '</div>';
+      tile.querySelector('.game-name').textContent = g.name;
+      tile.querySelector('.game-desc').textContent = g.desc;
+      grid.appendChild(tile);
+    });
+  });
+
+  var token = localStorage.getItem('stuflover_token');
+  if(!token) return;
+  var allIds = GAMES.reduce(function(a,g){ return a.concat(g.items.map(function(i){return i.id;})); }, []);
+  allIds.forEach(function(id){
+    fetch('/api/games/' + encodeURIComponent(id) + '/my-scores', {
+      headers:{'Authorization':'Bearer ' + token}
+    }).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(!d || !d.best) return;
+      var el = document.querySelector('.game-best[data-game-id="' + id + '"]');
+      if(el){ el.textContent = 'Best: ' + d.best; el.classList.add('visible'); }
+    }).catch(function(){});
+  });
+})();
 </script>
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
