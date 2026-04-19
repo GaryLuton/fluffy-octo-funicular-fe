@@ -3398,6 +3398,48 @@ function makeIconSvg(fn,c,size){
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 52 52">'+inner+'</svg>';
 }
 
+// ─── MODAL HISTORY HELPER ─────────────────────────────────
+// Full-screen overlays register here so the URL hash, document.title and
+// browser back-button stay in sync with what's on screen.
+var __sluModal = { active:null, prevTitle:null, closeFns:{}, closing:false };
+
+function openModalView(name, title, closeFn){
+  if(__sluModal.active === name){
+    __sluModal.closeFns[name] = closeFn;
+    if(title) document.title = title;
+    return;
+  }
+  if(__sluModal.active){
+    // Replace the current modal entry rather than stacking, so back exits cleanly.
+    delete __sluModal.closeFns[__sluModal.active];
+    try{ history.replaceState({stuModal:name}, '', '#'+name); }catch(e){}
+  } else {
+    if(!__sluModal.prevTitle) __sluModal.prevTitle = document.title;
+    try{ history.pushState({stuModal:name}, '', '#'+name); }catch(e){}
+  }
+  __sluModal.active = name;
+  __sluModal.closeFns[name] = closeFn;
+  if(title) document.title = title;
+}
+
+function closeModalView(){
+  if(__sluModal.active && !__sluModal.closing){
+    try{ history.back(); }catch(e){}
+  }
+}
+
+window.addEventListener('popstate', function(){
+  if(!__sluModal.active || __sluModal.closing) return;
+  __sluModal.closing = true;
+  var name = __sluModal.active;
+  var fn = __sluModal.closeFns[name];
+  __sluModal.active = null;
+  delete __sluModal.closeFns[name];
+  if(__sluModal.prevTitle){ document.title = __sluModal.prevTitle; __sluModal.prevTitle = null; }
+  try{ if(typeof fn === 'function') fn(); }catch(err){}
+  __sluModal.closing = false;
+});
+
 function openHub(){
   var pal = searchPal;
   var aeIcons = getAeIcons();
@@ -3497,6 +3539,7 @@ function startHubGame(game){
     var navEl = document.getElementById('sectionNameNav');
     navEl.textContent = 'Dress To Impress';
     dtiInit();
+    openModalView('dti', 'Dress To Impress \u2014 Stuflover', backToHub);
     return;
   }
 
@@ -3511,6 +3554,7 @@ function startHubGame(game){
     var navEl = document.getElementById('sectionNameNav');
     navEl.textContent = game.name;
     cgInit(game);
+    openModalView('cardgame', game.name+' \u2014 Stuflover', backToHub);
     return;
   }
 
