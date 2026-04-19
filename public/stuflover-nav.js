@@ -497,4 +497,215 @@ body { padding-top: var(--sl-nav-h); }\
   }
   window.StufloverNav = window.StufloverNav || {};
   window.StufloverNav.setActiveTab = setActiveTab;
+
+  // ── Client-side router ──────────────────────────────────
+  // Intercept nav-tab clicks and swap body content in place so the nav never
+  // unmounts/rebuilds when moving between pages. Falls back to a normal
+  // navigation if anything goes wrong.
+  var navigating = false;
+
+  function scriptAlreadyLoaded(src) {
+    if (!src) return false;
+    var abs;
+    try { abs = new URL(src, location.href).href; } catch (e) { return false; }
+    var existing = document.querySelectorAll('script[src]');
+    for (var i = 0; i < existing.length; i++) {
+      var e = existing[i];
+      try {
+        if (new URL(e.getAttribute('src'), location.href).href === abs) return true;
+      } catch (err) {}
+    }
+    return false;
+  }
+
+  function isSameOriginHref(href) {
+    if (!href) return false;
+    if (/^(https?:)?\/\//i.test(href)) {
+      try {
+        var u = new URL(href, location.href);
+        return u.origin === location.origin;
+      } catch (e) { return false; }
+    }
+    if (href.charAt(0) === '#' || href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return false;
+    return true;
+  }
+
+  function targetFile(href) {
+    try {
+      var u = new URL(href, location.href);
+      var f = (u.pathname || '').split('/').pop() || 'index.html';
+      return f || 'index.html';
+    } catch (e) { return href; }
+  }
+
+  function activeTabIdForFile(file) {
+    for (var i = 0; i < TABS.length; i++) {
+      if (TABS[i].match.indexOf(file) !== -1) return TABS[i].id;
+    }
+    return null;
+  }
+
+  function copyBodyAttrs(fromBody) {
+    var cur = document.body;
+    // Remove attrs not on the new body (except style we leave as-is to avoid flashes).
+    Array.prototype.slice.call(cur.attributes).forEach(function (a) {
+      if (a.name === 'style') return;
+      if (!fromBody.hasAttribute(a.name)) cur.removeAttribute(a.name);
+    });
+    Array.prototype.slice.call(fromBody.attributes).forEach(function (a) {
+      if (a.name === 'style') return;
+      cur.setAttribute(a.name, a.value);
+    });
+  }
+
+  function mergePageStyles(newDoc) {
+    // On first SPA swap, tag the original page's <style> blocks so they get
+    // cleared alongside subsequent page-scoped styles. Our own injected
+    // styles (sl-nav-styles, sl-theme-styles) and font <link>s are kept.
+    if (!window.__slPageStylesTagged) {
+      document.head.querySelectorAll('style').forEach(function (s) {
+        if (s.id === 'sl-nav-styles' || s.id === 'sl-theme-styles') return;
+        s.setAttribute('data-sl-page-style', '1');
+      });
+      window.__slPageStylesTagged = true;
+    }
+    // Remove page-scoped styles/links we added on the previous SPA swap (or tagged above).
+    document.querySelectorAll('[data-sl-page-style]').forEach(function (el) { el.remove(); });
+    var head = document.head;
+    newDoc.head.querySelectorAll('style').forEach(function (s) {
+      var clone = document.createElement('style');
+      for (var i = 0; i < s.attributes.length; i++) clone.setAttribute(s.attributes[i].name, s.attributes[i].value);
+      clone.textContent = s.textContent;
+      clone.setAttribute('data-sl-page-style', '1');
+      head.appendChild(clone);
+    });
+    newDoc.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+      var href = l.getAttribute('href');
+      if (!href) return;
+      if (head.querySelector('link[rel="stylesheet"][href="' + href + '"]')) return;
+      var clone = document.createElement('link');
+      for (var i = 0; i < l.attributes.length; i++) clone.setAttribute(l.attributes[i].name, l.attributes[i].value);
+      clone.setAttribute('data-sl-page-style', '1');
+      head.appendChild(clone);
+    });
+  }
+
+  function runScripts(container) {
+    // Re-insert each <script> as a fresh element so the browser actually runs it.
+    // For external scripts, skip if already loaded (shared framework scripts
+    // are idempotent via their own guards — re-running would either be a no-op
+    // or cause duplicate listeners). Inline scripts always re-run because
+    // they set up per-page DOM state.
+    var scripts = Array.prototype.slice.call(container.querySelectorAll('script'));
+    scripts.forEach(function (old) {
+      var src = old.getAttribute('src') || '';
+      if (src && scriptAlreadyLoaded(src)) { old.remove(); return; }
+      var s = document.createElement('script');
+      for (var i = 0; i < old.attributes.length; i++) s.setAttribute(old.attributes[i].name, old.attributes[i].value);
+      // defer is meaningless for dynamically-inserted scripts and would silently
+      // drop them on some engines; strip it so they execute promptly.
+      s.removeAttribute('defer');
+      if (!src) s.textContent = old.textContent || '';
+      old.parentNode.replaceChild(s, old);
+    });
+  }
+
+  function isLegacyNav(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.id === 'mainNav') return true;
+    if (el.id === 'sl-top-nav' || el.id === 'sl-bottom-tabs') return true; // source should never have ours, but be safe
+    if (el.classList && (el.classList.contains('sl-nav') || el.classList.contains('top-bar'))) return true;
+    return false;
+  }
+
+  function swapBody(newDoc) {
+    var top = document.getElementById('sl-top-nav');
+    var bottom = document.getElementById('sl-bottom-tabs');
+    if (top) top.parentNode.removeChild(top);
+    if (bottom) bottom.parentNode.removeChild(bottom);
+
+    // Clear current body
+    while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+
+    copyBodyAttrs(newDoc.body);
+
+    Array.prototype.slice.call(newDoc.body.childNodes).forEach(function (node) {
+      if (node.nodeType === 1 && isLegacyNav(node)) return;
+      document.body.appendChild(document.importNode(node, true));
+    });
+
+    if (top) document.body.insertBefore(top, document.body.firstChild);
+    if (bottom) document.body.appendChild(bottom);
+  }
+
+  function navigate(href, options) {
+    options = options || {};
+    if (navigating) return;
+    navigating = true;
+
+    var url;
+    try { url = new URL(href, location.href); } catch (e) { location.href = href; return; }
+
+    fetch(url.href, { credentials: 'same-origin', headers: { 'Accept': 'text/html' } })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var ct = res.headers.get('Content-Type') || '';
+        if (ct && ct.indexOf('text/html') === -1) throw new Error('Not HTML');
+        return res.text();
+      })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        if (doc.title) document.title = doc.title;
+        mergePageStyles(doc);
+        swapBody(doc);
+        runScripts(document.body);
+
+        if (!options.replace) history.pushState({ sl: true }, '', url.href);
+
+        var file = targetFile(url.pathname);
+        var tabId = activeTabIdForFile(file);
+        if (tabId) setActiveTab(tabId);
+        else window.__slActiveTabOverride = null;
+
+        // Scroll: respect #hash, otherwise top.
+        if (url.hash) {
+          var target = document.getElementById(url.hash.slice(1));
+          if (target) target.scrollIntoView();
+          else window.scrollTo(0, 0);
+        } else {
+          window.scrollTo(0, 0);
+        }
+
+        document.dispatchEvent(new CustomEvent('sl:pagechange', { detail: { url: url.href } }));
+      })
+      .catch(function () {
+        location.href = url.href;
+      })
+      .then(function () { navigating = false; });
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented) return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest('a');
+    if (!a) return;
+    // Only intercept links that are part of our nav — leaves other links alone.
+    if (!a.matches('#sl-top-nav a, #sl-bottom-tabs a, .sl-logo, .sl-back-chip, .sl-tab')) return;
+    var href = a.getAttribute('href');
+    if (!href) return;
+    if (a.target && a.target !== '' && a.target !== '_self') return;
+    if (a.hasAttribute('download')) return;
+    if (!isSameOriginHref(href)) return;
+
+    // If the link is the currently-active tab (same file), just prevent reload.
+    var file = targetFile(href);
+    if (file === currentFile()) { e.preventDefault(); return; }
+
+    e.preventDefault();
+    navigate(href);
+  });
+
+  window.addEventListener('popstate', function () {
+    navigate(location.href, { replace: true });
+  });
 })();
