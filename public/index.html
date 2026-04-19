@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-sl-home="1">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -25,6 +25,22 @@
       --terracotta:#c87860; --terracotta-dark:#a86050;
       --brown:#2a1a14; --white:#ffffff;
     }
+    /* Home page is always pink — never overridden by the user's quiz theme. */
+    html[data-sl-home="1"]{
+      --pink-light:#faf0f0 !important; --pink-mid:#f0ddd6 !important; --pink:#faf0f0 !important; --peach:#e8d5c8 !important;
+      --terracotta:#c87860 !important; --terracotta-dark:#a86050 !important;
+      --brown:#2a1a14 !important; --white:#ffffff !important;
+      --bg:#faf0f0 !important; --tx:#2a1a14 !important; --ac:#c87860 !important; --ac2:#a86050 !important;
+      --sl-pink-light:#faf0f0 !important; --sl-pink-mid:#f0ddd6 !important; --sl-peach:#e8d5c8 !important;
+      --sl-terracotta:#c87860 !important; --sl-terracotta-dark:#a86050 !important;
+      --sl-brown:#2a1a14 !important; --sl-white:#ffffff !important;
+      --sl-bg:#faf0f0 !important; --sl-tx:#2a1a14 !important; --sl-ac:#c87860 !important;
+      --sl-ac-hover:#a86050 !important; --sl-surface:#ffffff !important;
+      font-size:16px !important;
+    }
+    html[data-sl-home="1"] body{background-color:#faf0f0 !important;color:#2a1a14 !important;font-family:'Nunito',sans-serif !important;}
+    html[data-sl-home="1"] h1,html[data-sl-home="1"] h2,html[data-sl-home="1"] h3,
+    html[data-sl-home="1"] .logo,html[data-sl-home="1"] .bc{font-family:'Barlow Condensed',sans-serif !important;color:#2a1a14 !important;}
     body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);overflow-x:hidden;
       background-image:radial-gradient(circle, rgba(42,26,20,0.03) 1px, transparent 1px);background-size:24px 24px;}
     h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
