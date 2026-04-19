@@ -6757,13 +6757,13 @@ async function loadFloveePost(){
         '<div style="border-radius:24px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.08);">'+
           // Big gradient header with avatar
           '<div style="padding:24px 22px 20px;background:'+fd.gradient+';position:relative;">'+
-            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'+
-              '<div style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.08);">'+fd.emoji+'</div>'+
-              '<div style="flex:1;">'+
+            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;min-width:0;">'+
+              '<div style="flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.08);">'+fd.emoji+'</div>'+
+              '<div style="flex:1 1 auto;min-width:0;word-break:normal;overflow-wrap:anywhere;">'+
                 '<div style="font-size:1.1rem;font-weight:800;color:'+fd.darkColor+';line-height:1.2;">'+fd.name+'</div>'+
                 '<div style="font-size:0.72rem;opacity:0.6;color:'+fd.darkColor+';margin-top:2px;">'+fd.vibe+' · your flovee</div>'+
               '</div>'+
-              '<div style="text-align:right;">'+
+              '<div style="flex:0 0 auto;text-align:right;">'+
                 '<div style="display:flex;align-items:center;gap:5px;justify-content:flex-end;">'+
                   '<div id="floveeTimerDot" style="width:7px;height:7px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
                   '<div id="floveeTimerLabel" style="font-size:0.62rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+

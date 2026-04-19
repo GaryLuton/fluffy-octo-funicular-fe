@@ -90,6 +90,7 @@ nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 input, button, select, textarea {
