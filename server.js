@@ -710,6 +710,28 @@ app.get('/api/achievements/mine', auth, (req, res) => {
   res.json({ achievements });
 });
 
+app.get('/api/games/my-stats', auth, (req, res) => {
+  const perGame = stmts.getUserBestPerGame.all(req.user.id);
+  let totalPoints = 0;
+  let totalRounds = 0;
+  let topGame = null;
+  perGame.forEach((row) => {
+    totalPoints += row.best;
+    totalRounds += row.plays;
+    if (!topGame || row.best > topGame.score) {
+      topGame = { game_id: row.game_id, score: row.best };
+    }
+  });
+  const ach = stmts.countUserAchievements.get(req.user.id);
+  res.json({
+    total_points: totalPoints,
+    games_played: perGame.length,
+    total_rounds: totalRounds,
+    top_game: topGame,
+    achievements_unlocked: (ach && ach.n) || 0,
+  });
+});
+
 // ─── Admin Routes ───
 
 function adminAuth(req, res, next) {

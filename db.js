@@ -834,6 +834,20 @@ const stmts = {
       [userId]
     ),
   },
+  getUserBestPerGame: {
+    all: (userId) => all(
+      `SELECT game_id, MAX(score) as best, COUNT(*) as plays
+       FROM game_scores WHERE user_id = ?
+       GROUP BY game_id`,
+      [userId]
+    ),
+  },
+  countUserAchievements: {
+    get: (userId) => get(
+      'SELECT COUNT(*) as n FROM achievements WHERE user_id = ?',
+      [userId]
+    ),
+  },
   // Achievements
   unlockAchievement: {
     run: (userId, code) => run(
