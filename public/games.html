@@ -16,7 +16,7 @@
       background-image:radial-gradient(circle, var(--tx) 0.7px, transparent 0.7px);
       background-size:28px 28px;opacity:0.03;}
 
-    nav, .hero, #gamesGrid, #leaderboardSection{position:relative;z-index:1;}
+    nav, .hero, #gamesGrid, #leaderboardSection, #achievementsSection{position:relative;z-index:1;}
 
     .hero{padding:120px 40px 30px;text-align:center;}
     .hero h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(3.5rem,10vw,8rem);line-height:0.88;letter-spacing:-2px;color:var(--tx);margin:0;}
@@ -59,10 +59,25 @@
     .lb-empty{text-align:center;padding:40px 20px;font-size:0.9rem;opacity:0.45;font-style:italic;}
     .lb-loading{text-align:center;padding:40px 20px;font-size:0.85rem;opacity:0.4;}
 
+    #achievementsSection{max-width:1100px;margin:0 auto;padding:20px 40px 0;}
+    .ach-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);margin:0 0 6px;}
+    .ach-sub{font-size:0.85rem;opacity:0.5;margin:0 0 18px;}
+    .ach-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+    .ach-tile{background:#fff;border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:opacity 0.3s,transform 0.2s;}
+    .ach-tile.is-locked{opacity:0.4;}
+    .ach-tile.is-unlocked{transform:translateY(0);}
+    .ach-icon{flex:0 0 36px;height:36px;border-radius:50%;background:rgba(200,120,96,0.12);display:flex;align-items:center;justify-content:center;color:var(--ac);}
+    .ach-tile.is-unlocked .ach-icon{background:var(--ac);color:#fff;}
+    .ach-icon svg{width:18px;height:18px;}
+    .ach-meta{min-width:0;}
+    .ach-name{font-size:0.85rem;font-weight:700;line-height:1.3;}
+    .ach-desc{font-size:0.7rem;opacity:0.55;line-height:1.4;margin-top:2px;}
+
     @media(max-width:768px){
       .hero{padding:100px 24px 20px;}
       #gamesGrid{padding:16px 24px 60px;}
       #leaderboardSection{padding:16px 24px 60px;}
+      #achievementsSection{padding:16px 24px 0;}
       .lb-row{padding:10px 14px;}
     }
   </style>
@@ -84,6 +99,12 @@
 </section>
 
 <div id="gamesGrid"></div>
+
+<section id="achievementsSection">
+  <h2 class="ach-title">Achievements</h2>
+  <p class="ach-sub">Unlock by playing.</p>
+  <div class="ach-strip" id="achStrip"></div>
+</section>
 
 <section id="leaderboardSection">
   <h2 class="lb-title">Leaderboards</h2>
@@ -245,6 +266,50 @@
   }
 
   if(activeGameId) loadLeaderboard();
+
+  // ─── Achievements ─────────────────────────────────
+  var ACH_ICON_STAR    = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15,9 22,9 16.5,13.5 18.5,21 12,17 5.5,21 7.5,13.5 2,9 9,9"/></svg>';
+  var ACH_ICON_FLAME   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4-3 5-3 9a3 3 0 1 0 6 0c0 2 2 3 2 5a5 5 0 1 1-10 0c0-5 5-7 5-14z"/></svg>';
+  var ACH_ICON_TROPHY  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/><path d="M9 18h6M10 14h4l1 4H9z"/></svg>';
+  var ACH_ICON_GRID    = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+  var ACH_ICON_CROWN   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/></svg>';
+
+  var ACHIEVEMENTS = [
+    {code:'first_score',        name:'First Score',     desc:'Save any score',                icon:ACH_ICON_STAR},
+    {code:'score_100',          name:'Hundred Club',    desc:'Hit a score of 100',            icon:ACH_ICON_FLAME},
+    {code:'score_500',          name:'High Roller',     desc:'Hit a score of 500',            icon:ACH_ICON_TROPHY},
+    {code:'played_all_games',   name:'Try It All',      desc:'Play every game at least once', icon:ACH_ICON_GRID},
+    {code:'top_of_leaderboard', name:'Top of the Pile', desc:"Be #1 on a game's leaderboard", icon:ACH_ICON_CROWN},
+  ];
+
+  var stripEl = document.getElementById('achStrip');
+  ACHIEVEMENTS.forEach(function(a){
+    var tile = document.createElement('div');
+    tile.className = 'ach-tile is-locked';
+    tile.dataset.code = a.code;
+    tile.innerHTML =
+      '<div class="ach-icon">' + a.icon + '</div>' +
+      '<div class="ach-meta">' +
+        '<div class="ach-name">' + esc(a.name) + '</div>' +
+        '<div class="ach-desc">' + esc(a.desc) + '</div>' +
+      '</div>';
+    tile.title = a.desc;
+    stripEl.appendChild(tile);
+  });
+
+  fetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || !d.achievements) return;
+      var unlocked = {};
+      d.achievements.forEach(function(a){ unlocked[a.code] = true; });
+      Array.prototype.forEach.call(stripEl.children, function(tile){
+        if(unlocked[tile.dataset.code]){
+          tile.classList.remove('is-locked');
+          tile.classList.add('is-unlocked');
+        }
+      });
+    }).catch(function(){});
 })();
 </script>
 <script src="/stuflover-config.js"></script>
