@@ -140,27 +140,8 @@
       + '  color: var(--sl-tx) !important;'
       + '}'
       + 'html[data-sl-custom="on"] a { color: var(--sl-ac); }'
-      /* Top nav — force consistent themed background on every page. */
-      + 'html[data-sl-custom="on"] #sl-top-nav {'
-      + '  background: color-mix(in srgb, var(--sl-bg) 82%, transparent) !important;'
-      + '  border-bottom-color: color-mix(in srgb, var(--sl-tx) 10%, transparent) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] #sl-bottom-tabs {'
-      + '  background: color-mix(in srgb, var(--sl-bg) 92%, transparent) !important;'
-      + '  border-top-color: color-mix(in srgb, var(--sl-tx) 10%, transparent) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] #sl-top-nav .sl-logo,'
-      + 'html[data-sl-custom="on"] #sl-top-nav .sl-tab,'
-      + 'html[data-sl-custom="on"] #sl-top-nav .sl-back-chip,'
-      + 'html[data-sl-custom="on"] #sl-bottom-tabs .sl-tab {'
-      + '  color: var(--sl-tx) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] #sl-top-nav .sl-tab.is-active {'
-      + '  background: var(--sl-ac) !important; color: var(--sl-surface) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] #sl-bottom-tabs .sl-tab.is-active {'
-      + '  color: var(--sl-ac) !important;'
-      + '}'
+      /* Nav already uses theme tokens unconditionally in stuflover-nav.js,
+         so no extra custom-theme overrides are needed here. */
       + 'html[data-sl-motion="off"] *, html[data-sl-motion="off"] *::before, html[data-sl-motion="off"] *::after {'
       + '  animation-duration: 0ms !important; animation-delay: 0ms !important;'
       + '  transition-duration: 0ms !important; transition-delay: 0ms !important;'
@@ -281,6 +262,16 @@
   function injectStyles() {
     if (document.getElementById('sl-nav-styles')) return;
     var css = '\
+/* Cross-document view transitions: keep the nav visually stable when\
+   navigating between pages so it does not flash/rebuild. Supported in\
+   Chromium; older browsers ignore it harmlessly. */\
+@view-transition { navigation: auto; }\
+::view-transition-group(sl-top-nav),\
+::view-transition-group(sl-bottom-tabs) { animation-duration: 0ms; }\
+::view-transition-old(sl-top-nav),\
+::view-transition-new(sl-top-nav),\
+::view-transition-old(sl-bottom-tabs),\
+::view-transition-new(sl-bottom-tabs) { animation: none; mix-blend-mode: normal; }\
 /* Hide legacy per-page nav immediately so it never flashes before sl-top-nav mounts. */\
 nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }\
 :root { --sl-nav-h: 60px; --sl-tabs-h: 62px; }\
@@ -289,9 +280,11 @@ body { padding-top: var(--sl-nav-h); }\
   position: fixed; top: 0; left: 0; right: 0; height: var(--sl-nav-h);\
   display: flex; align-items: center; justify-content: space-between;\
   gap: 12px; padding: 0 24px; z-index: 300;\
-  background: rgba(250, 240, 240, 0.82); backdrop-filter: blur(18px) saturate(1.4);\
+  background: color-mix(in srgb, var(--sl-bg, #faf0f0) 92%, transparent);\
+  backdrop-filter: blur(18px) saturate(1.4);\
   -webkit-backdrop-filter: blur(18px) saturate(1.4);\
-  border-bottom: 1px solid rgba(42, 26, 20, 0.08);\
+  border-bottom: 1px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 12%, transparent);\
+  view-transition-name: sl-top-nav;\
 }\
 #sl-top-nav .sl-logo {\
   font-family: "Barlow Condensed", sans-serif; font-weight: 900;\
@@ -302,7 +295,7 @@ body { padding-top: var(--sl-nav-h); }\
 #sl-top-nav .sl-back-chip {\
   display: inline-flex; align-items: center; gap: 6px;\
   padding: 7px 14px; border-radius: 999px;\
-  border: 1.5px solid rgba(42, 26, 20, 0.12);\
+  border: 1.5px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 18%, transparent);\
   font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
   font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
   color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
@@ -310,7 +303,7 @@ body { padding-top: var(--sl-nav-h); }\
 }\
 #sl-top-nav .sl-back-chip:hover {\
   border-color: var(--sl-tx, #2a1a14);\
-  background: rgba(42, 26, 20, 0.04);\
+  background: color-mix(in srgb, var(--sl-tx, #2a1a14) 6%, transparent);\
 }\
 #sl-top-nav .sl-tabs { display: flex; gap: 4px; flex-wrap: nowrap; }\
 #sl-top-nav .sl-tab {\
@@ -321,15 +314,16 @@ body { padding-top: var(--sl-nav-h); }\
   color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
   transition: background 180ms ease, color 180ms ease;\
 }\
-#sl-top-nav .sl-tab:hover { background: rgba(42, 26, 20, 0.06); }\
+#sl-top-nav .sl-tab:hover { background: color-mix(in srgb, var(--sl-tx, #2a1a14) 8%, transparent); }\
 #sl-top-nav .sl-tab.is-active {\
-  background: var(--sl-ac, #c87860); color: #fff;\
+  background: var(--sl-ac, #c87860);\
+  color: var(--sl-surface, #fff);\
 }\
 #sl-top-nav .sl-tab svg { width: 16px; height: 16px; flex-shrink: 0; }\
 #sl-top-nav .sl-user {\
   font-family: "Barlow Condensed", sans-serif; font-weight: 700;\
   font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
-  color: rgba(42, 26, 20, 0.55); white-space: nowrap;\
+  color: color-mix(in srgb, var(--sl-tx, #2a1a14) 60%, transparent); white-space: nowrap;\
   max-width: 160px; overflow: hidden; text-overflow: ellipsis;\
 }\
 #sl-bottom-tabs { display: none; }\
@@ -347,17 +341,20 @@ body { padding-top: var(--sl-nav-h); }\
   #sl-bottom-tabs {\
     display: grid; grid-template-columns: repeat(4, 1fr);\
     position: fixed; bottom: 0; left: 0; right: 0; height: var(--sl-tabs-h);\
-    background: rgba(250, 240, 240, 0.92); backdrop-filter: blur(18px) saturate(1.4);\
+    background: color-mix(in srgb, var(--sl-bg, #faf0f0) 95%, transparent);\
+    backdrop-filter: blur(18px) saturate(1.4);\
     -webkit-backdrop-filter: blur(18px) saturate(1.4);\
-    border-top: 1px solid rgba(42, 26, 20, 0.1); z-index: 300;\
+    border-top: 1px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 12%, transparent);\
+    z-index: 300;\
     padding-bottom: env(safe-area-inset-bottom, 0);\
+    view-transition-name: sl-bottom-tabs;\
   }\
   #sl-bottom-tabs .sl-tab {\
     display: flex; flex-direction: column; align-items: center; justify-content: center;\
     gap: 3px; padding: 4px 2px; text-decoration: none; color: var(--sl-tx, #2a1a14);\
     font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
     font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase;\
-    opacity: 0.55; transition: opacity 150ms ease, color 150ms ease;\
+    opacity: 0.6; transition: opacity 150ms ease, color 150ms ease;\
     min-width: 0;\
   }\
   #sl-bottom-tabs .sl-tab span {\
