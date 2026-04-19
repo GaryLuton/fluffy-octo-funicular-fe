@@ -670,6 +670,14 @@ app.get('/api/games/:id/leaderboard', auth, (req, res) => {
   res.json({ leaderboard });
 });
 
+app.get('/api/games/:id/friends-leaderboard', auth, (req, res) => {
+  const gameId = req.params.id;
+  if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 50);
+  const leaderboard = stmts.getFriendsTopScores.all(gameId, req.user.id, limit);
+  res.json({ leaderboard });
+});
+
 app.get('/api/games/:id/my-scores', auth, (req, res) => {
   const gameId = req.params.id;
   if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
