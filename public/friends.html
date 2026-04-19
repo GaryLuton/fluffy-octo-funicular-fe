@@ -13,7 +13,9 @@
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     /* ── LAYOUT ── */
-    .app{display:grid;grid-template-columns:280px 1fr 320px;height:100vh;}
+    /* Fill body content box (below the fixed sl-top-nav) so the app never
+       overflows past the viewport and hides the nav on mobile Safari. */
+    .app{display:grid;grid-template-columns:280px 1fr 320px;height:100%;}
 
     /* ── LEFT: CONTACTS ── */
     .contacts-panel{display:flex;flex-direction:column;border-right:1px solid rgba(128,128,128,0.1);overflow:hidden;}
@@ -144,9 +146,9 @@
     }
     @media(max-width:700px){
       .app{grid-template-columns:1fr;position:relative;}
-      .contacts-panel{height:100vh;}
+      .contacts-panel{height:100%;}
       .chat-panel{display:none;position:absolute;inset:0;z-index:10;background:inherit;}
-      .chat-panel.mobile-active{display:flex;flex-direction:column;height:100vh;}
+      .chat-panel.mobile-active{display:flex;flex-direction:column;height:100%;}
       .mobile-back{display:block;}
       .modal{width:calc(100vw - 32px);max-width:360px;}
       .chat-header-actions{gap:4px;}
