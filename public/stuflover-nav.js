@@ -392,7 +392,10 @@ body { padding-top: var(--sl-nav-h); }\
     a.className = 'sl-tab' + (active ? ' is-active' : '');
     a.href = hrefFor(tab);
     a.setAttribute('data-tab', tab.id);
-    if (active) a.setAttribute('aria-current', 'page');
+    if (active) {
+      a.setAttribute('aria-current', 'page');
+      a.addEventListener('click', function (e) { e.preventDefault(); });
+    }
     a.appendChild(tab.icon());
     var span = document.createElement('span');
     span.textContent = tab.label;
