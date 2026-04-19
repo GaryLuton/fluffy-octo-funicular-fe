@@ -6731,7 +6731,7 @@ async function loadFloveePost(){
           '<div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">'+mfd.emoji+'</div>'+
           '<div style="font-size:1rem;font-weight:700;color:'+pal.tx+';margin-bottom:6px;">you missed a text from '+mfd.name+'</div>'+
           '<div style="font-size:0.8rem;opacity:0.35;color:'+pal.tx+';line-height:1.6;max-width:280px;margin:0 auto 14px;">her message disappeared. she will text you again soon — don\'t miss the next one</div>'+
-          '<a href="flovee.html" style="padding:10px 22px;border-radius:20px;border:none;background:'+mfd.color+'30;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;">chat with '+mfd.name+' while you wait</a>'+
+          '<a href="friends.html?peer='+encodeURIComponent(data.missedFlovee||'')+'" style="padding:10px 22px;border-radius:20px;border:none;background:'+mfd.color+'30;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;">chat with '+mfd.name+' while you wait</a>'+
         '</div>';
 
     } else if(data.status === 'none'){
@@ -6778,7 +6778,12 @@ function reactFlovee(name,postId,btn){
     replyData.reaction = name;
     localStorage.setItem('stuflover_flovee_reply', JSON.stringify(replyData));
   }
-  setTimeout(function(){ window.location.href = 'flovee.html'; }, 350);
+  var reactPeer = (wrap && wrap._replyData && wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]) ? wrap._replyData.floveeId : '';
+  setTimeout(function(){
+    window.location.href = reactPeer
+      ? 'friends.html?peer=' + encodeURIComponent(reactPeer)
+      : 'flovee.html';
+  }, 350);
 }
 
 function shareFloveePost(){
@@ -6796,10 +6801,16 @@ function shareFloveePost(){
 
 function replyToFlovee(){
   var wrap = document.getElementById('floveePostWrap');
+  var peer = '';
   if(wrap && wrap._replyData){
     localStorage.setItem('stuflover_flovee_reply', JSON.stringify(wrap._replyData));
+    if(wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]){
+      peer = wrap._replyData.floveeId;
+    }
   }
-  window.location.href = 'flovee.html';
+  window.location.href = peer
+    ? 'friends.html?peer=' + encodeURIComponent(peer)
+    : 'flovee.html';
 }
 
 // Poll for flovee posts every 60 seconds

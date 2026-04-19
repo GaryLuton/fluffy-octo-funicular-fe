@@ -6,7 +6,7 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Your Flovee — Stuflover</title>
   <meta http-equiv="refresh" content="0; url=/friends.html?flovee=1"/>
-  <link rel="canonical" href="/friends.html?flovee=1"/>
+  <link rel="canonical" href="/friends.html"/>
   <style>
     body{font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#2a1a14;background:#fdf2f4;}
     a{color:inherit;}
@@ -18,10 +18,11 @@
   </noscript>
   <script>
     // Preserve any query params (e.g. used by future deep links) and forward.
+    // If ?peer=X is present, drop ?flovee=1 so friends.html honors the slug.
     (function(){
       var search=window.location.search||'';
       var params=new URLSearchParams(search);
-      params.set('flovee','1');
+      if(!params.get('peer')) params.set('flovee','1');
       var target='/friends.html?'+params.toString();
       window.location.replace(target);
     })();
