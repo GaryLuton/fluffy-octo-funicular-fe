@@ -3657,6 +3657,16 @@ function cgRender(d){
   }
 }
 
+function postGameScore(gameId, score){
+  var token = localStorage.getItem('stuflover_token');
+  if(!token || !gameId || typeof score !== 'number') return;
+  fetch('/api/games/'+encodeURIComponent(gameId)+'/score',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({score: Math.max(0, Math.floor(score))})
+  }).catch(function(){});
+}
+
 function cgPickChoice(letter, el){
   if(cgState.answered) return;
   cgState.answered = true;
@@ -3665,6 +3675,7 @@ function cgPickChoice(letter, el){
   el.style.borderColor = pal.ac;
   cgState.score += 10;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
+  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   fb.textContent = cgState.data.funFact || 'Good pick!';
   fb.style.background = pal.ac+'12';
@@ -3682,6 +3693,7 @@ function cgPickQuiz(idx, el){
   el.style.borderColor = pal.ac;
   cgState.score += 10;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
+  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var aesthetic = (cgState.data.aesthetics||[])[idx] || 'mysterious';
   var fb = document.getElementById('cgFeedback');
   fb.textContent = 'That answer gives you: '+aesthetic+' energy';
@@ -3706,6 +3718,7 @@ function cgPickTrivia(idx, el){
     if(allCards[correct]) allCards[correct].classList.add('correct');
   }
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
+  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   fb.textContent = (idx===correct?'Correct! ':'Wrong! ')+(cgState.data.explanation||'');
   fb.style.background = (idx===correct?'rgba(76,175,80,0.1)':'rgba(239,83,80,0.1)');
@@ -3729,6 +3742,7 @@ function cgRate(rating){
   else points = 10;
   cgState.score += points;
   document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
+  postGameScore(cgState.game && cgState.game.id, cgState.score);
   var fb = document.getElementById('cgFeedback');
   fb.textContent = (isReal?'This was REAL! ':'This was MADE UP! ')+cgState.data.reveal+' (+'+points+' pts)';
   fb.style.background = pal.ac+'12';
@@ -3759,6 +3773,7 @@ async function cgSubmitChallenge(){
       var result = JSON.parse(match[0]);
       cgState.score += (result.score||15);
       document.getElementById('cgScore').textContent = 'Score: '+cgState.score;
+      postGameScore(cgState.game && cgState.game.id, cgState.score);
       var fb = document.getElementById('cgFeedback');
       fb.textContent = (result.score||15)+'/30 — '+(result.feedback||'Not bad!');
       fb.style.background = pal.ac+'12';
@@ -4716,6 +4731,7 @@ async function dtiSubmit(){
 
   document.getElementById('dtiSubmitBtn').disabled = false;
   document.getElementById('dtiSubmitBtn').textContent = 'Walk the Runway';
+  postGameScore('dti', dtiState.totalScore);
 }
 
 function dtiShowResult(stars, title, msg, outfit){
