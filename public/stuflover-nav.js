@@ -336,6 +336,7 @@ body { padding-top: var(--sl-nav-h); }\
 /* Mobile — keep tabs in the top bar so the nav stays at the top of the screen */\
 @media (max-width: 760px) {\
   #sl-top-nav { padding: 0 12px; gap: 8px; }\
+  #sl-top-nav .sl-logo { font-size: 1.15rem; letter-spacing: 1.8px; }\
   #sl-top-nav .sl-tabs { gap: 2px; }\
   #sl-top-nav .sl-tab { padding: 8px 10px; letter-spacing: 1px; font-size: 0.7rem; gap: 4px; }\
   #sl-top-nav .sl-tab svg { width: 14px; height: 14px; }\
