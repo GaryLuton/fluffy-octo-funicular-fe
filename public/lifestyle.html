@@ -2625,6 +2625,17 @@ function buildPage(){
     preAutoOpen = localStorage.getItem('stuflover_open_section');
     preAutoGame = localStorage.getItem('stuflover_open_game');
   } catch(e){}
+  // Deep-link from games.html (#game=<id>)
+  try {
+    if(!preAutoOpen){
+      var _hashMatch = (location.hash || '').match(/^#game=([a-z]+)$/);
+      if(_hashMatch){
+        preAutoOpen = 'floverhub';
+        preAutoGame = _hashMatch[1];
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+    }
+  } catch(e){}
   if(preAutoOpen){
     try {
       localStorage.removeItem('stuflover_open_section');
