@@ -414,6 +414,8 @@
     .hub-info{padding:12px 14px;}
     .hub-game-name{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:3px;}
     .hub-game-desc{font-size:0.72rem;opacity:0.42;line-height:1.5;}
+    .hub-game-best{font-size:0.62rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0;margin-top:6px;transition:opacity 0.3s;}
+    .hub-game-best.visible{opacity:0.7;}
     .hub-game-tag{display:inline-block;font-size:0.54rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;padding:3px 8px;border-radius:10px;margin-top:6px;opacity:0.6;}
     .hub-back-btn{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.18);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;transition:opacity 0.2s;margin-left:8px;}
     .hub-back-btn:hover{opacity:0.55;}
@@ -3399,11 +3401,28 @@ function openHub(){
         '<div class="hub-info" style="background:'+pal.bg+';color:'+pal.tx+'">'+
           '<div class="hub-game-name">'+game.name+'</div>'+
           '<div class="hub-game-desc">'+game.desc+'</div>'+
+          '<div class="hub-game-best" data-game-id="'+game.id+'" style="color:'+pal.ac+'"></div>'+
         '</div>';
 
       grid.appendChild(tile);
       gi++;
     });
+  });
+
+  loadHubBestScores();
+}
+
+function loadHubBestScores(){
+  var token = localStorage.getItem('stuflover_token');
+  if(!token) return;
+  HUB_GAMES.forEach(function(g){
+    fetch('/api/games/'+encodeURIComponent(g.id)+'/my-scores',{
+      headers:{'Authorization':'Bearer '+token}
+    }).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(!d || !d.best) return;
+      var el = document.querySelector('.hub-game-best[data-game-id="'+g.id+'"]');
+      if(el){ el.textContent = 'Best: '+d.best; el.classList.add('visible'); }
+    }).catch(function(){});
   });
 }
 
