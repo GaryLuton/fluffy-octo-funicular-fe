@@ -473,8 +473,8 @@
       .opts-single,.opts-multi{grid-template-columns:1fr;}
       .q-text{font-size:clamp(1.5rem,4vw,1.9rem);}
       #quizWrap{padding:90px 20px 60px;}
-      .cg-cards{gap:10px;}
-      .cg-card{min-width:120px;padding:18px 14px;}
+      .cg-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0;max-width:100%;}
+      .cg-card{min-width:0;max-width:none;padding:18px 14px;}
       .emoji-picker{width:200px;right:-20px;}
     }
     @media(max-width:480px){
@@ -3808,6 +3808,10 @@ function cgPickTrivia(idx, el){
   var nextBtn = document.getElementById('cgNextBtn');
   nextBtn.textContent = isLast ? 'See Final Score' : 'Next';
   nextBtn.style.display = 'inline-block';
+  if(cgState.autoAdvanceTimer) clearTimeout(cgState.autoAdvanceTimer);
+  cgState.autoAdvanceTimer = setTimeout(function(){
+    if(cgState.answered && !cgState.ended) cgNextRound();
+  }, 5000);
 }
 
 function cgRate(rating){
@@ -3868,6 +3872,7 @@ async function cgSubmitChallenge(){
 }
 
 function cgNextRound(){
+  if(cgState.autoAdvanceTimer){ clearTimeout(cgState.autoAdvanceTimer); cgState.autoAdvanceTimer = null; }
   if(cgState.game && cgState.game.id === 'trivia' && cgState.round >= TRIVIA_MAX_ROUNDS){
     cgShowFinal();
     return;
@@ -3878,6 +3883,7 @@ function cgNextRound(){
 }
 
 function cgEndGame(){
+  if(cgState.autoAdvanceTimer){ clearTimeout(cgState.autoAdvanceTimer); cgState.autoAdvanceTimer = null; }
   if(cgState.ended) return;
   cgShowFinal(true);
 }
