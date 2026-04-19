@@ -1595,6 +1595,18 @@ const COLOURS = {
 
 
 // ─── AESTHETICS ───────────────────────────────────────────
+// Each aesthetic has a default chat font. If the user hasn't explicitly
+// picked one we apply this on quiz completion so every aesthetic ships
+// with its own set colours, fonts and flovee.
+const AE_FONTS = {
+  kawaii:'cute',      softgirl:'cute',      cleangirl:'default',
+  coquette:'fancy',   goth:'default',       darkacad:'default',
+  grunge:'default',   y2k:'round',          street:'default',
+  cottage:'handwritten', hippie:'handwritten', oldmoney:'default',
+  preppy:'default',   tomato:'handwritten', indie:'default',
+  emo:'default',      ballet:'fancy',
+};
+
 const AE = {
   kawaii:      {name:"Kawaii",        quote:"Be so cute they cannot handle it."},
   softgirl:    {name:"Soft Girl",     quote:"Be so soft they underestimate you. Then bloom."},
@@ -1666,11 +1678,11 @@ const RECS = {
 // ─── QUESTION BANK ────────────────────────────────────────
 // Every question is designed to reveal something specific
 // ae scores are SMALL — no single question decides the result
+// Exactly 10 questions — enough signal for palette, flovee and interests
+// without ever running long.
 const CORE_IDS = [
-  "q_age","q_gender","q_mood","q_saturday","q_music","q_interests","q_fave_colour",
-  "q_phone_screen","q_coffee","q_room","q_friday","q_notes_app",
-  "q_shoes","q_last_bought","q_friend_group","q_fave_shop","q_dream_job",
-  "q_weekend_plan","q_wallpaper","q_energy_word"
+  "q_age","q_mood","q_fave_colour","q_music","q_interests",
+  "q_room","q_shoes","q_friday","q_fave_shop","q_energy_word"
 ];
 
 const QS = [
@@ -2027,11 +2039,8 @@ function confidence(){
 }
 
 function shouldContinue(){
-  if(qCount>=18) return false;
-  const c=confidence();
-  if(c==="high"&&qCount>=10) return false;
-  if(c==="medium"&&qCount>=13) return false;
-  return true;
+  // Quiz is always exactly 10 questions — no more, no less.
+  return qCount < 10;
 }
 
 function nextId(){
@@ -2060,19 +2069,15 @@ function startQuiz(){
 function renderNext(){
   if(!shouldContinue()){ buildPage(); return; }
   const id=nextId();
-  if(!id){
-    if(confidence()==="low"){ ["q_energy_word","q_friday"].forEach(qid=>{ if(!P.answered.has(qid)&&!queue.includes(qid)) queue.push(qid); }); const nid=nextId(); if(nid){renderQ(nid);return;} }
-    buildPage(); return;
-  }
+  if(!id){ buildPage(); return; }
   renderQ(id);
 }
 
 function renderQ(id){
   const q=getQ(id); if(!q){renderNext();return;}
   P.answered.add(id); qCount++;
-  const est=Math.max(CORE_IDS.length,qCount+Math.max(0,queue.length));
-  document.getElementById('pFill').style.width=Math.min(88,(qCount/est)*100)+'%';
-  document.getElementById('pLabel').textContent=`Question ${qCount}${queue.length>2?' — still building your picture...':''}`;
+  document.getElementById('pFill').style.width=((qCount/10)*100)+'%';
+  document.getElementById('pLabel').textContent=`Question ${qCount} of 10`;
   multiSel=[];
   const area=document.getElementById('qArea');
   area.className='q-anim';
@@ -2135,10 +2140,7 @@ function submitMulti(qid){
 
 function pickSingle(qid,i){
   const q=getQ(qid); const opt=q.opts[i]; applyOpt(opt);
-  // Unlock depth questions based on room answer rv field
-  if(q.id==='q_room'&&opt.rv&&q.unlocks?.[opt.rv]){
-    q.unlocks[opt.rv].forEach(uid=>{ if(!P.answered.has(uid)&&!queue.includes(uid)) queue.unshift(uid); });
-  }
+  // Depth-question unlocks are disabled — the quiz is a fixed 10 questions.
   renderNext();
 }
 
@@ -2274,12 +2276,37 @@ function shiftRgb(col,a){ try{const m=col.match(/\d+/g);if(!m||m.length<3)return
 // ─── BUILD PAGE ───────────────────────────────────────────
 function buildPage(){
   document.getElementById('pFill').style.width='100%';
-  document.getElementById('quizWrap').classList.remove('active');
 
   const pal = resolvePalette();
   const aeName = resolveAeName();
   const sorted = Object.entries(P.aesthetics).sort((a,b)=>b[1]-a[1]);
-  const topK = sorted[0]?.[0];
+  const topK = sorted[0]?.[0] || 'softgirl';
+
+  // Snapshot the quiz result BEFORE anything else so it survives a redirect
+  // to auth. The full save to stuflover_profile happens further down; this
+  // backup lets auth.html restore the result after sign-in / sign-up.
+  var quizSnapshot = {
+    aesthetics:P.aesthetics,music:P.music,interests:P.interests,
+    social:P.social,age:P.age,gender:P.gender,
+    faveColour:P.faveColour,faveShop:P.faveShop,
+    friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
+    phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
+    coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
+    dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
+    customArtists:P.customArtists||[],
+    extraTags:P.extraTags,
+    aesthetic:aeName,aestheticKey:topK
+  };
+
+  // You must be signed in to see your aesthetic. If not, park the quiz
+  // result and bounce to auth — a fresh visitor can create an account there.
+  if(!localStorage.getItem('stuflover_token')){
+    try{ localStorage.setItem('stuflover_pending_quiz', JSON.stringify(quizSnapshot)); }catch(e){}
+    window.location.href = '/auth.html?quiz=1';
+    return;
+  }
+
+  document.getElementById('quizWrap').classList.remove('active');
 
   // Colours
   document.body.style.background = pal.bg;
@@ -2523,19 +2550,10 @@ function buildPage(){
   // Build grid
   buildGrid(pal, aeName);
 
-  // Save profile
+  // Save profile — includes the resolved aesthetic so other pages never have
+  // to re-derive it from raw scores.
   try{
-    localStorage.setItem('stuflover_profile', JSON.stringify({
-      aesthetics:P.aesthetics,music:P.music,interests:P.interests,
-      social:P.social,age:P.age,gender:P.gender,
-      faveColour:P.faveColour,faveShop:P.faveShop,
-      friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
-      phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
-      coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
-      dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
-      customArtists:P.customArtists||[],
-      extraTags:P.extraTags,
-    }));
+    localStorage.setItem('stuflover_profile', JSON.stringify(quizSnapshot));
   }catch(e){}
 
   // Apply the quiz-derived palette as the user's site-wide theme so every
@@ -2571,6 +2589,15 @@ function buildPage(){
     localStorage.setItem('stuflover_theme', JSON.stringify(themeState));
     if (window.StufloverTheme && typeof window.StufloverTheme.apply === 'function') {
       window.StufloverTheme.apply(themeState);
+    }
+  } catch(e) {}
+
+  // Every aesthetic ships with a default chat font too. Only applied the
+  // first time a user reaches an aesthetic — never clobbers a manual pick.
+  try {
+    if (!localStorage.getItem('stuflover_chat_font')) {
+      var aeFont = (AE_FONTS && AE_FONTS[topK]) || 'default';
+      localStorage.setItem('stuflover_chat_font', aeFont);
     }
   } catch(e) {}
 
@@ -7942,9 +7969,11 @@ function pickAevs(choice){
 }
 
 // ─── AUTO-LOAD SAVED PROFILE ─────────────────────────────
-// If the user already completed the quiz, skip it and show their page
-// If the user already completed the quiz, skip it and show their page
+// If the user is signed in and already completed the quiz, skip it and show
+// their page. Anonymous visitors always see the hero so they can take the
+// quiz — their aesthetic is locked behind sign-in at the reveal step.
 (function autoLoad(){
+  if (!localStorage.getItem('stuflover_token')) return;
   var saved;
   try { saved = JSON.parse(localStorage.getItem('stuflover_profile')||'null'); } catch(e) { saved=null; }
   if(!saved || !saved.aesthetics || Object.keys(saved.aesthetics).length===0) return;

@@ -172,6 +172,17 @@ async function handleLogin(e) {
     // Pull user data from server into localStorage
     await syncFromServer(data.token);
 
+    // If the user just finished the quiz anonymously, restore that result
+    // (syncFromServer may have replaced it with an older server profile)
+    // and send them back to their aesthetic page.
+    var pending = localStorage.getItem('stuflover_pending_quiz');
+    if (pending) {
+      localStorage.setItem('stuflover_profile', pending);
+      localStorage.removeItem('stuflover_pending_quiz');
+      window.location.href = '/lifestyle.html';
+      return;
+    }
+
     window.location.href = '/index.html';
   } catch (err) {
     errEl.textContent = err.message;
@@ -224,6 +235,14 @@ async function handleRegister(e) {
     localStorage.setItem('stuflover_token', data.token);
     localStorage.setItem('stuflover_user', JSON.stringify(data.user));
 
+    // If the user just finished the quiz anonymously, restore that result
+    // into the new account so their aesthetic is ready on lifestyle.html.
+    var pending = localStorage.getItem('stuflover_pending_quiz');
+    if (pending) {
+      localStorage.setItem('stuflover_profile', pending);
+      localStorage.removeItem('stuflover_pending_quiz');
+    }
+
     window.location.href = '/lifestyle.html';
   } catch (err) {
     errEl.textContent = err.message;
@@ -268,7 +287,14 @@ async function syncFromServer(token) {
 
 // If already logged in, redirect
 if (localStorage.getItem('stuflover_token')) {
-  window.location.href = '/index.html';
+  var pending = localStorage.getItem('stuflover_pending_quiz');
+  if (pending) {
+    localStorage.setItem('stuflover_profile', pending);
+    localStorage.removeItem('stuflover_pending_quiz');
+    window.location.href = '/lifestyle.html';
+  } else {
+    window.location.href = '/index.html';
+  }
 }
 </script>
 <script src="/stuflover-ux.js"></script>
