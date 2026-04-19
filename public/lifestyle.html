@@ -155,7 +155,8 @@
     .feed-card:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(232,160,189,0.2);}
     .feed-card:active{transform:scale(0.98);}
     .feed-desc{font-size:0.88rem;opacity:0.5;line-height:1.6;margin-bottom:12px;}
-    .feed-cta{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;opacity:1;}
+    .feed-cta{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;opacity:1;transition:color 0.15s ease;}
+    .feed-card:hover .feed-cta,.feed-card:focus-within .feed-cta{color:var(--sl-cta-hover,inherit);}
     /* Scroll reveal */
     .feed-reveal{opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s cubic-bezier(0.34,1.56,0.64,1);}
     .feed-reveal.visible{opacity:1;transform:translateY(0);}
@@ -2766,8 +2767,9 @@ function buildPage(){
     c.style.background=searchPal.tx+'06';
     c.style.color=searchPal.tx;
     c.style.border='1px solid '+searchPal.tx+'08';
+    c.style.setProperty('--sl-cta-hover', searchPal.ac);
   });
-  document.querySelectorAll('.feed-cta').forEach(function(c){c.style.color=searchPal.ac;});
+  document.querySelectorAll('.feed-cta').forEach(function(c){c.style.color=searchPal.tx;});
 
   // Intersection Observer — fade in on scroll like TikTok FYP
   var feedObs = new IntersectionObserver(function(entries){
@@ -6685,8 +6687,12 @@ function buildInstantFeed(){
 
   // "Show more" button
   var more = document.createElement('button');
-  more.style.cssText = 'width:100%;padding:12px;border-radius:12px;border:1.5px dashed '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;cursor:pointer;opacity:0.4;transition:opacity 0.2s;margin-bottom:16px;';
+  more.style.cssText = 'width:100%;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'33;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;cursor:pointer;transition:color 0.15s, border-color 0.15s;margin-bottom:16px;';
   more.textContent = 'show me more';
+  more.onmouseenter = function(){ this.style.color = pal.ac; this.style.borderColor = pal.ac; };
+  more.onmouseleave = function(){ this.style.color = pal.tx; this.style.borderColor = pal.tx + '33'; };
+  more.onfocus = more.onmouseenter;
+  more.onblur = more.onmouseleave;
   more.onclick = function(){ buildInstantFeed(); };
   feed.appendChild(more);
 }
