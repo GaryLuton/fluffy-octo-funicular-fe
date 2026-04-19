@@ -1,1427 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <title>Friends — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="stuflover-design-system.css"/>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Space Grotesk',sans-serif;background:var(--sl-bg);color:var(--sl-tx);overflow:hidden;height:100vh;transition:background 0.5s,color 0.5s;}
-    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+<meta charset="utf-8" />
+<title>stuflover &mdash; friends</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --cream: #FEF9F5; --soft-white: #FFFCFA; --pink: #F4C4D8; --rose: #E8A0BD;
+    --peach: #F5D4C2; --mint: #D4EAE0; --lavender: #E4D9F0; --sky: #D9E8F5;
+    --yellow: #F5E8C8; --ink: #4A3F50;
+  }
+  html, body { margin: 0; padding: 0; font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--soft-white) 50%, var(--sky) 100%);
+    color: var(--ink); min-height: 100vh;
+  }
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px 30px 80px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px;
+    padding: 20px 30px; background: rgba(255, 252, 250, 0.7); border-radius: 32px;
+    backdrop-filter: blur(10px); border: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; font-family: 'Comfortaa', sans-serif;
+    font-size: 32px; font-weight: 700; color: var(--ink); text-decoration: none;
+  }
+  .logo-icon {
+    width: 48px; height: 48px; background: linear-gradient(135deg, var(--pink), var(--rose));
+    border-radius: 16px; display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg);
+    color: white;
+  }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a {
+    padding: 8px 16px; border-radius: 20px; text-decoration: none; color: var(--ink);
+    font-weight: 600; font-size: 14px; border: 1px solid transparent; transition: all 0.3s ease;
+  }
+  nav a:hover { background: var(--pink); border-color: var(--rose); }
+  nav a.active { background: var(--rose); color: white; }
 
-    /* ── LAYOUT ── */
-    /* Fill body content box (below the fixed sl-top-nav) so the app never
-       overflows past the viewport and hides the nav on mobile Safari. */
-    .app{display:grid;grid-template-columns:280px 1fr 320px;height:100%;}
+  .section { margin-bottom: 60px; }
+  .section-title {
+    font-family: 'Comfortaa', sans-serif; font-size: 40px; font-weight: 700;
+    margin: 0 0 40px; color: var(--ink); text-align: center;
+  }
 
-    /* ── LEFT: CONTACTS ── */
-    .contacts-panel{display:flex;flex-direction:column;border-right:1px solid rgba(128,128,128,0.1);overflow:hidden;}
-    .contacts-header{padding:18px 20px 14px;border-bottom:1px solid rgba(128,128,128,0.08);display:flex;align-items:center;justify-content:space-between;}
-    .contacts-title{font-size:1rem;font-weight:700;letter-spacing:-0.2px;}
-    .new-chat-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid rgba(128,128,128,0.2);background:transparent;color:inherit;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.15s;}
-    .new-chat-btn:hover{opacity:0.6;}
-    .contacts-search{padding:10px 16px;border-bottom:1px solid rgba(128,128,128,0.06);}
-    .contacts-search input{width:100%;padding:8px 12px;border-radius:20px;border:1.5px solid rgba(128,128,128,0.14);background:rgba(128,128,128,0.06);color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;outline:none;}
-    .contacts-search input::placeholder{opacity:0.35;}
-    .contacts-list{flex:1;overflow-y:auto;}
-    .contact-item{padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background 0.12s;border-bottom:1px solid rgba(128,128,128,0.04);}
-    .contact-item:hover,.contact-item.active{background:rgba(128,128,128,0.08);}
-    .contact-item.pinned{border-bottom:1px solid rgba(128,128,128,0.16);}
-    .contact-pin-label{font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.45;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-top:2px;}
-    .contact-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;flex-shrink:0;color:white;}
-    .contact-avatar.flovee{font-size:1.3rem;}
-    .contact-info{flex:1;min-width:0;}
-    .contact-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .contact-preview{font-size:0.75rem;opacity:0.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
-    .contact-time{font-size:0.68rem;opacity:0.3;flex-shrink:0;}
-    .contact-unread{width:18px;height:18px;border-radius:50%;font-size:0.65rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0;}
+  .friends-container {
+    display: grid; grid-template-columns: 300px 1fr; gap: 24px; max-width: 1000px; margin: 0 auto;
+  }
 
-    /* ── MIDDLE: CHAT ── */
-    .chat-panel{display:flex;flex-direction:column;overflow:hidden;}
-    .chat-header{padding:16px 20px;border-bottom:1px solid rgba(128,128,128,0.08);display:flex;align-items:center;gap:12px;}
-    .chat-header-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;flex-shrink:0;color:white;}
-    .chat-header-name{font-size:0.95rem;font-weight:700;}
-    .chat-header-status{font-size:0.72rem;opacity:0.4;margin-top:1px;}
-    .chat-header-actions{margin-left:auto;display:flex;gap:6px;}
-    .header-action-btn{padding:7px 14px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.18);background:transparent;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;}
-    .header-action-btn:hover{opacity:0.6;}
+  .friends-sidebar {
+    background: white; border-radius: 28px; padding: 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(232, 160, 189, 0.1); max-height: 600px; overflow-y: auto;
+  }
 
-    .chat-msgs{flex:1;overflow-y:auto;padding:20px 20px 12px;display:flex;flex-direction:column;gap:8px;}
-    .chat-date{font-size:0.68rem;opacity:0.3;text-align:center;margin:8px 0;letter-spacing:1px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+  .friends-sidebar h3 {
+    font-family: 'Comfortaa', sans-serif; font-size: 16px; font-weight: 700;
+    margin: 0 0 16px; color: var(--ink);
+  }
 
-    .bubble-wrap{display:flex;flex-direction:column;max-width:72%;}
-    .bubble-wrap.me{align-self:flex-end;align-items:flex-end;}
-    .bubble-wrap.them{align-self:flex-start;align-items:flex-start;}
-    .bubble{padding:10px 14px;border-radius:18px;font-size:0.9rem;line-height:1.55;word-break:break-word;}
-    .bubble-wrap.me .bubble{border-bottom-right-radius:4px;}
-    .bubble-wrap.them .bubble{border-bottom-left-radius:4px;}
-    .bubble-time{font-size:0.65rem;opacity:0.28;margin-top:3px;}
+  .friend-list-item {
+    padding: 12px; border-radius: 16px; cursor: pointer; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px; transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
 
-    /* Flovee suggestion bubble */
-    .flovee-suggestion{align-self:stretch;border-radius:10px;padding:12px 14px;margin:4px 0;border:1.5px dashed rgba(128,128,128,0.2);display:flex;align-items:flex-start;gap:10px;}
-    .flovee-suggestion-label{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.35;margin-bottom:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .flovee-suggestion-text{font-size:0.85rem;line-height:1.6;flex:1;}
-    .flovee-suggestion-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-    .sug-btn{padding:6px 14px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:opacity 0.15s;}
-    .sug-btn:hover{opacity:0.75;}
-    .sug-btn.use{color:white;}
-    .sug-btn.skip{background:transparent;border:1.5px solid rgba(128,128,128,0.2);}
+  .friend-list-item:hover { background: var(--cream); border-color: var(--pink); }
+  .friend-list-item.active { background: var(--rose); border-color: var(--rose); }
+  .friend-list-item.active * { color: white; }
 
-    .chat-input-area{border-top:1px solid rgba(128,128,128,0.08);padding:12px 16px;}
-    .draft-row{display:flex;align-items:flex-end;gap:8px;}
-    .chat-textarea{flex:1;padding:11px 16px;font-size:0.92rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.14);border-radius:22px;background:rgba(128,128,128,0.04);color:inherit;outline:none;resize:none;min-height:44px;max-height:120px;line-height:1.5;transition:border-color 0.2s;}
-    .chat-textarea:focus{border-color:rgba(128,128,128,0.32);}
-    .send-btn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:opacity 0.15s;}
-    .send-btn:hover{opacity:0.75;}
-    .flovee-help-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-    .help-chip{padding:5px 12px;border-radius:20px;font-size:0.7rem;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;transition:all 0.12s;}
-    .help-chip:hover{background:rgba(128,128,128,0.1);}
+  .friend-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  }
 
-    .no-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.25;gap:12px;text-align:center;padding:40px;}
-    .no-chat-icon{font-size:3rem;opacity:0.4;}
-    .no-chat-title{font-size:1.2rem;font-weight:700;}
-    .no-chat-sub{font-size:0.85rem;line-height:1.7;}
+  .friend-list-item:nth-child(2) .friend-avatar { background: linear-gradient(135deg, var(--pink), var(--rose)); }
+  .friend-list-item:nth-child(3) .friend-avatar { background: linear-gradient(135deg, var(--peach), var(--yellow)); }
+  .friend-list-item:nth-child(4) .friend-avatar { background: linear-gradient(135deg, var(--mint), var(--sky)); }
+  .friend-list-item:nth-child(5) .friend-avatar { background: linear-gradient(135deg, var(--lavender), var(--sky)); }
 
-    /* ── RIGHT: FLOVEE PANEL ── */
-    .flovee-panel{border-left:1px solid rgba(128,128,128,0.1);display:flex;flex-direction:column;overflow:hidden;}
-    .flovee-header{padding:16px 20px 14px;border-bottom:1px solid rgba(128,128,128,0.08);}
-    .flovee-header-name{font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .flovee-pulse{width:7px;height:7px;border-radius:50%;animation:pulse 2s ease-in-out infinite;flex-shrink:0;}
-    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-    .flovee-header-sub{font-size:0.72rem;opacity:0.38;margin-top:2px;}
-    .flovee-body{flex:1;overflow-y:auto;padding:16px;}
-    .flovee-section{margin-bottom:20px;}
-    .flovee-section-label{font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .flovee-card{border-radius:8px;padding:14px 16px;border:1.5px solid rgba(128,128,128,0.1);margin-bottom:8px;}
-    .flovee-card-title{font-size:0.82rem;font-weight:700;margin-bottom:4px;}
-    .flovee-card-text{font-size:0.78rem;opacity:0.55;line-height:1.65;}
-    .flovee-advice{font-size:0.85rem;line-height:1.72;opacity:0.7;font-style:italic;padding:12px 14px;border-radius:8px;border-left:3px solid rgba(128,128,128,0.2);}
-    .vibe-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-    .vibe-chip{padding:5px 12px;border-radius:20px;font-size:0.7rem;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.16);background:transparent;color:inherit;transition:all 0.12s;}
-    .vibe-chip:hover{background:rgba(128,128,128,0.08);}
-    .vibe-chip.on{border-color:currentColor;}
+  .friend-list-name {
+    font-family: 'Comfortaa', sans-serif; font-size: 14px; font-weight: 700;
+    margin: 0; color: var(--ink);
+  }
 
-    /* ── ADD CONTACT MODAL ── */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;}
-    .modal-overlay.open{display:flex;}
-    .modal{width:380px;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow-y:auto;}
+  .friend-list-status {
+    font-size: 12px; margin: 0; color: rgba(74, 63, 80, 0.6);
+  }
 
-    /* Share link section inside add modal */
-    .share-sec{padding:14px;border-radius:10px;border:1.5px dashed rgba(128,128,128,0.18);display:flex;flex-direction:column;gap:10px;}
-    .share-sec-title{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.4;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-    .share-link-row{display:flex;gap:8px;}
-    .share-link-row input{flex:1;padding:9px 12px;border-radius:6px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(128,128,128,0.05);color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.78rem;outline:none;}
-    .share-copy-btn{padding:9px 14px;border-radius:6px;border:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;}
-    .share-copy-btn:hover{opacity:0.8;}
-    .share-qr-wrap{display:flex;align-items:center;gap:12px;}
-    .share-qr{width:96px;height:96px;border-radius:8px;background:#fff;padding:6px;box-shadow:0 2px 10px rgba(0,0,0,0.08);flex-shrink:0;}
-    .share-hint{font-size:0.72rem;line-height:1.55;opacity:0.55;}
-    .share-disabled{font-size:0.72rem;opacity:0.5;font-style:italic;line-height:1.5;}
-    .modal-or{text-align:center;font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin:2px 0;}
+  .chat-window {
+    background: white; border-radius: 28px; padding: 32px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(232, 160, 189, 0.1); display: flex; flex-direction: column; min-height: 600px;
+  }
 
-    /* Invite banner (from activities.html ?invite=...) */
-    .invite-banner{padding:10px 14px;border-radius:8px;margin:10px 12px;display:flex;align-items:center;gap:10px;font-size:0.78rem;line-height:1.5;}
-    .invite-banner strong{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;display:block;font-size:0.6rem;opacity:0.55;margin-bottom:2px;}
-    .invite-banner .invite-close{background:none;border:none;color:inherit;opacity:0.5;cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 8px;margin-left:auto;}
-    .invite-banner .invite-close:hover{opacity:1;}
-    .modal-title{font-size:1.2rem;font-weight:700;margin-bottom:4px;}
-    .modal-input{width:100%;padding:11px 14px;font-size:0.92rem;font-family:'Space Grotesk',sans-serif;border:1.5px solid rgba(128,128,128,0.18);border-radius:8px;background:rgba(128,128,128,0.04);color:inherit;outline:none;transition:border-color 0.2s;}
-    .modal-input:focus{border-color:rgba(128,128,128,0.38);}
-    .modal-actions{display:flex;gap:8px;}
-    .modal-btn{flex:1;padding:11px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:opacity 0.15s;}
-    .modal-btn:hover{opacity:0.75;}
-    .modal-btn.cancel{background:transparent;border:1.5px solid rgba(128,128,128,0.2);}
+  .chat-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid rgba(232, 160, 189, 0.2);
+  }
 
-    /* emoji colours for avatars */
-    /* ── MOBILE BACK BUTTON ── */
-    .mobile-back{display:none;background:none;border:none;color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;padding:8px 12px;opacity:0.6;}
-    .mobile-back:hover{opacity:1;}
+  .chat-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), var(--rose));
+  }
 
-    @media(max-width:900px){
-      .app{grid-template-columns:280px 1fr;}
-      .flovee-panel{display:none;}
-    }
-    @media(max-width:700px){
-      .app{grid-template-columns:1fr;position:relative;}
-      .contacts-panel{height:100%;}
-      .chat-panel{display:none;position:absolute;inset:0;z-index:10;background:inherit;}
-      .chat-panel.mobile-active{display:flex;flex-direction:column;height:100%;}
-      .mobile-back{display:block;}
-      .modal{width:calc(100vw - 32px);max-width:360px;}
-      .chat-header-actions{gap:4px;}
-      .header-action-btn{padding:6px 10px;font-size:0.62rem;letter-spacing:1.5px;}
-      .bubble-wrap{max-width:85%;}
-      .help-chip{padding:4px 10px;font-size:0.65rem;}
-    }
-  </style>
+  .chat-info h3 {
+    margin: 0; font-size: 18px; font-weight: 700; color: var(--ink); font-family: 'Comfortaa', sans-serif;
+  }
+
+  .chat-info p {
+    margin: 4px 0 0; font-size: 12px; color: rgba(74, 63, 80, 0.6);
+  }
+
+  .messages {
+    flex: 1; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .message {
+    display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.5;
+  }
+
+  .message.bot { justify-content: flex-start; }
+  .message.user { justify-content: flex-end; }
+
+  .message-bubble {
+    max-width: 70%; padding: 12px 16px; border-radius: 18px; word-wrap: break-word;
+  }
+
+  .message.bot .message-bubble {
+    background: var(--cream); color: var(--ink); border: 1px solid var(--pink);
+  }
+
+  .message.user .message-bubble {
+    background: var(--rose); color: white;
+  }
+
+  .chat-input { display: flex; gap: 8px; }
+
+  .chat-input input {
+    flex: 1; padding: 12px 16px; border: 1px solid var(--pink);
+    border-radius: 20px; font-family: 'Quicksand', sans-serif;
+    font-size: 14px; background: white; outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .chat-input input:focus { border-color: var(--rose); }
+
+  .chat-input button {
+    width: 40px; height: 40px; background: var(--rose);
+    color: white; border: none; border-radius: 50%;
+    cursor: pointer; display: grid; place-items: center;
+    transition: transform 0.3s ease; font-size: 18px;
+  }
+
+  .chat-input button:hover { transform: scale(1.05); }
+
+  footer { text-align: center; padding: 40px 30px; margin-top: 80px;
+    border-top: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  footer p { font-size: 14px; color: rgba(74, 63, 80, 0.6); margin: 0; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+  @media (max-width: 768px) { .friends-container { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon">&#9825;</div>
+      <span>stuflover</span>
+    </a>
+    <nav>
+      <a href="/">home</a>
+      <a href="lifestyle.html">my page</a>
+      <a href="catalog.html">closet</a>
+      <a href="games.html">games</a>
+      <a href="friends.html" class="active">friends</a>
+      <a href="beyou.html">mindful</a>
+      <a href="account.html">account</a>
+    </nav>
+  </header>
 
-<div class="app" id="app">
+  <section class="section">
+    <div class="friends-container">
 
-  <!-- CONTACTS -->
-  <div class="contacts-panel" id="contactsPanel">
-    <div class="contacts-header">
-      <div class="contacts-title">Friends</div>
-      <button class="new-chat-btn bc" onclick="openAddModal()" title="Add friend">+</button>
-    </div>
-    <div class="contacts-search">
-      <input id="searchInput" placeholder="Search..." oninput="filterContacts(this.value)"/>
-    </div>
-    <div id="inviteBanner" style="display:none;"></div>
-    <div class="contacts-list" id="contactsList"></div>
-  </div>
+      <div class="friends-sidebar">
+        <h3>friends</h3>
 
-  <!-- CHAT -->
-  <div class="chat-panel" id="chatPanel">
-    <div class="no-chat" id="noChatState">
-      <div class="no-chat-icon">...</div>
-      <div class="no-chat-title bc">Select a conversation</div>
-      <div class="no-chat-sub">Chat with your Flovee or pick a friend from the left to start a conversation</div>
-    </div>
-    <div id="activeChatState" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-      <div class="chat-header" id="chatHeader"></div>
-      <div class="chat-msgs" id="chatMsgs"></div>
-      <div class="chat-input-area">
-        <div class="draft-row">
-          <textarea class="chat-textarea" id="chatInput" placeholder="Message..." rows="1"
-            oninput="autoResize(this);onTyping()"
-            onkeydown="handleMsgKey(event)"></textarea>
-          <button class="send-btn bc" id="sendBtn" onclick="sendMessage()">-></button>
-        </div>
-        <div class="flovee-help-row" id="helpChips"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FLOVEE PANEL -->
-  <div class="flovee-panel" id="floveePanel">
-    <div class="flovee-header">
-      <div class="flovee-header-name">
-        <div class="flovee-pulse" id="floveePulse"></div>
-        <span id="floveeNameEl">Flovee</span>
-      </div>
-      <div class="flovee-header-sub">helping you stay cool</div>
-    </div>
-    <div class="flovee-body" id="floveeBody">
-      <div class="flovee-advice" id="floveeWelcome" style="border-left-color:rgba(128,128,128,0.2)">
-        Select a conversation and start chatting. I will help you respond.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ADD CONTACT MODAL -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal" id="modalBox">
-    <div class="modal-title bc">Add a Friend</div>
-
-    <div class="share-sec" id="shareSec">
-      <div class="share-sec-title">Your share link</div>
-      <div id="shareContent"></div>
-    </div>
-
-    <div class="share-sec" id="friendRequestSec" style="display:none;">
-      <div class="share-sec-title">Send a friend request</div>
-      <div class="share-link-row">
-        <input id="frUsernameInput" placeholder="Their username..." maxlength="40"
-          onkeydown="if(event.key==='Enter') sendFriendRequestFromModal()"/>
-        <button class="share-copy-btn bc" id="frSendBtn" onclick="sendFriendRequestFromModal()">Send</button>
-      </div>
-      <div id="frRequestStatus" style="font-size:0.72rem;opacity:0.7;min-height:1em;"></div>
-    </div>
-
-    <div class="modal-or">or add a personal reminder</div>
-
-    <input class="modal-input" id="nameInput" placeholder="Their name..." maxlength="30"
-      onkeydown="if(event.key==='Enter') saveContact()"/>
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <div style="font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;">Relationship</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="relChips">
-        <button class="help-chip on" data-rel="bestie" onclick="pickRel(this)">Bestie</button>
-        <button class="help-chip" data-rel="close friend" onclick="pickRel(this)">Close friend</button>
-        <button class="help-chip" data-rel="group friend" onclick="pickRel(this)">Group friend</button>
-        <button class="help-chip" data-rel="situationship" onclick="pickRel(this)">Situationship</button>
-        <button class="help-chip" data-rel="acquaintance" onclick="pickRel(this)">Acquaintance</button>
-        <button class="help-chip" data-rel="complicated" onclick="pickRel(this)">Complicated</button>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn bc cancel" id="cancelBtn" onclick="closeAddModal()">Cancel</button>
-      <button class="modal-btn bc" id="saveBtn" onclick="saveContact()">Add</button>
-    </div>
-  </div>
-</div>
-
-<script src="/stuflover-config.js"></script>
-<script src="/safeguards-client.js"></script>
-<script src="/stuflover-backend.js"></script>
-<script>
-
-// ─── PROFILE + PALETTE ────────────────────────────────────
-const profile=(()=>{try{return JSON.parse(localStorage.getItem('stuflover_profile')||'null');}catch(e){return null;}})();
-function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
-function lightenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a);}catch(e){return hex;}}
-function darkenH(hex,a){try{const[r,g,b]=hex.slice(1).match(/.{2}/g).map(x=>parseInt(x,16));return'#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a));}catch(e){return hex;}}
-function resolvePalette(){
-  // Prefer the site-wide theme set via the Me page or quiz completion.
-  try {
-    const ts = JSON.parse(localStorage.getItem('stuflover_theme')||'null');
-    if (ts) {
-      if (ts.customPreset && ts.customPreset.bg) {
-        const cp = ts.customPreset;
-        return { bg: cp.bg, tx: cp.tx, ac: ts.accent || cp.accent };
-      }
-      const _P = {
-        'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
-        'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
-        'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
-        'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},
-        'ocean':{bg:'#e4f1f8',accent:'#2e86b8',tx:'#0c1a24'},
-        'sunset':{bg:'#fcead2',accent:'#e07b3c',tx:'#2a140a'},
-        'mono':{bg:'#f5f5f5',accent:'#333333',tx:'#111111'},
-        'dark':{bg:'#1a1418',accent:'#e08a95',tx:'#f5e8e8'}
-      };
-      const p = _P[ts.preset];
-      if (p) return { bg: p.bg, tx: p.tx, ac: ts.accent || p.accent };
-    }
-  } catch(e) {}
-  const fc=profile?.faveColour;const ae=profile?.aesthetics||{};
-  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-  if(fc&&!fc.dark)return{bg:lightenH(fc.hex,0.88),tx:darkenH(fc.hex,0.55),ac:fc.hex};
-  if(fc&&fc.dark)return{bg:darkenH(fc.hex,0.35),tx:lightenH(fc.hex,0.75),ac:fc.hex};
-  const m={kawaii:{bg:'#fff0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
-  return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
-}
-const PAL=resolvePalette();
-
-const topAe=Object.entries(profile?.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
-const aeName=(()=>{const m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};return m[topAe]||'Your Style';})();
-const social=profile?.social||'ambivert';
-const mood=profile?.moodToday||'okay';
-
-// ─── FLOVEE CHAT CHARACTER (merged from flovee.html) ──────
-const FLOVEE_DATA={
-  lumi:   {name:'Lumi',   emoji:'\u2728',vibe:'wellness queen',     aesthetic:'clean girl'},
-  delara: {name:'Delara', emoji:'\u{1F4D6}',vibe:'book girly',       aesthetic:'dark academia'},
-  vesper: {name:'Vesper', emoji:'\u{1F380}',vibe:'coquette princess',aesthetic:'coquette'},
-  zola:   {name:'Zola',   emoji:'\u{1F480}',vibe:'chaos queen',      aesthetic:'y2k'},
-  miro:   {name:'Miro',   emoji:'\u{1F3A7}',vibe:'indie girly',      aesthetic:'indie'},
-  seraph: {name:'Seraph', emoji:'\u{1F319}',vibe:'moon girl',        aesthetic:'spiritual'},
-  remi:   {name:'Remi',   emoji:'\u{1F305}',vibe:'main character',   aesthetic:'softgirl'},
-  nox:    {name:'Nox',    emoji:'\u{1F5A4}',vibe:'deadpan icon',     aesthetic:'goth'}
-};
-const FLOVEE_AE_MAP={kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
-const FLOVEE_STARTERS={
-  lumi:['what skincare should i try?','i need a morning routine','rate my aesthetic','help me feel put together'],
-  delara:['recommend me a book','i need a study playlist','what should i journal about?','tell me something deep'],
-  vesper:['i need outfit inspo','how do i romanticize my life?','tell me something pretty','i want a glow up'],
-  zola:['roast me lovingly','make me laugh rn','what trend should i try?','give me a hot take'],
-  miro:['put me onto new music','what should i thrift?','give me a creative idea','what is underrated rn?'],
-  seraph:['do a tarot reading for me','what does the universe want me to know?','i need a sign','what crystal should i get?'],
-  remi:['how do i be more main character?','give me a pep talk','romanticize my day','what movie fits my vibe?'],
-  nox:['give me honest advice','what do you really think?','tell me something real','i need a reality check']
-};
-function resolveFloveeId(){
-  const explicit=new URLSearchParams(window.location.search).get('peer');
-  if(explicit && FLOVEE_DATA[explicit]) return explicit;
-  return FLOVEE_AE_MAP[topAe]||'remi';
-}
-const floveeId=resolveFloveeId();
-const floveeChar={...FLOVEE_DATA[floveeId],id:floveeId};
-const FLOVEE_CONTACT_ID='flovee:'+floveeId;
-const FLOVEE_CHAT_KEY='stuflover_flovee_chat_'+floveeId;
-let floveeHistory=(()=>{try{const raw=JSON.parse(localStorage.getItem(FLOVEE_CHAT_KEY)||'null');return raw&&Array.isArray(raw.messages)?raw.messages:[];}catch(e){return[];}})();
-function saveFloveeHistory(){try{localStorage.setItem(FLOVEE_CHAT_KEY,JSON.stringify({messages:floveeHistory.slice(-60)}));}catch(e){}}
-
-// ─── DATA ─────────────────────────────────────────────────
-let contacts=(()=>{try{return JSON.parse(localStorage.getItem('stuflover_contacts')||'[]');}catch(e){return[];}})();
-let conversations=(()=>{try{return JSON.parse(localStorage.getItem('stuflover_convos')||'{}');}catch(e){return{};}})();
-let activeContactId=null;
-let selectedRel='bestie';
-let typingTimer=null;
-
-function saveData(){
-  try{localStorage.setItem('stuflover_contacts',JSON.stringify(contacts));}catch(e){}
-  try{localStorage.setItem('stuflover_convos',JSON.stringify(conversations));}catch(e){}
-}
-
-// ─── BACKEND FRIENDS (real accounts) ──────────────────────
-const REMOTE_PREFIX='remote:';
-let remoteFriends=[];
-let remoteRequests=[];
-let remoteSentRequests=[];
-let remoteMessages={};
-let remoteUnread={};
-let remotePollInterval=null;
-
-function authToken(){ try{return localStorage.getItem('stuflover_token')||'';}catch(e){return '';} }
-function isAuthed(){ return !!authToken(); }
-function myUserId(){ try{const u=JSON.parse(localStorage.getItem('stuflover_user')||'null');return u?parseInt(u.id):0;}catch(e){return 0;} }
-function apiFetch(path,opts){
-  const url=(window.STUFLOVER_API_URL||'')+path;
-  const o=opts||{};
-  o.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+authToken()},o.headers||{});
-  const f=window._origFetch||window.fetch;
-  return f.call(window,url,o);
-}
-
-async function loadRemoteData(){
-  if(!isAuthed()) return;
-  try{
-    const [frRes,rqRes,sentRes,unRes]=await Promise.all([
-      apiFetch('/api/friends'),
-      apiFetch('/api/friends/requests'),
-      apiFetch('/api/friends/sent-requests'),
-      apiFetch('/api/friends/unread')
-    ]);
-    const frData=await frRes.json();
-    const rqData=await rqRes.json();
-    const sentData=await sentRes.json();
-    const unData=await unRes.json();
-    remoteFriends=frData.friends||[];
-    remoteRequests=rqData.requests||[];
-    remoteSentRequests=sentData.requests||[];
-    remoteUnread={};
-    (unData.perFriend||[]).forEach(u=>{ remoteUnread[u.from_user]=u.count; });
-    // Fetch last message for preview on visible friends (cap to avoid burst)
-    await Promise.all(remoteFriends.slice(0,20).map(f=>loadRemoteMessages(f.id,true)));
-    renderContacts(document.getElementById('searchInput')?.value||'');
-  }catch(e){}
-}
-
-async function loadRemoteMessages(friendId,silent){
-  try{
-    const res=await apiFetch('/api/friends/messages/'+friendId);
-    const data=await res.json();
-    remoteMessages[friendId]=data.messages||[];
-    if(!silent && activeContactId===REMOTE_PREFIX+friendId){
-      renderRemoteMessages(friendId);
-    }
-  }catch(e){}
-}
-
-async function sendRemoteMessage(friendId,text){
-  try{
-    const res=await apiFetch('/api/friends/message',{
-      method:'POST',
-      body:JSON.stringify({friendId:friendId,text:text})
-    });
-    const data=await res.json().catch(()=>({error:'Server error'}));
-    if(!res.ok||data.error){
-      const c=document.getElementById('chatMsgs');
-      const err=document.createElement('div');
-      err.style.cssText='text-align:center;padding:8px;font-size:0.75rem;opacity:0.6;color:#c44;';
-      err.textContent=data.error||'Could not send';
-      c.appendChild(err); c.scrollTop=c.scrollHeight;
-      return;
-    }
-    await loadRemoteMessages(friendId);
-    renderContacts(document.getElementById('searchInput')?.value||'');
-  }catch(e){}
-}
-
-async function acceptRemoteRequest(id){
-  try{
-    await apiFetch('/api/friends/accept',{method:'POST',body:JSON.stringify({requestId:id})});
-    await loadRemoteData();
-  }catch(e){}
-}
-
-async function declineRemoteRequest(id){
-  try{
-    await apiFetch('/api/friends/decline',{method:'POST',body:JSON.stringify({requestId:id})});
-    await loadRemoteData();
-  }catch(e){}
-}
-
-async function sendFriendRequestFromModal(){
-  const input=document.getElementById('frUsernameInput');
-  const status=document.getElementById('frRequestStatus');
-  if(!input||!status) return;
-  const username=input.value.trim();
-  if(!username){ status.style.color='#c44'; status.textContent='Enter a username'; return; }
-  status.style.color=PAL.tx; status.textContent='Searching...';
-  try{
-    const check=await apiFetch('/api/friends/search/'+encodeURIComponent(username));
-    if(check.ok){
-      const cd=await check.json();
-      if(!cd.found){
-        status.style.color='#c44';
-        status.textContent='No account for "'+username+'" — ask them to sign up first';
-        return;
-      }
-    }
-    const res=await apiFetch('/api/friends/request',{method:'POST',body:JSON.stringify({username:username})});
-    const data=await res.json().catch(()=>({error:'Server error'}));
-    if(!res.ok||data.error){ status.style.color='#c44'; status.textContent=data.error||'Failed'; return; }
-    status.style.color=PAL.ac;
-    status.textContent='Request sent to '+username;
-    input.value='';
-    await loadRemoteData();
-    setTimeout(closeAddModal,1200);
-  }catch(e){ status.style.color='#c44'; status.textContent='Cannot reach server'; }
-}
-
-function startRemotePolling(){
-  if(remotePollInterval) return;
-  remotePollInterval=setInterval(()=>{
-    if(!isAuthed()) return;
-    if(activeContactId && activeContactId.startsWith(REMOTE_PREFIX)){
-      const fid=parseInt(activeContactId.slice(REMOTE_PREFIX.length));
-      loadRemoteMessages(fid);
-    }
-    loadRemoteData();
-  },5000);
-}
-
-// ─── AVATAR COLOURS ───────────────────────────────────────
-const AVATAR_COLS=['#e06080','#9040c0','#c4943a','#4a8a2a','#3060c0','#e08040','#8a7a5a','#c03ab0','#c4a438','#7858d0'];
-function getAvatarCol(id){ return AVATAR_COLS[parseInt(id,36)%AVATAR_COLS.length]||PAL.ac; }
-function getInitials(name){ return name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
-
-// ─── APPLY STYLES ─────────────────────────────────────────
-function applyStyles(){
-  document.body.style.background=PAL.bg; document.body.style.color=PAL.tx;
-  document.getElementById('app').style.background=PAL.bg;
-  document.getElementById('floveePulse').style.background=PAL.ac;
-  document.getElementById('floveeNameEl').textContent=floveeChar.name;
-  document.getElementById('sendBtn').style.background=PAL.ac;
-  document.getElementById('sendBtn').style.color=PAL.bg;
-  document.getElementById('modalBox').style.background=PAL.bg;
-  document.getElementById('modalBox').style.borderColor=PAL.tx+'18';
-  document.getElementById('saveBtn').style.background=PAL.ac;
-  document.getElementById('saveBtn').style.color=PAL.bg;
-  document.getElementById('cancelBtn').style.color=PAL.tx;
-  document.getElementById('cancelBtn').style.borderColor=PAL.tx+'22';
-  document.getElementById('searchInput').style.borderColor=PAL.tx+'18';
-  document.getElementById('searchInput').style.color=PAL.tx;
-  // Flovee welcome
-  const w=document.getElementById('floveeWelcome');
-  if(w){ w.style.color=PAL.tx; w.style.background=PAL.ac+'0c'; w.style.borderLeftColor=PAL.ac+'50'; }
-  // Help chips default
-  buildHelpChips();
-}
-
-// ─── CONTACTS LIST ────────────────────────────────────────
-function renderFloveeRow(filter){
-  if(filter && !floveeChar.name.toLowerCase().includes(filter.toLowerCase())) return '';
-  const last=floveeHistory[floveeHistory.length-1];
-  const preview=last?((last.role==='user'?'You: ':'')+last.content):`${floveeChar.vibe} \u2022 your AI friend`;
-  const time=last?formatTime(last.time):'';
-  const isActive=activeContactId===FLOVEE_CONTACT_ID;
-  return `<div class="contact-item pinned ${isActive?'active':''}" onclick="openChat('${FLOVEE_CONTACT_ID}')"
-    style="${isActive?'background:'+PAL.ac+'18':''}" id="ci-${FLOVEE_CONTACT_ID}">
-    <div class="contact-avatar flovee" style="background:${PAL.ac}">${floveeChar.emoji}</div>
-    <div class="contact-info">
-      <div class="contact-name" style="color:${PAL.tx}">${floveeChar.name}</div>
-      <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
-      <div class="contact-pin-label" style="color:${PAL.tx}">Flovee \u2022 your AI friend</div>
-    </div>
-    <div class="contact-time" style="color:${PAL.tx}">${time}</div>
-  </div>`;
-}
-
-function renderRemoteRequestsBlock(filter){
-  if(filter||!remoteRequests.length) return '';
-  const items=remoteRequests.map(r=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
-      <div class="contact-avatar" style="background:${getAvatarCol(String(r.id))};width:30px;height:30px;font-size:0.8rem;">${getInitials(r.username)}</div>
-      <div style="flex:1;font-size:0.85rem;color:${PAL.tx};min-width:0;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.username)}</div>
-      <button class="sug-btn use bc" onclick="acceptRemoteRequest(${r.id})" style="background:${PAL.ac};color:${PAL.bg};padding:4px 10px;font-size:0.62rem;">Accept</button>
-      <button class="sug-btn skip bc" onclick="declineRemoteRequest(${r.id})" style="border-color:${PAL.tx}20;color:${PAL.tx};padding:4px 8px;font-size:0.62rem;">×</button>
-    </div>`).join('');
-  return `<div style="padding:10px 16px;border-bottom:1px solid rgba(128,128,128,0.1);background:${PAL.ac}0a;">
-    <div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:${PAL.tx}">Friend requests</div>
-    ${items}
-  </div>`;
-}
-
-function renderRemoteFriendRows(filter){
-  const myId=myUserId();
-  const q=(filter||'').toLowerCase();
-  const visible=remoteFriends.filter(f=>!q||(f.username||'').toLowerCase().includes(q));
-  return visible.map(f=>{
-    const remoteId=REMOTE_PREFIX+f.id;
-    const msgs=remoteMessages[f.id]||[];
-    const last=msgs[msgs.length-1];
-    let preview=`@${f.username} \u2022 say hi`;
-    let time='';
-    if(last){
-      const fromMe=parseInt(last.from_user)===myId;
-      preview=(fromMe?'You: ':'')+last.text;
-      time=formatTime(new Date(last.created_at+'Z').getTime());
-    }
-    const unread=remoteUnread[f.id]||0;
-    const isActive=activeContactId===remoteId;
-    const right=unread>0
-      ? `<div class="contact-unread" style="background:${PAL.ac}">${unread}</div>`
-      : `<div class="contact-time" style="color:${PAL.tx}">${time}</div>`;
-    return `<div class="contact-item ${isActive?'active':''}" onclick="openChat('${remoteId}')"
-      style="${isActive?'background:'+PAL.ac+'18':''}" id="ci-${remoteId}">
-      <div class="contact-avatar" style="background:${getAvatarCol(String(f.id))}">${getInitials(f.username)}</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:${PAL.tx}">${escapeHtml(f.username)}</div>
-        <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
-      </div>
-      ${right}
-    </div>`;
-  }).join('');
-}
-
-function renderContacts(filter=''){
-  const list=document.getElementById('contactsList');
-  const filteredLocal=contacts.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()));
-  const floveeRow=renderFloveeRow(filter);
-  const requestsBlock=renderRemoteRequestsBlock(filter);
-  const remoteRows=renderRemoteFriendRows(filter);
-  const hasAny=floveeRow||requestsBlock||remoteRows||filteredLocal.length;
-  if(!hasAny){
-    const msg=contacts.length===0&&remoteFriends.length===0?'Add a friend to get started':'No matches';
-    list.innerHTML=`<div style="padding:32px 20px;text-align:center;opacity:0.3;font-size:0.85rem;line-height:1.7">${msg}</div>`;
-    return;
-  }
-  const friendRows=filteredLocal.map(c=>{
-    const msgs=conversations[c.id]||[];
-    const last=msgs[msgs.length-1];
-    const preview=last?(last.from==='me'?'You: ':'')+last.text:'Start a conversation';
-    const time=last?formatTime(last.ts):'';
-    const isActive=c.id===activeContactId;
-    return `<div class="contact-item ${isActive?'active':''}" onclick="openChat('${c.id}')"
-      style="${isActive?'background:'+PAL.ac+'18':''}" id="ci-${c.id}">
-      <div class="contact-avatar" style="background:${getAvatarCol(c.id)}">${getInitials(c.name)}</div>
-      <div class="contact-info">
-        <div class="contact-name" style="color:${PAL.tx}">${c.name}</div>
-        <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
-      </div>
-      <div class="contact-time" style="color:${PAL.tx}">${time}</div>
-    </div>`;
-  }).join('');
-  list.innerHTML=floveeRow+requestsBlock+remoteRows+friendRows;
-}
-
-function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function filterContacts(val){ renderContacts(val); }
-
-function formatTime(ts){
-  const d=new Date(ts),now=new Date();
-  const diffDays=Math.floor((now-d)/(1000*60*60*24));
-  if(diffDays===0) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  if(diffDays===1) return 'Yesterday';
-  if(diffDays<7) return d.toLocaleDateString([],{weekday:'short'});
-  return d.toLocaleDateString([],{month:'short',day:'numeric'});
-}
-
-// ─── OPEN CHAT ────────────────────────────────────────────
-function openChat(id){
-  activeContactId=id;
-
-  if(id===FLOVEE_CONTACT_ID){
-    openFloveeChat();
-    return;
-  }
-
-  if(typeof id==='string'&&id.startsWith(REMOTE_PREFIX)){
-    openRemoteChat(parseInt(id.slice(REMOTE_PREFIX.length)));
-    return;
-  }
-
-  const contact=contacts.find(c=>c.id===id);
-  if(!contact) return;
-
-  // Show chat state
-  document.getElementById('noChatState').style.display='none';
-  const acs=document.getElementById('activeChatState');
-  acs.style.display='flex';
-
-  // Header
-  document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
-    <div class="chat-header-avatar" style="background:${getAvatarCol(id)}">${getInitials(contact.name)}</div>
-    <div>
-      <div class="chat-header-name" style="color:${PAL.tx}">${contact.name}</div>
-      <div class="chat-header-status" style="color:${PAL.tx}">${contact.rel||'friend'}</div>
-    </div>
-    <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="askFloveeAdvice()" style="color:${PAL.tx};border-color:${PAL.tx}22">Ask Flovee</button>
-      <button class="header-action-btn bc" onclick="clearChat('${id}')" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
-    </div>`;
-  // Show chat panel on mobile
-  document.getElementById('chatPanel').classList.add('mobile-active');
-
-  // Restore help chips for friend chats
-  const chipsRow=document.getElementById('helpChips');
-  if(chipsRow) chipsRow.style.display='';
-  const input=document.getElementById('chatInput');
-  if(input) input.placeholder='Message...';
-
-  renderMessages();
-  updateFloveePanel(contact);
-  renderContacts();
-
-  // Focus input
-  setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
-}
-
-// ─── OPEN FLOVEE CHAT (AI character) ──────────────────────
-function openFloveeChat(){
-  document.getElementById('noChatState').style.display='none';
-  const acs=document.getElementById('activeChatState');
-  acs.style.display='flex';
-
-  document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
-    <div class="chat-header-avatar flovee" style="background:${PAL.ac};font-size:1.2rem">${floveeChar.emoji}</div>
-    <div>
-      <div class="chat-header-name" style="color:${PAL.tx}">${floveeChar.name}</div>
-      <div class="chat-header-status" style="color:${PAL.tx}">${floveeChar.vibe} \u2022 your AI friend</div>
-    </div>
-    <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="clearFloveeChat()" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
-    </div>`;
-  document.getElementById('chatPanel').classList.add('mobile-active');
-
-  // Hide friend-chat help chips, set Flovee placeholder
-  const chipsRow=document.getElementById('helpChips');
-  if(chipsRow) chipsRow.style.display='none';
-  const input=document.getElementById('chatInput');
-  if(input) input.placeholder=`say something to ${floveeChar.name}...`;
-
-  renderFloveeMessages();
-  updateFloveeSidePanel();
-  renderContacts();
-  setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
-}
-
-function renderFloveeMessages(){
-  const container=document.getElementById('chatMsgs');
-  if(floveeHistory.length===0){
-    const starters=(FLOVEE_STARTERS[floveeChar.id]||FLOVEE_STARTERS.remi);
-    container.innerHTML=`
-      <div class="no-chat" style="opacity:0.9;padding:24px 12px">
-        <div class="no-chat-icon" style="opacity:0.7">${floveeChar.emoji}</div>
-        <div class="no-chat-title bc" style="color:${PAL.tx}">this is ${floveeChar.name}</div>
-        <div class="no-chat-sub" style="color:${PAL.tx};max-width:300px">${floveeChar.vibe}. matched to your aesthetic. she remembers your conversations and actually gets you. say anything.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px">
-          ${starters.map(s=>`<button class="help-chip bc" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')" style="color:${PAL.tx};border-color:${PAL.tx}22">${s}</button>`).join('')}
-        </div>
-      </div>`;
-    return;
-  }
-  container.innerHTML=floveeHistory.map((m,i)=>{
-    const isMe=m.role==='user';
-    const showDate=i===0||new Date(m.time).toDateString()!==new Date(floveeHistory[i-1].time).toDateString();
-    const date=showDate?`<div class="chat-date" style="color:${PAL.tx}">${new Date(m.time).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`:'';
-    const bubbleBg=isMe?PAL.ac:PAL.tx+'14';
-    const bubbleTx=isMe?PAL.bg:PAL.tx;
-    return `${date}<div class="bubble-wrap ${isMe?'me':'them'}">
-      <div class="bubble" style="background:${bubbleBg};color:${bubbleTx}">${escapeHtml(m.content)}</div>
-      <div class="bubble-time" style="color:${PAL.tx}">${formatTime(m.time)}</div>
-    </div>`;
-  }).join('');
-  container.scrollTop=container.scrollHeight;
-}
-
-function sendFloveeStarter(text){
-  const input=document.getElementById('chatInput');
-  if(input){ input.value=text; autoResize(input); input.focus(); }
-  sendMessage();
-}
-
-function updateFloveeSidePanel(){
-  const body=document.getElementById('floveeBody');
-  body.innerHTML=`
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">About ${floveeChar.name}</div>
-      <div class="flovee-advice" style="border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c">
-        ${floveeChar.vibe} \u2022 ${floveeChar.aesthetic} aesthetic. Matched to your ${aeName} vibe. Talk like a best friend \u2014 she remembers everything you say.
-      </div>
-    </div>
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">Try saying</div>
-      ${(FLOVEE_STARTERS[floveeChar.id]||FLOVEE_STARTERS.remi).map(s=>`
-        <div class="flovee-card" style="border-color:${PAL.tx}12;background:transparent;cursor:pointer;" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')">
-          <div class="flovee-card-text" style="color:${PAL.tx}">${s}</div>
-        </div>`).join('')}
-    </div>`;
-}
-
-// ─── RENDER MESSAGES ─────────────────────────────────────
-function renderMessages(){
-  if(activeContactId===FLOVEE_CONTACT_ID){ renderFloveeMessages(); return; }
-  const msgs=conversations[activeContactId]||[];
-  const contact=contacts.find(c=>c.id===activeContactId);
-  const container=document.getElementById('chatMsgs');
-
-  container.innerHTML=msgs.map((m,i)=>{
-    const isMe=m.from==='me';
-    const showDate=i===0||new Date(m.ts).toDateString()!==new Date(msgs[i-1].ts).toDateString();
-    const date=showDate?`<div class="chat-date" style="color:${PAL.tx}">${new Date(m.ts).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`:'';
-    const bubbleBg=isMe?PAL.ac:PAL.tx+'14';
-    const bubbleTx=isMe?PAL.bg:PAL.tx;
-
-    if(m.type==='flovee_suggestion'){
-      return `${date}<div class="flovee-suggestion" style="background:${PAL.ac}0a;border-color:${PAL.ac}30">
-        <div style="flex:1">
-          <div class="flovee-suggestion-label" style="color:${PAL.tx}">${floveeChar.name} suggests</div>
-          <div class="flovee-suggestion-text" style="color:${PAL.tx}">${m.text}</div>
-          <div class="flovee-suggestion-actions">
-            <button class="sug-btn use bc" onclick="useSuggestion(${i})" style="background:${PAL.ac};color:${PAL.bg}">Use this</button>
-            <button class="sug-btn skip bc" onclick="dismissSuggestion(${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Skip</button>
-            <button class="sug-btn skip bc" onclick="rewriteSuggestion('${m.original||''}',${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Rewrite</button>
+        <div class="friend-list-item active">
+          <div class="friend-avatar"></div>
+          <div>
+            <p class="friend-list-name">mika</p>
+            <p class="friend-list-status">online</p>
           </div>
         </div>
-      </div>`;
-    }
 
-    return `${date}<div class="bubble-wrap ${isMe?'me':'them'}">
-      <div class="bubble" style="background:${bubbleBg};color:${bubbleTx}">${m.text}</div>
-      <div class="bubble-time" style="color:${PAL.tx}">${formatTime(m.ts)}</div>
-    </div>`;
-  }).join('');
+        <div class="friend-list-item">
+          <div class="friend-avatar"></div>
+          <div>
+            <p class="friend-list-name">lily</p>
+            <p class="friend-list-status">online</p>
+          </div>
+        </div>
 
-  container.scrollTop=container.scrollHeight;
-}
+        <div class="friend-list-item">
+          <div class="friend-avatar"></div>
+          <div>
+            <p class="friend-list-name">rory</p>
+            <p class="friend-list-status">online</p>
+          </div>
+        </div>
 
-// ─── SEND MESSAGE ─────────────────────────────────────────
-function sendMessage(){
-  const input=document.getElementById('chatInput');
-  const text=input.value.trim();
-  if(!text||!activeContactId) return;
-  input.value=''; input.style.height='auto';
+        <div class="friend-list-item">
+          <div class="friend-avatar"></div>
+          <div>
+            <p class="friend-list-name">jade</p>
+            <p class="friend-list-status">last seen 2h ago</p>
+          </div>
+        </div>
 
-  if(activeContactId===FLOVEE_CONTACT_ID){
-    sendFloveeMessage(text);
-    return;
-  }
+      </div>
 
-  if(typeof activeContactId==='string'&&activeContactId.startsWith(REMOTE_PREFIX)){
-    const fid=parseInt(activeContactId.slice(REMOTE_PREFIX.length));
-    sendRemoteMessage(fid,text);
-    clearTypingTimer();
-    return;
-  }
+      <div class="chat-window">
+        <div class="chat-header">
+          <div class="chat-avatar"></div>
+          <div class="chat-info">
+            <h3>mika</h3>
+            <p>online now</p>
+          </div>
+        </div>
 
-  if(!conversations[activeContactId]) conversations[activeContactId]=[];
-  conversations[activeContactId].push({from:'me',text,ts:Date.now()});
-  saveData();
-  renderMessages();
-  renderContacts();
-  clearTypingTimer();
-}
+        <div class="messages">
+          <div class="message bot"><div class="message-bubble">hey!! what's up</div></div>
+          <div class="message user"><div class="message-bubble">hiiii! just vibing, u?</div></div>
+          <div class="message bot"><div class="message-bubble">same same. wanna do a fit check later?</div></div>
+          <div class="message user"><div class="message-bubble">omg yes!! i got a new top</div></div>
+          <div class="message bot"><div class="message-bubble">ooooh i need to seee</div></div>
+        </div>
 
-// ─── OPEN REMOTE (BACKEND) CHAT ───────────────────────────
-function openRemoteChat(friendId){
-  const f=remoteFriends.find(x=>parseInt(x.id)===parseInt(friendId));
-  if(!f){
-    // Friend might not be loaded yet; try refresh
-    loadRemoteData();
-    return;
-  }
-  document.getElementById('noChatState').style.display='none';
-  const acs=document.getElementById('activeChatState');
-  acs.style.display='flex';
-  document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
-    <div class="chat-header-avatar" style="background:${getAvatarCol(String(f.id))}">${getInitials(f.username)}</div>
-    <div>
-      <div class="chat-header-name" style="color:${PAL.tx}">${escapeHtml(f.username)}</div>
-      <div class="chat-header-status" style="color:${PAL.tx}">friend</div>
+        <form class="chat-input" onsubmit="event.preventDefault();">
+          <input type="text" placeholder="send a message..." />
+          <button type="submit" aria-label="send">&#10148;</button>
+        </form>
+      </div>
+
     </div>
-    <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="clearRemoteUnreadUI(${f.id})" style="color:${PAL.tx};border-color:${PAL.tx}22">Refresh</button>
-    </div>`;
-  document.getElementById('chatPanel').classList.add('mobile-active');
-  const chipsRow=document.getElementById('helpChips');
-  if(chipsRow) chipsRow.style.display='none';
-  const input=document.getElementById('chatInput');
-  if(input) input.placeholder=`Message ${f.username}...`;
+  </section>
+</div>
 
-  // Mark unread cleared locally (will re-populate on next poll if new arrive)
-  remoteUnread[f.id]=0;
-  renderContacts(document.getElementById('searchInput')?.value||'');
-  renderRemoteMessages(f.id);
-  // Fresh fetch
-  loadRemoteMessages(f.id);
-  // Flovee side panel: show a minimal "About this chat" block
-  updateRemoteFloveePanel(f);
-  setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
-}
-
-function clearRemoteUnreadUI(friendId){
-  loadRemoteMessages(friendId);
-}
-
-function renderRemoteMessages(friendId){
-  const container=document.getElementById('chatMsgs');
-  if(!container) return;
-  const msgs=remoteMessages[friendId]||[];
-  const myId=myUserId();
-  if(msgs.length===0){
-    container.innerHTML=`<div class="no-chat" style="opacity:0.6;padding:24px 12px">
-      <div class="no-chat-icon" style="opacity:0.6">👋</div>
-      <div class="no-chat-title bc" style="color:${PAL.tx}">Start the conversation</div>
-      <div class="no-chat-sub" style="color:${PAL.tx};max-width:300px">Messages here are delivered to their account and they'll see them next time they open Stuflover.</div>
-    </div>`;
-    return;
-  }
-  container.innerHTML=msgs.map((m,i)=>{
-    const tsNum=new Date(m.created_at+'Z').getTime();
-    const prevTsNum=i>0?new Date(msgs[i-1].created_at+'Z').getTime():0;
-    const showDate=i===0||new Date(tsNum).toDateString()!==new Date(prevTsNum).toDateString();
-    const date=showDate?`<div class="chat-date" style="color:${PAL.tx}">${new Date(tsNum).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`:'';
-    const isMe=parseInt(m.from_user)===myId;
-    const bubbleBg=isMe?PAL.ac:PAL.tx+'14';
-    const bubbleTx=isMe?PAL.bg:PAL.tx;
-    return `${date}<div class="bubble-wrap ${isMe?'me':'them'}">
-      <div class="bubble" style="background:${bubbleBg};color:${bubbleTx}">${escapeHtml(m.text)}</div>
-      <div class="bubble-time" style="color:${PAL.tx}">${formatTime(tsNum)}</div>
-    </div>`;
-  }).join('');
-  container.scrollTop=container.scrollHeight;
-}
-
-function updateRemoteFloveePanel(friend){
-  const body=document.getElementById('floveeBody');
-  if(!body) return;
-  body.innerHTML=`
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">About this chat</div>
-      <div class="flovee-advice" style="border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c">
-        You're chatting with @${escapeHtml(friend.username)}. Messages are delivered to their Stuflover account.
-      </div>
-    </div>`;
-}
-
-// ─── SEND TO FLOVEE (AI) ──────────────────────────────────
-async function sendFloveeMessage(text){
-  // Clear empty-state if visible
-  const container=document.getElementById('chatMsgs');
-  const empty=container.querySelector('.no-chat');
-  if(empty) empty.remove();
-
-  const safe=window.Safeguards;
-
-  if(safe){
-    const inputCheck=safe.checkInputSafety(text);
-    if(!inputCheck.safe){
-      floveeHistory.push({role:'user',content:text,time:Date.now()});
-      floveeHistory.push({role:'assistant',content:inputCheck.reason,time:Date.now()});
-      saveFloveeHistory();
-      renderFloveeMessages();
-      renderContacts();
-      return;
-    }
-    const rateCheck=safe.checkRateLimit();
-    if(!rateCheck.allowed){
-      floveeHistory.push({role:'user',content:text,time:Date.now()});
-      floveeHistory.push({role:'assistant',content:rateCheck.message,time:Date.now()});
-      saveFloveeHistory();
-      renderFloveeMessages();
-      renderContacts();
-      return;
-    }
-  }
-
-  floveeHistory.push({role:'user',content:text,time:Date.now()});
-  saveFloveeHistory();
-  renderFloveeMessages();
-  renderContacts();
-
-  // Typing indicator
-  const typingDiv=document.createElement('div');
-  typingDiv.className='bubble-wrap them';
-  typingDiv.innerHTML=`<div class="bubble" style="background:${PAL.tx}10;color:${PAL.tx};font-style:italic;opacity:0.6">${floveeChar.name} is typing...</div>`;
-  container.appendChild(typingDiv);
-  container.scrollTop=container.scrollHeight;
-
-  try{
-    const characterPrompt=`You are ${floveeChar.name} \u2014 ${floveeChar.vibe}. You are a teen girl who is the user's AI best friend on Stuflover, a lifestyle app.\n\n`+
-      `Your personality: ${floveeChar.vibe}. Aesthetic: ${floveeChar.aesthetic}.\n`+
-      `The user's aesthetic: ${aeName}. ${mood?'Their mood today: '+mood+'. ':''}`+
-      `\n\nRULES:\n`+
-      `- Talk like an ACTUAL teen best friend texting \u2014 not a therapist, not a chatbot\n`+
-      `- Use lowercase, abbreviations, gen-z language NATURALLY (not forced)\n`+
-      `- Be warm, specific, and real\n`+
-      `- Reference real things (songs, artists, brands, shows, trends)\n`+
-      `- Keep responses 1-4 sentences usually. Longer only if they ask something deep\n`+
-      `- NEVER say "as an AI" or "I'm here for you" or therapist-speak\n`+
-      `- Have OPINIONS. Agree, disagree, tease, joke, be real\n`+
-      `- Remember what they said earlier in the conversation and reference it\n`+
-      `- If they seem down, be genuinely supportive but in a best friend way, not a counselor way\n`+
-      `- You can use emoji occasionally but don't overdo it`;
-
-    const systemPrompt=safe?safe.wrapSystemPrompt(characterPrompt):characterPrompt;
-    const trimmed=safe?safe.trimConversationHistory(floveeHistory):floveeHistory.slice(-10);
-    const apiMessages=trimmed.map(m=>({role:m.role==='user'?'user':'assistant',content:m.content}));
-
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        system:systemPrompt,
-        messages:apiMessages
-      })
-    });
-    const data=await res.json();
-    const reply=(data.content&&data.content[0]&&data.content[0].text)||'hmm try that again?';
-
-    typingDiv.remove();
-    floveeHistory.push({role:'assistant',content:reply,time:Date.now()});
-    saveFloveeHistory();
-    renderFloveeMessages();
-    renderContacts();
-
-    if(safe) safe.incrementRateLimit();
-  }catch(e){
-    typingDiv.remove();
-    floveeHistory.push({role:'assistant',content:'Something went wrong \u2014 try again in a moment! \u{1F60A}',time:Date.now()});
-    saveFloveeHistory();
-    renderFloveeMessages();
-    renderContacts();
-  }
-}
-
-function clearFloveeChat(){
-  if(!confirm(`Clear your chat with ${floveeChar.name}?`)) return;
-  floveeHistory=[];
-  try{localStorage.removeItem(FLOVEE_CHAT_KEY);}catch(e){}
-  renderFloveeMessages();
-  renderContacts();
-}
-
-function handleMsgKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); }
-}
-
-// ─── RECEIVE THEIR MESSAGE ────────────────────────────────
-// User types what the friend said — shown as their bubble
-function addTheirMessage(){
-  const text=prompt('What did they say?');
-  if(!text||!activeContactId) return;
-  if(!conversations[activeContactId]) conversations[activeContactId]=[];
-  const contact=contacts.find(c=>c.id===activeContactId);
-  conversations[activeContactId].push({from:'them',text,ts:Date.now()});
-  saveData();
-  renderMessages();
-  renderContacts();
-  // Auto-trigger Flovee suggestion after they say something
-  setTimeout(()=>getFloveeReply(text, contact),600);
-}
-
-// ─── HELP CHIPS ───────────────────────────────────────────
-const HELP_MODES=[
-  {id:'cool',label:'Keep it cool'},
-  {id:'reply',label:'Write my reply'},
-  {id:'check',label:'Check my vibe'},
-  {id:'them',label:'They texted me'},
-  {id:'vent',label:'Vent to Flovee'},
-];
-let activeHelpMode='cool';
-
-function buildHelpChips(){
-  const row=document.getElementById('helpChips');
-  if(!row) return;
-  row.innerHTML=HELP_MODES.map(m=>`
-    <button class="help-chip ${m.id===activeHelpMode?'on':''}" onclick="setHelpMode('${m.id}')"
-      style="${m.id===activeHelpMode?'border-color:'+PAL.ac+';background:'+PAL.ac+'14':''};color:${PAL.tx}">${m.label}</button>`).join('');
-}
-
-function setHelpMode(id){
-  activeHelpMode=id;
-  buildHelpChips();
-  const input=document.getElementById('chatInput');
-  const placeholders={cool:'Type what you want to say — Flovee will keep it cool...',reply:'Tell Flovee what happened — get a reply...',check:'Type your draft — Flovee will check the vibe...',them:'Paste what they said — Flovee will help you respond...',vent:'Vent here — stays between you and Flovee...'};
-  if(input) input.placeholder=placeholders[id]||'Message...';
-
-  if(id==='them'){
-    // Shortcut: open prompt for their message
-    addTheirMessage();
-  }
-}
-
-// ─── TYPING DETECTION ─────────────────────────────────────
-function onTyping(){
-  clearTypingTimer();
-  typingTimer=setTimeout(()=>{
-    const text=document.getElementById('chatInput')?.value.trim();
-    if(text && text.length>8 && activeHelpMode==='check') analyseMyDraft(text);
-  },1400);
-}
-
-function clearTypingTimer(){ if(typingTimer){ clearTimeout(typingTimer); typingTimer=null; } }
-
-// ─── FLOVEE FUNCTIONS ─────────────────────────────────────
-async function getFloveeReply(theirMessage, contact){
-  if(!contact) return;
-  const history=(conversations[activeContactId]||[]).filter(m=>m.from!=='flovee_suggestion').slice(-8);
-  const historyStr=history.map(m=>`${m.from==='me'?'Me':contact.name}: ${m.text}`).join('\n');
-
-  const typingDiv=document.createElement('div');
-  typingDiv.className='flovee-suggestion';
-  typingDiv.style.cssText=`background:${PAL.ac}0a;border-color:${PAL.ac}30`;
-  typingDiv.innerHTML=`<div style="flex:1"><div class="flovee-suggestion-label" style="color:${PAL.tx}">${floveeChar.name} is thinking...</div><div style="font-size:0.82rem;opacity:0.4;font-style:italic;color:${PAL.tx}">coming up with a reply...</div></div>`;
-  document.getElementById('chatMsgs')?.appendChild(typingDiv);
-  document.getElementById('chatMsgs').scrollTop=99999;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:200,
-        system:`You are ${floveeChar.name}, helping someone with ${aeName} aesthetic reply to their ${contact.rel||'friend'} called ${contact.name}. Your job is to suggest a reply that sounds natural and fits their vibe. Keep it to 1-3 sentences max. Casual texting style. Never suggest anything aggressive. Help them sound cool and genuine.`,
-        messages:[{role:'user',content:`Conversation so far:\n${historyStr}\n\n${contact.name} just said: "${theirMessage}"\n\nSuggest a reply for me. Just the reply text, nothing else.`}]
-      })
-    });
-    const data=await res.json();
-    const reply=data.content?.[0]?.text?.trim()||'';
-    typingDiv.remove();
-    if(reply){
-      conversations[activeContactId].push({from:'flovee_suggestion',text:reply,original:theirMessage,ts:Date.now()});
-      saveData();
-      renderMessages();
-    }
-  }catch(e){ typingDiv.remove(); }
-}
-
-async function analyseMyDraft(draft){
-  const contact=contacts.find(c=>c.id===activeContactId);
-  if(!contact) return;
-
-  // Show a quick vibe check in the flovee panel
-  const body=document.getElementById('floveeBody');
-  const checking=document.createElement('div');
-  checking.className='flovee-advice';
-  checking.style.cssText=`border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c;margin-bottom:12px`;
-  checking.textContent='checking your vibe...';
-  body.insertBefore(checking,body.firstChild);
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:180,
-        system:`You are ${floveeChar.name}, a cool honest friend helping someone with ${aeName} aesthetic. Check the vibe of their message before they send it. Be brief and real. Tell them if it sounds good, if it might come across wrong, or if they should reword anything. Max 2 sentences. Casual.`,
-        messages:[{role:'user',content:`I'm about to send this to my ${contact.rel||'friend'} ${contact.name}: "${draft}"\n\nQuick vibe check — does this sound right?`}]
-      })
-    });
-    const data=await res.json();
-    checking.textContent=data.content?.[0]?.text||'Looks good to send.';
-    setTimeout(()=>checking.remove(),8000);
-  }catch(e){ checking.remove(); }
-}
-
-async function askFloveeAdvice(){
-  const contact=contacts.find(c=>c.id===activeContactId);
-  if(!contact) return;
-  const situation=prompt(`What do you want ${floveeChar.name} to know about the situation with ${contact.name}?`);
-  if(!situation) return;
-
-  const body=document.getElementById('floveeBody');
-  const card=document.createElement('div');
-  card.className='flovee-card';
-  card.style.cssText=`background:${PAL.ac}0c;border-color:${PAL.ac}30;color:${PAL.tx}`;
-  card.innerHTML=`<div class="flovee-card-title" style="color:${PAL.tx}">${floveeChar.name} says</div><div class="flovee-card-text" style="color:${PAL.tx}">thinking...</div>`;
-  body.insertBefore(card,body.firstChild);
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:250,
-        system:`You are ${floveeChar.name}, an honest and caring friend for someone with ${aeName} aesthetic, social energy: ${social}. Give genuine advice about a friend situation. Be real, not preachy. Take their side while being honest. Short and direct. Max 3 sentences.`,
-        messages:[{role:'user',content:`Situation with my ${contact.rel||'friend'} ${contact.name}: ${situation}\n\nWhat should I do?`}]
-      })
-    });
-    const data=await res.json();
-    card.querySelector('.flovee-card-text').textContent=data.content?.[0]?.text||'Trust your gut on this one.';
-  }catch(e){ card.querySelector('.flovee-card-text').textContent='Try talking to them directly.'; }
-}
-
-async function rewriteSuggestion(original,idx){
-  const contact=contacts.find(c=>c.id===activeContactId);
-  if(!contact) return;
-  const msgs=conversations[activeContactId]||[];
-  const sug=msgs[idx];
-  if(!sug) return;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:150,
-        system:`You are ${floveeChar.name}. Write a different version of the suggested reply. Different tone or approach. Keep it natural and casual. Just the reply text.`,
-        messages:[{role:'user',content:`Original suggestion: "${sug.text}"\n\nWrite a different version.`}]
-      })
-    });
-    const data=await res.json();
-    const newText=data.content?.[0]?.text?.trim();
-    if(newText){ sug.text=newText; saveData(); renderMessages(); }
-  }catch(e){}
-}
-
-function useSuggestion(idx){
-  const msgs=conversations[activeContactId]||[];
-  const sug=msgs[idx];
-  if(!sug) return;
-  // Put suggestion text into input for user to review before sending
-  const input=document.getElementById('chatInput');
-  if(input){ input.value=sug.text; input.focus(); autoResize(input); }
-  // Remove the suggestion bubble
-  msgs.splice(idx,1);
-  saveData();
-  renderMessages();
-}
-
-function dismissSuggestion(idx){
-  const msgs=conversations[activeContactId]||[];
-  msgs.splice(idx,1);
-  saveData();
-  renderMessages();
-}
-
-// ─── FLOVEE PANEL ─────────────────────────────────────────
-function updateFloveePanel(contact){
-  const body=document.getElementById('floveeBody');
-  const vibeMap={
-    bestie:'Your bestie. Be yourself completely.',
-    'close friend':'A close one — be real with them.',
-    'group friend':'Group dynamic — watch the group energy.',
-    situationship:'Complicated energy. Think before you send.',
-    acquaintance:'Keep it light and friendly.',
-    complicated:'Handle with care. Choose words carefully.',
-  };
-  const vibe=vibeMap[contact.rel]||'Be yourself.';
-
-  body.innerHTML=`
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">About this chat</div>
-      <div class="flovee-advice" style="border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c">${vibe}</div>
-    </div>
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">Flovee tools</div>
-      <div class="flovee-card" style="border-color:${PAL.tx}12;background:transparent;cursor:pointer;" onclick="addTheirMessage()">
-        <div class="flovee-card-title" style="color:${PAL.tx}">They texted me</div>
-        <div class="flovee-card-text" style="color:${PAL.tx}">Paste what they said and get a reply suggestion</div>
-      </div>
-      <div class="flovee-card" style="border-color:${PAL.tx}12;background:transparent;cursor:pointer;" onclick="askFloveeAdvice()">
-        <div class="flovee-card-title" style="color:${PAL.tx}">Ask Flovee</div>
-        <div class="flovee-card-text" style="color:${PAL.tx}">Get advice on the whole situation</div>
-      </div>
-      <div class="flovee-card" style="border-color:${PAL.tx}12;background:transparent;cursor:pointer;" onclick="setHelpMode('check');document.getElementById('chatInput').focus()">
-        <div class="flovee-card-title" style="color:${PAL.tx}">Check my vibe</div>
-        <div class="flovee-card-text" style="color:${PAL.tx}">Type your message — Flovee checks it before you send</div>
-      </div>
-    </div>
-    <div class="flovee-section">
-      <div class="flovee-section-label bc" style="color:${PAL.tx}">Vibe mode</div>
-      <div class="vibe-chips" id="vibeChips">
-        ${['Keep it cool','Be direct','Stay warm','Set a boundary','Be low-key','No drama'].map(v=>`<button class="vibe-chip bc" onclick="setVibe('${v}',this)" style="color:${PAL.tx};border-color:${PAL.tx}18">${v}</button>`).join('')}
-      </div>
-    </div>`;
-}
-
-let activeVibe='Keep it cool';
-function setVibe(v,el){
-  activeVibe=v;
-  document.querySelectorAll('.vibe-chip').forEach(c=>{ c.classList.remove('on'); c.style.borderColor=PAL.tx+'18'; c.style.background='transparent'; });
-  if(el){ el.classList.add('on'); el.style.borderColor=PAL.ac; el.style.background=PAL.ac+'14'; }
-}
-
-// ─── ADD CONTACT ──────────────────────────────────────────
-function openAddModal(){
-  document.getElementById('addModal').classList.add('open');
-  const status=document.getElementById('frRequestStatus'); if(status) status.textContent='';
-  const frInput=document.getElementById('frUsernameInput'); if(frInput) frInput.value='';
-  setTimeout(()=>{
-    const focusEl=isAuthed()?document.getElementById('frUsernameInput'):document.getElementById('nameInput');
-    focusEl?.focus();
-  },100);
-}
-function closeAddModal(){
-  document.getElementById('addModal').classList.remove('open');
-  document.getElementById('nameInput').value='';
-  const frInput=document.getElementById('frUsernameInput'); if(frInput) frInput.value='';
-  const status=document.getElementById('frRequestStatus'); if(status) status.textContent='';
-}
-
-function pickRel(el){
-  document.querySelectorAll('#relChips .help-chip').forEach(c=>{ c.classList.remove('on'); c.style.borderColor=''; c.style.background='transparent'; });
-  el.classList.add('on'); el.style.borderColor=PAL.ac; el.style.background=PAL.ac+'14';
-  selectedRel=el.dataset.rel;
-}
-
-function saveContact(){
-  const name=document.getElementById('nameInput')?.value.trim();
-  if(!name) return;
-  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-  contacts.push({id,name,rel:selectedRel,createdAt:Date.now()});
-  saveData();
-  closeAddModal();
-  renderContacts();
-  openChat(id);
-}
-
-function clearChat(id){
-  if(!confirm('Clear this conversation?')) return;
-  conversations[id]=[];
-  saveData();
-  renderMessages();
-}
-
-// ─── UTILS ────────────────────────────────────────────────
-function autoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
-function closeMobileChat(){ document.getElementById('chatPanel').classList.remove('mobile-active'); }
-
-// ─── URL PARAM HANDLING (invite / add link) ───────────────
-let pendingInvite=null;
-function getMyUsername(){
-  try{ const u=JSON.parse(localStorage.getItem('stuflover_user')||'null'); return u&&u.username?u.username:null; }catch(e){ return null; }
-}
-function buildShareSection(){
-  const host=document.getElementById('shareContent');
-  if(!host) return;
-  const username=getMyUsername();
-  if(!username){
-    host.innerHTML='<div class="share-disabled">Sign in to get a shareable link you can send friends — they\u2019ll land right in your friends list ready to chat.</div>';
-    return;
-  }
-  const link=window.location.origin+'/friends.html?add='+encodeURIComponent(username);
-  const qrSrc='https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data='+encodeURIComponent(link);
-  host.innerHTML=`
-    <div class="share-qr-wrap">
-      <img class="share-qr" src="${qrSrc}" alt="QR code for your share link" loading="lazy"
-        onerror="this.style.display='none';"/>
-      <div class="share-hint">Scan or send this link. Anyone who opens it lands here with your name ready to add.</div>
-    </div>
-    <div class="share-link-row">
-      <input id="shareLinkInput" type="text" readonly value="${link}"/>
-      <button class="share-copy-btn bc" id="shareCopyBtn" onclick="copyShareLink(this)" style="background:${PAL.ac};color:${PAL.bg};">Copy</button>
-    </div>`;
-}
-function copyShareLink(btn){
-  const i=document.getElementById('shareLinkInput');
-  if(!i) return;
-  const text=i.value;
-  const done=()=>{ const t=btn.textContent; btn.textContent='Copied'; setTimeout(()=>{ btn.textContent=t; },1400); };
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done,()=>{ i.select(); document.execCommand('copy'); done(); });
-  }else{
-    i.select(); document.execCommand('copy'); done();
-  }
-}
-
-function showInviteBanner(title){
-  const b=document.getElementById('inviteBanner');
-  if(!b) return;
-  b.style.background=PAL.ac+'1a';
-  b.style.color=PAL.tx;
-  b.style.display='flex';
-  b.className='invite-banner';
-  b.innerHTML=`<div style="flex:1;min-width:0;"><strong>Invite a friend</strong>${title}</div>
-    <button class="invite-close" onclick="dismissInvite()">\u00d7</button>`;
-}
-function dismissInvite(){ pendingInvite=null; const b=document.getElementById('inviteBanner'); if(b){ b.style.display='none'; b.innerHTML=''; } }
-
-function handleUrlParams(){
-  const p=new URLSearchParams(window.location.search);
-  const invite=p.get('invite');
-  if(invite){
-    pendingInvite={title:invite,cat:p.get('cat')||''};
-    showInviteBanner(invite);
-  }
-  const add=p.get('add');
-  if(add){
-    const name=add.trim().slice(0,30);
-    if(name){
-      const dup=contacts.find(c=>c.name.toLowerCase()===name.toLowerCase());
-      if(!dup){
-        openAddModal();
-        setTimeout(()=>{ const i=document.getElementById('nameInput'); if(i){ i.value=name; } },120);
-      }
-    }
-  }
-  const peerSlug=p.get('peer');
-  const wantFlovee=p.get('flovee')==='1'||p.get('chat')==='flovee'||(peerSlug && FLOVEE_DATA[peerSlug]);
-  if(wantFlovee){ openChat(FLOVEE_CONTACT_ID); }
-  // Clean one-shot URL params (invite/add) so refresh doesn't re-fire them.
-  // Keep ?flovee=1 / ?peer=X so refresh keeps the Flovee chat open and the Flovee nav tab stays active.
-  if((invite||add) && window.history && window.history.replaceState){
-    const remaining=peerSlug && FLOVEE_DATA[peerSlug]
-      ? '?peer='+encodeURIComponent(peerSlug)
-      : (wantFlovee?'?flovee=1':'');
-    window.history.replaceState({},'',window.location.pathname+remaining);
-  }
-}
-
-// Patch openChat to prefill an invite message if pendingInvite is set.
-const _openChatOrig=openChat;
-openChat=function(id){
-  _openChatOrig(id);
-  if(pendingInvite){
-    const input=document.getElementById('chatInput');
-    if(input && !input.value){
-      input.value='hey! wanna '+pendingInvite.title.toLowerCase()+' together?';
-      autoResize(input);
-      input.focus();
-    }
-    dismissInvite();
-  }
-};
-
-// ─── INIT ─────────────────────────────────────────────────
-applyStyles();
-buildShareSection();
-setupFriendRequestSection();
-renderContacts();
-handleUrlParams();
-
-// Add default contacts if none
-if(contacts.length===0){
-  const defaults=[{name:'Best Friend',rel:'bestie'},{name:'Group Chat',rel:'group friend'},{name:'That Person',rel:'complicated'}];
-  defaults.forEach(d=>{
-    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-    contacts.push({id,name:d.name,rel:d.rel,createdAt:Date.now()});
-  });
-  saveData();
-  renderContacts();
-}
-
-// Load backend friends + start polling (when authed)
-function setupFriendRequestSection(){
-  const sec=document.getElementById('friendRequestSec');
-  if(!sec) return;
-  if(!isAuthed()){ sec.style.display='none'; return; }
-  sec.style.display='flex';
-  const input=document.getElementById('frUsernameInput');
-  const btn=document.getElementById('frSendBtn');
-  if(input){
-    input.style.borderColor=PAL.tx+'22';
-    input.style.color=PAL.tx;
-    input.style.background=PAL.tx+'08';
-  }
-  if(btn){ btn.style.background=PAL.ac; btn.style.color=PAL.bg; }
-}
-
-if(isAuthed()){
-  loadRemoteData();
-  startRemotePolling();
-}
-</script>
-<script src="/stuflover-nav.js" defer></script>
+<footer>
+  <p>made w/ <span style="display: inline-block; animation: pulse 2s ease-in-out infinite;">&#9825;</span> for u</p>
+</footer>
 </body>
 </html>

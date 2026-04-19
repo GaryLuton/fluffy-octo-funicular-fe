@@ -1,910 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <title>BeYou — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="stuflover-design-system.css"/>
-  <style>
-    body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:color 1.2s;display:flex;flex-direction:column;position:relative;}
-    .view.scrollable{overflow-y:auto;}
-    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
-
-    /* ── 1. ANIMATED GRADIENT BACKGROUND ── */
-    #gradientBg{position:fixed;inset:0;z-index:-2;animation:gradientShift 20s ease infinite;background-size:400% 400%;}
-    @keyframes gradientShift{
-      0%{background-position:0% 50%;}
-      25%{background-position:50% 0%;}
-      50%{background-position:100% 50%;}
-      75%{background-position:50% 100%;}
-      100%{background-position:0% 50%;}
-    }
-
-    /* ── 7. VIGNETTE OVERLAY ── */
-    #vignetteOverlay{position:fixed;inset:0;z-index:90;pointer-events:none;background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.18) 100%);}
-
-    /* ── 3. FLOATING PARTICLES CANVAS ── */
-    #particleCanvas{position:fixed;inset:0;z-index:-1;pointer-events:none;}
-
-    nav{position:fixed;top:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.06);transition:opacity 0.8s;}
-    nav.hidden{opacity:0;pointer-events:none;}
-    .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
-    .nav-links{display:flex;gap:8px;}
-    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
-    .nav-btn:hover{opacity:0.6;}
-
-    /* ── MODE SELECTOR (4. Glass-morphism) ── */
-    .mode-bar{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:4px;padding:6px;border-radius:30px;backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border:1px solid rgba(255,255,255,0.18);box-shadow:0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.12);transition:opacity 0.8s;}
-    .mode-bar.hidden{opacity:0;pointer-events:none;}
-    @keyframes pillBounce{
-      0%{transform:scale(1);}
-      30%{transform:scale(0.88);}
-      60%{transform:scale(1.08);}
-      80%{transform:scale(0.97);}
-      100%{transform:scale(1);}
-    }
-    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.35s;opacity:0.45;}
-    .mode-pill.on{opacity:1;background:rgba(255,255,255,0.15);box-shadow:0 2px 12px rgba(0,0,0,0.06);animation:pillBounce 0.4s cubic-bezier(0.34,1.56,0.64,1);}
-    .mode-pill:hover{opacity:0.8;background:rgba(255,255,255,0.08);}
-
-    /* ── FULL SCREEN VIEWS ── */
-    .view{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.8s;}
-    .view.active{opacity:1;pointer-events:auto;}
-
-    /* ── BREATHE VIEW (2. Glow/bloom effect) ── */
-    .breathe-container{display:flex;flex-direction:column;align-items:center;gap:40px;}
-    .petal-wrap{position:relative;width:220px;height:220px;filter:blur(0px);}
-    .petal-wrap::after{content:'';position:absolute;inset:-40%;border-radius:50%;opacity:0;transition:opacity 4s ease, transform 4s ease;pointer-events:none;z-index:-1;filter:blur(8px);}
-    .petal-wrap.inhale::after{opacity:0.8;transform:scale(1.1);}
-    .petal-wrap.exhale::after{opacity:0.2;transform:scale(0.9);}
-    .petal{position:absolute;width:70px;height:70px;border-radius:50%;opacity:0.55;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease,box-shadow 4s ease,filter 4s ease;}
-    .petal-wrap.inhale .petal{opacity:0.65;box-shadow:0 0 32px 14px currentColor, 0 0 60px 20px currentColor;filter:blur(1.5px);}
-    .petal-wrap.exhale .petal{opacity:0.35;box-shadow:0 0 12px 4px currentColor, 0 0 24px 8px currentColor;filter:blur(0.5px);}
-    .breathe-label{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
-    .breathe-instruction{font-size:1.3rem;font-weight:300;text-align:center;min-height:40px;letter-spacing:0.5px;transition:opacity 0.6s;}
-    .breathe-timer{font-size:0.78rem;opacity:0.3;letter-spacing:2px;text-align:center;}
-    .breathe-start{padding:14px 44px;border:none;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.9;}
-    .breathe-start:hover{opacity:1;transform:scale(1.03);}
-    .duration-row{display:flex;gap:8px;align-items:center;}
-    .dur-btn{padding:8px 16px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.4;}
-    .dur-btn.on{opacity:1;}
-
-    /* ── REFLECT VIEW (6. Typewriter animation) ── */
-    .reflect-container{display:flex;flex-direction:column;align-items:center;gap:36px;padding:0 40px;max-width:520px;}
-    .reflect-orb{width:120px;height:120px;border-radius:50%;opacity:0.25;animation:orbPulse 6s ease-in-out infinite;}
-    @keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.15);opacity:0.35;}}
-    .reflect-prompt{font-size:clamp(1.4rem,3.5vw,2rem);font-weight:300;text-align:center;line-height:1.55;letter-spacing:0.5px;transition:opacity 0.6s;min-height:3.2em;}
-    .reflect-prompt.fade{opacity:0;}
-    .reflect-prompt .typewriter-cursor{display:inline-block;width:2px;height:1.1em;vertical-align:text-bottom;margin-left:2px;animation:cursorBlink 0.7s step-end infinite;}
-    @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
-    .reflect-sub{font-size:0.78rem;opacity:0.3;text-align:center;letter-spacing:1px;line-height:1.8;}
-    .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
-    .reflect-next:hover{opacity:1;}
-
-    /* ── JOURNAL VIEW (5. Cute card design) ── */
-    .journal-container{display:flex;flex-direction:column;align-items:center;gap:20px;padding:80px 24px 120px;max-width:540px;width:100%;height:100vh;overflow-y:auto;}
-    .journal-title{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
-    .journal-textarea{width:100%;min-height:100px;padding:16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.15);background:rgba(255,255,255,0.06);color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.92rem;line-height:1.6;resize:vertical;outline:none;transition:border-color 0.3s,box-shadow 0.3s;}
-    .journal-textarea:focus{border-color:currentColor;box-shadow:0 0 0 3px rgba(128,128,128,0.06);}
-    .journal-textarea::placeholder{opacity:0.3;}
-    .mood-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
-    .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
-    .mood-chip.on{opacity:1;border-color:currentColor;}
-    .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
-    .journal-save:hover{opacity:1;transform:scale(1.02);}
-    .journal-entries{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:8px;}
-    .journal-entry{width:100%;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);text-align:left;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);transition:transform 0.25s, box-shadow 0.25s;}
-    .journal-entry:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05);}
-    .journal-entry:nth-child(even){background:rgba(128,128,128,0.04) !important;}
-    .journal-entry:nth-child(odd){background:rgba(128,128,128,0.01) !important;}
-    .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-    .journal-entry-date{font-size:0.7rem;opacity:0.35;letter-spacing:1px;}
-    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:4px 12px;border-radius:14px;opacity:0.7;}
-    .journal-entry-text{font-size:0.88rem;line-height:1.65;opacity:0.75;white-space:pre-wrap;}
-
-    /* ── REGULATE VIEW ── */
-    .regulate-container{display:flex;flex-direction:column;align-items:center;gap:28px;padding:80px 24px 120px;max-width:540px;width:100%;}
-    .regulate-title{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
-    .regulate-desc{font-size:0.92rem;font-weight:300;text-align:center;line-height:1.6;opacity:0.55;max-width:400px;}
-    .ground-steps{width:100%;display:flex;flex-direction:column;gap:12px;}
-    .ground-step{width:100%;padding:18px 20px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.12);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.35s;opacity:0.55;}
-    .ground-step.done{opacity:1;}
-    .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
-    .ground-step-text{font-size:0.88rem;line-height:1.5;}
-    @keyframes journalShake{0%,100%{transform:translateX(0);}15%{transform:translateX(-6px);}30%{transform:translateX(5px);}45%{transform:translateX(-4px);}60%{transform:translateX(3px);}75%{transform:translateX(-2px);}90%{transform:translateX(1px);}}
-    @keyframes checkPop{
-      0%{transform:scale(0) rotate(-45deg);opacity:0;}
-      50%{transform:scale(1.3) rotate(5deg);opacity:1;}
-      70%{transform:scale(0.9) rotate(-2deg);}
-      100%{transform:scale(1) rotate(0deg);opacity:1;}
-    }
-    .ground-step .ground-check{display:none;font-size:1rem;}
-    .ground-step.done .ground-check{display:inline-block;animation:checkPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;}
-    .ground-step.done .ground-step-num-val{display:none;}
-    .regulate-done-msg{text-align:center;padding:24px;border-radius:16px;display:none;flex-direction:column;align-items:center;gap:10px;}
-    .regulate-done-msg.show{display:flex;}
-    .regulate-done-emoji{font-size:2rem;}
-    .regulate-done-title{font-size:1.2rem;font-weight:300;letter-spacing:0.5px;}
-    .regulate-done-sub{font-size:0.82rem;opacity:0.4;letter-spacing:0.5px;}
-    .regulate-reset{margin-top:4px;padding:10px 30px;border:none;border-radius:22px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;opacity:0.7;transition:opacity 0.3s;}
-    .regulate-reset:hover{opacity:1;}
-
-    /* ── COMPLETE VIEW (after breathing session) ── */
-    .complete-container{display:flex;flex-direction:column;align-items:center;gap:24px;padding:0 40px;text-align:center;}
-    .complete-check{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:0.6;}
-    .complete-title{font-size:1.6rem;font-weight:300;letter-spacing:0.5px;}
-    .complete-stat{font-size:0.82rem;opacity:0.35;letter-spacing:1px;}
-    .complete-btn{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;opacity:0.7;margin-top:10px;}
-    .complete-btn:hover{opacity:1;}
-
-    /* ── HAMBURGER ── */
-    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
-    .nav-toggle svg{width:22px;height:22px;display:block;}
-
-    @media(max-width:680px){
-      nav{padding:13px 16px;}
-      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(128,128,128,0.12);backdrop-filter:blur(24px) saturate(1.4);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
-      .nav-links.open{display:flex;}
-      .nav-btn{display:block;padding:10px 16px;border:none;border-radius:6px;}
-      .nav-btn:hover{background:rgba(128,128,128,0.06);}
-      .nav-toggle{display:block;}
-      .petal-wrap{width:180px;height:180px;}
-      .petal{width:56px;height:56px;}
-      .mode-bar{bottom:20px;padding:4px;}
-      .mode-pill{padding:8px 16px;font-size:0.65rem;letter-spacing:2px;}
-      .complete-title{font-size:1.3rem;}
-    }
-    @media(max-width:480px){
-      .petal-wrap{width:150px;height:150px;}
-      .petal{width:48px;height:48px;}
-      .reflect-container{padding:0 20px;}
-      .reflect-prompt{font-size:clamp(1.2rem,3vw,1.6rem);}
-      .journal-container{padding:80px 16px 100px;}
-      .journal-textarea{font-size:0.88rem;min-height:80px;}
-      .regulate-container{padding:80px 16px 100px;}
-      .ground-step{padding:14px 16px;min-height:44px;}
-      .mode-pill{padding:7px 12px;font-size:0.6rem;letter-spacing:1.5px;min-height:44px;}
-      .mode-bar{bottom:12px;padding:4px;}
-      .nav-btn,.breathe-start,.reflect-next,.journal-save,.dur-btn,.mood-chip{min-height:44px;display:inline-flex;align-items:center;}
-      body{font-size:15px;}
-    }
-  </style>
+<meta charset="utf-8" />
+<title>stuflover &mdash; mindful</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --cream: #FEF9F5; --soft-white: #FFFCFA; --pink: #F4C4D8; --rose: #E8A0BD;
+    --peach: #F5D4C2; --mint: #D4EAE0; --lavender: #E4D9F0; --sky: #D9E8F5;
+    --yellow: #F5E8C8; --ink: #4A3F50;
+  }
+  html, body { margin: 0; padding: 0; font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--soft-white) 50%, var(--sky) 100%);
+    color: var(--ink); min-height: 100vh;
+  }
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px 30px 80px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px;
+    padding: 20px 30px; background: rgba(255, 252, 250, 0.7); border-radius: 32px;
+    backdrop-filter: blur(10px); border: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; font-family: 'Comfortaa', sans-serif;
+    font-size: 32px; font-weight: 700; color: var(--ink); text-decoration: none;
+  }
+  .logo-icon {
+    width: 48px; height: 48px; background: linear-gradient(135deg, var(--pink), var(--rose));
+    border-radius: 16px; display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg);
+    color: white;
+  }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a {
+    padding: 8px 16px; border-radius: 20px; text-decoration: none; color: var(--ink);
+    font-weight: 600; font-size: 14px; border: 1px solid transparent; transition: all 0.3s ease;
+  }
+  nav a:hover { background: var(--pink); border-color: var(--rose); }
+  nav a.active { background: var(--rose); color: white; }
+  .hero { margin-bottom: 60px; text-align: center; }
+  .hero-bg {
+    background: linear-gradient(135deg, var(--lavender) 0%, var(--sky) 50%, var(--mint) 100%);
+    border-radius: 40px; padding: 80px 50px; margin-bottom: 30px; box-shadow: 0 8px 24px rgba(232, 160, 189, 0.15);
+  }
+  .hero h1 {
+    font-family: 'Comfortaa', sans-serif; font-size: 64px; font-weight: 700; margin: 0;
+    line-height: 1.2; color: white; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .hero p { font-size: 20px; line-height: 1.6; margin: 20px auto 0; color: rgba(255, 255, 255, 0.9);
+    max-width: 600px;
+  }
+  .cta {
+    display: inline-block; margin-top: 30px; padding: 16px 40px; background: white;
+    color: var(--rose); border: none; border-radius: 24px; font-family: 'Comfortaa', sans-serif;
+    font-size: 16px; font-weight: 700; cursor: pointer; text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .cta:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+  .section { margin-bottom: 60px; }
+  .section-title {
+    font-family: 'Comfortaa', sans-serif; font-size: 40px; font-weight: 700;
+    margin: 0 0 40px; color: var(--ink); text-align: center;
+  }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .activity-card {
+    background: white; border-radius: 28px; padding: 40px 32px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(232, 160, 189, 0.1); cursor: pointer;
+  }
+  .activity-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(232, 160, 189, 0.15); }
+  .activity-icon {
+    width: 70px; height: 70px; margin: 0 auto 20px; border-radius: 20px;
+  }
+  .activity-card:nth-child(1) .activity-icon { background: linear-gradient(135deg, var(--pink), var(--rose)); }
+  .activity-card:nth-child(2) .activity-icon { background: linear-gradient(135deg, var(--lavender), var(--sky)); }
+  .activity-card:nth-child(3) .activity-icon { background: linear-gradient(135deg, var(--mint), var(--sky)); }
+  .activity-card h3 {
+    font-family: 'Comfortaa', sans-serif; font-size: 22px; font-weight: 700; margin: 0 0 12px;
+    color: var(--ink);
+  }
+  .activity-card p { font-size: 14px; line-height: 1.6; margin: 0 0 20px;
+    color: rgba(74, 63, 80, 0.7);
+  }
+  .btn {
+    display: inline-block; padding: 10px 24px; background: var(--mint); color: white;
+    border: none; border-radius: 20px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s ease; font-size: 13px;
+  }
+  .btn:hover { transform: scale(1.05); }
+  footer { text-align: center; padding: 40px 30px; margin-top: 80px;
+    border-top: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  footer p { font-size: 14px; color: rgba(74, 63, 80, 0.6); margin: 0; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 44px; }
+  }
+</style>
 </head>
-<body class="font-alt">
+<body>
+<div class="wrap">
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon">&#9825;</div>
+      <span>stuflover</span>
+    </a>
+    <nav>
+      <a href="/">home</a>
+      <a href="lifestyle.html">my page</a>
+      <a href="catalog.html">closet</a>
+      <a href="games.html">games</a>
+      <a href="friends.html">friends</a>
+      <a href="beyou.html" class="active">mindful</a>
+      <a href="account.html">account</a>
+    </nav>
+  </header>
 
-<div id="previewBanner" style="display:none;"></div>
-
-<!-- Animated gradient background -->
-<div id="gradientBg"></div>
-<!-- Floating particles -->
-<canvas id="particleCanvas"></canvas>
-<!-- Vignette overlay -->
-<div id="vignetteOverlay"></div>
-
-<nav id="mainNav" class="sl-nav">
-  <a class="nav-logo bc sl-nav-logo" href="index.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-links sl-nav-links">
-    <a class="nav-btn bc sl-nav-btn" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
-    <a class="nav-btn bc sl-nav-btn" href="account.html">Account</a>
-    <a class="nav-btn bc sl-nav-btn" href="index.html">Home</a>
-  </div>
-</nav>
-
-<!-- BREATHE -->
-<div class="view active" id="breatheView">
-  <div class="breathe-container">
-    <div class="breathe-label bc" id="breatheLabel">Breathe</div>
-    <div class="petal-wrap" id="petalWrap"></div>
-    <div class="breathe-instruction" id="breatheInstruction">Take a moment for yourself</div>
-    <div class="breathe-timer" id="breatheTimer"></div>
-    <div class="duration-row" id="durationRow">
-      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="64" onclick="setDuration(64,this)">1 min</button>
-      <button class="dur-btn bc sl-btn sl-btn-pill on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
-      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="304" onclick="setDuration(304,this)">5 min</button>
+  <section class="hero">
+    <div class="hero-bg">
+      <h1>take a moment</h1>
+      <p>breathe. journal. reset. 2 minutes that actually calm u down.</p>
+      <button class="cta">start now</button>
     </div>
-    <button class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
-  </div>
-</div>
+  </section>
 
-<!-- REFLECT -->
-<div class="view" id="reflectView">
-  <div class="reflect-container">
-    <div class="reflect-orb" id="reflectOrb"></div>
-    <div class="reflect-prompt" id="reflectPrompt"></div>
-    <div class="reflect-sub">sit with this for a moment</div>
-    <button class="reflect-next bc" id="reflectNextBtn" onclick="nextReflect()">Next</button>
-  </div>
-</div>
-
-<!-- JOURNAL -->
-<div class="view scrollable" id="journalView">
-  <div class="journal-container">
-    <div class="journal-title bc">My Journal</div>
-    <textarea class="journal-textarea" id="journalText" placeholder="Write what's on your mind..."></textarea>
-    <div class="mood-row" id="moodRow">
-      <button class="mood-chip" data-mood="happy" onclick="selectMood(this)">happy</button>
-      <button class="mood-chip" data-mood="calm" onclick="selectMood(this)">calm</button>
-      <button class="mood-chip" data-mood="sad" onclick="selectMood(this)">sad</button>
-      <button class="mood-chip" data-mood="anxious" onclick="selectMood(this)">anxious</button>
-      <button class="mood-chip" data-mood="grateful" onclick="selectMood(this)">grateful</button>
-      <button class="mood-chip" data-mood="tired" onclick="selectMood(this)">tired</button>
-    </div>
-    <button class="journal-save bc" id="journalSaveBtn" onclick="saveJournalEntry()">Save Entry</button>
-    <div class="journal-entries" id="journalEntries"></div>
-    <div style="text-align:center;font-size:0.65rem;opacity:0.2;margin-top:16px;padding:0 20px;line-height:1.5;">your journal is saved on this device. sign in on stuflover to back it up.</div>
-  </div>
-</div>
-
-<!-- REGULATE -->
-<div class="view scrollable" id="regulateView">
-  <div class="regulate-container">
-    <div class="regulate-title bc">5-4-3-2-1 Grounding</div>
-    <div class="regulate-desc">Tap each step as you complete it. Take your time.</div>
-    <div class="ground-steps" id="groundSteps">
-      <div class="ground-step" onclick="toggleGroundStep(this,0)">
-        <div class="ground-step-num" id="gsNum0"><span class="ground-step-num-val">5</span><span class="ground-check">&#10003;</span></div>
-        <div class="ground-step-text">Name <strong>5 things</strong> you can <strong>see</strong></div>
+  <section class="section">
+    <h2 class="section-title">what do u need?</h2>
+    <div class="grid">
+      <div class="activity-card">
+        <div class="activity-icon"></div>
+        <h3>breathing</h3>
+        <p>guided breathwork to calm ur mind &amp; body</p>
+        <button class="btn">start</button>
       </div>
-      <div class="ground-step" onclick="toggleGroundStep(this,1)">
-        <div class="ground-step-num" id="gsNum1"><span class="ground-step-num-val">4</span><span class="ground-check">&#10003;</span></div>
-        <div class="ground-step-text">Name <strong>4 things</strong> you can <strong>touch / feel</strong></div>
+      <div class="activity-card">
+        <div class="activity-icon"></div>
+        <h3>journaling</h3>
+        <p>write ur thoughts, feelings, whatever ur heart needs</p>
+        <button class="btn">start</button>
       </div>
-      <div class="ground-step" onclick="toggleGroundStep(this,2)">
-        <div class="ground-step-num" id="gsNum2"><span class="ground-step-num-val">3</span><span class="ground-check">&#10003;</span></div>
-        <div class="ground-step-text">Name <strong>3 things</strong> you can <strong>hear</strong></div>
-      </div>
-      <div class="ground-step" onclick="toggleGroundStep(this,3)">
-        <div class="ground-step-num" id="gsNum3"><span class="ground-step-num-val">2</span><span class="ground-check">&#10003;</span></div>
-        <div class="ground-step-text">Name <strong>2 things</strong> you can <strong>smell</strong></div>
-      </div>
-      <div class="ground-step" onclick="toggleGroundStep(this,4)">
-        <div class="ground-step-num" id="gsNum4"><span class="ground-step-num-val">1</span><span class="ground-check">&#10003;</span></div>
-        <div class="ground-step-text">Name <strong>1 thing</strong> you can <strong>taste</strong></div>
+      <div class="activity-card">
+        <div class="activity-icon"></div>
+        <h3>meditate</h3>
+        <p>5 min guided meditation matched to ur vibe</p>
+        <button class="btn">start</button>
       </div>
     </div>
-    <div class="regulate-done-msg" id="regulateDone">
-      <div class="regulate-done-emoji">&#10024;</div>
-      <div class="regulate-done-title">Well done — you are here, you are present</div>
-      <div class="regulate-done-sub">Your body and mind are connected again</div>
-      <button class="regulate-reset bc" onclick="resetGrounding()">Do it again</button>
-    </div>
-  </div>
+  </section>
 </div>
-
-<!-- COMPLETE -->
-<div class="view" id="completeView">
-  <div class="complete-container">
-    <div class="complete-check" id="completeCheck"></div>
-    <div class="complete-title" id="completeTitle">Well done</div>
-    <div class="complete-stat" id="completeStat"></div>
-    <button class="complete-btn bc" onclick="resetBreathe()">Again</button>
-    <button class="complete-btn bc" onclick="switchMode('reflect')" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Reflect</button>
-    <button class="complete-btn bc" onclick="window.location.href='index.html'" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Done</button>
-  </div>
-</div>
-
-<!-- MODE BAR -->
-<div class="mode-bar" id="modeBar">
-  <button class="mode-pill bc on" id="pillBreathe" onclick="switchMode('breathe')">Breathe</button>
-  <button class="mode-pill bc" id="pillReflect" onclick="switchMode('reflect')">Reflect</button>
-  <button class="mode-pill bc" id="pillJournal" onclick="switchMode('journal')">Journal</button>
-  <button class="mode-pill bc" id="pillRegulate" onclick="switchMode('regulate')">Regulate</button>
-</div>
-
-<script src="/stuflover-config.js"></script>
-<script src="/stuflover-backend.js"></script>
-<script>
-
-// ─── PROFILE ─────────────────────────────────────────────
-var profile = (function(){ try{ return JSON.parse(localStorage.getItem('stuflover_profile')||'null'); }catch(e){return null;} })();
-
-function resolvePalette(){
-  // The Me page / quiz stores a site-wide theme. Prefer it so this page
-  // matches whatever the user picked there.
-  try {
-    var themeState = JSON.parse(localStorage.getItem('stuflover_theme')||'null');
-    if (themeState) {
-      if (themeState.customPreset && themeState.customPreset.bg) {
-        var cp = themeState.customPreset;
-        return { bg: cp.bg, tx: cp.tx, ac: themeState.accent || cp.accent };
-      }
-      var PRESETS = {
-        'default': { bg: '#faf0f0', accent: '#c87860', tx: '#2a1a14' },
-        'rose':    { bg: '#fbe8ec', accent: '#d84a6b', tx: '#2a0e18' },
-        'mint':    { bg: '#e8f5ef', accent: '#3fa874', tx: '#0e2419' },
-        'lilac':   { bg: '#f0e8fa', accent: '#8a5fd8', tx: '#1a0c2a' },
-        'ocean':   { bg: '#e4f1f8', accent: '#2e86b8', tx: '#0c1a24' },
-        'sunset':  { bg: '#fcead2', accent: '#e07b3c', tx: '#2a140a' },
-        'mono':    { bg: '#f5f5f5', accent: '#333333', tx: '#111111' },
-        'dark':    { bg: '#1a1418', accent: '#e08a95', tx: '#f5e8e8' }
-      };
-      var p = PRESETS[themeState.preset];
-      if (p) return { bg: p.bg, tx: p.tx, ac: themeState.accent || p.accent };
-    }
-  } catch(e) {}
-
-  var fc=profile&&profile.faveColour; var ae=(profile&&profile.aesthetics)||{};
-  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
-  top=top?top[0]:'softgirl';
-  if(fc&&!fc.dark) return {bg:lightenH(fc.hex,0.92),tx:darkenH(fc.hex,0.6),ac:fc.hex};
-  if(fc&&fc.dark) return {bg:darkenH(fc.hex,0.45),tx:lightenH(fc.hex,0.8),ac:fc.hex};
-  var m={kawaii:{bg:'#fdf0f5',tx:'#3d0020',ac:'#ff80ab'},softgirl:{bg:'#fce4ec',tx:'#2d0814',ac:'#e8829a'},cleangirl:{bg:'#f5f0ea',tx:'#1a1408',ac:'#8a7a5a'},coquette:{bg:'#fdf0f5',tx:'#280010',ac:'#e06080'},goth:{bg:'#0e060e',tx:'#e8d0f0',ac:'#9040c0'},darkacad:{bg:'#100e08',tx:'#e8d8a8',ac:'#c4a438'},grunge:{bg:'#1a1008',tx:'#f0d4a0',ac:'#c4943a'},y2k:{bg:'#f0c8ec',tx:'#1a0028',ac:'#c03ab0'},street:{bg:'#111111',tx:'#f4c8a0',ac:'#e08040'},cottage:{bg:'#d8ecc4',tx:'#0e2008',ac:'#4a8a2a'},hippie:{bg:'#d8cc88',tx:'#1a1400',ac:'#8a7000'},oldmoney:{bg:'#e8e0d0',tx:'#1a140a',ac:'#7a6840'},preppy:{bg:'#e8f0fc',tx:'#0a1840',ac:'#3060c0'},tomato:{bg:'#e8c498',tx:'#1e0800',ac:'#c46418'},indie:{bg:'#1a1030',tx:'#d8ccf8',ac:'#9070e0'},emo:{bg:'#0a0810',tx:'#e0d0f8',ac:'#7858d0'}};
-  return m[top]||{bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'};
-}
-function toHex(v){var h=Math.round(Math.max(0,Math.min(255,v))).toString(16);return h.length<2?'0'+h:h;}
-function lightenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]+(255-c[0])*a)+toHex(c[1]+(255-c[1])*a)+toHex(c[2]+(255-c[2])*a);}catch(e){return hex;}}
-function darkenH(hex,a){try{var c=hex.slice(1).match(/.{2}/g).map(function(x){return parseInt(x,16);});return'#'+toHex(c[0]*(1-a))+toHex(c[1]*(1-a))+toHex(c[2]*(1-a));}catch(e){return hex;}}
-
-function resolveAeName(){
-  if(!profile) return 'You';
-  var ae=profile.aesthetics||{};
-  var top=Object.entries(ae).sort(function(a,b){return b[1]-a[1];})[0];
-  top=top?top[0]:'';
-  var m={kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
-  return m[top]||'You';
-}
-
-var PAL = resolvePalette();
-var aeName = resolveAeName();
-
-// ─── PETALS ──────────────────────────────────────────────
-var PETAL_COUNT = 7;
-var petalEls = [];
-
-function createPetals(){
-  var wrap = document.getElementById('petalWrap');
-  var cx = wrap.offsetWidth/2;
-  var cy = wrap.offsetHeight/2;
-  var petalW = wrap.offsetWidth < 200 ? 56 : 70;
-  for(var i=0; i<PETAL_COUNT; i++){
-    var el = document.createElement('div');
-    el.className = 'petal';
-    el.style.width = petalW+'px';
-    el.style.height = petalW+'px';
-    el.style.background = PAL.ac;
-    el.style.left = (cx - petalW/2) + 'px';
-    el.style.top = (cy - petalW/2) + 'px';
-    el.style.transform = 'translate(0,0) scale(0.6)';
-    wrap.appendChild(el);
-    petalEls.push(el);
-  }
-  // Add center circle
-  var center = document.createElement('div');
-  center.style.cssText = 'position:absolute;width:'+Math.round(petalW*0.7)+'px;height:'+Math.round(petalW*0.7)+'px;border-radius:50%;background:'+PAL.ac+';opacity:0.5;left:'+(cx-petalW*0.35)+'px;top:'+(cy-petalW*0.35)+'px;transition:transform 4s cubic-bezier(0.4,0,0.2,1),opacity 4s ease;z-index:2;';
-  center.id = 'petalCenter';
-  wrap.appendChild(center);
-  petalEls.push(center);
-}
-
-function setPetalState(state){
-  var wrap = document.getElementById('petalWrap');
-  var cx = wrap.offsetWidth/2;
-  var cy = wrap.offsetHeight/2;
-  var radius = state==='expand' ? (wrap.offsetWidth*0.34) : 0;
-  var scale = state==='expand' ? 1 : 0.6;
-  var centerScale = state==='expand' ? 1.15 : 0.8;
-
-  wrap.className = 'petal-wrap ' + (state==='expand'?'inhale':'exhale');
-
-  for(var i=0; i<PETAL_COUNT; i++){
-    var angle = (i / PETAL_COUNT) * Math.PI * 2 - Math.PI/2;
-    var tx = Math.cos(angle) * radius;
-    var ty = Math.sin(angle) * radius;
-    petalEls[i].style.transform = 'translate('+tx+'px,'+ty+'px) scale('+scale+')';
-  }
-  // Center circle
-  var center = document.getElementById('petalCenter');
-  if(center) center.style.transform = 'scale('+centerScale+')';
-}
-
-// ─── BREATHING SESSION ───────────────────────────────────
-var breatheDuration = 176; // seconds (11 cycles of 16s)
-var breatheRunning = false;
-var breatheTimeout = null;
-var breatheElapsed = 0;
-
-function setDuration(sec, el){
-  breatheDuration = sec;
-  document.querySelectorAll('.dur-btn').forEach(function(b){b.classList.remove('on');});
-  el.classList.add('on');
-}
-
-function startBreathe(){
-  breatheRunning = true;
-  breatheElapsed = 0;
-  document.getElementById('breatheStartBtn').style.display = 'none';
-  document.getElementById('durationRow').style.display = 'none';
-  document.getElementById('breatheTimer').textContent = formatTime(breatheDuration);
-  document.getElementById('modeBar').classList.add('hidden');
-  document.getElementById('mainNav').classList.add('hidden');
-  breatheCycle();
-}
-
-function breatheCycle(){
-  if(!breatheRunning) return;
-  if(breatheElapsed >= breatheDuration){ finishBreathe(); return; }
-
-  // Inhale (4s)
-  var inst = document.getElementById('breatheInstruction');
-  inst.textContent = 'Breathe In';
-  setPetalState('expand');
-
-  breatheTimeout = setTimeout(function(){
-    if(!breatheRunning) return;
-    // Hold (4s at top)
-    inst.textContent = 'Hold';
-    breatheTimeout = setTimeout(function(){
-      if(!breatheRunning) return;
-      // Exhale (4s)
-      inst.textContent = 'Breathe Out';
-      setPetalState('contract');
-      breatheTimeout = setTimeout(function(){
-        if(!breatheRunning) return;
-        // Hold (4s at bottom)
-        inst.textContent = 'Hold';
-        breatheTimeout = setTimeout(function(){
-          breatheElapsed += 16;
-          var remaining = Math.max(0, breatheDuration - breatheElapsed);
-          var timerEl = document.getElementById('breatheTimer');
-          if(timerEl) timerEl.textContent = formatTime(remaining);
-          breatheCycle();
-        }, 4000);
-      }, 4000);
-    }, 4000);
-  }, 4000);
-}
-
-function finishBreathe(){
-  breatheRunning = false;
-  var mins = Math.round(breatheDuration/60);
-  document.getElementById('completeTitle').textContent = 'Well done';
-  document.getElementById('completeStat').textContent = mins + ' minute' + (mins>1?'s':'') + ' of mindful breathing';
-  document.getElementById('completeCheck').textContent = '\u2713';
-  document.getElementById('completeCheck').style.background = PAL.ac + '30';
-  document.getElementById('completeCheck').style.color = PAL.ac;
-  var btns = document.querySelectorAll('.complete-btn');
-  btns[0].style.background = PAL.ac;
-  btns[0].style.color = PAL.bg;
-  btns[1].style.color = PAL.tx;
-  btns[2].style.color = PAL.tx;
-
-  showView('completeView');
-  document.getElementById('modeBar').classList.remove('hidden');
-  document.getElementById('mainNav').classList.remove('hidden');
-}
-
-function resetBreathe(){
-  breatheRunning = false;
-  clearTimeout(breatheTimeout);
-  breatheElapsed = 0;
-  setPetalState('contract');
-  document.getElementById('breatheInstruction').textContent = 'Take a moment for yourself';
-  document.getElementById('breatheTimer').textContent = '';
-  document.getElementById('breatheStartBtn').style.display = '';
-  document.getElementById('durationRow').style.display = '';
-  document.getElementById('modeBar').classList.remove('hidden');
-  document.getElementById('mainNav').classList.remove('hidden');
-  showView('breatheView');
-}
-
-function formatTime(s){
-  var m = Math.floor(s/60);
-  var sec = s%60;
-  return m + ':' + (sec<10?'0':'') + sec;
-}
-
-// ─── REFLECT ─────────────────────────────────────────────
-var REFLECT_BASE = [
-  'What is one thing you are grateful for right now?',
-  'Think of someone who made you smile recently.',
-  'What is something about yourself that you appreciate?',
-  'Recall a moment today when you felt at peace.',
-  'What is one kind thing you did for yourself recently?',
-  'Think of a place where you feel completely safe.',
-  'What is a quality in yourself that you are proud of?',
-  'Remember a time you overcame something difficult.',
-  'What is one thing you are looking forward to?',
-  'Think about what makes you feel most like yourself.',
-  'What would you tell your younger self right now?',
-  'What does rest look like for you?',
-  'Name something beautiful you noticed today.',
-  'What is a boundary you are glad you set?',
-  'Think of a song that makes you feel understood.',
-];
-
-var REFLECT_AE = {
-  kawaii: ['What small, cute thing brought you joy today?','Think about what makes you feel soft and safe.','What is something sweet you could do for yourself right now?'],
-  softgirl: ['What makes you feel gentle and at ease?','Think of a colour or texture that calms you.','What does your softest, most peaceful day look like?'],
-  cleangirl: ['What does your ideal morning feel like?','Think of a routine that makes you feel grounded.','What is one thing you did today that was just for you?'],
-  coquette: ['What makes you feel beautiful without trying?','Think of a moment you felt effortlessly confident.','What is something romantic about your everyday life?'],
-  goth: ['What is something dark or intense that actually brings you comfort?','Think about the beauty in something others might overlook.','What does your inner world look like right now?'],
-  darkacad: ['What is something you learned recently that changed how you think?','Think of a book, idea, or conversation that moved you.','What does intellectual peace feel like to you?'],
-  grunge: ['What is something raw and honest you have been avoiding?','Think of a song that captures exactly how you feel.','When do you feel most authentically yourself?'],
-  y2k: ['What is something playful or fun you did recently?','Think of a memory that makes you feel nostalgic in a good way.','What does your most vibrant, alive self look like?'],
-  street: ['What gives you confidence without you having to try?','Think of a time you trusted your instincts and it paid off.','What does freedom feel like to you?'],
-  cottage: ['What is a simple pleasure you enjoyed today?','Think of a natural thing — a tree, the sky, rain — that grounded you.','What does your most peaceful, slow life look like?'],
-  hippie: ['What is something you believe in deeply?','Think of a time you felt truly connected to the world around you.','What does inner peace mean to you today?'],
-  oldmoney: ['What is a tradition or habit that brings you comfort?','Think of something timeless that you value about yourself.','What does elegance in rest look like for you?'],
-  preppy: ['What is something you accomplished that you have not celebrated yet?','Think of a goal you are quietly working toward.','What does success feel like beyond achievement?'],
-  tomato: ['What is something warm and vibrant about your life right now?','Think of a moment you felt truly alive today.','What does joy without effort look like for you?'],
-  indie: ['What is something only you would notice or appreciate?','Think of an artist, song, or film that feels like your inner world.','When do you feel most creatively alive?'],
-  emo: ['What is a feeling you have been sitting with lately?','Think of something that hurt but also taught you something real.','What does emotional honesty look like for you right now?'],
-};
-
-var reflectPrompts = [];
-var reflectIdx = 0;
-
-function initReflect(){
-  var topAe = Object.entries((profile&&profile.aesthetics)||{}).sort(function(a,b){return b[1]-a[1];})[0];
-  topAe = topAe ? topAe[0] : '';
-  var aePrompts = REFLECT_AE[topAe] || [];
-  reflectPrompts = aePrompts.concat(REFLECT_BASE);
-  // Shuffle
-  for(var i=reflectPrompts.length-1;i>0;i--){
-    var j=Math.floor(Math.random()*(i+1));
-    var tmp=reflectPrompts[i]; reflectPrompts[i]=reflectPrompts[j]; reflectPrompts[j]=tmp;
-  }
-  reflectIdx = 0;
-  showReflectPrompt();
-}
-
-function showReflectPrompt(){
-  var el = document.getElementById('reflectPrompt');
-  el.classList.add('fade');
-  setTimeout(function(){
-    el.textContent = reflectPrompts[reflectIdx % reflectPrompts.length];
-    el.classList.remove('fade');
-  }, 300);
-}
-
-function nextReflect(){
-  reflectIdx++;
-  showReflectPrompt();
-}
-
-// ─── VIEW SWITCHING ──────────────────────────────────────
-function showView(id){
-  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-}
-
-function switchMode(mode){
-  // Stop any running breathing
-  if(mode !== 'breathe' && breatheRunning){
-    breatheRunning = false;
-    clearTimeout(breatheTimeout);
-  }
-
-  document.getElementById('pillBreathe').classList.toggle('on', mode==='breathe');
-  document.getElementById('pillReflect').classList.toggle('on', mode==='reflect');
-  document.getElementById('pillJournal').classList.toggle('on', mode==='journal');
-  document.getElementById('pillRegulate').classList.toggle('on', mode==='regulate');
-
-  if(mode==='breathe'){
-    resetBreathe();
-  } else if(mode==='reflect'){
-    showView('reflectView');
-  } else if(mode==='journal'){
-    renderJournalEntries();
-    showView('journalView');
-  } else if(mode==='regulate'){
-    showView('regulateView');
-  }
-
-  document.getElementById('modeBar').classList.remove('hidden');
-  document.getElementById('mainNav').classList.remove('hidden');
-}
-
-// ─── JOURNAL ────────────────────────────────────────────
-var selectedMood = '';
-
-function selectMood(el){
-  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
-  if(selectedMood === el.dataset.mood){
-    selectedMood = '';
-  } else {
-    el.classList.add('on');
-    selectedMood = el.dataset.mood;
-  }
-}
-
-function getJournalEntries(){
-  try{ return JSON.parse(localStorage.getItem('stuflover_journal')||'[]'); }catch(e){return [];}
-}
-
-function saveJournalEntry(){
-  var ta = document.getElementById('journalText');
-  var text = ta.value.trim();
-  if(!text){
-    ta.style.borderColor = PAL.ac;
-    ta.style.boxShadow = '0 0 0 3px ' + PAL.ac + '30';
-    ta.placeholder = 'Please write something before saving...';
-    ta.style.animation = 'journalShake 0.5s ease';
-    setTimeout(function(){
-      ta.style.borderColor = '';
-      ta.style.boxShadow = '';
-      ta.placeholder = 'Write what\'s on your mind...';
-      ta.style.animation = '';
-    }, 1500);
-    ta.focus();
-    return;
-  }
-  var entries = getJournalEntries();
-  entries.push({
-    id: Date.now(),
-    date: new Date().toISOString(),
-    text: text,
-    mood: selectedMood || ''
-  });
-  localStorage.setItem('stuflover_journal', JSON.stringify(entries));
-  document.getElementById('journalText').value = '';
-  selectedMood = '';
-  document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('on');});
-  renderJournalEntries();
-}
-
-function renderJournalEntries(){
-  var container = document.getElementById('journalEntries');
-  var entries = getJournalEntries().slice().reverse();
-  if(entries.length === 0){
-    container.innerHTML = '<div style="text-align:center;opacity:0.25;font-size:0.82rem;padding:20px 0;">No entries yet — start writing above</div>';
-    return;
-  }
-  var html = '';
-  entries.forEach(function(e){
-    var d = new Date(e.date);
-    var dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    var moodHtml = e.mood ? '<span class="journal-entry-mood" style="background:'+PAL.ac+'20;color:'+PAL.tx+'">'+e.mood+'</span>' : '';
-    html += '<div class="journal-entry" style="background:'+PAL.tx+'08;">';
-    html += '<div class="journal-entry-head"><span class="journal-entry-date">'+dateStr+'</span>'+moodHtml+'</div>';
-    html += '<div class="journal-entry-text">'+escHtml(e.text)+'</div>';
-    html += '</div>';
-  });
-  container.innerHTML = html;
-}
-
-function escHtml(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ─── REGULATE (5-4-3-2-1 GROUNDING) ─────────────────────
-var groundState = [false,false,false,false,false];
-
-function toggleGroundStep(el,idx){
-  groundState[idx] = !groundState[idx];
-  el.classList.toggle('done', groundState[idx]);
-  applyGroundStepStyles();
-  // Check if all done
-  if(groundState.every(function(v){return v;})){
-    setTimeout(function(){
-      document.getElementById('regulateDone').classList.add('show');
-    }, 400);
-  } else {
-    document.getElementById('regulateDone').classList.remove('show');
-  }
-}
-
-function resetGrounding(){
-  groundState = [false,false,false,false,false];
-  document.querySelectorAll('.ground-step').forEach(function(el){el.classList.remove('done');});
-  document.getElementById('regulateDone').classList.remove('show');
-  applyGroundStepStyles();
-}
-
-function applyGroundStepStyles(){
-  document.querySelectorAll('.ground-step-num').forEach(function(el,i){
-    if(groundState[i]){
-      el.style.background = PAL.ac;
-      el.style.color = PAL.bg;
-    } else {
-      el.style.background = PAL.ac + '20';
-      el.style.color = PAL.tx;
-    }
-  });
-}
-
-// ─── APPLY STYLES ────────────────────────────────────────
-function applyStyles(){
-  document.body.style.color = PAL.tx;
-
-  // 1. Animated gradient background
-  var bgEl = document.getElementById('gradientBg');
-  var bgLight1 = lightenH(PAL.bg, 0.02);
-  var bgLight2 = lightenH(PAL.ac, 0.88);
-  var bgLight3 = lightenH(PAL.bg, 0.05);
-  bgEl.style.background = 'linear-gradient(135deg, '+PAL.bg+' 0%, '+bgLight2+' 25%, '+bgLight1+' 50%, '+bgLight3+' 75%, '+PAL.bg+' 100%)';
-
-  var nav = document.getElementById('mainNav');
-  nav.style.background = PAL.bg + 'f0';
-  nav.style.borderColor = PAL.tx + '08';
-  document.querySelectorAll('.nav-logo,.nav-btn').forEach(function(el){
-    el.style.color = PAL.tx;
-    el.style.borderColor = PAL.tx + '18';
-  });
-
-  // Breathe
-  document.getElementById('breatheStartBtn').style.background = PAL.ac;
-  document.getElementById('breatheStartBtn').style.color = PAL.bg;
-  document.querySelectorAll('.dur-btn').forEach(function(b){
-    b.style.borderColor = PAL.tx + '18';
-    b.style.color = PAL.tx;
-  });
-
-  // Petal glow colour
-  document.querySelectorAll('.petal').forEach(function(p){ p.style.color = PAL.ac; });
-
-  // Petal wrap glow
-  var pw = document.querySelector('.petal-wrap');
-  if(pw) pw.style.setProperty('--glow-color', PAL.ac);
-  var styleTag = document.getElementById('dynamicGlow');
-  if(!styleTag){
-    styleTag = document.createElement('style');
-    styleTag.id = 'dynamicGlow';
-    document.head.appendChild(styleTag);
-  }
-  styleTag.textContent = '.petal-wrap::after{background:radial-gradient(circle, '+PAL.ac+'30 0%, transparent 70%);}';
-
-  // Mode bar (glassmorphism)
-  var modeBar = document.getElementById('modeBar');
-  modeBar.style.background = PAL.tx + '0c';
-  document.querySelectorAll('.mode-pill').forEach(function(p){ p.style.color = PAL.tx; });
-
-  // Reflect
-  document.getElementById('reflectOrb').style.background = PAL.ac;
-  document.getElementById('reflectNextBtn').style.background = PAL.ac + '25';
-  document.getElementById('reflectNextBtn').style.color = PAL.tx;
-
-  // Typewriter cursor colour
-  var cursorStyle = document.getElementById('cursorColor');
-  if(!cursorStyle){
-    cursorStyle = document.createElement('style');
-    cursorStyle.id = 'cursorColor';
-    document.head.appendChild(cursorStyle);
-  }
-  cursorStyle.textContent = '.reflect-prompt .typewriter-cursor{background:'+PAL.ac+';}';
-
-  // Journal
-  document.getElementById('journalSaveBtn').style.background = PAL.ac;
-  document.getElementById('journalSaveBtn').style.color = PAL.bg;
-  document.getElementById('journalText').style.borderColor = PAL.tx + '18';
-  document.getElementById('journalText').style.color = PAL.tx;
-  document.querySelectorAll('.mood-chip').forEach(function(c){
-    c.style.borderColor = PAL.tx + '18';
-    c.style.color = PAL.tx;
-  });
-
-  // Regulate
-  document.querySelectorAll('.ground-step').forEach(function(s){
-    s.style.borderColor = PAL.tx + '15';
-    s.style.color = PAL.tx;
-  });
-  document.querySelectorAll('.ground-step-num').forEach(function(n){
-    n.style.background = PAL.ac + '20';
-    n.style.color = PAL.tx;
-  });
-  document.getElementById('regulateDone').style.background = PAL.ac + '15';
-  document.getElementById('regulateDone').style.color = PAL.tx;
-  var regResetBtn = document.querySelector('.regulate-reset');
-  if(regResetBtn){ regResetBtn.style.background = PAL.ac + '25'; regResetBtn.style.color = PAL.tx; }
-}
-
-// ─── 3. FLOATING PARTICLES ──────────────────────────────
-function initParticles(){
-  var canvas = document.getElementById('particleCanvas');
-  var ctx = canvas.getContext('2d');
-  var particles = [];
-  var PARTICLE_COUNT = 35;
-
-  function resize(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Parse accent colour for particles
-  function hexToRgb(hex){
-    var c = hex.slice(1).match(/.{2}/g);
-    return c ? c.map(function(x){return parseInt(x,16);}) : [180,140,200];
-  }
-  var rgb = hexToRgb(PAL.ac);
-
-  for(var i=0; i<PARTICLE_COUNT; i++){
-    particles.push({
-      x: Math.random()*canvas.width,
-      y: Math.random()*canvas.height,
-      r: Math.random()*2.5+1,
-      vx: (Math.random()-0.5)*0.3,
-      vy: (Math.random()-0.5)*0.3,
-      opacity: Math.random()*0.12+0.04
-    });
-  }
-
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(var i=0;i<particles.length;i++){
-      var p=particles[i];
-      p.x+=p.vx;
-      p.y+=p.vy;
-      if(p.x<-10)p.x=canvas.width+10;
-      if(p.x>canvas.width+10)p.x=-10;
-      if(p.y<-10)p.y=canvas.height+10;
-      if(p.y>canvas.height+10)p.y=-10;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle='rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+p.opacity+')';
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
-
-// ─── 6. TYPEWRITER EFFECT FOR REFLECT ───────────────────
-var typewriterTimeout = null;
-
-function typewriterShow(text){
-  var el = document.getElementById('reflectPrompt');
-  el.innerHTML = '';
-  var i = 0;
-  var span = document.createElement('span');
-  el.appendChild(span);
-  var cursor = document.createElement('span');
-  cursor.className = 'typewriter-cursor';
-  el.appendChild(cursor);
-
-  function type(){
-    if(i < text.length){
-      span.textContent += text.charAt(i);
-      i++;
-      typewriterTimeout = setTimeout(type, 28 + Math.random()*22);
-    } else {
-      // Remove cursor after a pause
-      setTimeout(function(){ if(cursor.parentNode) cursor.style.display='none'; }, 1500);
-    }
-  }
-  type();
-}
-
-// Override showReflectPrompt to use typewriter
-var _origShowReflect = showReflectPrompt;
-showReflectPrompt = function(){
-  clearTimeout(typewriterTimeout);
-  var el = document.getElementById('reflectPrompt');
-  el.classList.add('fade');
-  setTimeout(function(){
-    el.classList.remove('fade');
-    typewriterShow(reflectPrompts[reflectIdx % reflectPrompts.length]);
-  }, 350);
-};
-
-// ─── INIT ────────────────────────────────────────────────
-applyStyles();
-createPetals();
-setPetalState('contract');
-initReflect();
-applyGroundStepStyles();
-initParticles();
-
-</script>
-
-<script>
-// ─── Logged-out preview nudge ───
-(function(){
-  try {
-    if (localStorage.getItem('stuflover_token')) return;
-    var banner = document.getElementById('previewBanner');
-    if (!banner) return;
-    banner.style.cssText = 'position:relative;z-index:5;margin:78px 16px 0;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px dashed rgba(30,12,6,0.18);display:flex;align-items:center;gap:12px;font-family:Space Grotesk,sans-serif;font-size:0.82rem;line-height:1.5;';
-    banner.innerHTML = '<span style="flex:1;">\u2728 Previewing BeYou without an account. <strong style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;font-size:0.72rem;">Sign up to save your journal + streaks.</strong></span><a href="auth.html" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:999px;background:#c87860;color:#fff;text-decoration:none;white-space:nowrap;">Sign up</a>';
-    banner.style.display = 'flex';
-  } catch (e) {}
-})();
-</script>
-<script src="/stuflover-ux.js"></script>
-<script src="/stuflover-nav.js" defer></script>
+<footer>
+  <p>made w/ <span style="display: inline-block; animation: pulse 2s ease-in-out infinite;">&#9825;</span> for u</p>
+</footer>
 </body>
 </html>
