@@ -3331,8 +3331,15 @@ var HUB_GAMES = [
     userPrompt:'Give me a This or That question. Topics: fashion, food, social media, music, lifestyle, school, celebrities.'},
   {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices', tag:'fun', category:'Quick', iconFn:'scaleSVG',
     isCardGame:true, cardType:'choice',
-    sysPrompt:'Generate a Would You Rather question with two genuinely difficult options. Return ONLY JSON: {question:"would you rather...", optionA:"first option", optionB:"second option", percentA:number, funFact:"why this is a hard choice"}. percentA is what percent of people would pick A (make it close to 50/50). Keep it fun, clean, appropriate for teens. No markdown.',
-    userPrompt:'Give me a Would You Rather question that is genuinely hard to choose between.'},
+    sysPrompt:'Generate a Would You Rather question with two genuinely difficult options. Return ONLY JSON: {question:"would you rather...", optionA:"first option", optionB:"second option", percentA:number, funFact:"why this is a hard choice"}. percentA is what percent of people would pick A (make it close to 50/50). Keep it fun, clean, appropriate for teens. Avoid clichés and repeating common WYR questions. No markdown.',
+    userPromptFn:function(){
+      var topics = ['superpowers','food','school','social media','fashion','travel','friendship','celebrities','pets','technology','time travel','swap lives','embarrassing situations','dream jobs','weather','seasons','music','movies','holidays','weird abilities'];
+      var vibes = ['silly','dramatic','impossible','everyday','existential','futuristic','nostalgic','chaotic'];
+      var topic = topics[Math.floor(Math.random()*topics.length)];
+      var vibe = vibes[Math.floor(Math.random()*vibes.length)];
+      var seed = Math.random().toString(36).slice(2,8);
+      return 'Give me a '+vibe+' Would You Rather question about '+topic+' that is genuinely hard to choose between. Make it fresh and original. Seed: '+seed+'.';
+    }},
 
   // Quizzes
   {id:'aestheticquiz', name:'Aesthetic Quiz', desc:'Discover your secret aesthetic', tag:'quiz', category:'Quizzes', iconFn:'paletteSVG',
@@ -3563,17 +3570,33 @@ function backToHub(){
 
 // ─── CARD GAME ENGINE ─────────────────────────────────────
 var TRIVIA_MAX_ROUNDS = 10;
-var cgState = {game:null, round:1, score:0, correct:0, answered:false, data:null, ended:false};
+var WYR_MAX_ROUNDS = 10;
+var WYR_PRELOAD_AHEAD = 2;
+var cgState = {game:null, round:1, score:0, correct:0, answered:false, data:null, ended:false, preload:[], preloading:0};
+
+function cgIsCappedGame(){
+  return cgState.game && (cgState.game.id === 'trivia' || cgState.game.id === 'wouldyourather');
+}
+
+function cgMaxRounds(){
+  if(!cgState.game) return 0;
+  if(cgState.game.id === 'trivia') return TRIVIA_MAX_ROUNDS;
+  if(cgState.game.id === 'wouldyourather') return WYR_MAX_ROUNDS;
+  return 0;
+}
 
 function cgRoundLabel(){
   if(cgState.game && cgState.game.id === 'trivia'){
     return 'Question '+cgState.round+' / '+TRIVIA_MAX_ROUNDS;
   }
+  if(cgState.game && cgState.game.id === 'wouldyourather'){
+    return 'Question '+cgState.round+' / '+WYR_MAX_ROUNDS;
+  }
   return 'Round '+cgState.round;
 }
 
 function cgInit(game){
-  cgState = {game:game, round:1, score:0, correct:0, answered:false, data:null, ended:false};
+  cgState = {game:game, round:1, score:0, correct:0, answered:false, data:null, ended:false, preload:[], preloading:0};
   var pal = searchPal;
   document.getElementById('cgGameName').textContent = game.name;
   document.getElementById('cgScore').textContent = 'Score: 0';
@@ -3596,29 +3619,69 @@ function cgInit(game){
   cgLoadRound();
 }
 
+async function cgFetchQuestion(game){
+  var res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:game.sysPrompt,messages:[{role:'user',content:(typeof game.userPromptFn==='function'?game.userPromptFn():game.userPrompt)}]})
+  });
+  var data = await res.json();
+  var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+  var match = text.match(/\{[\s\S]*\}/);
+  if(!match) throw new Error('No JSON');
+  return JSON.parse(match[0]);
+}
+
+function cgPreloadFill(){
+  if(!cgState.game || !cgState.game.id) return;
+  if(cgState.game.id !== 'wouldyourather') return;
+  if(cgState.ended) return;
+  var maxRounds = cgMaxRounds();
+  var roomLeft = maxRounds - cgState.round;
+  var target = Math.min(WYR_PRELOAD_AHEAD, Math.max(0, roomLeft));
+  var have = (cgState.preload ? cgState.preload.length : 0) + (cgState.preloading || 0);
+  var need = target - have;
+  var game = cgState.game;
+  for(var i=0;i<need;i++){
+    cgState.preloading = (cgState.preloading || 0) + 1;
+    (function(){
+      cgFetchQuestion(game).then(function(d){
+        cgState.preloading = Math.max(0, (cgState.preloading || 1) - 1);
+        if(cgState.game === game && !cgState.ended){
+          cgState.preload.push(d);
+        }
+      }).catch(function(){
+        cgState.preloading = Math.max(0, (cgState.preloading || 1) - 1);
+      });
+    })();
+  }
+}
+
 async function cgLoadRound(){
   var pal = searchPal;
   var game = cgState.game;
   var cards = document.getElementById('cgCards');
   var question = document.getElementById('cgQuestion');
-  cards.innerHTML = '<div class="cg-loading">Loading...</div>';
-  question.textContent = '';
   document.getElementById('cgNextBtn').style.display = 'none';
   document.getElementById('cgFeedback').style.display = 'none';
   cgState.answered = false;
 
-  try{
-    var res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:game.sysPrompt,messages:[{role:'user',content:(typeof game.userPromptFn==='function'?game.userPromptFn():game.userPrompt)}]})
-    });
-    var data = await res.json();
-    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
-    var match = text.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('No JSON');
-    var d = JSON.parse(match[0]);
+  if(game.id === 'wouldyourather' && cgState.preload && cgState.preload.length > 0){
+    var d = cgState.preload.shift();
     cgState.data = d;
     cgRender(d);
+    cgPreloadFill();
+    return;
+  }
+
+  cards.innerHTML = '<div class="cg-loading">Loading...</div>';
+  question.textContent = '';
+
+  try{
+    var d = await cgFetchQuestion(game);
+    if(cgState.game !== game || cgState.ended) return;
+    cgState.data = d;
+    cgRender(d);
+    cgPreloadFill();
   }catch(e){
     cards.innerHTML = '<div class="cg-loading">Could not load — <a href="#" onclick="cgLoadRound();return false" style="color:'+pal.ac+'">try again</a></div>';
   }
@@ -3763,7 +3826,18 @@ function cgPickChoice(letter, el){
   fb.style.color = pal.tx;
   fb.style.display = 'block';
   fb.classList.add('visible');
-  document.getElementById('cgNextBtn').style.display = 'inline-block';
+  var nextBtn = document.getElementById('cgNextBtn');
+  var isWyrLast = cgState.game && cgState.game.id === 'wouldyourather' && cgState.round >= WYR_MAX_ROUNDS;
+  if(cgState.game && cgState.game.id === 'wouldyourather'){
+    nextBtn.textContent = isWyrLast ? 'See Final Score' : 'Next';
+  }
+  nextBtn.style.display = 'inline-block';
+  if(cgState.game && cgState.game.id === 'wouldyourather'){
+    if(cgState.autoAdvanceTimer) clearTimeout(cgState.autoAdvanceTimer);
+    cgState.autoAdvanceTimer = setTimeout(function(){
+      if(cgState.answered && !cgState.ended) cgNextRound();
+    }, 5000);
+  }
 }
 
 function cgPickQuiz(idx, el){
@@ -3877,7 +3951,7 @@ async function cgSubmitChallenge(){
 
 function cgNextRound(){
   if(cgState.autoAdvanceTimer){ clearTimeout(cgState.autoAdvanceTimer); cgState.autoAdvanceTimer = null; }
-  if(cgState.game && cgState.game.id === 'trivia' && cgState.round >= TRIVIA_MAX_ROUNDS){
+  if(cgIsCappedGame() && cgState.round >= cgMaxRounds()){
     cgShowFinal();
     return;
   }
@@ -3894,15 +3968,17 @@ function cgEndGame(){
 
 function cgShowFinal(earlyEnd){
   cgState.ended = true;
+  if(cgState.autoAdvanceTimer){ clearTimeout(cgState.autoAdvanceTimer); cgState.autoAdvanceTimer = null; }
   var pal = searchPal;
   var isTrivia = cgState.game && cgState.game.id === 'trivia';
-  var total = TRIVIA_MAX_ROUNDS;
+  var isWyr = cgState.game && cgState.game.id === 'wouldyourather';
+  var total = cgIsCappedGame() ? cgMaxRounds() : TRIVIA_MAX_ROUNDS;
   var played = Math.min(cgState.round - (cgState.answered ? 0 : 1), total);
   if(played < 0) played = 0;
   var correct = cgState.correct || 0;
   var score = cgState.score;
   var msg;
-  if(score >= 160) msg = isTrivia ? 'Trivia legend.' : 'Certified legend.';
+  if(score >= 160) msg = isTrivia ? 'Trivia legend.' : (isWyr ? 'Decisive legend.' : 'Certified legend.');
   else if(score >= 100) msg = 'Solid run!';
   else if(score >= 40) msg = 'Nice try — level up next time.';
   else msg = 'Better luck next round.';
@@ -3911,9 +3987,15 @@ function cgShowFinal(earlyEnd){
   document.getElementById('cgQuestion').style.color = pal.tx;
   document.getElementById('cgRound').textContent = earlyEnd ? 'Ended early' : 'Final';
   var cards = document.getElementById('cgCards');
-  var subLine = isTrivia
-    ? '<div class="cg-final-correct">'+correct+' / '+(earlyEnd?played:total)+' correct</div>'
-    : '<div class="cg-final-correct">'+(cgState.round||1)+' round'+((cgState.round||1)===1?'':'s')+' played</div>';
+  var subLine;
+  if(isTrivia){
+    subLine = '<div class="cg-final-correct">'+correct+' / '+(earlyEnd?played:total)+' correct</div>';
+  } else if(isWyr){
+    var answered = earlyEnd ? played : total;
+    subLine = '<div class="cg-final-correct">'+answered+' / '+total+' answered</div>';
+  } else {
+    subLine = '<div class="cg-final-correct">'+(cgState.round||1)+' round'+((cgState.round||1)===1?'':'s')+' played</div>';
+  }
   cards.innerHTML =
     '<div class="cg-final" style="color:'+pal.tx+';background:'+pal.ac+'12;">'+
       '<div class="cg-final-sub">Final Score</div>'+
