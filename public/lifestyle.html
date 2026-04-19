@@ -3326,8 +3326,15 @@ var HUB_GAMES = [
     userPrompt:'Give me a fun scenario-based aesthetic quiz question with 4 creative options.'},
   {id:'trivia', name:'Trivia Battle', desc:'Pop culture questions', tag:'quiz', category:'Quizzes', iconFn:'questionSVG',
     isCardGame:true, cardType:'trivia',
-    sysPrompt:'Generate a pop culture trivia question about music, fashion, social media, TV shows, or celebrities that teens would know. Return ONLY JSON: {question:"the question", options:["A","B","C","D"], correct:0, explanation:"why that is the answer"}. correct is the 0-based index of the right answer. Keep it fun and appropriate. No markdown.',
-    userPrompt:'Give me a pop culture trivia question for teens.'},
+    sysPrompt:'Generate a fresh pop culture trivia question that teens would know. Return ONLY JSON: {question:"the question", options:["A","B","C","D"], correct:N, explanation:"why that is the answer"}. correct is the 0-based index of the right answer and MUST vary randomly between 0, 1, 2, and 3 across questions — do not default to 0. Keep it fun and appropriate. No markdown.',
+    userPromptFn:function(){
+      var topics = ['music','fashion','social media','TV shows','movies','celebrities','video games','memes','viral trends','streaming shows','K-pop','TikTok','beauty/makeup','sports'];
+      var eras = ['current','recent (last 2 years)','2020s','2010s','all-time classic'];
+      var topic = topics[Math.floor(Math.random()*topics.length)];
+      var era = eras[Math.floor(Math.random()*eras.length)];
+      var seed = Math.random().toString(36).slice(2,8);
+      return 'Give me a '+era+' '+topic+' trivia question for teens. Make it fresh and specific — avoid overused clichés. Place the correct answer at a random position (A/B/C/D). Seed: '+seed+'.';
+    }},
 ];
 
 var currentHubGame = null;
@@ -3570,7 +3577,7 @@ async function cgLoadRound(){
   try{
     var res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:game.sysPrompt,messages:[{role:'user',content:game.userPrompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:game.sysPrompt,messages:[{role:'user',content:(typeof game.userPromptFn==='function'?game.userPromptFn():game.userPrompt)}]})
     });
     var data = await res.json();
     var text = (data.content&&data.content[0]&&data.content[0].text)||'';
@@ -3625,10 +3632,21 @@ function cgRender(d){
     });
 
   } else if(game.cardType === 'trivia'){
+    // Shuffle options so the correct answer isn't always in the same slot.
+    var tOpts = (d.options||[]).slice();
+    var tCorrect = typeof d.correct === 'number' ? d.correct : 0;
+    var order = tOpts.map(function(_,i){return i;});
+    for(var s=order.length-1; s>0; s--){
+      var r = Math.floor(Math.random()*(s+1));
+      var tmp = order[s]; order[s] = order[r]; order[r] = tmp;
+    }
+    d.options = order.map(function(i){return tOpts[i];});
+    d.correct = order.indexOf(tCorrect);
+    cgState.data = d;
     // Trivia — 4 option cards
     question.textContent = d.question || '';
     question.style.color = pal.tx;
-    (d.options||[]).forEach(function(opt, i){
+    d.options.forEach(function(opt, i){
       var card = document.createElement('div');
       card.className = 'cg-card';
       card.style.background = pal.tx+'08';
