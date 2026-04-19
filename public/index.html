@@ -264,7 +264,7 @@
   <h1 class="reveal sl-reveal" style="font-size:clamp(6rem,18vw,14rem);line-height:0.82;letter-spacing:-4px;margin-bottom:20px;">Stuf<br>lover</h1>
   <p class="reveal sl-reveal" style="font-size:1.15rem;color:rgba(42,26,20,0.45);max-width:380px;line-height:1.8;margin-bottom:8px;">take the quiz. get a page built around your aesthetic. it is scary accurate.</p>
   <div class="reveal sl-reveal" style="font-family:'Caveat',cursive;font-size:1.3rem;color:var(--terracotta);opacity:0.7;margin-bottom:32px;">you NEED to try this</div>
-  <a href="quiz.html" class="reveal sl-reveal" style="display:inline-block;padding:18px 52px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:4px;text-transform:uppercase;border-radius:50px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 6px 24px rgba(200,120,96,0.25);" onmouseenter="this.style.transform='translateY(-4px) scale(1.03)';this.style.boxShadow='0 10px 36px rgba(200,120,96,0.35)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(200,120,96,0.25)'">Take the Quiz</a>
+  <a href="quiz.html" id="takeQuizBtn" class="reveal sl-reveal" style="display:inline-block;padding:18px 52px;background:var(--terracotta);color:white;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.2rem;letter-spacing:4px;text-transform:uppercase;border-radius:50px;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 6px 24px rgba(200,120,96,0.25);" onmouseenter="this.style.transform='translateY(-4px) scale(1.03)';this.style.boxShadow='0 10px 36px rgba(200,120,96,0.35)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(200,120,96,0.25)'">Take the Quiz</a>
   <a href="beyou.html" class="reveal sl-reveal" style="display:inline-block;margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--terracotta);text-decoration:none;opacity:0.6;transition:opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'">or try a breathing moment first →</a>
   <div class="reveal sl-reveal" style="margin-top:12px;font-size:0.7rem;opacity:0.25;letter-spacing:2px;">scroll to explore more</div>
 </div>
@@ -358,12 +358,12 @@
   </div>
 </div>
 
-<div class="viral" id="viral" style="padding:60px;">
+<div class="viral" id="viral" style="padding:60px;display:none;">
   <h2 class="reveal sl-reveal" style="margin-bottom:12px;">Your Vibe, Your Feed</h2>
   <p class="reveal sl-reveal" style="margin-bottom:0;">Add your favourite outfit and beauty videos. We will find more that match your style.</p>
 </div>
 
-<div class="videos" id="videos">
+<div class="videos" id="videos" style="display:none;">
   <div class="videos-header reveal sl-reveal">
     <h2>Videos</h2>
     <div style="display:flex;gap:12px;flex-wrap:wrap;">
@@ -748,6 +748,30 @@
       wel.textContent = greet + ', ' + user.username;
     }
   }
+
+  // ─── AUTH-GATED CTAs ───────────────────────────────────────
+  // When the visitor isn't logged in, the only working CTA on the home
+  // page is "Take the Quiz". Everything else (feature cards, footer
+  // links, the breathing-moment sub-link) is dimmed and inert until
+  // they sign in.
+  (function(){
+    if(localStorage.getItem('stuflover_token')) return;
+    var quizBtn = document.getElementById('takeQuizBtn');
+    function disable(el){
+      if(!el || el === quizBtn) return;
+      el.style.opacity = '0.4';
+      el.style.cursor = 'not-allowed';
+      el.style.pointerEvents = 'none';
+      el.setAttribute('aria-disabled', 'true');
+      el.setAttribute('tabindex', '-1');
+    }
+    document.querySelectorAll('.feature-card').forEach(disable);
+    document.querySelectorAll('footer a').forEach(disable);
+    var hero = document.querySelector('.hero');
+    if(hero){
+      hero.querySelectorAll('a').forEach(function(a){ if(a !== quizBtn) disable(a); });
+    }
+  })();
 
   // ─── PARALLAX HERO ────────────────────────────────────────
   (function(){
