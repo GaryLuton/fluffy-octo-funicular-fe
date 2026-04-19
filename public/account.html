@@ -1,363 +1,164 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <title>Me — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="stuflover-design-system.css"/>
-  <style>
-    :root {
-      --pink-light:#f9c4c4; --pink-mid:#f5aaaa; --peach:#f7d4b0;
-      --terracotta:#c4522a; --terracotta-dark:#a83e1e;
-      --brown:#1e0c06; --white:#ffffff;
-    }
-    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;}
-    h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
-
-    nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.93);backdrop-filter:blur(10px);border-bottom:2px solid rgba(30,12,6,0.08);}
-    .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);text-decoration:none;}
-    .nav-links{display:flex;gap:8px;}
-    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--brown);transition:opacity 0.2s;}
-    .nav-link:hover{opacity:0.55;}
-    .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:8px;color:inherit;}
-    .nav-toggle svg{width:22px;height:22px;display:block;}
-
-    .account-container{max-width:520px;margin:0 auto;padding:120px 24px 60px;}
-
-    .welcome-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
-    .welcome-title{font-size:2.4rem;letter-spacing:3px;margin-bottom:4px;}
-    .welcome-email{font-size:0.88rem;color:rgba(30,12,6,0.4);margin-bottom:8px;}
-    .welcome-joined{font-size:0.78rem;color:rgba(30,12,6,0.3);}
-
-    .section-card{background:var(--white);border-radius:24px;padding:32px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
-    .section-title{font-size:1.2rem;letter-spacing:3px;margin-bottom:6px;}
-    .section-desc{font-size:0.88rem;color:rgba(30,12,6,0.45);line-height:1.7;margin-bottom:20px;}
-
-    .btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.2s,transform 0.15s;margin-bottom:10px;}
-    .btn:hover{transform:translateY(-1px);}
-    .btn-primary{background:var(--terracotta);color:white;}
-    .btn-primary:hover{background:var(--terracotta-dark);}
-    .btn-outline{background:transparent;color:var(--brown);border:2px solid rgba(30,12,6,0.15);}
-    .btn-outline:hover{border-color:var(--brown);}
-    .btn-danger{background:transparent;color:#c0392b;border:2px solid rgba(192,57,43,0.2);}
-    .btn-danger:hover{background:#c0392b;color:white;}
-
-    .status-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;text-align:center;}
-
-    .me-eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:6px;font-size:0.72rem;color:var(--terracotta);text-transform:uppercase;margin-bottom:8px;}
-    .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
-    .theme-swatch{cursor:pointer;border:2px solid transparent;border-radius:14px;padding:10px 8px 12px;background:rgba(30,12,6,0.04);display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color 0.15s,transform 0.15s;}
-    .theme-swatch:hover{transform:translateY(-2px);}
-    .theme-swatch.is-selected{border-color:var(--terracotta);background:rgba(200,120,96,0.1);}
-    .theme-swatch-ring{width:100%;aspect-ratio:1/1;border-radius:12px;display:flex;overflow:hidden;box-shadow:0 2px 8px rgba(30,12,6,0.08);}
-    .theme-swatch-ring span{flex:1;}
-    .theme-swatch-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1.5px;font-size:0.66rem;text-transform:uppercase;text-align:center;color:var(--brown);line-height:1.1;}
-    .accent-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-    .accent-row label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.78rem;text-transform:uppercase;color:var(--brown);}
-    .accent-row input[type="color"]{width:44px;height:44px;border:2px solid rgba(30,12,6,0.12);border-radius:10px;background:none;cursor:pointer;padding:2px;}
-    .accent-row button{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.72rem;text-transform:uppercase;background:transparent;border:1.5px solid rgba(30,12,6,0.15);color:var(--brown);padding:8px 14px;border-radius:8px;cursor:pointer;}
-    .accent-row button:hover{border-color:var(--brown);}
-    .segmented{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-    .segmented button{flex:1;min-width:64px;font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:1.5px;font-size:0.72rem;text-transform:uppercase;background:rgba(30,12,6,0.04);border:1.5px solid transparent;color:var(--brown);padding:10px 12px;border-radius:10px;cursor:pointer;transition:background 0.15s,border-color 0.15s;}
-    .segmented button:hover{background:rgba(30,12,6,0.07);}
-    .segmented button.is-selected{background:var(--terracotta);color:#fff;border-color:var(--terracotta);}
-    .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-top:1px solid rgba(30,12,6,0.06);}
-    .toggle-row:first-of-type{border-top:none;}
-    .toggle-text strong{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;font-size:0.82rem;text-transform:uppercase;color:var(--brown);margin-bottom:2px;}
-    .toggle-text span{font-size:0.78rem;color:rgba(30,12,6,0.5);line-height:1.5;}
-    .switch{position:relative;width:46px;height:26px;flex-shrink:0;}
-    .switch input{opacity:0;width:0;height:0;}
-    .switch-slider{position:absolute;inset:0;background:rgba(30,12,6,0.2);border-radius:999px;cursor:pointer;transition:background 0.2s;}
-    .switch-slider::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform 0.2s;}
-    .switch input:checked + .switch-slider{background:var(--terracotta);}
-    .switch input:checked + .switch-slider::before{transform:translateX(20px);}
-    .field-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:2px;font-size:0.78rem;text-transform:uppercase;color:var(--brown);margin-bottom:8px;}
-
-    @media(max-width:480px){
-      .theme-grid{grid-template-columns:repeat(2,1fr);}
-    }
-
-    @media(max-width:768px){
-      nav{padding:14px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(249,196,196,0.97);backdrop-filter:blur(12px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(30,12,6,0.07);box-shadow:0 6px 20px rgba(30,12,6,0.08);}
-      .nav-links.open{display:flex;}
-      .nav-link{display:block;padding:10px 16px;border:none;border-radius:6px;}
-      .nav-link:hover{background:rgba(30,12,6,0.04);}
-      .nav-toggle{display:block;}
-      .account-container{padding:90px 16px 40px;}
-      .welcome-card,.section-card{padding:28px 20px;border-radius:18px;}
-      .welcome-title{font-size:1.8rem;}
-    }
-  </style>
+<meta charset="utf-8" />
+<title>stuflover &mdash; your account</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --cream: #FEF9F5; --soft-white: #FFFCFA; --pink: #F4C4D8; --rose: #E8A0BD;
+    --peach: #F5D4C2; --mint: #D4EAE0; --lavender: #E4D9F0; --sky: #D9E8F5;
+    --yellow: #F5E8C8; --ink: #4A3F50;
+  }
+  html, body { margin: 0; padding: 0; font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, var(--cream) 0%, var(--soft-white) 50%, var(--sky) 100%);
+    color: var(--ink); min-height: 100vh;
+  }
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px 30px 80px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px;
+    padding: 20px 30px; background: rgba(255, 252, 250, 0.7); border-radius: 32px;
+    backdrop-filter: blur(10px); border: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; font-family: 'Comfortaa', sans-serif;
+    font-size: 32px; font-weight: 700; color: var(--ink); text-decoration: none;
+  }
+  .logo-icon {
+    width: 48px; height: 48px; background: linear-gradient(135deg, var(--pink), var(--rose));
+    border-radius: 16px; display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg);
+    color: white;
+  }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; }
+  nav a {
+    padding: 8px 16px; border-radius: 20px; text-decoration: none; color: var(--ink);
+    font-weight: 600; font-size: 14px; border: 1px solid transparent; transition: all 0.3s ease;
+  }
+  nav a:hover { background: var(--pink); border-color: var(--rose); }
+  nav a.active { background: var(--rose); color: white; }
+  .profile-card {
+    background: white; border-radius: 32px; padding: 50px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); margin-bottom: 40px;
+    border: 1px solid rgba(232, 160, 189, 0.1);
+  }
+  .profile-avatar {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), var(--rose));
+    margin: 0 auto 20px; box-shadow: 0 4px 12px rgba(232, 160, 189, 0.2);
+  }
+  .profile-card h1 {
+    font-family: 'Comfortaa', sans-serif; font-size: 36px; font-weight: 700;
+    margin: 0 0 8px; color: var(--ink);
+  }
+  .profile-card p { font-size: 16px; line-height: 1.6; margin: 0 0 24px;
+    color: rgba(74, 63, 80, 0.7);
+  }
+  .btn {
+    display: inline-block; padding: 12px 32px; background: var(--rose); color: white;
+    border: none; border-radius: 24px; font-weight: 600; cursor: pointer;
+    transition: all 0.3s ease; font-size: 14px; margin: 0 8px; text-decoration: none;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .section { margin-bottom: 60px; }
+  .section-title {
+    font-family: 'Comfortaa', sans-serif; font-size: 32px; font-weight: 700;
+    margin: 0 0 30px; color: var(--ink);
+  }
+  .settings-list { display: grid; gap: 16px; }
+  .setting-item {
+    background: white; border-radius: 24px; padding: 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); border: 1px solid rgba(232, 160, 189, 0.1);
+  }
+  .setting-item h3 { font-family: 'Comfortaa', sans-serif; font-size: 16px;
+    font-weight: 700; margin: 0; color: var(--ink);
+  }
+  .toggle {
+    width: 50px; height: 30px; background: var(--mint); border: none;
+    border-radius: 20px; cursor: pointer; transition: all 0.3s ease; position: relative;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    background: white; border-radius: 50%; transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .toggle.on { background: var(--rose); }
+  .toggle.on::after { left: 23px; }
+  footer { text-align: center; padding: 40px 30px; margin-top: 80px;
+    border-top: 1px solid rgba(232, 160, 189, 0.2);
+  }
+  footer p { font-size: 14px; color: rgba(74, 63, 80, 0.6); margin: 0; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+</style>
 </head>
 <body>
+<div class="wrap">
+  <header>
+    <a href="/" class="logo">
+      <div class="logo-icon">&#9825;</div>
+      <span>stuflover</span>
+    </a>
+    <nav>
+      <a href="/">home</a>
+      <a href="lifestyle.html">my page</a>
+      <a href="catalog.html">closet</a>
+      <a href="games.html">games</a>
+      <a href="friends.html">friends</a>
+      <a href="beyou.html">mindful</a>
+      <a href="account.html" class="active">account</a>
+    </nav>
+  </header>
 
-<nav class="sl-nav">
-  <a class="logo sl-nav-logo" href="lifestyle.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-  <div class="nav-links sl-nav-links">
-    <a class="nav-link sl-nav-btn" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
-    <a class="nav-link sl-nav-btn" href="account.html">Account</a>
-    <a class="nav-link sl-nav-btn" href="index.html">Home</a>
-  </div>
-</nav>
+  <section class="profile-card">
+    <div class="profile-avatar"></div>
+    <h1>mika</h1>
+    <p>aesthetic: soft girl &middot; joined 3 months ago</p>
+    <button class="btn">edit profile</button>
+    <button class="btn">logout</button>
+  </section>
 
-<div class="account-container">
-  <div class="welcome-card sl-card">
-    <div class="me-eyebrow">Me</div>
-    <h1 class="welcome-title" id="welcomeName">Welcome</h1>
-    <div class="welcome-email" id="welcomeEmail"></div>
-    <div class="welcome-joined" id="welcomeJoined"></div>
-  </div>
-
-  <div class="section-card sl-card">
-    <h2 class="section-title">Your Style Profile</h2>
-    <div class="section-desc" id="profileDesc">Your style preferences power Flovee, your shop, and your whole experience.</div>
-    <button class="btn btn-primary sl-btn sl-btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
-    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="window.location.href='lifestyle.html'">View My Page</button>
-  </div>
-
-  <div class="section-card sl-card" id="appearanceCard">
-    <h2 class="section-title">Appearance &amp; Experience</h2>
-    <div class="section-desc">Pick a color theme, tweak your accent, and tune motion and sizing. Changes apply everywhere on the site.</div>
-
-    <div class="field-label">Color theme</div>
-    <div class="theme-grid" id="themeGrid"></div>
-
-    <div class="field-label">Accent color</div>
-    <div class="accent-row">
-      <input type="color" id="accentInput" aria-label="Custom accent color"/>
-      <span id="accentHex" style="font-family:monospace;font-size:0.82rem;color:rgba(30,12,6,0.55);"></span>
-      <button type="button" id="accentReset">Use theme default</button>
+  <section class="section">
+    <h2 class="section-title">preferences</h2>
+    <div class="settings-list">
+      <div class="setting-item">
+        <h3>notifications</h3>
+        <button class="toggle on" aria-label="notifications" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="setting-item">
+        <h3>private messages</h3>
+        <button class="toggle on" aria-label="private messages" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="setting-item">
+        <h3>activity status</h3>
+        <button class="toggle on" aria-label="activity status" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="setting-item">
+        <h3>dark mode</h3>
+        <button class="toggle" aria-label="dark mode" onclick="this.classList.toggle('on')"></button>
+      </div>
     </div>
+  </section>
 
-    <div class="field-label" style="margin-top:4px;">Text size</div>
-    <div class="segmented" id="textSize" role="group" aria-label="Text size">
-      <button type="button" data-val="small">Small</button>
-      <button type="button" data-val="default">Default</button>
-      <button type="button" data-val="large">Large</button>
-      <button type="button" data-val="xlarge">X-Large</button>
+  <section class="section">
+    <h2 class="section-title">need help?</h2>
+    <div class="settings-list">
+      <div class="setting-item">
+        <h3>privacy policy</h3>
+        <button class="btn" style="padding: 8px 20px; margin: 0;">read</button>
+      </div>
+      <div class="setting-item">
+        <h3>contact support</h3>
+        <button class="btn" style="padding: 8px 20px; margin: 0;">email</button>
+      </div>
     </div>
-
-    <div class="toggle-row">
-      <div class="toggle-text"><strong>Motion</strong><span>Animations and transitions across the site.</span></div>
-      <label class="switch"><input type="checkbox" id="motionToggle"/><span class="switch-slider"></span></label>
-    </div>
-    <div class="toggle-row">
-      <div class="toggle-text"><strong>Background texture</strong><span>Subtle dot grid behind the page.</span></div>
-      <label class="switch"><input type="checkbox" id="textureToggle"/><span class="switch-slider"></span></label>
-    </div>
-
-    <button class="btn btn-outline sl-btn sl-btn-secondary" id="themeResetBtn" style="margin-top:16px;">Reset to defaults</button>
-  </div>
-
-  <div class="section-card sl-card">
-    <h2 class="section-title">Sign Out</h2>
-    <div class="section-desc">You will need to sign in again next time.</div>
-    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="stufloverLogout()">Sign Out</button>
-  </div>
-
-  <div class="section-card sl-card">
-    <h2 class="section-title">Delete Account</h2>
-    <div class="section-desc">This permanently deletes your account and all your data. This cannot be undone.</div>
-    <div class="status-msg" id="deleteStatus"></div>
-    <button class="btn btn-danger sl-btn sl-btn-danger" id="deleteBtn" onclick="deleteAccount()">Delete My Account</button>
-  </div>
+  </section>
 </div>
-
-<script src="/stuflover-config.js"></script>
-<script src="/stuflover-backend.js"></script>
-<script>
-var API_BASE = window.STUFLOVER_API_URL || '';
-
-// Load user info
-var user = window.stufloverUser ? window.stufloverUser() : null;
-if (user && user.username) {
-  document.getElementById('welcomeName').textContent = user.username;
-  document.getElementById('welcomeEmail').textContent = user.email || '';
-} else {
-  // Try fetching from API
-  var token = localStorage.getItem('stuflover_token');
-  if(token){
-    fetch((window.STUFLOVER_API_URL||'')+'/api/auth/me',{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.user && d.user.username){
-        document.getElementById('welcomeName').textContent = d.user.username;
-        document.getElementById('welcomeEmail').textContent = d.user.email || '';
-        localStorage.setItem('stuflover_user', JSON.stringify(d.user));
-      }
-    }).catch(function(){});
-  }
-}
-
-// Load profile info
-var profile;
-try { profile = JSON.parse(localStorage.getItem('stuflover_profile') || 'null'); } catch(e) { profile = null; }
-if (profile && profile.aesthetics) {
-  var sorted = Object.entries(profile.aesthetics).sort(function(a,b){ return b[1]-a[1]; });
-  var topAe = sorted[0] ? sorted[0][0] : '';
-  var aeNames = {kawaii:'Kawaii',softgirl:'Soft Girl',cleangirl:'Clean Girl',coquette:'Coquette',goth:'Goth',darkacad:'Dark Academia',grunge:'Grunge',y2k:'Y2K',street:'Streetwear',cottage:'Cottagecore',hippie:'Hippie',oldmoney:'Old Money',preppy:'Preppy',tomato:'Tomato Girl',indie:'Indie Alt',emo:'Emo'};
-  document.getElementById('profileDesc').textContent = 'Your aesthetic: ' + (aeNames[topAe] || topAe) + '. Retake the quiz to update your style.';
-} else {
-  document.getElementById('profileDesc').textContent = 'You have not taken the quiz yet. Take it to personalise your experience.';
-}
-
-// Fetch joined date from server
-(async function(){
-  try {
-    var token = localStorage.getItem('stuflover_token');
-    if (!token) return;
-    var res = await fetch(API_BASE + '/api/auth/me', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    var data = await res.json();
-    if (data.user && data.user.created_at) {
-      var d = new Date(data.user.created_at);
-      document.getElementById('welcomeJoined').textContent = 'Joined ' + d.toLocaleDateString(undefined, {month:'long', year:'numeric'});
-    }
-  } catch(e) {}
-})();
-
-function retakeQuiz() {
-  // Clear saved profile so the quiz shows again
-  localStorage.removeItem('stuflover_profile');
-  // Also clear it on the server
-  var token = localStorage.getItem('stuflover_token');
-  if (token) {
-    fetch(API_BASE + '/api/data/profile', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
-    }).catch(function(){});
-  }
-  window.location.href = '/lifestyle.html';
-}
-
-// ── Appearance & Experience controls ───────────────────────
-(function setupAppearance(){
-  function ready(fn){ if(window.StufloverTheme) return fn(); setTimeout(function(){ ready(fn); }, 30); }
-  ready(function(){
-    var T = window.StufloverTheme;
-    var state = T.load();
-
-    // Build theme swatches
-    var grid = document.getElementById('themeGrid');
-    grid.innerHTML = '';
-    Object.keys(T.PRESETS).forEach(function(key){
-      var p = T.PRESETS[key];
-      var el = document.createElement('div');
-      el.className = 'theme-swatch' + (state.preset === key ? ' is-selected' : '');
-      el.setAttribute('data-preset', key);
-      el.setAttribute('role', 'button');
-      el.setAttribute('tabindex', '0');
-      el.innerHTML = '<div class="theme-swatch-ring">'
-        + '<span style="background:' + p.bg + '"></span>'
-        + '<span style="background:' + p.bgMid + '"></span>'
-        + '<span style="background:' + p.accent + '"></span>'
-        + '<span style="background:' + p.tx + '"></span>'
-        + '</div>'
-        + '<div class="theme-swatch-label">' + p.name + '</div>';
-      el.addEventListener('click', function(){
-        state = T.update({ preset: key, accent: null });
-        syncUI();
-      });
-      el.addEventListener('keydown', function(e){
-        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
-      });
-      grid.appendChild(el);
-    });
-
-    var accentInput = document.getElementById('accentInput');
-    var accentHex = document.getElementById('accentHex');
-    var accentReset = document.getElementById('accentReset');
-
-    accentInput.addEventListener('input', function(){
-      state = T.update({ accent: accentInput.value });
-      syncUI();
-    });
-    accentReset.addEventListener('click', function(){
-      state = T.update({ accent: null });
-      syncUI();
-    });
-
-    var sizeGroup = document.getElementById('textSize');
-    sizeGroup.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click', function(){
-        state = T.update({ textSize: b.getAttribute('data-val') });
-        syncUI();
-      });
-    });
-
-    var motionToggle = document.getElementById('motionToggle');
-    motionToggle.addEventListener('change', function(){
-      state = T.update({ motion: motionToggle.checked });
-    });
-    var textureToggle = document.getElementById('textureToggle');
-    textureToggle.addEventListener('change', function(){
-      state = T.update({ texture: textureToggle.checked });
-    });
-
-    document.getElementById('themeResetBtn').addEventListener('click', function(){
-      state = T.reset();
-      syncUI();
-    });
-
-    function currentAccentHex(){
-      var preset = T.PRESETS[state.preset] || T.PRESETS['default'];
-      return state.accent || preset.accent;
-    }
-
-    function syncUI(){
-      document.querySelectorAll('.theme-swatch').forEach(function(el){
-        el.classList.toggle('is-selected', el.getAttribute('data-preset') === state.preset);
-      });
-      var hex = currentAccentHex();
-      accentInput.value = hex;
-      accentHex.textContent = hex.toUpperCase() + (state.accent ? '' : ' (theme)');
-      sizeGroup.querySelectorAll('button').forEach(function(b){
-        b.classList.toggle('is-selected', b.getAttribute('data-val') === state.textSize);
-      });
-      motionToggle.checked = !!state.motion;
-      textureToggle.checked = !!state.texture;
-    }
-
-    syncUI();
-  });
-})();
-
-async function deleteAccount() {
-  if (!confirm('Are you sure? This will permanently delete your account and all your data.')) return;
-  if (!confirm('Really sure? There is no going back.')) return;
-
-  var btn = document.getElementById('deleteBtn');
-  var status = document.getElementById('deleteStatus');
-  btn.disabled = true;
-  btn.textContent = 'DELETING...';
-
-  try {
-    var token = localStorage.getItem('stuflover_token');
-    var res = await fetch(API_BASE + '/api/auth/account', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    var text = await res.text();
-    var data;
-    try { data = JSON.parse(text); } catch(e) { throw new Error('Server error'); }
-    if (!res.ok) throw new Error(data.error || 'Failed to delete');
-
-    // Clear all local data
-    localStorage.clear();
-    window.location.href = '/auth.html';
-  } catch(err) {
-    status.textContent = err.message;
-    btn.disabled = false;
-    btn.textContent = 'DELETE MY ACCOUNT';
-  }
-}
-</script>
-<script src="/stuflover-ux.js"></script>
-<script src="/stuflover-nav.js" defer></script>
+<footer>
+  <p>made w/ <span style="display: inline-block; animation: pulse 2s ease-in-out infinite;">&#9825;</span> for u</p>
+</footer>
 </body>
 </html>
