@@ -16,7 +16,7 @@
       background-image:radial-gradient(circle, var(--tx) 0.7px, transparent 0.7px);
       background-size:28px 28px;opacity:0.03;}
 
-    nav, .hero, #gamesGrid{position:relative;z-index:1;}
+    nav, .hero, #gamesGrid, #leaderboardSection{position:relative;z-index:1;}
 
     .hero{padding:120px 40px 30px;text-align:center;}
     .hero h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(3.5rem,10vw,8rem);line-height:0.88;letter-spacing:-2px;color:var(--tx);margin:0;}
@@ -37,9 +37,28 @@
     .game-best{font-size:0.62rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0;margin-top:6px;color:var(--ac);transition:opacity 0.3s;}
     .game-best.visible{opacity:0.8;}
 
+    #leaderboardSection{max-width:1100px;margin:0 auto;padding:20px 40px 80px;}
+    .lb-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);margin:0 0 6px;}
+    .lb-sub{font-size:0.85rem;opacity:0.5;margin:0 0 18px;}
+    .lb-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+    .lb-chip{padding:8px 14px;border-radius:999px;border:1.5px solid rgba(42,26,20,0.12);background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s,border-color 0.2s;}
+    .lb-chip:hover{border-color:var(--tx);}
+    .lb-chip.is-active{background:var(--ac);color:#fff;border-color:var(--ac);}
+    .lb-list{background:#fff;border-radius:14px;padding:6px 0;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;}
+    .lb-row{display:grid;grid-template-columns:40px 1fr auto;align-items:center;padding:12px 18px;border-bottom:1px solid rgba(42,26,20,0.06);}
+    .lb-row:last-child{border-bottom:none;}
+    .lb-rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;color:var(--ac);opacity:0.7;}
+    .lb-row.is-top .lb-rank{opacity:1;font-size:1.05rem;}
+    .lb-name{font-size:0.92rem;font-weight:500;}
+    .lb-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:1px;}
+    .lb-empty{text-align:center;padding:40px 20px;font-size:0.9rem;opacity:0.45;font-style:italic;}
+    .lb-loading{text-align:center;padding:40px 20px;font-size:0.85rem;opacity:0.4;}
+
     @media(max-width:768px){
       .hero{padding:100px 24px 20px;}
       #gamesGrid{padding:16px 24px 60px;}
+      #leaderboardSection{padding:16px 24px 60px;}
+      .lb-row{padding:10px 14px;}
     }
   </style>
 </head>
@@ -60,6 +79,13 @@
 </section>
 
 <div id="gamesGrid"></div>
+
+<section id="leaderboardSection">
+  <h2 class="lb-title">Leaderboards</h2>
+  <p class="lb-sub">Top players by game.</p>
+  <div class="lb-chips" id="lbChips"></div>
+  <div class="lb-list" id="lbList"><div class="lb-loading">Loading…</div></div>
+</section>
 
 <script>
   if(!localStorage.getItem('stuflover_token')){
@@ -121,16 +147,69 @@
 
   var token = localStorage.getItem('stuflover_token');
   if(!token) return;
-  var allIds = GAMES.reduce(function(a,g){ return a.concat(g.items.map(function(i){return i.id;})); }, []);
-  allIds.forEach(function(id){
-    fetch('/api/games/' + encodeURIComponent(id) + '/my-scores', {
+  var allGames = GAMES.reduce(function(a,g){ return a.concat(g.items); }, []);
+  allGames.forEach(function(g){
+    fetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
       headers:{'Authorization':'Bearer ' + token}
     }).then(function(r){return r.ok?r.json():null;}).then(function(d){
       if(!d || !d.best) return;
-      var el = document.querySelector('.game-best[data-game-id="' + id + '"]');
+      var el = document.querySelector('.game-best[data-game-id="' + g.id + '"]');
       if(el){ el.textContent = 'Best: ' + d.best; el.classList.add('visible'); }
     }).catch(function(){});
   });
+
+  // ─── Leaderboard ─────────────────────────────────
+  var chipsEl = document.getElementById('lbChips');
+  var listEl = document.getElementById('lbList');
+  var activeGameId = allGames[0] && allGames[0].id;
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  }); }
+
+  allGames.forEach(function(g){
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'lb-chip' + (g.id === activeGameId ? ' is-active' : '');
+    chip.textContent = g.name;
+    chip.onclick = function(){ selectGame(g.id); };
+    chipsEl.appendChild(chip);
+  });
+
+  function selectGame(id){
+    activeGameId = id;
+    Array.prototype.forEach.call(chipsEl.children, function(c, i){
+      c.classList.toggle('is-active', allGames[i].id === id);
+    });
+    loadLeaderboard(id);
+  }
+
+  function loadLeaderboard(id){
+    listEl.innerHTML = '<div class="lb-loading">Loading…</div>';
+    fetch('/api/games/' + encodeURIComponent(id) + '/leaderboard?limit=10', {
+      headers:{'Authorization':'Bearer ' + token}
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if(id !== activeGameId) return;
+      var rows = (d && d.leaderboard) || [];
+      if(!rows.length){
+        listEl.innerHTML = '<div class="lb-empty">No scores yet — be the first.</div>';
+        return;
+      }
+      listEl.innerHTML = rows.map(function(row, i){
+        var rank = i + 1;
+        return '<div class="lb-row' + (rank <= 3 ? ' is-top' : '') + '">' +
+          '<div class="lb-rank">#' + rank + '</div>' +
+          '<div class="lb-name">' + esc(row.username || '—') + '</div>' +
+          '<div class="lb-score">' + (row.score | 0) + '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function(){
+      if(id !== activeGameId) return;
+      listEl.innerHTML = '<div class="lb-empty">Could not load leaderboard.</div>';
+    });
+  }
+
+  if(activeGameId) loadLeaderboard(activeGameId);
 })();
 </script>
 <script src="/stuflover-config.js"></script>
