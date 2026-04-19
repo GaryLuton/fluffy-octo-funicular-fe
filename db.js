@@ -324,6 +324,20 @@ async function initDb() {
     db.run("INSERT OR IGNORE INTO collab_access (email, role, granted_by) VALUES ('chloealuton@gmail.com', 'owner', 'system')");
   } catch(e) {}
 
+  // Game scores
+  db.run(`
+    CREATE TABLE IF NOT EXISTS game_scores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      game_id TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_game_scores_game ON game_scores(game_id, score DESC)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_game_scores_user ON game_scores(user_id, game_id)`);
+
   save();
   return db;
 }
@@ -746,6 +760,38 @@ const stmts = {
   },
   cleanExpiredPosts: {
     run: () => run("DELETE FROM flovee_posts WHERE expires_at < datetime('now','-24 hours')"),
+  },
+  // Game scores
+  insertGameScore: {
+    run: (userId, gameId, score) => run(
+      'INSERT INTO game_scores (user_id, game_id, score) VALUES (?, ?, ?)',
+      [userId, gameId, score]
+    ),
+  },
+  getTopScores: {
+    all: (gameId, limit) => all(
+      `SELECT gs.user_id, u.username, MAX(gs.score) as score, MAX(gs.created_at) as created_at
+       FROM game_scores gs JOIN users u ON u.id = gs.user_id
+       WHERE gs.game_id = ?
+       GROUP BY gs.user_id, u.username
+       ORDER BY score DESC, created_at ASC
+       LIMIT ?`,
+      [gameId, limit || 10]
+    ),
+  },
+  getUserScores: {
+    all: (userId, gameId) => all(
+      `SELECT id, game_id, score, created_at FROM game_scores
+       WHERE user_id = ? AND game_id = ?
+       ORDER BY created_at DESC`,
+      [userId, gameId]
+    ),
+  },
+  getUserBestScore: {
+    get: (userId, gameId) => get(
+      'SELECT MAX(score) as best FROM game_scores WHERE user_id = ? AND game_id = ?',
+      [userId, gameId]
+    ),
   },
 };
 
