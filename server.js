@@ -642,6 +642,42 @@ app.post('/api/activity/page', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── Game Score Routes ───
+
+const VALID_GAME_IDS = new Set([
+  'dti', 'ratethis', 'stylechallenge',
+  'thisorthat', 'wouldyourather',
+  'aestheticquiz', 'trivia',
+]);
+
+app.post('/api/games/:id/score', auth, (req, res) => {
+  const gameId = req.params.id;
+  if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
+  const score = Number(req.body && req.body.score);
+  if (!Number.isInteger(score) || score < 0 || score > 100000) {
+    return res.status(400).json({ error: 'Invalid score' });
+  }
+  stmts.insertGameScore.run(req.user.id, gameId, score);
+  const best = stmts.getUserBestScore.get(req.user.id, gameId);
+  res.json({ ok: true, best: (best && best.best) || score });
+});
+
+app.get('/api/games/:id/leaderboard', auth, (req, res) => {
+  const gameId = req.params.id;
+  if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 50);
+  const leaderboard = stmts.getTopScores.all(gameId, limit);
+  res.json({ leaderboard });
+});
+
+app.get('/api/games/:id/my-scores', auth, (req, res) => {
+  const gameId = req.params.id;
+  if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
+  const scores = stmts.getUserScores.all(req.user.id, gameId);
+  const best = stmts.getUserBestScore.get(req.user.id, gameId);
+  res.json({ scores, best: (best && best.best) || 0 });
+});
+
 // ─── Admin Routes ───
 
 function adminAuth(req, res, next) {
