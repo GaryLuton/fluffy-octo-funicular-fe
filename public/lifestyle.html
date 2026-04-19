@@ -1248,12 +1248,16 @@
         <div class="dti-result-title" id="dtiResultTitle"></div>
         <div class="dti-result-msg" id="dtiResultMsg"></div>
         <div class="dti-result-outfit" id="dtiResultOutfit"></div>
-        <button class="dti-next bc" id="dtiNextBtn" onclick="dtiNextRound()">Next Round</button>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <button class="dti-next bc" id="dtiNextBtn" onclick="dtiNextRound()">Next Round</button>
+          <button class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
+        </div>
       </div>
       <div class="dti-bottom" id="dtiBottomBar">
         <div class="dti-score" id="dtiScore">Round 1 — 0 pts <span class="dti-xp-bar" id="dtiXpBar"><span class="dti-xp-fill" id="dtiXpFill"></span></span></div>
         <div style="display:flex;gap:8px;">
           <button class="dti-skip bc" onclick="dtiSkipTheme()">Skip Theme</button>
+          <button class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
           <button class="dti-submit bc" id="dtiSubmitBtn" onclick="dtiSubmit()">Walk the Runway</button>
         </div>
       </div>
@@ -3586,7 +3590,7 @@ function cgInit(game){
     endBtn.textContent = 'End Game';
     endBtn.onclick = cgEndGame;
     endBtn.style.color = pal.tx;
-    endBtn.style.display = (game.id === 'trivia') ? 'inline-block' : 'none';
+    endBtn.style.display = 'inline-block';
   }
   document.getElementById('cgFeedback').style.display = 'none';
   cgLoadRound();
@@ -3891,13 +3895,14 @@ function cgEndGame(){
 function cgShowFinal(earlyEnd){
   cgState.ended = true;
   var pal = searchPal;
+  var isTrivia = cgState.game && cgState.game.id === 'trivia';
   var total = TRIVIA_MAX_ROUNDS;
   var played = Math.min(cgState.round - (cgState.answered ? 0 : 1), total);
   if(played < 0) played = 0;
   var correct = cgState.correct || 0;
   var score = cgState.score;
   var msg;
-  if(score >= 160) msg = 'Trivia legend.';
+  if(score >= 160) msg = isTrivia ? 'Trivia legend.' : 'Certified legend.';
   else if(score >= 100) msg = 'Solid run!';
   else if(score >= 40) msg = 'Nice try — level up next time.';
   else msg = 'Better luck next round.';
@@ -3906,11 +3911,14 @@ function cgShowFinal(earlyEnd){
   document.getElementById('cgQuestion').style.color = pal.tx;
   document.getElementById('cgRound').textContent = earlyEnd ? 'Ended early' : 'Final';
   var cards = document.getElementById('cgCards');
+  var subLine = isTrivia
+    ? '<div class="cg-final-correct">'+correct+' / '+(earlyEnd?played:total)+' correct</div>'
+    : '<div class="cg-final-correct">'+(cgState.round||1)+' round'+((cgState.round||1)===1?'':'s')+' played</div>';
   cards.innerHTML =
     '<div class="cg-final" style="color:'+pal.tx+';background:'+pal.ac+'12;">'+
       '<div class="cg-final-sub">Final Score</div>'+
       '<div class="cg-final-score" style="color:'+pal.ac+'">'+score+'</div>'+
-      '<div class="cg-final-correct">'+correct+' / '+(earlyEnd?played:total)+' correct</div>'+
+      subLine+
       '<div class="cg-final-msg">'+msg+'</div>'+
     '</div>';
   var fb = document.getElementById('cgFeedback');
@@ -4923,6 +4931,11 @@ function dtiNextRound(){
   dtiState.round++;
   dtiState.picks = {hair:null,tops:null,bottoms:null,shoes:null,accessories:null};
   dtiInit();
+}
+
+function dtiEndGame(){
+  if(dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval = null; }
+  window.location.href = 'games.html';
 }
 
 // ─── FETCH WITH TIMEOUT UTILITY ──────────────────────────
