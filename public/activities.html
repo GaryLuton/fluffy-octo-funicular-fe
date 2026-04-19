@@ -70,9 +70,9 @@
     .rail-scroller .activity-card{flex:0 0 260px;scroll-snap-align:start;margin:0;}
     .activity-card.is-filtered{display:none;}
 
-    /* GAMES RAIL — wrap onto multiple rows instead of horizontal scroll */
-    #gamesRailScroller{flex-wrap:wrap;overflow-x:visible;scroll-snap-type:none;}
-    #gamesRailScroller .activity-card{flex:1 1 240px;max-width:320px;scroll-snap-align:none;}
+    /* GAMES RAIL — uniform grid of tiles instead of horizontal scroll */
+    #gamesRailScroller{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:1fr;overflow-x:visible;scroll-snap-type:none;}
+    #gamesRailScroller .activity-card{flex:none;max-width:none;width:auto;scroll-snap-align:none;height:100%;}
 
     /* CARD FOOTER (Play together button) */
     .card-foot{display:flex;align-items:center;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(30,12,6,0.08);}
