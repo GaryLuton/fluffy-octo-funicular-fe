@@ -779,6 +779,23 @@ const stmts = {
       [gameId, limit || 10]
     ),
   },
+  getFriendsTopScores: {
+    all: (gameId, userId, limit) => all(
+      `SELECT gs.user_id, u.username, MAX(gs.score) as score, MAX(gs.created_at) as created_at
+       FROM game_scores gs JOIN users u ON u.id = gs.user_id
+       WHERE gs.game_id = ?
+         AND (gs.user_id = ?
+              OR gs.user_id IN (
+                SELECT CASE WHEN from_user = ? THEN to_user ELSE from_user END
+                FROM friend_requests
+                WHERE (from_user = ? OR to_user = ?) AND status = 'accepted'
+              ))
+       GROUP BY gs.user_id, u.username
+       ORDER BY score DESC, created_at ASC
+       LIMIT ?`,
+      [gameId, userId, userId, userId, userId, limit || 10]
+    ),
+  },
   getUserScores: {
     all: (userId, gameId) => all(
       `SELECT id, game_id, score, created_at FROM game_scores
