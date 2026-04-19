@@ -222,7 +222,17 @@
       <div id="shareContent"></div>
     </div>
 
-    <div class="modal-or">or add by name</div>
+    <div class="share-sec" id="friendRequestSec" style="display:none;">
+      <div class="share-sec-title">Send a friend request</div>
+      <div class="share-link-row">
+        <input id="frUsernameInput" placeholder="Their username..." maxlength="40"
+          onkeydown="if(event.key==='Enter') sendFriendRequestFromModal()"/>
+        <button class="share-copy-btn bc" id="frSendBtn" onclick="sendFriendRequestFromModal()">Send</button>
+      </div>
+      <div id="frRequestStatus" style="font-size:0.72rem;opacity:0.7;min-height:1em;"></div>
+    </div>
+
+    <div class="modal-or">or add a personal reminder</div>
 
     <input class="modal-input" id="nameInput" placeholder="Their name..." maxlength="30"
       onkeydown="if(event.key==='Enter') saveContact()"/>
@@ -334,6 +344,135 @@ function saveData(){
   try{localStorage.setItem('stuflover_convos',JSON.stringify(conversations));}catch(e){}
 }
 
+// ─── BACKEND FRIENDS (real accounts) ──────────────────────
+const REMOTE_PREFIX='remote:';
+let remoteFriends=[];
+let remoteRequests=[];
+let remoteSentRequests=[];
+let remoteMessages={};
+let remoteUnread={};
+let remotePollInterval=null;
+
+function authToken(){ try{return localStorage.getItem('stuflover_token')||'';}catch(e){return '';} }
+function isAuthed(){ return !!authToken(); }
+function myUserId(){ try{const u=JSON.parse(localStorage.getItem('stuflover_user')||'null');return u?parseInt(u.id):0;}catch(e){return 0;} }
+function apiFetch(path,opts){
+  const url=(window.STUFLOVER_API_URL||'')+path;
+  const o=opts||{};
+  o.headers=Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+authToken()},o.headers||{});
+  const f=window._origFetch||window.fetch;
+  return f.call(window,url,o);
+}
+
+async function loadRemoteData(){
+  if(!isAuthed()) return;
+  try{
+    const [frRes,rqRes,sentRes,unRes]=await Promise.all([
+      apiFetch('/api/friends'),
+      apiFetch('/api/friends/requests'),
+      apiFetch('/api/friends/sent-requests'),
+      apiFetch('/api/friends/unread')
+    ]);
+    const frData=await frRes.json();
+    const rqData=await rqRes.json();
+    const sentData=await sentRes.json();
+    const unData=await unRes.json();
+    remoteFriends=frData.friends||[];
+    remoteRequests=rqData.requests||[];
+    remoteSentRequests=sentData.requests||[];
+    remoteUnread={};
+    (unData.perFriend||[]).forEach(u=>{ remoteUnread[u.from_user]=u.count; });
+    // Fetch last message for preview on visible friends (cap to avoid burst)
+    await Promise.all(remoteFriends.slice(0,20).map(f=>loadRemoteMessages(f.id,true)));
+    renderContacts(document.getElementById('searchInput')?.value||'');
+  }catch(e){}
+}
+
+async function loadRemoteMessages(friendId,silent){
+  try{
+    const res=await apiFetch('/api/friends/messages/'+friendId);
+    const data=await res.json();
+    remoteMessages[friendId]=data.messages||[];
+    if(!silent && activeContactId===REMOTE_PREFIX+friendId){
+      renderRemoteMessages(friendId);
+    }
+  }catch(e){}
+}
+
+async function sendRemoteMessage(friendId,text){
+  try{
+    const res=await apiFetch('/api/friends/message',{
+      method:'POST',
+      body:JSON.stringify({friendId:friendId,text:text})
+    });
+    const data=await res.json().catch(()=>({error:'Server error'}));
+    if(!res.ok||data.error){
+      const c=document.getElementById('chatMsgs');
+      const err=document.createElement('div');
+      err.style.cssText='text-align:center;padding:8px;font-size:0.75rem;opacity:0.6;color:#c44;';
+      err.textContent=data.error||'Could not send';
+      c.appendChild(err); c.scrollTop=c.scrollHeight;
+      return;
+    }
+    await loadRemoteMessages(friendId);
+    renderContacts(document.getElementById('searchInput')?.value||'');
+  }catch(e){}
+}
+
+async function acceptRemoteRequest(id){
+  try{
+    await apiFetch('/api/friends/accept',{method:'POST',body:JSON.stringify({requestId:id})});
+    await loadRemoteData();
+  }catch(e){}
+}
+
+async function declineRemoteRequest(id){
+  try{
+    await apiFetch('/api/friends/decline',{method:'POST',body:JSON.stringify({requestId:id})});
+    await loadRemoteData();
+  }catch(e){}
+}
+
+async function sendFriendRequestFromModal(){
+  const input=document.getElementById('frUsernameInput');
+  const status=document.getElementById('frRequestStatus');
+  if(!input||!status) return;
+  const username=input.value.trim();
+  if(!username){ status.style.color='#c44'; status.textContent='Enter a username'; return; }
+  status.style.color=PAL.tx; status.textContent='Searching...';
+  try{
+    const check=await apiFetch('/api/friends/search/'+encodeURIComponent(username));
+    if(check.ok){
+      const cd=await check.json();
+      if(!cd.found){
+        status.style.color='#c44';
+        status.textContent='No account for "'+username+'" — ask them to sign up first';
+        return;
+      }
+    }
+    const res=await apiFetch('/api/friends/request',{method:'POST',body:JSON.stringify({username:username})});
+    const data=await res.json().catch(()=>({error:'Server error'}));
+    if(!res.ok||data.error){ status.style.color='#c44'; status.textContent=data.error||'Failed'; return; }
+    status.style.color=PAL.ac;
+    status.textContent='Request sent to '+username;
+    input.value='';
+    await loadRemoteData();
+    setTimeout(closeAddModal,1200);
+  }catch(e){ status.style.color='#c44'; status.textContent='Cannot reach server'; }
+}
+
+function startRemotePolling(){
+  if(remotePollInterval) return;
+  remotePollInterval=setInterval(()=>{
+    if(!isAuthed()) return;
+    if(activeContactId && activeContactId.startsWith(REMOTE_PREFIX)){
+      const fid=parseInt(activeContactId.slice(REMOTE_PREFIX.length));
+      loadRemoteMessages(fid);
+    }
+    loadRemoteData();
+  },5000);
+}
+
 // ─── AVATAR COLOURS ───────────────────────────────────────
 const AVATAR_COLS=['#e06080','#9040c0','#c4943a','#4a8a2a','#3060c0','#e08040','#8a7a5a','#c03ab0','#c4a438','#7858d0'];
 function getAvatarCol(id){ return AVATAR_COLS[parseInt(id,36)%AVATAR_COLS.length]||PAL.ac; }
@@ -381,15 +520,66 @@ function renderFloveeRow(filter){
   </div>`;
 }
 
+function renderRemoteRequestsBlock(filter){
+  if(filter||!remoteRequests.length) return '';
+  const items=remoteRequests.map(r=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+      <div class="contact-avatar" style="background:${getAvatarCol(String(r.id))};width:30px;height:30px;font-size:0.8rem;">${getInitials(r.username)}</div>
+      <div style="flex:1;font-size:0.85rem;color:${PAL.tx};min-width:0;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.username)}</div>
+      <button class="sug-btn use bc" onclick="acceptRemoteRequest(${r.id})" style="background:${PAL.ac};color:${PAL.bg};padding:4px 10px;font-size:0.62rem;">Accept</button>
+      <button class="sug-btn skip bc" onclick="declineRemoteRequest(${r.id})" style="border-color:${PAL.tx}20;color:${PAL.tx};padding:4px 8px;font-size:0.62rem;">×</button>
+    </div>`).join('');
+  return `<div style="padding:10px 16px;border-bottom:1px solid rgba(128,128,128,0.1);background:${PAL.ac}0a;">
+    <div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:${PAL.tx}">Friend requests</div>
+    ${items}
+  </div>`;
+}
+
+function renderRemoteFriendRows(filter){
+  const myId=myUserId();
+  const q=(filter||'').toLowerCase();
+  const visible=remoteFriends.filter(f=>!q||(f.username||'').toLowerCase().includes(q));
+  return visible.map(f=>{
+    const remoteId=REMOTE_PREFIX+f.id;
+    const msgs=remoteMessages[f.id]||[];
+    const last=msgs[msgs.length-1];
+    let preview=`@${f.username} \u2022 say hi`;
+    let time='';
+    if(last){
+      const fromMe=parseInt(last.from_user)===myId;
+      preview=(fromMe?'You: ':'')+last.text;
+      time=formatTime(new Date(last.created_at+'Z').getTime());
+    }
+    const unread=remoteUnread[f.id]||0;
+    const isActive=activeContactId===remoteId;
+    const right=unread>0
+      ? `<div class="contact-unread" style="background:${PAL.ac}">${unread}</div>`
+      : `<div class="contact-time" style="color:${PAL.tx}">${time}</div>`;
+    return `<div class="contact-item ${isActive?'active':''}" onclick="openChat('${remoteId}')"
+      style="${isActive?'background:'+PAL.ac+'18':''}" id="ci-${remoteId}">
+      <div class="contact-avatar" style="background:${getAvatarCol(String(f.id))}">${getInitials(f.username)}</div>
+      <div class="contact-info">
+        <div class="contact-name" style="color:${PAL.tx}">${escapeHtml(f.username)}</div>
+        <div class="contact-preview" style="color:${PAL.tx}">${escapeHtml(preview)}</div>
+      </div>
+      ${right}
+    </div>`;
+  }).join('');
+}
+
 function renderContacts(filter=''){
   const list=document.getElementById('contactsList');
-  const filtered=contacts.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()));
+  const filteredLocal=contacts.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()));
   const floveeRow=renderFloveeRow(filter);
-  if(filtered.length===0 && !floveeRow){
-    list.innerHTML=`<div style="padding:32px 20px;text-align:center;opacity:0.3;font-size:0.85rem;line-height:1.7">${contacts.length===0?'Add a friend to get started':'No matches'}</div>`;
+  const requestsBlock=renderRemoteRequestsBlock(filter);
+  const remoteRows=renderRemoteFriendRows(filter);
+  const hasAny=floveeRow||requestsBlock||remoteRows||filteredLocal.length;
+  if(!hasAny){
+    const msg=contacts.length===0&&remoteFriends.length===0?'Add a friend to get started':'No matches';
+    list.innerHTML=`<div style="padding:32px 20px;text-align:center;opacity:0.3;font-size:0.85rem;line-height:1.7">${msg}</div>`;
     return;
   }
-  const friendRows=filtered.map(c=>{
+  const friendRows=filteredLocal.map(c=>{
     const msgs=conversations[c.id]||[];
     const last=msgs[msgs.length-1];
     const preview=last?(last.from==='me'?'You: ':'')+last.text:'Start a conversation';
@@ -405,7 +595,7 @@ function renderContacts(filter=''){
       <div class="contact-time" style="color:${PAL.tx}">${time}</div>
     </div>`;
   }).join('');
-  list.innerHTML=floveeRow+friendRows;
+  list.innerHTML=floveeRow+requestsBlock+remoteRows+friendRows;
 }
 
 function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -427,6 +617,11 @@ function openChat(id){
 
   if(id===FLOVEE_CONTACT_ID){
     openFloveeChat();
+    return;
+  }
+
+  if(typeof id==='string'&&id.startsWith(REMOTE_PREFIX)){
+    openRemoteChat(parseInt(id.slice(REMOTE_PREFIX.length)));
     return;
   }
 
@@ -599,12 +794,102 @@ function sendMessage(){
     return;
   }
 
+  if(typeof activeContactId==='string'&&activeContactId.startsWith(REMOTE_PREFIX)){
+    const fid=parseInt(activeContactId.slice(REMOTE_PREFIX.length));
+    sendRemoteMessage(fid,text);
+    clearTypingTimer();
+    return;
+  }
+
   if(!conversations[activeContactId]) conversations[activeContactId]=[];
   conversations[activeContactId].push({from:'me',text,ts:Date.now()});
   saveData();
   renderMessages();
   renderContacts();
   clearTypingTimer();
+}
+
+// ─── OPEN REMOTE (BACKEND) CHAT ───────────────────────────
+function openRemoteChat(friendId){
+  const f=remoteFriends.find(x=>parseInt(x.id)===parseInt(friendId));
+  if(!f){
+    // Friend might not be loaded yet; try refresh
+    loadRemoteData();
+    return;
+  }
+  document.getElementById('noChatState').style.display='none';
+  const acs=document.getElementById('activeChatState');
+  acs.style.display='flex';
+  document.getElementById('chatHeader').innerHTML=`
+    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
+    <div class="chat-header-avatar" style="background:${getAvatarCol(String(f.id))}">${getInitials(f.username)}</div>
+    <div>
+      <div class="chat-header-name" style="color:${PAL.tx}">${escapeHtml(f.username)}</div>
+      <div class="chat-header-status" style="color:${PAL.tx}">friend</div>
+    </div>
+    <div class="chat-header-actions">
+      <button class="header-action-btn bc" onclick="clearRemoteUnreadUI(${f.id})" style="color:${PAL.tx};border-color:${PAL.tx}22">Refresh</button>
+    </div>`;
+  document.getElementById('chatPanel').classList.add('mobile-active');
+  const chipsRow=document.getElementById('helpChips');
+  if(chipsRow) chipsRow.style.display='none';
+  const input=document.getElementById('chatInput');
+  if(input) input.placeholder=`Message ${f.username}...`;
+
+  // Mark unread cleared locally (will re-populate on next poll if new arrive)
+  remoteUnread[f.id]=0;
+  renderContacts(document.getElementById('searchInput')?.value||'');
+  renderRemoteMessages(f.id);
+  // Fresh fetch
+  loadRemoteMessages(f.id);
+  // Flovee side panel: show a minimal "About this chat" block
+  updateRemoteFloveePanel(f);
+  setTimeout(()=>document.getElementById('chatInput')?.focus(),100);
+}
+
+function clearRemoteUnreadUI(friendId){
+  loadRemoteMessages(friendId);
+}
+
+function renderRemoteMessages(friendId){
+  const container=document.getElementById('chatMsgs');
+  if(!container) return;
+  const msgs=remoteMessages[friendId]||[];
+  const myId=myUserId();
+  if(msgs.length===0){
+    container.innerHTML=`<div class="no-chat" style="opacity:0.6;padding:24px 12px">
+      <div class="no-chat-icon" style="opacity:0.6">👋</div>
+      <div class="no-chat-title bc" style="color:${PAL.tx}">Start the conversation</div>
+      <div class="no-chat-sub" style="color:${PAL.tx};max-width:300px">Messages here are delivered to their account and they'll see them next time they open Stuflover.</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML=msgs.map((m,i)=>{
+    const tsNum=new Date(m.created_at+'Z').getTime();
+    const prevTsNum=i>0?new Date(msgs[i-1].created_at+'Z').getTime():0;
+    const showDate=i===0||new Date(tsNum).toDateString()!==new Date(prevTsNum).toDateString();
+    const date=showDate?`<div class="chat-date" style="color:${PAL.tx}">${new Date(tsNum).toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`:'';
+    const isMe=parseInt(m.from_user)===myId;
+    const bubbleBg=isMe?PAL.ac:PAL.tx+'14';
+    const bubbleTx=isMe?PAL.bg:PAL.tx;
+    return `${date}<div class="bubble-wrap ${isMe?'me':'them'}">
+      <div class="bubble" style="background:${bubbleBg};color:${bubbleTx}">${escapeHtml(m.text)}</div>
+      <div class="bubble-time" style="color:${PAL.tx}">${formatTime(tsNum)}</div>
+    </div>`;
+  }).join('');
+  container.scrollTop=container.scrollHeight;
+}
+
+function updateRemoteFloveePanel(friend){
+  const body=document.getElementById('floveeBody');
+  if(!body) return;
+  body.innerHTML=`
+    <div class="flovee-section">
+      <div class="flovee-section-label bc" style="color:${PAL.tx}">About this chat</div>
+      <div class="flovee-advice" style="border-left-color:${PAL.ac}50;color:${PAL.tx};background:${PAL.ac}0c">
+        You're chatting with @${escapeHtml(friend.username)}. Messages are delivered to their Stuflover account.
+      </div>
+    </div>`;
 }
 
 // ─── SEND TO FLOVEE (AI) ──────────────────────────────────
@@ -953,8 +1238,21 @@ function setVibe(v,el){
 }
 
 // ─── ADD CONTACT ──────────────────────────────────────────
-function openAddModal(){ document.getElementById('addModal').classList.add('open'); setTimeout(()=>document.getElementById('nameInput')?.focus(),100); }
-function closeAddModal(){ document.getElementById('addModal').classList.remove('open'); document.getElementById('nameInput').value=''; }
+function openAddModal(){
+  document.getElementById('addModal').classList.add('open');
+  const status=document.getElementById('frRequestStatus'); if(status) status.textContent='';
+  const frInput=document.getElementById('frUsernameInput'); if(frInput) frInput.value='';
+  setTimeout(()=>{
+    const focusEl=isAuthed()?document.getElementById('frUsernameInput'):document.getElementById('nameInput');
+    focusEl?.focus();
+  },100);
+}
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('nameInput').value='';
+  const frInput=document.getElementById('frUsernameInput'); if(frInput) frInput.value='';
+  const status=document.getElementById('frRequestStatus'); if(status) status.textContent='';
+}
 
 function pickRel(el){
   document.querySelectorAll('#relChips .help-chip').forEach(c=>{ c.classList.remove('on'); c.style.borderColor=''; c.style.background='transparent'; });
@@ -1080,6 +1378,7 @@ openChat=function(id){
 // ─── INIT ─────────────────────────────────────────────────
 applyStyles();
 buildShareSection();
+setupFriendRequestSection();
 renderContacts();
 handleUrlParams();
 
@@ -1092,6 +1391,27 @@ if(contacts.length===0){
   });
   saveData();
   renderContacts();
+}
+
+// Load backend friends + start polling (when authed)
+function setupFriendRequestSection(){
+  const sec=document.getElementById('friendRequestSec');
+  if(!sec) return;
+  if(!isAuthed()){ sec.style.display='none'; return; }
+  sec.style.display='flex';
+  const input=document.getElementById('frUsernameInput');
+  const btn=document.getElementById('frSendBtn');
+  if(input){
+    input.style.borderColor=PAL.tx+'22';
+    input.style.color=PAL.tx;
+    input.style.background=PAL.tx+'08';
+  }
+  if(btn){ btn.style.background=PAL.ac; btn.style.color=PAL.bg; }
+}
+
+if(isAuthed()){
+  loadRemoteData();
+  startRemotePolling();
 }
 </script>
 <script src="/stuflover-nav.js" defer></script>
