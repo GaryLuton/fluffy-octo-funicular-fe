@@ -1,156 +1,383 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>stuflover &mdash; games</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Comfortaa:wght@400;700&display=swap" rel="stylesheet" />
-<style>
-  * { box-sizing: border-box; }
-  :root {
-    --cream: #FEF9F5; --soft-white: #FFFCFA; --pink: #F4C4D8; --rose: #E8A0BD;
-    --peach: #F5D4C2; --mint: #D4EAE0; --lavender: #E4D9F0; --sky: #D9E8F5;
-    --yellow: #F5E8C8; --ink: #4A3F50;
-  }
-  html, body { margin: 0; padding: 0; font-family: 'Quicksand', sans-serif;
-    background: linear-gradient(135deg, var(--cream) 0%, var(--soft-white) 50%, var(--sky) 100%);
-    color: var(--ink); min-height: 100vh;
-  }
-  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px 30px 80px; }
-  header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px;
-    padding: 20px 30px; background: rgba(255, 252, 250, 0.7); border-radius: 32px;
-    backdrop-filter: blur(10px); border: 1px solid rgba(232, 160, 189, 0.2);
-  }
-  .logo { display: flex; align-items: center; gap: 12px; font-family: 'Comfortaa', sans-serif;
-    font-size: 32px; font-weight: 700; color: var(--ink); text-decoration: none;
-  }
-  .logo-icon {
-    width: 48px; height: 48px; background: linear-gradient(135deg, var(--pink), var(--rose));
-    border-radius: 16px; display: grid; place-items: center; font-size: 24px; transform: rotate(-8deg);
-    color: white;
-  }
-  nav { display: flex; gap: 8px; flex-wrap: wrap; }
-  nav a {
-    padding: 8px 16px; border-radius: 20px; text-decoration: none; color: var(--ink);
-    font-weight: 600; font-size: 14px; border: 1px solid transparent; transition: all 0.3s ease;
-  }
-  nav a:hover { background: var(--pink); border-color: var(--rose); }
-  nav a.active { background: var(--rose); color: white; }
-  .hero { margin-bottom: 60px; text-align: center; }
-  .hero-bg {
-    background: linear-gradient(135deg, var(--yellow) 0%, var(--peach) 50%, var(--pink) 100%);
-    border-radius: 40px; padding: 80px 50px; margin-bottom: 30px; box-shadow: 0 8px 24px rgba(232, 160, 189, 0.15);
-  }
-  .hero h1 {
-    font-family: 'Comfortaa', sans-serif; font-size: 64px; font-weight: 700; margin: 0;
-    line-height: 1.2; color: white; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  .hero p { font-size: 20px; line-height: 1.6; margin: 20px auto 0; color: rgba(255, 255, 255, 0.9);
-    max-width: 600px;
-  }
-  .cta {
-    display: inline-block; margin-top: 30px; padding: 16px 40px; background: white;
-    color: var(--peach); border: none; border-radius: 24px; font-family: 'Comfortaa', sans-serif;
-    font-size: 16px; font-weight: 700; cursor: pointer; text-decoration: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-  .cta:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
-  .section { margin-bottom: 60px; }
-  .section-title {
-    font-family: 'Comfortaa', sans-serif; font-size: 40px; font-weight: 700;
-    margin: 0 0 40px; color: var(--ink); text-align: center;
-  }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .game-card {
-    background: white; border-radius: 28px; padding: 32px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    transition: transform 0.3s ease, box-shadow 0.3s ease; border: 1px solid rgba(232, 160, 189, 0.1);
-    cursor: pointer; text-decoration: none; color: var(--ink); display: block;
-  }
-  .game-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(232, 160, 189, 0.15); }
-  .game-icon {
-    width: 60px; height: 60px; margin-bottom: 16px; border-radius: 16px;
-  }
-  .game-card:nth-child(1) .game-icon { background: linear-gradient(135deg, var(--pink), var(--rose)); }
-  .game-card:nth-child(2) .game-icon { background: linear-gradient(135deg, var(--peach), var(--yellow)); }
-  .game-card:nth-child(3) .game-icon { background: linear-gradient(135deg, var(--mint), var(--sky)); }
-  .game-card h3 {
-    font-family: 'Comfortaa', sans-serif; font-size: 20px; font-weight: 700; margin: 0 0 12px;
-    color: var(--ink);
-  }
-  .game-card p { font-size: 14px; line-height: 1.6; margin: 0 0 20px; color: rgba(74, 63, 80, 0.7); }
-  .btn {
-    display: inline-block; padding: 10px 24px; background: var(--rose); color: white;
-    border: none; border-radius: 20px; font-weight: 600; cursor: pointer;
-    transition: all 0.3s ease; font-size: 13px; text-decoration: none;
-  }
-  .btn:hover { transform: scale(1.05); }
-  footer { text-align: center; padding: 40px 30px; margin-top: 80px;
-    border-top: 1px solid rgba(232, 160, 189, 0.2);
-  }
-  footer p { font-size: 14px; color: rgba(74, 63, 80, 0.6); margin: 0; }
-  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-  @media (max-width: 768px) {
-    .grid { grid-template-columns: 1fr; }
-    .hero h1 { font-size: 44px; }
-  }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <title>Games — Stuflover</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="stuflover-design-system.css"/>
+  <style>
+    :root{--bg:#faf0f0;--tx:#2a1a14;--ac:#c87860;--ac2:#a86050;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;position:relative;}
+    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:radial-gradient(circle, var(--tx) 0.7px, transparent 0.7px);
+      background-size:28px 28px;opacity:0.03;}
+
+    .hero, #gamesGrid, #leaderboardSection, #achievementsSection, #statsSection{position:relative;z-index:1;}
+
+    .hero{padding:120px 40px 30px;text-align:center;}
+    .hero h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(3.5rem,10vw,8rem);line-height:0.88;letter-spacing:-2px;color:var(--tx);margin:0;}
+    .hero-sub{font-size:1.05rem;color:var(--tx);opacity:0.5;margin-top:18px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.8;}
+
+    #statsSection{max-width:1100px;margin:0 auto;padding:0 40px;}
+    .stats-card{background:#fff;border-radius:14px;padding:20px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+    .stat{text-align:center;padding:0 8px;border-right:1px solid rgba(42,26,20,0.06);}
+    .stat:last-child{border-right:none;}
+    .stat-value{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.9rem;color:var(--ac);line-height:1;}
+    .stat-label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;opacity:0.5;margin-top:6px;}
+    .stat-sub{font-size:0.7rem;opacity:0.55;margin-top:4px;min-height:0.85em;}
+
+    #gamesGrid{max-width:1100px;margin:0 auto;padding:20px 40px 80px;}
+    .cat-group{margin-top:14px;}
+    .cat-group:first-child{margin-top:0;}
+    .cat-group.has-rule{border-top:1px solid rgba(42,26,20,0.05);padding-top:14px;}
+    .games-empty{text-align:center;padding:60px 20px;font-size:0.95rem;opacity:0.5;}
+    .cat-label{font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;opacity:0.3;padding:0 0 10px;color:var(--tx);text-align:center;}
+    .cat-tiles{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+    .game-tile{flex:0 0 180px;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.04);opacity:0;transform:translateY(6px);animation:gt-in 0.5s cubic-bezier(0.22,1,0.36,1) forwards;transition:transform 0.35s cubic-bezier(0.22,1,0.36,1),box-shadow 0.35s cubic-bezier(0.22,1,0.36,1);}
+    .game-tile:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.09);}
+    .game-tile:active{transform:translateY(0) scale(0.98);}
+    .game-thumb{aspect-ratio:1.7/1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(200,120,96,0.15),rgba(200,120,96,0.04));transition:background 0.4s ease;}
+    .game-thumb svg{width:32px;height:32px;color:var(--ac);transition:transform 0.45s cubic-bezier(0.22,1,0.36,1);}
+    .game-tile:hover .game-thumb{background:linear-gradient(135deg,rgba(200,120,96,0.22),rgba(200,120,96,0.06));}
+    .game-tile:hover .game-thumb svg{transform:scale(1.08);}
+    .game-info{padding:9px 12px 11px;}
+    .game-name{font-size:0.82rem;font-weight:700;line-height:1.3;margin-bottom:2px;color:var(--tx);}
+    .game-desc{font-size:0.68rem;opacity:0.6;line-height:1.45;}
+    .game-best{font-size:0.58rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0;margin-top:5px;color:var(--ac);transition:opacity 0.3s;}
+    .game-best.visible{opacity:0.85;}
+    @keyframes gt-in{to{opacity:1;transform:none;}}
+    @media (prefers-reduced-motion: reduce){
+      .game-tile{animation:none;opacity:1;transform:none;}
+      .game-tile:hover{transform:none;}
+      .game-thumb svg,.game-thumb{transition:none;}
+      .game-tile:hover .game-thumb svg{transform:none;}
+    }
+
+    #leaderboardSection{max-width:1100px;margin:0 auto;padding:20px 40px 80px;}
+    .lb-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);margin:0 0 6px;}
+    .lb-sub{font-size:0.85rem;opacity:0.5;margin:0 0 18px;}
+    .lb-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .lb-chip{padding:8px 14px;border-radius:999px;border:1.5px solid rgba(42,26,20,0.12);background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s,border-color 0.2s;}
+    .lb-chip:hover{border-color:var(--tx);}
+    .lb-chip.is-active{background:var(--ac);color:#fff;border-color:var(--ac);}
+    .lb-scope{display:inline-flex;border:1.5px solid rgba(42,26,20,0.12);border-radius:999px;padding:3px;margin-bottom:18px;background:#fff;}
+    .lb-scope button{padding:6px 16px;border:none;background:transparent;border-radius:999px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s;}
+    .lb-scope button.is-active{background:var(--ac);color:#fff;}
+    .lb-list{background:#fff;border-radius:14px;padding:6px 0;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;}
+    .lb-row{display:grid;grid-template-columns:40px 1fr auto;align-items:center;padding:12px 18px;border-bottom:1px solid rgba(42,26,20,0.06);}
+    .lb-row:last-child{border-bottom:none;}
+    .lb-row.is-me{background:rgba(200,120,96,0.08);}
+    .lb-row.is-me .lb-name::after{content:' (you)';opacity:0.5;font-size:0.78rem;font-weight:400;}
+    .lb-rank{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;color:var(--ac);opacity:0.7;}
+    .lb-row.is-top .lb-rank{opacity:1;font-size:1.05rem;}
+    .lb-name{font-size:0.92rem;font-weight:500;}
+    .lb-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:1px;}
+    .lb-empty{text-align:center;padding:40px 20px;font-size:0.9rem;opacity:0.45;font-style:italic;}
+    .lb-loading{text-align:center;padding:40px 20px;font-size:0.85rem;opacity:0.4;}
+
+    #achievementsSection{max-width:1100px;margin:0 auto;padding:20px 40px 0;}
+    .ach-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);margin:0 0 6px;}
+    .ach-sub{font-size:0.85rem;opacity:0.5;margin:0 0 18px;}
+    .ach-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+    .ach-tile{background:#fff;border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:opacity 0.3s,transform 0.2s;}
+    .ach-tile.is-locked{opacity:0.4;}
+    .ach-tile.is-unlocked{transform:translateY(0);}
+    .ach-icon{flex:0 0 36px;height:36px;border-radius:50%;background:rgba(200,120,96,0.12);display:flex;align-items:center;justify-content:center;color:var(--ac);}
+    .ach-tile.is-unlocked .ach-icon{background:var(--ac);color:#fff;}
+    .ach-icon svg{width:18px;height:18px;}
+    .ach-meta{min-width:0;}
+    .ach-name{font-size:0.85rem;font-weight:700;line-height:1.3;}
+    .ach-desc{font-size:0.7rem;opacity:0.55;line-height:1.4;margin-top:2px;}
+
+    @media(max-width:768px){
+      .hero{padding:100px 24px 20px;}
+      #gamesGrid{padding:16px 24px 60px;}
+      #leaderboardSection{padding:16px 24px 60px;}
+      #achievementsSection{padding:16px 24px 0;}
+      #statsSection{padding:0 24px;}
+      .stats-card{grid-template-columns:repeat(2,1fr);gap:14px;padding:16px;}
+      .stat{border-right:none;border-bottom:1px solid rgba(42,26,20,0.06);padding-bottom:12px;}
+      .stat:nth-last-child(-n+2){border-bottom:none;padding-bottom:0;}
+      .stat-value{font-size:1.6rem;}
+      .lb-row{padding:10px 14px;}
+    }
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <a href="/" class="logo">
-      <div class="logo-icon">&#9825;</div>
-      <span>stuflover</span>
-    </a>
-    <nav>
-      <a href="/">home</a>
-      <a href="lifestyle.html">my page</a>
-      <a href="catalog.html">closet</a>
-      <a href="games.html" class="active">games</a>
-      <a href="friends.html">friends</a>
-      <a href="beyou.html">mindful</a>
-      <a href="account.html">account</a>
-    </nav>
-  </header>
+<body class="font-alt">
 
-  <section class="hero">
-    <div class="hero-bg">
-      <h1>play something</h1>
-      <p>DTI, trivia, style battles. instant fun, play solo or with besties.</p>
-      <button class="cta">start playing</button>
-    </div>
-  </section>
+<nav id="mainNav" class="sl-nav">
+  <a class="logo sl-nav-logo" id="navLogo" href="index.html">Stuflover</a>
+  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="nav-links sl-nav-links">
+    <a class="nav-link sl-nav-btn" href="lifestyle.html">My Page</a>
+    <a class="nav-link sl-nav-btn" href="account.html">Account</a>
+  </div>
+</nav>
 
-  <section class="section">
-    <h2 class="section-title">pick ur game</h2>
-    <div class="grid">
-      <a class="game-card" href="fitforit.html">
-        <div class="game-icon"></div>
-        <h3>dress to impress</h3>
-        <p>style ur avatar, win against besties</p>
-        <span class="btn">play now</span>
-      </a>
-      <a class="game-card" href="quiz.html">
-        <div class="game-icon"></div>
-        <h3>style trivia</h3>
-        <p>test ur fashion knowledge, climb leaderboard</p>
-        <span class="btn">play now</span>
-      </a>
-      <a class="game-card" href="fitcheck.html">
-        <div class="game-icon"></div>
-        <h3>battle</h3>
-        <p>quick rounds, instant results, big vibes</p>
-        <span class="btn">play now</span>
-      </a>
-    </div>
-  </section>
-</div>
-<footer>
-  <p>made w/ <span style="display: inline-block; animation: pulse 2s ease-in-out infinite;">&#9825;</span> for u</p>
-</footer>
+<section class="hero">
+  <h1>Games</h1>
+  <p class="hero-sub">Pick a game, set a high score.</p>
+</section>
+
+<section id="statsSection">
+  <div class="stats-card" id="statsCard">
+    <div class="stat"><div class="stat-value" id="statPoints">—</div><div class="stat-label">Points</div><div class="stat-sub" id="statTopGame">&nbsp;</div></div>
+    <div class="stat"><div class="stat-value" id="statGames">—</div><div class="stat-label">Games</div><div class="stat-sub">&nbsp;</div></div>
+    <div class="stat"><div class="stat-value" id="statRounds">—</div><div class="stat-label">Rounds</div><div class="stat-sub">&nbsp;</div></div>
+    <div class="stat"><div class="stat-value" id="statAchievements">—</div><div class="stat-label">Unlocked</div><div class="stat-sub" id="statAchievementsSub">&nbsp;</div></div>
+  </div>
+</section>
+
+<div id="gamesGrid"></div>
+
+<section id="achievementsSection">
+  <h2 class="ach-title">Achievements</h2>
+  <p class="ach-sub">Unlock by playing.</p>
+  <div class="ach-strip" id="achStrip"></div>
+</section>
+
+<section id="leaderboardSection">
+  <h2 class="lb-title">Leaderboards</h2>
+  <p class="lb-sub">Top players by game.</p>
+  <div class="lb-scope" id="lbScope" role="tablist">
+    <button type="button" data-scope="global"  class="is-active">Global</button>
+    <button type="button" data-scope="friends">Friends</button>
+  </div>
+  <div class="lb-chips" id="lbChips"></div>
+  <div class="lb-list" id="lbList"><div class="lb-loading">Loading…</div></div>
+</section>
+
+<script>
+  if(!localStorage.getItem('stuflover_token')){
+    window.location.href = '/auth.html';
+  }
+</script>
+<script>
+(function(){
+  var ICONS = {
+    hanger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c0 .8-.5 1.4-1.4 1.7L3 14h18L12 9.7"/></svg>',
+    heart:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.8 8.7 2.3 5 6 5c2.1 0 3.5 1.1 4.5 2.5C11.5 6.1 12.9 5 15 5c3.7 0 5.2 3.7 3.5 7-2.5 4.5-9.5 9-9.5 9z"/></svg>',
+    bolt:   '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13,2 3,14 11,14 9,22 21,10 13,10"/></svg>',
+    arrows: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12M15 3l4 4-4 4M17 17H5M9 21l-4-4 4-4"/></svg>',
+    scale:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 21h14M5 7l-3 7h6zM19 7l-3 7h6zM5 7h14"/></svg>',
+    palette:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.6-1.4-.4-.4-.6-.9-.6-1.4 0-1.1.9-2 2-2h2.4A4.6 4.6 0 0 0 22 10.6 8.6 8.6 0 0 0 12 2zM6 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
+    question:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>',
+  };
+
+  var GAMES = [
+    {category:'Fashion', items:[
+      {id:'dti',            name:'Dress To Impress', desc:'Build an outfit for a theme',     icon:'hanger'},
+      {id:'ratethis',       name:'Rate the Look',    desc:'Rate outfits — real or fake?',   icon:'heart'},
+      {id:'stylechallenge', name:'Style Challenge',  desc:'Wild constraints — build an outfit', icon:'bolt'},
+    ]},
+    {category:'Quick', items:[
+      {id:'thisorthat',     name:'This or That',     desc:'Two cards — tap your pick',      icon:'arrows'},
+      {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices',             icon:'scale'},
+    ]},
+    {category:'Quizzes', items:[
+      {id:'aestheticquiz',  name:'Aesthetic Quiz',   desc:'Discover your secret aesthetic', icon:'palette'},
+      {id:'trivia',         name:'Trivia Battle',    desc:'Pop culture questions',          icon:'question'},
+    ]},
+  ];
+
+  var grid = document.getElementById('gamesGrid');
+  var first = true;
+  var tileIdx = 0;
+  GAMES.forEach(function(group){
+    var groupEl = document.createElement('div');
+    groupEl.className = 'cat-group' + (first ? '' : ' has-rule');
+    var label = document.createElement('div');
+    label.className = 'cat-label';
+    label.textContent = group.category;
+    groupEl.appendChild(label);
+    var tilesEl = document.createElement('div');
+    tilesEl.className = 'cat-tiles';
+    groupEl.appendChild(tilesEl);
+    grid.appendChild(groupEl);
+    first = false;
+    group.items.forEach(function(g){
+      var tile = document.createElement('a');
+      tile.className = 'game-tile';
+      tile.href = 'lifestyle.html#game=' + encodeURIComponent(g.id);
+      tile.style.animationDelay = (tileIdx * 40) + 'ms';
+      tileIdx++;
+      tile.innerHTML =
+        '<div class="game-thumb">' + (ICONS[g.icon] || '') + '</div>' +
+        '<div class="game-info">' +
+          '<div class="game-name"></div>' +
+          '<div class="game-desc"></div>' +
+          '<div class="game-best" data-game-id="' + g.id + '"></div>' +
+        '</div>';
+      tile.querySelector('.game-name').textContent = g.name;
+      tile.querySelector('.game-desc').textContent = g.desc;
+      tilesEl.appendChild(tile);
+    });
+  });
+
+  var token = localStorage.getItem('stuflover_token');
+  if(!token) return;
+  var allGames = GAMES.reduce(function(a,g){ return a.concat(g.items); }, []);
+  allGames.forEach(function(g){
+    fetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
+      headers:{'Authorization':'Bearer ' + token}
+    }).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(!d || !d.best) return;
+      var el = document.querySelector('.game-best[data-game-id="' + g.id + '"]');
+      if(el){ el.textContent = 'Best: ' + d.best; el.classList.add('visible'); }
+    }).catch(function(){});
+  });
+
+  // ─── Leaderboard ─────────────────────────────────
+  var chipsEl = document.getElementById('lbChips');
+  var scopeEl = document.getElementById('lbScope');
+  var listEl = document.getElementById('lbList');
+  var activeGameId = allGames[0] && allGames[0].id;
+  var activeScope = 'global';
+  var myUsername = '';
+  try { myUsername = (JSON.parse(localStorage.getItem('stuflover_user') || '{}').username) || ''; } catch(e){}
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+  }); }
+
+  allGames.forEach(function(g){
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'lb-chip' + (g.id === activeGameId ? ' is-active' : '');
+    chip.textContent = g.name;
+    chip.onclick = function(){ selectGame(g.id); };
+    chipsEl.appendChild(chip);
+  });
+
+  Array.prototype.forEach.call(scopeEl.children, function(btn){
+    btn.onclick = function(){ selectScope(btn.getAttribute('data-scope')); };
+  });
+
+  function selectGame(id){
+    activeGameId = id;
+    Array.prototype.forEach.call(chipsEl.children, function(c, i){
+      c.classList.toggle('is-active', allGames[i].id === id);
+    });
+    loadLeaderboard();
+  }
+
+  function selectScope(scope){
+    if(scope === activeScope) return;
+    activeScope = scope;
+    Array.prototype.forEach.call(scopeEl.children, function(b){
+      b.classList.toggle('is-active', b.getAttribute('data-scope') === scope);
+    });
+    loadLeaderboard();
+  }
+
+  function loadLeaderboard(){
+    var id = activeGameId;
+    var scope = activeScope;
+    var endpoint = scope === 'friends' ? 'friends-leaderboard' : 'leaderboard';
+    listEl.innerHTML = '<div class="lb-loading">Loading…</div>';
+    fetch('/api/games/' + encodeURIComponent(id) + '/' + endpoint + '?limit=10', {
+      headers:{'Authorization':'Bearer ' + token}
+    }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if(id !== activeGameId || scope !== activeScope) return;
+      var rows = (d && d.leaderboard) || [];
+      if(!rows.length){
+        var msg = scope === 'friends'
+          ? 'No friend scores yet — invite some, or play a round.'
+          : 'No scores yet — be the first.';
+        listEl.innerHTML = '<div class="lb-empty">' + msg + '</div>';
+        return;
+      }
+      listEl.innerHTML = rows.map(function(row, i){
+        var rank = i + 1;
+        var classes = 'lb-row';
+        if(rank <= 3) classes += ' is-top';
+        if(myUsername && row.username === myUsername) classes += ' is-me';
+        return '<div class="' + classes + '">' +
+          '<div class="lb-rank">#' + rank + '</div>' +
+          '<div class="lb-name">' + esc(row.username || '—') + '</div>' +
+          '<div class="lb-score">' + (row.score | 0) + '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function(){
+      if(id !== activeGameId || scope !== activeScope) return;
+      listEl.innerHTML = '<div class="lb-empty">Could not load leaderboard.</div>';
+    });
+  }
+
+  if(activeGameId) loadLeaderboard();
+
+  // ─── Achievements ─────────────────────────────────
+  var ACH_ICON_STAR    = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15,9 22,9 16.5,13.5 18.5,21 12,17 5.5,21 7.5,13.5 2,9 9,9"/></svg>';
+  var ACH_ICON_FLAME   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 4-3 5-3 9a3 3 0 1 0 6 0c0 2 2 3 2 5a5 5 0 1 1-10 0c0-5 5-7 5-14z"/></svg>';
+  var ACH_ICON_TROPHY  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/><path d="M9 18h6M10 14h4l1 4H9z"/></svg>';
+  var ACH_ICON_GRID    = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>';
+  var ACH_ICON_CROWN   = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/></svg>';
+
+  var ACHIEVEMENTS = [
+    {code:'first_score',        name:'First Score',     desc:'Save any score',                icon:ACH_ICON_STAR},
+    {code:'score_100',          name:'Hundred Club',    desc:'Hit a score of 100',            icon:ACH_ICON_FLAME},
+    {code:'score_500',          name:'High Roller',     desc:'Hit a score of 500',            icon:ACH_ICON_TROPHY},
+    {code:'played_all_games',   name:'Try It All',      desc:'Play every game at least once', icon:ACH_ICON_GRID},
+    {code:'top_of_leaderboard', name:'Top of the Pile', desc:"Be #1 on a game's leaderboard", icon:ACH_ICON_CROWN},
+  ];
+
+  var stripEl = document.getElementById('achStrip');
+  ACHIEVEMENTS.forEach(function(a){
+    var tile = document.createElement('div');
+    tile.className = 'ach-tile is-locked';
+    tile.dataset.code = a.code;
+    tile.innerHTML =
+      '<div class="ach-icon">' + a.icon + '</div>' +
+      '<div class="ach-meta">' +
+        '<div class="ach-name">' + esc(a.name) + '</div>' +
+        '<div class="ach-desc">' + esc(a.desc) + '</div>' +
+      '</div>';
+    tile.title = a.desc;
+    stripEl.appendChild(tile);
+  });
+
+  fetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || !d.achievements) return;
+      var unlocked = {};
+      d.achievements.forEach(function(a){ unlocked[a.code] = true; });
+      Array.prototype.forEach.call(stripEl.children, function(tile){
+        if(unlocked[tile.dataset.code]){
+          tile.classList.remove('is-locked');
+          tile.classList.add('is-unlocked');
+        }
+      });
+    }).catch(function(){});
+
+  // ─── Stats card ─────────────────────────────────
+  var gameNameById = {};
+  allGames.forEach(function(g){ gameNameById[g.id] = g.name; });
+
+  fetch('/api/games/my-stats', {headers:{'Authorization':'Bearer ' + token}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d) return;
+      document.getElementById('statPoints').textContent = d.total_points | 0;
+      document.getElementById('statGames').textContent = d.games_played | 0;
+      document.getElementById('statRounds').textContent = d.total_rounds | 0;
+      document.getElementById('statAchievements').textContent = d.achievements_unlocked | 0;
+      if(d.top_game && d.top_game.game_id){
+        var nm = gameNameById[d.top_game.game_id] || d.top_game.game_id;
+        document.getElementById('statTopGame').textContent = 'Top: ' + nm;
+      }
+      var of = ACHIEVEMENTS.length;
+      document.getElementById('statAchievementsSub').textContent = 'of ' + of;
+    }).catch(function(){});
+})();
+</script>
+<script src="/stuflover-config.js"></script>
+<script src="/stuflover-backend.js"></script>
+<script src="/stuflover-ux.js"></script>
+<script src="/stuflover-nav.js" defer></script>
 </body>
 </html>
