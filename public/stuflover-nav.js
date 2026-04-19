@@ -326,56 +326,34 @@ body { padding-top: var(--sl-nav-h); }\
   color: color-mix(in srgb, var(--sl-tx, #2a1a14) 60%, transparent); white-space: nowrap;\
   max-width: 160px; overflow: hidden; text-overflow: ellipsis;\
 }\
-#sl-bottom-tabs { display: none; }\
+#sl-bottom-tabs { display: none !important; }\
 /* Tablet / narrow desktop — drop the user greeting and tighten tab padding so tabs don\'t collide */\
 @media (max-width: 999px) {\
   #sl-top-nav .sl-user { display: none; }\
   #sl-top-nav .sl-tab { padding: 9px 12px; letter-spacing: 1.5px; font-size: 0.78rem; gap: 6px; }\
   #sl-top-nav .sl-tab svg { width: 15px; height: 15px; }\
 }\
-/* Mobile — swap top tabs for a bottom tab bar */\
+/* Mobile — keep tabs in the top bar so the nav stays at the top of the screen */\
 @media (max-width: 760px) {\
-  body { padding-top: var(--sl-nav-h); padding-bottom: calc(var(--sl-tabs-h) + env(safe-area-inset-bottom, 0px)); }\
-  #sl-top-nav { padding: 0 16px; }\
-  #sl-top-nav .sl-tabs { display: none; }\
-  #sl-bottom-tabs {\
-    display: grid; grid-template-columns: repeat(4, 1fr);\
-    position: fixed; bottom: 0; left: 0; right: 0; height: var(--sl-tabs-h);\
-    background: color-mix(in srgb, var(--sl-bg, #faf0f0) 95%, transparent);\
-    backdrop-filter: blur(18px) saturate(1.4);\
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);\
-    border-top: 1px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 12%, transparent);\
-    z-index: 300;\
-    padding-bottom: env(safe-area-inset-bottom, 0);\
-    view-transition-name: sl-bottom-tabs;\
-  }\
-  #sl-bottom-tabs .sl-tab {\
-    display: flex; flex-direction: column; align-items: center; justify-content: center;\
-    gap: 3px; padding: 4px 2px; text-decoration: none; color: var(--sl-tx, #2a1a14);\
-    font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
-    font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase;\
-    opacity: 0.6; transition: opacity 150ms ease, color 150ms ease;\
-    min-width: 0;\
-  }\
-  #sl-bottom-tabs .sl-tab span {\
-    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;\
-  }\
-  #sl-bottom-tabs .sl-tab svg { width: 22px; height: 22px; flex-shrink: 0; }\
-  #sl-bottom-tabs .sl-tab.is-active { opacity: 1; color: var(--sl-ac, #c87860); }\
-}\
-/* Small phones — tighten logo and hide back-chip label; bottom tab labels get smaller */\
-@media (max-width: 480px) {\
   #sl-top-nav { padding: 0 12px; gap: 8px; }\
-  #sl-top-nav .sl-logo { font-size: 1.2rem; letter-spacing: 2px; }\
-  #sl-top-nav .sl-back-chip { padding: 6px 10px; font-size: 0.65rem; letter-spacing: 1.5px; }\
-  #sl-bottom-tabs .sl-tab { letter-spacing: 1px; font-size: 0.58rem; }\
-  #sl-bottom-tabs .sl-tab svg { width: 20px; height: 20px; }\
+  #sl-top-nav .sl-tabs { gap: 2px; }\
+  #sl-top-nav .sl-tab { padding: 8px 10px; letter-spacing: 1px; font-size: 0.7rem; gap: 4px; }\
+  #sl-top-nav .sl-tab svg { width: 14px; height: 14px; }\
 }\
-/* Very small phones — icon-only bottom tabs so labels never collide */\
+/* Small phones — drop tab labels so all four tabs + logo fit in the top bar */\
+@media (max-width: 480px) {\
+  #sl-top-nav { padding: 0 10px; gap: 6px; }\
+  #sl-top-nav .sl-logo { font-size: 1.05rem; letter-spacing: 1.5px; }\
+  #sl-top-nav .sl-back-chip { padding: 6px 10px; font-size: 0.65rem; letter-spacing: 1.5px; }\
+  #sl-top-nav .sl-tab { padding: 8px; }\
+  #sl-top-nav .sl-tab span { display: none; }\
+  #sl-top-nav .sl-tab svg { width: 18px; height: 18px; }\
+}\
+/* Very small phones — shrink the logo further so icon tabs never collide */\
 @media (max-width: 360px) {\
-  #sl-top-nav .sl-logo { font-size: 1.1rem; letter-spacing: 1.5px; }\
-  #sl-bottom-tabs .sl-tab span { display: none; }\
-  #sl-bottom-tabs .sl-tab svg { width: 24px; height: 24px; }\
+  #sl-top-nav .sl-logo { font-size: 0.95rem; letter-spacing: 1px; }\
+  #sl-top-nav .sl-tab { padding: 7px; }\
+  #sl-top-nav .sl-tab svg { width: 20px; height: 20px; }\
 }\
 ';
     var style = document.createElement('style');
