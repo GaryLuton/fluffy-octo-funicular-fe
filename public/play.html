@@ -12,8 +12,7 @@
   <script src="/stuflover-theme-boot.js"></script>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
-    :root{--bg:#faf0f0;--tx:#2a1a14;--ac:#c87860;--ac2:#a86050;--terracotta:#c87860;}
-    body{margin:0;font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);}
+    body{margin:0;font-family:'Space Grotesk',sans-serif;background:var(--bg,#faf0f0);color:var(--tx,#2a1a14);}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     #gamePage{min-height:100vh;display:flex;flex-direction:column;padding-top:60px;}
@@ -246,7 +245,22 @@
 // a colour palette, an aesthetic name, a judge name — using whatever
 // is in localStorage (or safe defaults for a new visitor).
 
-var searchPal = {bg:'#faf0f0', tx:'#2a1a14', ac:'#c87860', ac2:'#a86050'};
+// Pull the active palette (bg / text / accent) straight from the CSS vars
+// that stuflover-theme-boot.js writes on <html> synchronously before first
+// paint. This way the game surfaces match whichever aesthetic the user
+// landed on via the quiz (or later picked on the Me page) instead of a
+// hardcoded cream/terracotta default.
+var searchPal = (function(){
+  var def = {bg:'#faf0f0', tx:'#2a1a14', ac:'#c87860', ac2:'#a86050'};
+  try {
+    var cs = getComputedStyle(document.documentElement);
+    var bg = (cs.getPropertyValue('--bg')||'').trim();
+    var tx = (cs.getPropertyValue('--tx')||'').trim();
+    var ac = (cs.getPropertyValue('--ac')||'').trim();
+    var ac2 = (cs.getPropertyValue('--ac2')||'').trim();
+    return {bg:bg||def.bg, tx:tx||def.tx, ac:ac||def.ac, ac2:ac2||def.ac2};
+  } catch(e){ return def; }
+})();
 
 function escHtml(s){ var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
 
