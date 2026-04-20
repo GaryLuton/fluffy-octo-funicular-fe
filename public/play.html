@@ -447,6 +447,7 @@ async function cgLoadRound(){
   var game = cgState.game;
   var cards = document.getElementById('cgCards');
   var question = document.getElementById('cgQuestion');
+  question.classList.remove('bc');
   document.getElementById('cgNextBtn').style.display = 'none';
   document.getElementById('cgFeedback').style.display = 'none';
   cgState.answered = false;
@@ -779,8 +780,10 @@ function cgShowFinal(earlyEnd){
   else if(score >= 40) msg = 'Nice try — level up next time.';
   else msg = 'Better luck next round.';
   var savePromise = postGameScore(cgState.game && cgState.game.id, score);
-  document.getElementById('cgQuestion').textContent = earlyEnd ? 'Game Ended' : 'Game Over!';
-  document.getElementById('cgQuestion').style.color = pal.tx;
+  var qEl = document.getElementById('cgQuestion');
+  qEl.textContent = earlyEnd ? 'Game Ended' : 'Game Over!';
+  qEl.classList.add('bc');
+  qEl.style.color = pal.tx;
   document.getElementById('cgRound').textContent = earlyEnd ? 'Ended early' : 'Final';
   var cards = document.getElementById('cgCards');
   var subLine;
