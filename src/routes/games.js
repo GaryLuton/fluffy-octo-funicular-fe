@@ -63,6 +63,18 @@ router.get('/my-stats', auth, (req, res) => {
   });
 });
 
+router.get('/total-points-leaderboard', auth, (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 50);
+  const leaderboard = stmts.getTotalPointsLeaderboard.all(limit);
+  res.json({ leaderboard });
+});
+
+router.get('/total-points-friends-leaderboard', auth, (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 50);
+  const leaderboard = stmts.getFriendsTotalPointsLeaderboard.all(req.user.id, limit);
+  res.json({ leaderboard });
+});
+
 router.get('/:id/leaderboard', auth, (req, res) => {
   const gameId = req.params.id;
   if (!VALID_GAME_IDS.has(gameId)) return res.status(400).json({ error: 'Unknown game' });
