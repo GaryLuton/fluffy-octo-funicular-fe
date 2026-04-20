@@ -901,6 +901,7 @@
   </style>
 </head>
 <body>
+<script src="/stuflover-nav.js"></script>
 
 <a href="#mainContent" class="skip-link">Skip to main content</a>
 
@@ -1385,10 +1386,8 @@
 <script>
 
 // ─── NAV TAB HELPER ─────────────────────────────────────
-// stuflover-nav.js is deferred, so this inline script runs before
-// window.StufloverNav is defined. Setting the override directly means
-// buildNav picks up the right tab when it mounts later; calling
-// setActiveTab too updates the DOM if the nav is already mounted.
+// Set the override so activeTabId() resolves correctly, and call
+// setActiveTab to re-sync the DOM classes if the nav is already mounted.
 function slSetNavTab(id){
   window.__slActiveTabOverride = id || null;
   if(window.StufloverNav && window.StufloverNav.setActiveTab){
@@ -6465,7 +6464,6 @@ function pickAevs(choice){
 </script>
 
 <script src="/stuflover-ux.js"></script>
-<script src="/stuflover-nav.js" defer></script>
 <script src="/stuflover-tour.js" defer></script>
 </body>
 </html>

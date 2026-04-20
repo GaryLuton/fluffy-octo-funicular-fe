@@ -7,8 +7,7 @@
   <title>Games — Stuflover</title>
   <script>
     // Apply saved theme synchronously so the first paint uses the user's
-    // chosen colors. stuflover-nav.js (deferred) would otherwise swap them
-    // in after render, producing a visible color flash.
+    // chosen colors before any stylesheet loads.
     (function(){
       var PRESETS = {
         'default': { bg:'#faf0f0', bgMid:'#f0ddd6', accent:'#c87860', tx:'#2a1a14', surface:'#ffffff' },
@@ -178,6 +177,7 @@
   </style>
 </head>
 <body class="font-alt">
+<script src="/stuflover-nav.js"></script>
 
 <nav id="mainNav" class="sl-nav">
   <a class="logo sl-nav-logo" id="navLogo" href="index.html">Stuflover</a>
@@ -491,6 +491,5 @@
 })();
 </script>
 <script src="/stuflover-ux.js"></script>
-<script src="/stuflover-nav.js" defer></script>
 </body>
 </html>

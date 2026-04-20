@@ -381,10 +381,10 @@
     scheduleIdle(prefetchNavTargets);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mount);
-  } else {
+  if (document.body) {
     mount();
+  } else {
+    document.addEventListener('DOMContentLoaded', mount);
   }
 
   function setActiveTab(id) {
