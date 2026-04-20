@@ -3901,7 +3901,6 @@ const SECTIONS = [
   {id:'outfitroast',name:'Roast Me',       sub:'flovee judges you', col:7, newBadge:true},
   {id:'secretdiary',name:'Diary',          sub:'just for you',      col:8, newBadge:true},
   {id:'studyroom',  name:'Study Room',     sub:'focus by aesthetic', col:2, newBadge:true},
-  {id:'aevsgame',   name:'AE vs Reality',  sub:'the truth hurts',   col:11, newBadge:true},
   {id:'stufloverdaily',name:'Discover',    sub:'trending + inspo',  col:4},
   {id:'floveegroup',name:'Groups',         sub:'find your people',  col:6},
   {id:'readit',     name:'ReadIt',         sub:'books + booktok',   col:10},
@@ -3927,7 +3926,6 @@ function buildGrid(pal, aeName){
     outfitroast:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" stroke="white" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9.5" r="1" fill="white"/><circle cx="15" cy="9.5" r="1" fill="white"/></svg>',
     secretdiary:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2" width="14" height="20" rx="2" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="10" r="2" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 12v3" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
     studyroom:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z" fill="none" stroke="white" stroke-width="1.5"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
-    aevsgame:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
   };
   const grid = document.getElementById('browserGrid');
   if(!grid) return;
@@ -4274,16 +4272,6 @@ function openSection(id, opts){
     document.getElementById('viralView').style.display = 'flex';
     document.getElementById('viralView').classList.add('active');
     openStudyRoom();
-    return;
-  } else if(sec.id === 'aevsgame'){
-    shopBar.style.display = 'none';
-    document.getElementById('normalChat').style.display = 'none';
-    hideAllViews();
-    document.getElementById('sectionView').style.height = 'auto';
-    document.getElementById('sectionView').style.overflow = 'visible';
-    document.getElementById('viralView').style.display = 'flex';
-    document.getElementById('viralView').classList.add('active');
-    openAeVsReality();
     return;
   } else if(sec.id === 'stufloverdaily' || sec.id === 'contentwithit'){
     shopBar.style.display = 'none';
@@ -4987,99 +4975,6 @@ function incrementStudySessions(){
   var key = 'stuflover_study_'+new Date().toDateString();
   var n = parseInt(localStorage.getItem(key)||'0') + 1;
   localStorage.setItem(key, n.toString());
-}
-
-// ─── AESTHETIC VS REALITY GAME ───────────────────────────
-var aevsScore = 0;
-var aevsRound = 0;
-var aevsQuestions = [];
-
-function openAeVsReality(){
-  var pal = searchPal;
-  var vc = document.getElementById('viralContent');
-  if(!vc) return;
-  aevsScore = 0;
-  aevsRound = 0;
-
-  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
-  var aeKey = topAe ? topAe[0] : 'softgirl';
-
-  // Build questions based on aesthetic
-  aevsQuestions = [
-    {q:'friday night plans',ae:'curating a mood board and journaling by candlelight',reality:'scrolling tiktok in bed for 4 hours straight',pick:null},
-    {q:'morning routine',ae:'5am sunrise yoga, green juice, meditation',reality:'snoozing the alarm 7 times and running out with wet hair',pick:null},
-    {q:'study session',ae:'color-coded notes in a cute cafe with a latte',reality:'panicking at 11pm with 47 tabs open',pick:null},
-    {q:'closet situation',ae:'perfectly organized by color, everything fits',reality:'floor-drobe. the chair. you know the chair.',pick:null},
-    {q:'self care sunday',ae:'face mask, journaling, herbal tea, early bed',reality:'did nothing all day, called it rest, ate cereal for dinner',pick:null},
-    {q:'playlist',ae:'curated 200 songs, each one a vibe, organized by mood',reality:'the same 12 songs on repeat for 3 months',pick:null},
-    {q:'skincare routine',ae:'10 steps, all the serums, glass skin era',reality:'face wash if i remember, moisturizer sometimes',pick:null},
-    {q:'room aesthetic',ae:'pinterest-perfect, fairy lights, plants, organized desk',reality:'organized chaos. translation: chaos.',pick:null},
-  ];
-
-  showAevsRound(pal);
-}
-
-function showAevsRound(pal){
-  if(!pal) pal = searchPal;
-  var vc = document.getElementById('viralContent');
-  if(!vc) return;
-
-  if(aevsRound >= aevsQuestions.length){
-    // Show results
-    var aeCount = aevsQuestions.filter(function(q){return q.pick==='ae';}).length;
-    var realCount = aevsQuestions.filter(function(q){return q.pick==='reality';}).length;
-    var verdict = aeCount > realCount ? 'you are living the aesthetic fantasy and honestly good for you' :
-                  aeCount === realCount ? 'perfectly balanced between delulu and real — as all things should be' :
-                  'you are SO real for this. the aesthetic is aspirational and that is valid';
-    var shareText = 'i got '+aeCount+' aesthetic vs '+realCount+' reality on stuflover — '+verdict;
-
-    vc.innerHTML =
-      '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
-        '<div style="font-size:2rem;margin-bottom:8px;">'+(aeCount>realCount?'✨':'💀')+'</div>'+
-        '<h2 class="bc" style="font-size:1.8rem;color:'+pal.tx+';margin:0 0 4px;">YOUR RESULTS</h2>'+
-        '<div style="display:flex;gap:16px;justify-content:center;margin:20px 0;">'+
-          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.ac+'15;text-align:center;">'+
-            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+aeCount+'</div>'+
-            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">aesthetic</div>'+
-          '</div>'+
-          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.tx+'08;text-align:center;">'+
-            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+realCount+'</div>'+
-            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">reality</div>'+
-          '</div>'+
-        '</div>'+
-        '<div style="font-size:0.88rem;line-height:1.6;opacity:0.55;color:'+pal.tx+';margin-bottom:20px;">'+verdict+'</div>'+
-        '<div style="display:flex;gap:8px;justify-content:center;">'+
-          '<button onclick="openAeVsReality()" class="bc" style="padding:12px 24px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">play again</button>'+
-          '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" class="bc" style="padding:12px 24px;border:1.5px solid '+pal.tx+'15;border-radius:12px;background:transparent;color:'+pal.tx+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">share</button>'+
-        '</div>'+
-      '</div>';
-    return;
-  }
-
-  var q = aevsQuestions[aevsRound];
-  vc.innerHTML =
-    '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
-      '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:6px;color:'+pal.tx+';">round '+(aevsRound+1)+' of '+aevsQuestions.length+'</div>'+
-      '<h2 class="bc" style="font-size:clamp(1.3rem,3.5vw,1.8rem);color:'+pal.tx+';margin:0 0 4px;">'+q.q.toUpperCase()+'</h2>'+
-      '<div style="font-size:0.75rem;opacity:0.35;color:'+pal.tx+';margin-bottom:10px;">which one is you? be honest.</div>'+
-      '<div class="aevs-vs">'+
-        '<div class="aevs-side" onclick="pickAevs(\'ae\')" style="background:'+pal.ac+'10;border-color:'+pal.ac+'20;border-radius:16px;">'+
-          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Aesthetic</div>'+
-          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.ae+'</div>'+
-        '</div>'+
-        '<div style="display:flex;align-items:center;font-size:0.65rem;opacity:0.2;font-weight:900;color:'+pal.tx+';">vs</div>'+
-        '<div class="aevs-side" onclick="pickAevs(\'reality\')" style="background:'+pal.tx+'06;border-color:'+pal.tx+'10;border-radius:16px;">'+
-          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Reality</div>'+
-          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.reality+'</div>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-}
-
-function pickAevs(choice){
-  aevsQuestions[aevsRound].pick = choice;
-  aevsRound++;
-  setTimeout(function(){ showAevsRound(searchPal); }, 300);
 }
 
 // ─── AUTO-LOAD SAVED PROFILE ─────────────────────────────
