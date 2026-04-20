@@ -842,6 +842,42 @@ const stmts = {
       [userId]
     ),
   },
+  getTotalPointsLeaderboard: {
+    all: (limit) => all(
+      `SELECT bests.user_id, u.username, SUM(bests.best) AS score
+       FROM (
+         SELECT user_id, game_id, MAX(score) AS best
+         FROM game_scores
+         GROUP BY user_id, game_id
+       ) bests
+       JOIN users u ON u.id = bests.user_id
+       GROUP BY bests.user_id, u.username
+       ORDER BY score DESC, u.username ASC
+       LIMIT ?`,
+      [limit || 20]
+    ),
+  },
+  getFriendsTotalPointsLeaderboard: {
+    all: (userId, limit) => all(
+      `SELECT bests.user_id, u.username, SUM(bests.best) AS score
+       FROM (
+         SELECT user_id, game_id, MAX(score) AS best
+         FROM game_scores
+         WHERE user_id = ?
+            OR user_id IN (
+              SELECT CASE WHEN from_user = ? THEN to_user ELSE from_user END
+              FROM friend_requests
+              WHERE (from_user = ? OR to_user = ?) AND status = 'accepted'
+            )
+         GROUP BY user_id, game_id
+       ) bests
+       JOIN users u ON u.id = bests.user_id
+       GROUP BY bests.user_id, u.username
+       ORDER BY score DESC, u.username ASC
+       LIMIT ?`,
+      [userId, userId, userId, userId, limit || 20]
+    ),
+  },
   countUserAchievements: {
     get: (userId) => get(
       'SELECT COUNT(*) as n FROM achievements WHERE user_id = ?',

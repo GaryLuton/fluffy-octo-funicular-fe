@@ -251,7 +251,9 @@
   var chipsEl = document.getElementById('lbChips');
   var scopeEl = document.getElementById('lbScope');
   var listEl = document.getElementById('lbList');
-  var activeGameId = allGames[0] && allGames[0].id;
+  var TOTAL_POINTS = '__total__';
+  var LB_LIMIT = 20;
+  var activeGameId = TOTAL_POINTS;
   var activeScope = 'global';
   var myUsername = '';
   try { myUsername = (JSON.parse(localStorage.getItem('stuflover_user') || '{}').username) || ''; } catch(e){}
@@ -260,12 +262,15 @@
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
   }); }
 
-  allGames.forEach(function(g){
+  var chipDefs = [{id: TOTAL_POINTS, name: 'Total Points'}].concat(
+    allGames.map(function(g){ return {id: g.id, name: g.name}; })
+  );
+  chipDefs.forEach(function(c){
     var chip = document.createElement('button');
     chip.type = 'button';
-    chip.className = 'lb-chip' + (g.id === activeGameId ? ' is-active' : '');
-    chip.textContent = g.name;
-    chip.onclick = function(){ selectGame(g.id); };
+    chip.className = 'lb-chip' + (c.id === activeGameId ? ' is-active' : '');
+    chip.textContent = c.name;
+    chip.onclick = function(){ selectGame(c.id); };
     chipsEl.appendChild(chip);
   });
 
@@ -276,7 +281,7 @@
   function selectGame(id){
     activeGameId = id;
     Array.prototype.forEach.call(chipsEl.children, function(c, i){
-      c.classList.toggle('is-active', allGames[i].id === id);
+      c.classList.toggle('is-active', chipDefs[i].id === id);
     });
     loadLeaderboard();
   }
@@ -293,9 +298,15 @@
   function loadLeaderboard(){
     var id = activeGameId;
     var scope = activeScope;
-    var endpoint = scope === 'friends' ? 'friends-leaderboard' : 'leaderboard';
+    var url;
+    if(id === TOTAL_POINTS){
+      url = '/api/games/' + (scope === 'friends' ? 'total-points-friends-leaderboard' : 'total-points-leaderboard') + '?limit=' + LB_LIMIT;
+    } else {
+      var endpoint = scope === 'friends' ? 'friends-leaderboard' : 'leaderboard';
+      url = '/api/games/' + encodeURIComponent(id) + '/' + endpoint + '?limit=' + LB_LIMIT;
+    }
     listEl.innerHTML = '<div class="lb-loading">Loading…</div>';
-    gFetch('/api/games/' + encodeURIComponent(id) + '/' + endpoint + '?limit=10', {
+    gFetch(url, {
       headers:{'Authorization':'Bearer ' + token}
     }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if(id !== activeGameId || scope !== activeScope) return;
