@@ -445,8 +445,6 @@
     .hub-info{padding:12px 14px;}
     .hub-game-name{font-size:0.88rem;font-weight:700;line-height:1.3;margin-bottom:3px;}
     .hub-game-desc{font-size:0.72rem;opacity:0.42;line-height:1.5;}
-    .hub-game-best{font-size:0.62rem;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0;margin-top:6px;transition:opacity 0.3s;}
-    .hub-game-best.visible{opacity:0.7;}
     .hub-game-tag{display:inline-block;font-size:0.54rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;padding:3px 8px;border-radius:10px;margin-top:6px;opacity:0.6;}
     .hub-back-btn{font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;background:transparent;border:1.5px solid rgba(128,128,128,0.18);border-radius:4px;padding:6px 14px;cursor:pointer;color:inherit;transition:opacity 0.2s;margin-left:8px;}
     .hub-back-btn:hover{opacity:0.55;}
@@ -3306,34 +3304,6 @@ function getFloveeName(){
   return (FLOVEE_VIBES[topK]||FLOVEE_VIBES.softgirl).name;
 }
 
-function buildFloveeHubPrompt(){
-  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
-  topK = topK?topK[0]:'softgirl';
-  var v = FLOVEE_VIBES[topK]||FLOVEE_VIBES.softgirl;
-  return 'You are '+v.name+', the user\'s Flovee in the FloveeHub — their personal best friend AI.\n\n'+
-    'PERSONALITY: '+v.tone+'\n\n'+
-    'YOUR VIBE: You are a '+resolveAeName()+' Flovee. You naturally talk about things like: '+v.topics+'.\n\n'+
-    'HOW YOU TEXT: Use slang and phrases like: '+v.slang+'. Keep messages short (2-4 sentences). Text like a real person — no essays, no bullet points, no therapy speak.\n\n'+
-    'WHAT YOU KNOW ABOUT THEM:\n'+
-    '- Aesthetic: {AE}\n- Music: {MUSIC}\n- Mood today: {MOOD}\n- Interests: {INTERESTS}\n- Social energy: {SOCIAL}\n- Friend group: {FG}\n\n'+
-    'RULES:\n'+
-    '- Be their actual best friend, not a chatbot. Have opinions. Disagree sometimes. Tease them gently.\n'+
-    '- React to what they say like a real person would — excited, shocked, supportive, curious.\n'+
-    '- Bring up topics they would care about based on their aesthetic and interests.\n'+
-    '- Ask follow-up questions. Keep the conversation going naturally.\n'+
-    '- If they seem down, notice it and be there for them in YOUR way (goth Raven is sarcastic-supportive, kawaii Luna is soft-supportive, etc).\n'+
-    '- Reference their music taste, aesthetic, and interests naturally — do not list them out.\n'+
-    '- Never break character. You ARE '+v.name+'. You have your own personality, not just theirs.\n'+
-    '- If you have had previous conversations, bring up things they told you like a real friend would.\n- NEVER help create websites, write code, build apps, or do programming. You are a lifestyle companion ONLY. If asked to code, politely decline.';
-}
-
-function buildFloveeHubOpener(){
-  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
-  topK = topK?topK[0]:'softgirl';
-  var v = FLOVEE_VIBES[topK]||FLOVEE_VIBES.softgirl;
-  return v.opener;
-}
-
 // ─── FLOVEEHUB GAMES ─────────────────────────────────────
 var HUB_GAMES = [
   // Fashion Games
@@ -3505,84 +3475,14 @@ window.addEventListener('popstate', function(){
 });
 
 function openHub(){
-  var pal = searchPal;
-  var aeIcons = getAeIcons();
-  var fName = getFloveeName();
-
+  // Games are listed only on /games.html. This page no longer renders a
+  // FloveeHub grid or per-tile "Best:" scoreboard — deep-links to #game=<id>
+  // jump straight into the game view (see startHubGame).
   document.getElementById('normalChat').style.display = 'none';
   document.getElementById('shopBar').style.display = 'none';
   document.getElementById('sectionNameNav').textContent = '';
   var hv = document.getElementById('hubView');
-  hv.style.display = 'flex';
-  hv.classList.add('active');
-
-  // Banner
-  document.getElementById('hubTitle').style.color = pal.tx;
-  document.getElementById('hubSub').style.color = pal.tx;
-  document.getElementById('hubSub').textContent = 'Pick a game to play';
-  document.getElementById('hubBanner').style.background = pal.bg;
-
-  // Build game grid grouped by category
-  var grid = document.getElementById('hubGrid');
-  grid.innerHTML = '';
-  var iconMap = {starSVG:starSVG,flowerSVG:flowerSVG,butterflySVG:butterflySVG,batSVG:batSVG,moonSVG:moonSVG,bookSVG:bookSVG,bowSVG:bowSVG,vinylSVG:vinylSVG,noteSVG:noteSVG,hangerSVG:hangerSVG,heartSVG:heartSVG,boltSVG:boltSVG,arrowsSVG:arrowsSVG,scaleSVG:scaleSVG,paletteSVG:paletteSVG,questionSVG:questionSVG};
-
-  // Group by category
-  var categories = [];
-  var catMap = {};
-  HUB_GAMES.forEach(function(game){
-    var cat = game.category || 'Other';
-    if(!catMap[cat]){ catMap[cat] = []; categories.push(cat); }
-    catMap[cat].push(game);
-  });
-
-  var gi = 0;
-  categories.forEach(function(cat){
-    // Category label
-    var label = document.createElement('div');
-    label.style.cssText = 'grid-column:1/-1;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;padding:16px 0 4px;color:'+pal.tx+';';
-    if(gi > 0) label.style.borderTop = '1px solid '+pal.tx+'08';
-    label.textContent = cat;
-    grid.appendChild(label);
-
-    catMap[cat].forEach(function(game){
-      var tile = document.createElement('div');
-      tile.className = 'hub-tile';
-      tile.onclick = function(){ startHubGame(game); };
-      var thumbBg = 'linear-gradient(135deg,'+pal.ac+'18,'+pal.ac+'0a)';
-      var iconFn = iconMap[game.iconFn] || aeIcons[gi%aeIcons.length];
-      var iconHtml = makeIconSvg(iconFn, pal.ac, 44);
-
-      tile.innerHTML =
-        '<div class="hub-thumb" style="background:'+thumbBg+'">'+
-          '<div class="hub-thumb-icon">'+iconHtml+'</div>'+
-        '</div>'+
-        '<div class="hub-info" style="background:'+pal.bg+';color:'+pal.tx+'">'+
-          '<div class="hub-game-name">'+game.name+'</div>'+
-          '<div class="hub-game-desc">'+game.desc+'</div>'+
-          '<div class="hub-game-best" data-game-id="'+game.id+'" style="color:'+pal.ac+'"></div>'+
-        '</div>';
-
-      grid.appendChild(tile);
-      gi++;
-    });
-  });
-
-  loadHubBestScores();
-}
-
-function loadHubBestScores(){
-  var token = localStorage.getItem('stuflover_token');
-  if(!token) return;
-  HUB_GAMES.forEach(function(g){
-    fetch('/api/games/'+encodeURIComponent(g.id)+'/my-scores',{
-      headers:{'Authorization':'Bearer '+token}
-    }).then(function(r){return r.ok?r.json():null;}).then(function(d){
-      if(!d || !d.best) return;
-      var el = document.querySelector('.hub-game-best[data-game-id="'+g.id+'"]');
-      if(el){ el.textContent = 'Best: '+d.best; el.classList.add('visible'); }
-    }).catch(function(){});
-  });
+  if(hv){ hv.style.display = 'none'; hv.classList.remove('active'); }
 }
 
 function startHubGame(game){
@@ -3621,47 +3521,12 @@ function startHubGame(game){
     openModalView('cardgame', game.name+' \u2014 Stuflover', backToHub, document.getElementById('cardGameView'));
     return;
   }
-
-  // Fallback: chat-based (shouldn't happen with new games)
-  document.getElementById('dtiView').style.display = 'none';
-  document.getElementById('dtiView').classList.remove('active');
-  document.getElementById('cardGameView').style.display = 'none';
-  document.getElementById('cardGameView').classList.remove('active');
-  document.getElementById('normalChat').style.display = 'flex';
-
-  var send = document.getElementById('chatSend');
-  if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
-  var input = document.getElementById('chatInput');
-  if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
-  document.getElementById('chatMessages').innerHTML='';
-
-  var navEl = document.getElementById('sectionNameNav');
-  navEl.textContent = fName+' — '+game.name;
-
-  // Override the section prompt temporarily
-  sec._origPrompt = sec.prompt;
-  sec._origOpener = sec.opener;
-  sec.prompt = function(){
-    var vibePrompt = buildFloveeHubPrompt();
-    return vibePrompt+'\n\nGAME MODE: '+game.name+'\n'+game.prompt;
-  };
-  sec.opener = function(){ return game.opener; };
-
-  // Load saved chat or show opener
-  var chatId = 'floverhub_'+game.id;
-  var saved = loadChat(chatId);
-  if(saved.messages.length > 0){
-    chatHistory = saved.messages.map(function(m){ return {role:m.role, content:m.content, time:m.time}; });
-    restoreMessages(chatId, saved.messages, pal);
-  } else {
-    chatHistory = [];
-    var opener = game.opener;
-    setTimeout(function(){ addMsg(opener,'flovee'); },250);
-  }
 }
 
 function backToHub(){
-  // Restore original section prompt
+  // Closing a game view returns to the one canonical games listing
+  // (/games.html). Save any pending score first so the destination
+  // leaderboard/stats reflect it.
   var sec = currentSection;
   if(sec && sec._origPrompt){
     sec.prompt = sec._origPrompt;
@@ -3676,18 +3541,17 @@ function backToHub(){
   document.getElementById('dtiView').style.display = 'none';
   document.getElementById('dtiView').classList.remove('active');
   if(dtiTimerInterval) clearInterval(dtiTimerInterval);
+  var savePromise = Promise.resolve();
   if(dtiState && dtiState.totalScore > 0){
-    postGameScore('dti', dtiState.totalScore);
+    savePromise = postGameScore('dti', dtiState.totalScore);
     dtiState.totalScore = 0;
     dtiState.round = 1;
-  }
-  if(!cgState.ended && cgState.score > 0){
-    postGameScore(cgState.game && cgState.game.id, cgState.score);
+  } else if(cgState && !cgState.ended && cgState.score > 0){
+    savePromise = postGameScore(cgState.game && cgState.game.id, cgState.score);
     cgState.ended = true;
   }
   if(typeof dti2DDestroy === 'function') dti2DDestroy();
   document.getElementById('chatMessages').innerHTML = '';
-  document.getElementById('sectionNameNav').textContent = 'FloveeHub';
   // Clear FloveeHub game chat histories
   for(var i = localStorage.length - 1; i >= 0; i--){
     var key = localStorage.key(i);
@@ -3695,7 +3559,7 @@ function backToHub(){
       localStorage.removeItem(key);
     }
   }
-  openHub();
+  waitThenGo(savePromise, '/games.html');
 }
 
 // ─── CARD GAME ENGINE ─────────────────────────────────────
@@ -3934,7 +3798,11 @@ function cgRender(d){
 function postGameScore(gameId, score){
   var token = localStorage.getItem('stuflover_token');
   if(!token || !gameId || typeof score !== 'number') return Promise.resolve();
-  return fetch('/api/games/'+encodeURIComponent(gameId)+'/score',{
+  // Route through STUFLOVER_API_URL so scores reach the Railway backend
+  // even when this page is served from stuflover.com.
+  var base = (window.STUFLOVER_API_URL || '');
+  var f = window._origFetch || window.fetch;
+  return f.call(window, base + '/api/games/'+encodeURIComponent(gameId)+'/score', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
     body:JSON.stringify({score: Math.max(0, Math.floor(score))}),
@@ -7217,7 +7085,7 @@ function initGlowTitle(){
 const SECTIONS = [
   {id:'fitforit',   name:'Style',          sub:'closet + outfits',  col:0},
   {id:'beyou',      name:'Wellness',       sub:'breathe + journal', col:1},
-  {id:'floverhub',  name:'Games',          sub:'play something',    col:3, prompt:function(){ return buildFloveeHubPrompt(); }, opener:function(){ return buildFloveeHubOpener(); }},
+  {id:'floverhub',  name:'Games',          sub:'play something',    col:3},
   {id:'outfitroast',name:'Roast Me',       sub:'flovee judges you', col:7, newBadge:true},
   {id:'secretdiary',name:'Diary',          sub:'just for you',      col:8, newBadge:true},
   {id:'studyroom',  name:'Study Room',     sub:'focus by aesthetic', col:2, newBadge:true},
@@ -7447,9 +7315,14 @@ function openSection(id, opts){
   if(id === 'fitcheck'){ window.location.href = '/fitcheck.html'; return; }
   if(id === 'academic'){ window.location.href = '/academic.html'; return; }
   if(id === 'activities'){ window.location.href = '/activities.html'; return; }
-  // The "Games" tile/search hit opens games.html; deep-links from games.html
-  // (#game=<id>) pass skipRedirect so the hub can still launch a specific game.
-  if(id === 'floverhub' && !(opts && opts.skipRedirect)){ window.location.href = '/games.html'; return; }
+  // The "Games" tile/search hit opens games.html — the one canonical Games
+  // listing. Deep-links from play.html (#game=<id>) pass skipRedirect so a
+  // specific game can still launch on this page.
+  if(id === 'floverhub' && !(opts && opts.skipRedirect)){
+    var g = (opts && opts.game) ? ('#game=' + encodeURIComponent(opts.game)) : '';
+    window.location.href = '/games.html' + g;
+    return;
+  }
   const sec = SECTIONS.find(s=>s.id===id);
   if(!sec) return;
   currentSection = sec;
