@@ -2521,6 +2521,9 @@ function buildPage(){
     document.body.appendChild(updatePopup);
   }
 
+  // Show flovee intro (first visit) or question (later visits)
+  loadFloveeIntro();
+
   // Load flovee post
   loadFloveePost();
 
@@ -4743,6 +4746,18 @@ var FLOVEE_DATA = {
   nox:    {name:'Nox',    emoji:'🖤', color:'#90a4ae', darkColor:'#263238', vibe:'deadpan icon',    aesthetic:'goth',      gradient:'linear-gradient(135deg,#78909c,#b0bec5)'},
 };
 
+// Starter questions matched to each flovee — mirrors FLOVEE_STARTERS in friends.html
+var FLOVEE_STARTERS = {
+  lumi:   ['what skincare should i try?','i need a morning routine','rate my aesthetic','help me feel put together'],
+  delara: ['recommend me a book','i need a study playlist','what should i journal about?','tell me something deep'],
+  vesper: ['i need outfit inspo','how do i romanticize my life?','tell me something pretty','i want a glow up'],
+  zola:   ['roast me lovingly','make me laugh rn','what trend should i try?','give me a hot take'],
+  miro:   ['put me onto new music','what should i thrift?','give me a creative idea','what is underrated rn?'],
+  seraph: ['do a tarot reading for me','what does the universe want me to know?','i need a sign','what crystal should i get?'],
+  remi:   ['how do i be more main character?','give me a pep talk','romanticize my day','what movie fits my vibe?'],
+  nox:    ['give me honest advice','what do you really think?','tell me something real','i need a reality check']
+};
+
 var floveeReacted = false;
 
 function getUserFloveeId(){
@@ -4750,6 +4765,46 @@ function getUserFloveeId(){
   var aeKey = topAe ? topAe[0] : 'softgirl';
   var aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
   return aeMap[aeKey] || 'remi';
+}
+
+// ─── FLOVEE INTRO — first visit introduces herself, later visits ask a question ───
+function loadFloveeIntro(){
+  var wrap = document.getElementById('floveeLetterWrap');
+  if(!wrap || !searchPal) return;
+  var pal = searchPal;
+  var fid = getUserFloveeId();
+  var fd = FLOVEE_DATA[fid] || FLOVEE_DATA.remi;
+  var seenKey = 'stuflover_lifestyle_intro_seen';
+  var firstVisit = !localStorage.getItem(seenKey);
+
+  var headline, body;
+  if(firstVisit){
+    headline = "hi, i'm "+fd.name;
+    body = fd.vibe+" — your AI best friend, matched to your aesthetic. i'll be here on your lifestyle page, and we can chat anytime.";
+    localStorage.setItem(seenKey, '1');
+  } else {
+    var starters = FLOVEE_STARTERS[fid] || FLOVEE_STARTERS.remi;
+    var question = starters[Math.floor(Math.random()*starters.length)];
+    headline = fd.name+" says";
+    body = question;
+  }
+
+  var chatHref = 'friends.html?peer='+encodeURIComponent(fid);
+  wrap.style.display = 'block';
+  wrap.innerHTML =
+    '<div style="border-radius:22px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,0.06);">'+
+      '<div style="padding:20px 22px;background:'+fd.gradient+';display:flex;align-items:flex-start;gap:14px;">'+
+        '<div style="flex:0 0 48px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.45);display:flex;align-items:center;justify-content:center;font-size:1.5rem;backdrop-filter:blur(8px);">'+fd.emoji+'</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:0.62rem;font-weight:900;font-family:Barlow Condensed,sans-serif;letter-spacing:3px;text-transform:uppercase;opacity:0.55;color:'+fd.darkColor+';margin-bottom:6px;">'+(firstVisit?'meet your flovee':'your flovee')+'</div>'+
+          '<div style="font-size:1.05rem;font-weight:800;color:'+fd.darkColor+';line-height:1.25;margin-bottom:4px;">'+escHtml(headline)+'</div>'+
+          '<div style="font-size:0.88rem;color:'+fd.darkColor+';opacity:0.8;line-height:1.55;">'+escHtml(body)+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding:12px 16px;background:'+pal.tx+'04;display:flex;justify-content:flex-end;">'+
+        '<a href="'+chatHref+'" style="padding:9px 20px;border-radius:20px;border:none;background:'+fd.color+';color:'+fd.darkColor+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;">'+(firstVisit?'say hi to '+fd.name:'reply to '+fd.name)+'</a>'+
+      '</div>'+
+    '</div>';
 }
 
 var _floveeTimerInterval = null;
@@ -4783,8 +4838,8 @@ async function loadFloveePost(){
       if(!seenFlovee){
         introHtml =
           '<div style="padding:12px 16px;border-radius:12px;background:'+pal.tx+'05;margin-bottom:14px;border:1px dashed '+pal.tx+'10;">'+
-            '<div style="font-size:0.72rem;font-weight:700;color:'+pal.tx+';margin-bottom:4px;">'+fd.emoji+' meet your flovee</div>'+
-            '<div style="font-size:0.78rem;line-height:1.6;color:'+pal.tx+';opacity:0.55;">your flovee is your AI best friend — matched to your aesthetic. she texts you throughout the day, but her messages disappear. if you miss it, it is gone forever.</div>'+
+            '<div style="font-size:0.72rem;font-weight:700;color:'+pal.tx+';margin-bottom:4px;">'+fd.emoji+' meet '+fd.name+' — your flovee</div>'+
+            '<div style="font-size:0.78rem;line-height:1.6;color:'+pal.tx+';opacity:0.55;">'+fd.name+' is your AI best friend — matched to your aesthetic. she texts you throughout the day, but her messages disappear. if you miss it, it is gone forever.</div>'+
           '</div>';
         localStorage.setItem('stuflover_seen_flovee', 'true');
       }
