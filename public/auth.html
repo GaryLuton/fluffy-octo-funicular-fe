@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Stuflover - Sign In</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     :root {
@@ -16,21 +16,28 @@
     html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
     input,button,select,textarea{font-size:16px;}
-    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;display:flex;align-items:center;justify-content:center;
-      background-image:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(42,26,20,0.018) 18px,rgba(42,26,20,0.018) 19px),
-        repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(42,26,20,0.018) 18px,rgba(42,26,20,0.018) 19px),
-        radial-gradient(circle at 30% 20%,rgba(240,221,214,0.4) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(232,213,200,0.3) 0%,transparent 50%);}
+    body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--brown);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;
+      background-image:radial-gradient(circle, rgba(42,26,20,0.03) 1px, transparent 1px);background-size:24px 24px;}
     h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
-    .auth-container{width:90%;max-width:440px;animation:fadeUp 0.5s ease both;}
+    .auth-container{width:100%;max-width:460px;animation:fadeUp 0.5s ease both;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
     @keyframes floatBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
 
-    .logo-top{text-align:center;margin-bottom:40px;}
-    .logo-top h1{font-size:3.2rem;letter-spacing:5px;color:var(--brown);}
-    .logo-top p{font-size:0.85rem;color:rgba(42,26,20,0.45);margin-top:4px;letter-spacing:1px;}
+    .logo-top{text-align:center;margin-bottom:32px;}
+    .logo-top .eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:6px;text-transform:uppercase;color:var(--terracotta);margin-bottom:14px;}
+    .logo-top h1{font-size:clamp(3rem,9vw,4.4rem);line-height:0.82;letter-spacing:-2px;color:var(--brown);margin-bottom:14px;}
+    .logo-top p{font-size:1rem;color:rgba(42,26,20,0.45);line-height:1.6;max-width:340px;margin:0 auto;}
+    .logo-top .caveat{font-family:'Caveat',cursive;font-size:1.25rem;color:var(--terracotta);opacity:0.75;margin-top:10px;}
 
-    .auth-card{background:var(--white);border-radius:28px;padding:40px;box-shadow:0 24px 64px rgba(42,26,20,0.07),0 8px 24px rgba(42,26,20,0.04),0 0 0 1px rgba(42,26,20,0.025);backdrop-filter:blur(10px);animation:floatBob 4s ease-in-out infinite;}
+    /* Quiz-complete banner: only shown when user arrives from quiz while logged out. */
+    .quiz-banner{background:var(--terracotta);color:white;border-radius:18px;padding:20px 22px;margin-bottom:20px;box-shadow:0 10px 32px rgba(200,120,96,0.28);position:relative;overflow:hidden;}
+    .quiz-banner::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,0.06) 20px,rgba(255,255,255,0.06) 21px);pointer-events:none;}
+    .quiz-banner .qb-eyebrow{position:relative;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:4px;text-transform:uppercase;opacity:0.8;margin-bottom:6px;}
+    .quiz-banner .qb-title{position:relative;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.55rem;letter-spacing:1px;text-transform:uppercase;line-height:1.05;margin-bottom:6px;}
+    .quiz-banner .qb-sub{position:relative;font-size:0.9rem;line-height:1.5;color:rgba(255,255,255,0.85);}
+
+    .auth-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 16px 44px rgba(42,26,20,0.08),0 4px 12px rgba(42,26,20,0.04),0 0 0 1px rgba(42,26,20,0.03);animation:floatBob 4s ease-in-out infinite;}
 
     .tabs{display:flex;gap:0;margin-bottom:32px;border-radius:12px;overflow:hidden;border:2px solid rgba(42,26,20,0.1);}
     .tab{flex:1;text-align:center;padding:13px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(42,26,20,0.35);transition:all 0.35s cubic-bezier(0.4,0,0.2,1);}
@@ -48,23 +55,26 @@
     .error-msg:not(:empty){animation:slideInError 0.3s cubic-bezier(0.4,0,0.2,1) both;}
     .success-msg{font-size:0.82rem;color:#2a8a4a;font-weight:700;min-height:22px;margin-bottom:8px;}
 
-    .submit-btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.25s cubic-bezier(0.4,0,0.2,1),transform 0.25s cubic-bezier(0.4,0,0.2,1),box-shadow 0.25s cubic-bezier(0.4,0,0.2,1);}
-    .submit-btn:hover:not(:disabled){box-shadow:0 4px 16px rgba(200,120,96,0.35);}
-    .submit-btn:hover{background:var(--terracotta-dark);transform:translateY(-1px);}
-    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .submit-btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:50px;padding:16px;cursor:pointer;box-shadow:0 6px 24px rgba(200,120,96,0.25);transition:background 0.25s cubic-bezier(0.4,0,0.2,1),transform 0.25s cubic-bezier(0.4,0,0.2,1),box-shadow 0.25s cubic-bezier(0.4,0,0.2,1);}
+    .submit-btn:hover:not(:disabled){background:var(--terracotta-dark);transform:translateY(-2px);box-shadow:0 10px 32px rgba(200,120,96,0.35);}
+    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
 
     .hidden{display:none;}
 
     .divider{text-align:center;margin:24px 0 16px;font-size:0.78rem;color:rgba(42,26,20,0.3);letter-spacing:1px;}
 
     @media(max-width:480px){
+      body{padding:24px 16px;}
       .auth-card{padding:28px 16px;border-radius:18px;}
-      .logo-top h1{font-size:2.4rem;}
-      .logo-top{margin-bottom:28px;}
-      .auth-container{width:calc(100% - 32px);}
+      .logo-top h1{font-size:2.6rem;}
+      .logo-top{margin-bottom:24px;}
+      .logo-top .eyebrow{letter-spacing:4px;}
+      .auth-container{width:100%;}
       .submit-btn{min-height:48px;padding:14px;}
       .tab{min-height:44px;padding:13px 8px;}
       .form-group input{padding:14px 16px;min-height:44px;}
+      .quiz-banner{padding:18px 18px;border-radius:14px;}
+      .quiz-banner .qb-title{font-size:1.3rem;}
       body{font-size:15px;}
     }
   </style>
@@ -72,8 +82,16 @@
 <body>
   <div class="auth-container">
     <div class="logo-top">
+      <div class="eyebrow">your vibe, your world</div>
       <h1>Stuflover</h1>
-      <p>your vibe, your world</p>
+      <p>take the quiz. get a page built around your aesthetic. it is scary accurate.</p>
+    </div>
+
+    <!-- Shown only when the user just finished the quiz while logged out. -->
+    <div id="quizBanner" class="quiz-banner hidden">
+      <div class="qb-eyebrow">Quiz complete</div>
+      <div class="qb-title">Your aesthetic is ready</div>
+      <div class="qb-sub">Register or sign in to unlock your personalised page.</div>
     </div>
 
     <div class="auth-card">
@@ -128,6 +146,26 @@
 <script>
 // API base URL — use Railway backend when not hosted there
 const API_BASE = window.STUFLOVER_API_URL || '';
+
+// If the user arrived here straight from finishing the quiz,
+// show the "your aesthetic is ready" banner and default them to
+// the Create Account tab (the expected path for first-time quiz takers).
+(function showQuizBannerIfNeeded(){
+  var params = new URLSearchParams(window.location.search);
+  var fromQuiz = params.get('quiz') === '1' || !!localStorage.getItem('stuflover_pending_quiz');
+  if (fromQuiz) {
+    var banner = document.getElementById('quizBanner');
+    if (banner) banner.classList.remove('hidden');
+    // Pre-select the Create Account tab on first visit after the quiz.
+    if (params.get('quiz') === '1') {
+      document.querySelectorAll('.tab').forEach(function(t, i){
+        t.classList.toggle('active', i === 1);
+      });
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('register-form').classList.remove('hidden');
+    }
+  }
+})();
 
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => {
