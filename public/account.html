@@ -9,6 +9,7 @@
   <link rel="preload" href="/stuflover-nav.css" as="style"/>
   <link rel="stylesheet" href="/stuflover-nav.css"/>
   <link rel="preload" href="/stuflover-nav.js" as="script"/>
+  <script src="/stuflover-schema.js"></script>
   <script src="/stuflover-theme-boot.js"></script>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
@@ -101,9 +102,9 @@
 
 <nav class="sl-nav">
   <a class="logo sl-nav-logo" href="lifestyle.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" id="acctNavToggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
-    <a class="nav-link sl-nav-btn" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
+    <a class="nav-link sl-nav-btn" id="acctNavBack" href="lifestyle.html">← Back</a>
     <a class="nav-link sl-nav-btn" href="account.html">Account</a>
     <a class="nav-link sl-nav-btn" href="index.html">Home</a>
   </div>
@@ -120,8 +121,8 @@
   <div class="section-card sl-card">
     <h2 class="section-title">Your Style Profile</h2>
     <div class="section-desc" id="profileDesc">Your style preferences power Flovee, your shop, and your whole experience.</div>
-    <button class="btn btn-primary sl-btn sl-btn-primary" onclick="retakeQuiz()">Retake the Quiz</button>
-    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="window.location.href='lifestyle.html'">View My Page</button>
+    <button type="button" class="btn btn-primary sl-btn sl-btn-primary" id="retakeQuizBtn">Retake the Quiz</button>
+    <button type="button" class="btn btn-outline sl-btn sl-btn-secondary" id="viewMyPageBtn">View My Page</button>
   </div>
 
   <div class="section-card sl-card" id="appearanceCard">
@@ -155,20 +156,26 @@
       <label class="switch"><input type="checkbox" id="textureToggle"/><span class="switch-slider"></span></label>
     </div>
 
-    <button class="btn btn-outline sl-btn sl-btn-secondary" id="themeResetBtn" style="margin-top:16px;">Reset to defaults</button>
+    <button type="button" class="btn btn-outline sl-btn sl-btn-secondary" id="themeResetBtn" style="margin-top:16px;">Reset to defaults</button>
   </div>
 
   <div class="section-card sl-card">
     <h2 class="section-title">Sign Out</h2>
     <div class="section-desc">You will need to sign in again next time.</div>
-    <button class="btn btn-outline sl-btn sl-btn-secondary" onclick="stufloverLogout()">Sign Out</button>
+    <button type="button" class="btn btn-outline sl-btn sl-btn-secondary" id="signOutBtn">Sign Out</button>
   </div>
 
   <div class="section-card sl-card">
     <h2 class="section-title">Delete Account</h2>
     <div class="section-desc">This permanently deletes your account and all your data. This cannot be undone.</div>
     <div class="status-msg" id="deleteStatus"></div>
-    <button class="btn btn-danger sl-btn sl-btn-danger" id="deleteBtn" onclick="deleteAccount()">Delete My Account</button>
+    <div id="deleteConfirmWrap" style="display:none;margin-bottom:10px;">
+      <label class="field-label" for="deleteConfirmInput" style="display:block;">Type <strong>DELETE</strong> to confirm</label>
+      <input id="deleteConfirmInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="DELETE" style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(30,12,6,0.15);font-family:'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:3px;text-transform:uppercase;font-size:0.9rem;background:#fff;color:var(--brown);outline:none;"/>
+    </div>
+    <button type="button" class="btn btn-danger sl-btn sl-btn-danger" id="deleteBtn">Delete My Account</button>
+    <button type="button" class="btn btn-danger sl-btn sl-btn-danger" id="deleteConfirmBtn" style="display:none;" disabled>Permanently Delete</button>
+    <button type="button" class="btn btn-outline sl-btn sl-btn-secondary" id="deleteCancelBtn" style="display:none;">Cancel</button>
   </div>
 </div>
 
@@ -333,13 +340,10 @@ function retakeQuiz() {
 })();
 
 async function deleteAccount() {
-  if (!confirm('Are you sure? This will permanently delete your account and all your data.')) return;
-  if (!confirm('Really sure? There is no going back.')) return;
-
-  var btn = document.getElementById('deleteBtn');
+  var confirmBtn = document.getElementById('deleteConfirmBtn');
   var status = document.getElementById('deleteStatus');
-  btn.disabled = true;
-  btn.textContent = 'DELETING...';
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'DELETING...';
 
   try {
     var token = localStorage.getItem('stuflover_token');
@@ -352,15 +356,78 @@ async function deleteAccount() {
     try { data = JSON.parse(text); } catch(e) { throw new Error('Server error'); }
     if (!res.ok) throw new Error(data.error || 'Failed to delete');
 
-    // Clear all local data
     localStorage.clear();
     window.location.href = '/auth.html';
   } catch(err) {
     status.textContent = err.message;
-    btn.disabled = false;
-    btn.textContent = 'DELETE MY ACCOUNT';
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Permanently Delete';
   }
 }
+
+// ─── Event wiring (replaces inline onclick attributes) ───────
+(function wireAccountEvents(){
+  var navToggle = document.getElementById('acctNavToggle');
+  if(navToggle) navToggle.addEventListener('click', function(){
+    document.querySelector('.nav-links').classList.toggle('open');
+  });
+
+  var back = document.getElementById('acctNavBack');
+  if(back) back.addEventListener('click', function(e){
+    e.preventDefault();
+    history.back();
+  });
+
+  var retake = document.getElementById('retakeQuizBtn');
+  if(retake) retake.addEventListener('click', retakeQuiz);
+
+  var viewPage = document.getElementById('viewMyPageBtn');
+  if(viewPage) viewPage.addEventListener('click', function(){ window.location.href='lifestyle.html'; });
+
+  var signOut = document.getElementById('signOutBtn');
+  if(signOut) signOut.addEventListener('click', function(){
+    if(window.stufloverLogout) window.stufloverLogout();
+  });
+
+  // ─── Typed-DELETE confirmation for destructive account removal ───
+  var openBtn = document.getElementById('deleteBtn');
+  var wrap = document.getElementById('deleteConfirmWrap');
+  var input = document.getElementById('deleteConfirmInput');
+  var confirmBtn = document.getElementById('deleteConfirmBtn');
+  var cancelBtn = document.getElementById('deleteCancelBtn');
+  var status = document.getElementById('deleteStatus');
+
+  function openConfirm(){
+    openBtn.style.display = 'none';
+    wrap.style.display = 'block';
+    confirmBtn.style.display = 'block';
+    cancelBtn.style.display = 'block';
+    confirmBtn.disabled = true;
+    status.textContent = '';
+    input.value = '';
+    input.focus();
+  }
+  function closeConfirm(){
+    openBtn.style.display = 'block';
+    wrap.style.display = 'none';
+    confirmBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    confirmBtn.disabled = true;
+    status.textContent = '';
+  }
+  openBtn.addEventListener('click', openConfirm);
+  cancelBtn.addEventListener('click', closeConfirm);
+  input.addEventListener('input', function(){
+    confirmBtn.disabled = input.value.trim().toUpperCase() !== 'DELETE';
+  });
+  confirmBtn.addEventListener('click', function(){
+    if(input.value.trim().toUpperCase() !== 'DELETE'){
+      status.textContent = 'Type DELETE to confirm.';
+      return;
+    }
+    deleteAccount();
+  });
+})();
 </script>
 <script src="/stuflover-ux.js"></script>
 </body>

@@ -228,7 +228,7 @@
 
 <nav id="mainNav" class="sl-nav">
   <a class="logo sl-nav-logo" id="navLogo" href="index.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
     <a class="nav-link sl-nav-btn" id="navMyPage" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
     <a class="nav-link sl-nav-btn" id="navAccount" href="account.html">Account</a>
@@ -242,7 +242,7 @@
     <input class="search-input" id="searchInput" type="search" placeholder="Search activities…" autocomplete="off" />
   </div>
   <div class="chip-row" id="chipRow"></div>
-  <button class="refresh-btn" id="refreshBtn" onclick="generateActivities(true)" style="margin-left:auto;">
+  <button type="button" class="refresh-btn" id="refreshBtn" onclick="generateActivities(true)" style="margin-left:auto;">
     <span class="refresh-icon">&#x21bb;</span> New Ideas
   </button>
 </div>

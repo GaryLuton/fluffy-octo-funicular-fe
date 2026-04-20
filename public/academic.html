@@ -178,7 +178,7 @@
 <!-- NAV -->
 <nav id="mainNav" class="sl-nav">
   <a href="index.html" class="logo bc sl-nav-logo">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
     <a href="lifestyle.html" class="nav-link bc sl-nav-btn" onclick="event.preventDefault();history.back();">← Back</a>
     <a href="account.html" class="nav-link bc sl-nav-btn">Account</a>
@@ -195,9 +195,9 @@
 
 <!-- TABS -->
 <div class="tabs-bar">
-  <button class="tab-btn bc active" data-tab="homework">Ask Flovee</button>
-  <button class="tab-btn bc" data-tab="flashcards">Flash Cards</button>
-  <button class="tab-btn bc" data-tab="quiz">Quiz Me</button>
+  <button type="button" class="tab-btn bc active" data-tab="homework">Ask Flovee</button>
+  <button type="button" class="tab-btn bc" data-tab="flashcards">Flash Cards</button>
+  <button type="button" class="tab-btn bc" data-tab="quiz">Quiz Me</button>
 </div>
 
 <!-- MOTIVATIONAL QUOTE -->
@@ -208,7 +208,7 @@
   <div class="chat-box" id="chatBox"></div>
   <div class="chat-input-row">
     <input type="text" id="chatInput" placeholder="Ask anything — no stupid questions here..." autocomplete="off"/>
-    <button class="send-btn bc" id="chatSend">Send</button>
+    <button type="button" class="send-btn bc" id="chatSend">Send</button>
   </div>
 </div>
 
@@ -221,7 +221,7 @@
   <div class="fc-create">
     <input type="text" id="fcFront" placeholder="Question or term..."/>
     <input type="text" id="fcBack" placeholder="Answer..."/>
-    <button class="action-btn bc" id="fcAdd">Add</button>
+    <button type="button" class="action-btn bc" id="fcAdd">Add</button>
   </div>
   <div class="card-stage" id="fcStage">
     <div class="fc-empty" id="fcEmpty">No cards yet — add your first one above</div>
@@ -236,7 +236,7 @@
   </div>
   <div class="quiz-topic-row">
     <input type="text" id="quizTopic" placeholder="What do you want to be quizzed on?"/>
-    <button class="action-btn bc" id="quizGen">Go</button>
+    <button type="button" class="action-btn bc" id="quizGen">Go</button>
   </div>
   <div id="quizArea"></div>
 </div>

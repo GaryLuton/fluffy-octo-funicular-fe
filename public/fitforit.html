@@ -178,7 +178,7 @@
 
 <nav id="mainNav" class="sl-nav">
   <a class="nav-logo bc sl-nav-logo" href="index.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
     <a class="nav-btn bc sl-nav-btn" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
   </div>
@@ -197,7 +197,7 @@
         Snap
         <input type="file" accept="image/*" capture="environment" id="instantCamera" onchange="handleInstantPhoto(this)" style="display:none;"/>
       </label>
-      <button class="closet-add bc" id="addItemBtn" onclick="openAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);box-shadow:none;">+ Add</button>
+      <button type="button" class="closet-add bc" id="addItemBtn" onclick="openAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);box-shadow:none;">+ Add</button>
     </div>
   </div>
 
@@ -209,8 +209,8 @@
         <input id="instantName" placeholder="what is it? (e.g. black crop top)" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(128,128,128,0.12);background:transparent;font-family:Space Grotesk,sans-serif;font-size:0.85rem;color:inherit;outline:none;"/>
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="instantCats"></div>
         <div style="display:flex;gap:6px;">
-          <button id="instantSave" onclick="saveInstantItem()" class="bc" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Save</button>
-          <button onclick="cancelInstant()" class="bc" style="padding:10px 16px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;background:transparent;color:inherit;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">x</button>
+          <button type="button" id="instantSave" onclick="saveInstantItem()" class="bc" style="flex:1;padding:10px;border:none;border-radius:10px;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Save</button>
+          <button type="button" onclick="cancelInstant()" class="bc" style="padding:10px 16px;border:1.5px solid rgba(128,128,128,0.15);border-radius:10px;background:transparent;color:inherit;font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">x</button>
         </div>
       </div>
     </div>
@@ -222,11 +222,11 @@
   <div id="builderSection" style="margin-top:32px;display:none;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <h2 class="bc" style="font-size:0.9rem;letter-spacing:2px;opacity:0.4;">Build an Outfit</h2>
-      <button class="builder-btn outline bc" onclick="clearOutfit()" style="padding:6px 14px;font-size:0.68rem;">Clear</button>
+      <button type="button" class="builder-btn outline bc" onclick="clearOutfit()" style="padding:6px 14px;font-size:0.68rem;">Clear</button>
     </div>
     <div class="builder-preview" id="builderPreview"></div>
     <div style="text-align:center;margin-top:12px;">
-      <button class="builder-btn bc" id="suggestBtn" onclick="aiSuggest()">AI Suggest</button>
+      <button type="button" class="builder-btn bc" id="suggestBtn" onclick="aiSuggest()">AI Suggest</button>
     </div>
     <div class="suggest-result" id="suggestResult"></div>
   </div>
@@ -265,11 +265,11 @@
     </select>
     <div class="modal-err" id="addErr"></div>
     <div class="modal-btns">
-      <button id="addSubmit" onclick="addItem()">Add to Closet</button>
-      <button onclick="closeAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
+      <button type="button" id="addSubmit" onclick="addItem()">Add to Closet</button>
+      <button type="button" onclick="closeAddModal()" style="background:transparent;border:1.5px solid rgba(128,128,128,0.2);color:inherit;">Cancel</button>
     </div>
     <div style="margin-top:12px;font-size:0.72rem;opacity:0.35;text-align:center;">Or let AI identify it:</div>
-    <button id="aiIdentify" onclick="aiIdentifyItem()" style="width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(128,128,128,0.15);border-radius:8px;background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;cursor:pointer;transition:opacity 0.15s;">Auto-detect item from photo</button>
+    <button type="button" id="aiIdentify" onclick="aiIdentifyItem()" style="width:100%;margin-top:6px;padding:10px;border:1.5px dashed rgba(128,128,128,0.15);border-radius:8px;background:transparent;color:inherit;font-family:'Space Grotesk',sans-serif;font-size:0.82rem;cursor:pointer;transition:opacity 0.15s;">Auto-detect item from photo</button>
   </div>
 </div>
 
@@ -372,7 +372,7 @@ function renderCloset(){
       '<div class="closet-item-info" style="color:'+PAL.tx+'">'+
         '<div class="closet-item-name">'+escHtml(item.name)+'</div>'+
       '</div>'+
-      '<button class="closet-item-del" onclick="deleteItem(event,'+i+')">x</button>';
+      '<button type="button" class="closet-item-del" onclick="deleteItem(event,'+i+')">x</button>';
     grid.appendChild(card);
   });
   // Show builder when 2+ items
@@ -427,7 +427,7 @@ function handleInstantPhoto(input){
       var cats = ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
       var catsDiv = document.getElementById('instantCats');
       catsDiv.innerHTML = cats.map(function(c){
-        return '<button onclick="pickInstantCat(this,\''+c+'\')" style="padding:5px 12px;border-radius:12px;border:1.5px solid '+PAL.tx+'12;background:transparent;color:'+PAL.tx+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;">'+c+'</button>';
+        return '<button type="button" onclick="pickInstantCat(this,\''+c+'\')" style="padding:5px 12px;border-radius:12px;border:1.5px solid '+PAL.tx+'12;background:transparent;color:'+PAL.tx+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.4;transition:all 0.2s;">'+c+'</button>';
       }).join('');
 
       document.getElementById('instantName').focus();
