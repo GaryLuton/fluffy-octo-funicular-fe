@@ -2679,7 +2679,8 @@ function buildPage(){
       localStorage.removeItem('stuflover_open_game');
     } catch(e){}
     document.getElementById('homeView').style.display = 'none';
-    try { openSection(preAutoOpen); } catch(e){ console.error('auto-open section failed', e); }
+    var _openOpts = (preAutoOpen === 'floverhub' && preAutoGame) ? {skipRedirect:true} : undefined;
+    try { openSection(preAutoOpen, _openOpts); } catch(e){ console.error('auto-open section failed', e); }
     if(preAutoGame && preAutoOpen === 'floverhub' && typeof HUB_GAMES !== 'undefined'){
       var _targetGame = HUB_GAMES.find(function(g){ return g.id === preAutoGame; });
       if(_targetGame) { try { startHubGame(_targetGame); } catch(e){ console.error('auto-open game failed', e); } }
@@ -7430,12 +7431,15 @@ function restoreMessages(secId, messages, pal){
   container.scrollTop = container.scrollHeight;
 }
 
-function openSection(id){
+function openSection(id, opts){
   // Redirect to dedicated pages
   if(id === 'beyou'){ window.location.href = '/beyou.html'; return; }
   if(id === 'fitcheck'){ window.location.href = '/fitcheck.html'; return; }
   if(id === 'academic'){ window.location.href = '/academic.html'; return; }
   if(id === 'activities'){ window.location.href = '/activities.html'; return; }
+  // The "Games" tile/search hit opens games.html; deep-links from games.html
+  // (#game=<id>) pass skipRedirect so the hub can still launch a specific game.
+  if(id === 'floverhub' && !(opts && opts.skipRedirect)){ window.location.href = '/games.html'; return; }
   const sec = SECTIONS.find(s=>s.id===id);
   if(!sec) return;
   currentSection = sec;
