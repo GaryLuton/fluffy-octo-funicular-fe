@@ -5,6 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Games — Stuflover</title>
+  <script>
+    // Apply saved theme synchronously so the first paint uses the user's
+    // chosen colors. stuflover-nav.js (deferred) would otherwise swap them
+    // in after render, producing a visible color flash.
+    (function(){
+      var PRESETS = {
+        'default': { bg:'#faf0f0', bgMid:'#f0ddd6', accent:'#c87860', tx:'#2a1a14', surface:'#ffffff' },
+        'rose':    { bg:'#fbe8ec', bgMid:'#f5cdd5', accent:'#d84a6b', tx:'#2a0e18', surface:'#ffffff' },
+        'mint':    { bg:'#e8f5ef', bgMid:'#cde8dc', accent:'#3fa874', tx:'#0e2419', surface:'#ffffff' },
+        'lilac':   { bg:'#f0e8fa', bgMid:'#ddcdf0', accent:'#8a5fd8', tx:'#1a0c2a', surface:'#ffffff' },
+        'ocean':   { bg:'#e4f1f8', bgMid:'#c8dfed', accent:'#2e86b8', tx:'#0c1a24', surface:'#ffffff' },
+        'sunset':  { bg:'#fcead2', bgMid:'#f6d2a8', accent:'#e07b3c', tx:'#2a140a', surface:'#ffffff' },
+        'mono':    { bg:'#f5f5f5', bgMid:'#e0e0e0', accent:'#333333', tx:'#111111', surface:'#ffffff' },
+        'dark':    { bg:'#1a1418', bgMid:'#2a1f25', accent:'#e08a95', tx:'#f5e8e8', surface:'#2a1f25' }
+      };
+      function shade(hex, pct){
+        hex = (hex||'').replace('#','');
+        if(hex.length===3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        if(hex.length!==6) return '#'+hex;
+        var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+        var f = pct<0 ? (1+pct) : 1, add = pct>0 ? pct*255 : 0;
+        r=Math.max(0,Math.min(255,Math.round(r*f+add)));
+        g=Math.max(0,Math.min(255,Math.round(g*f+add)));
+        b=Math.max(0,Math.min(255,Math.round(b*f+add)));
+        return '#'+[r,g,b].map(function(x){var h=x.toString(16);return h.length<2?'0'+h:h;}).join('');
+      }
+      try {
+        var s = JSON.parse(localStorage.getItem('stuflover_theme')||'null') || {};
+        var preset;
+        if (s.customPreset && s.customPreset.bg) {
+          preset = { bg:s.customPreset.bg, bgMid:s.customPreset.bgMid||shade(s.customPreset.bg,-0.06),
+                     accent:s.customPreset.accent, tx:s.customPreset.tx, surface:s.customPreset.surface||'#ffffff' };
+        } else {
+          preset = PRESETS[s.preset] || PRESETS['default'];
+        }
+        var accent = s.accent || preset.accent;
+        var accentDark = shade(accent, -0.2);
+        var r = document.documentElement;
+        r.style.setProperty('--sl-pink-light', preset.bg);
+        r.style.setProperty('--sl-pink-mid', preset.bgMid);
+        r.style.setProperty('--sl-peach', preset.bgMid);
+        r.style.setProperty('--sl-terracotta', accent);
+        r.style.setProperty('--sl-terracotta-dark', accentDark);
+        r.style.setProperty('--sl-brown', preset.tx);
+        r.style.setProperty('--sl-white', preset.surface);
+        r.style.setProperty('--sl-bg', preset.bg);
+        r.style.setProperty('--sl-tx', preset.tx);
+        r.style.setProperty('--sl-ac', accent);
+        r.style.setProperty('--sl-ac-hover', accentDark);
+        r.style.setProperty('--sl-surface', preset.surface);
+        r.style.setProperty('--bg', preset.bg);
+        r.style.setProperty('--tx', preset.tx);
+        r.style.setProperty('--ac', accent);
+        r.style.setProperty('--ac2', accentDark);
+        var SIZES = { 'small':0.9, 'default':1.0, 'large':1.1, 'xlarge':1.2 };
+        var mult = SIZES[s.textSize] || 1.0;
+        r.style.setProperty('font-size', (16*mult)+'px');
+        if (s.preset) r.setAttribute('data-sl-theme', s.preset);
+        r.setAttribute('data-sl-motion', s.motion===false ? 'off' : 'on');
+        r.setAttribute('data-sl-texture', s.texture===false ? 'off' : 'on');
+        if (localStorage.getItem('stuflover_theme')) r.setAttribute('data-sl-custom','on');
+      } catch(e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap"/>
