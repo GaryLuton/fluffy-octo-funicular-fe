@@ -3933,13 +3933,23 @@ function cgRender(d){
 
 function postGameScore(gameId, score){
   var token = localStorage.getItem('stuflover_token');
-  if(!token || !gameId || typeof score !== 'number') return;
-  fetch('/api/games/'+encodeURIComponent(gameId)+'/score',{
+  if(!token || !gameId || typeof score !== 'number') return Promise.resolve();
+  return fetch('/api/games/'+encodeURIComponent(gameId)+'/score',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
     body:JSON.stringify({score: Math.max(0, Math.floor(score))}),
     keepalive:true
   }).catch(function(){});
+}
+
+// Wait for a score save to finish (with timeout) before navigating away,
+// so the destination page's leaderboard/stats fetch sees the new row.
+function waitThenGo(promise, href){
+  var done = false;
+  var go = function(){ if(done) return; done = true; window.location.href = href; };
+  setTimeout(go, 2000);
+  if(promise && typeof promise.then === 'function') promise.then(go, go);
+  else go();
 }
 
 function cgPickChoice(letter, el){
@@ -4108,7 +4118,7 @@ function cgShowFinal(earlyEnd){
   else if(score >= 100) msg = 'Solid run!';
   else if(score >= 40) msg = 'Nice try — level up next time.';
   else msg = 'Better luck next round.';
-  postGameScore(cgState.game && cgState.game.id, score);
+  var savePromise = postGameScore(cgState.game && cgState.game.id, score);
   document.getElementById('cgQuestion').textContent = earlyEnd ? 'Game Ended' : 'Game Over!';
   document.getElementById('cgQuestion').style.color = pal.tx;
   document.getElementById('cgRound').textContent = earlyEnd ? 'Ended early' : 'Final';
@@ -4139,7 +4149,7 @@ function cgShowFinal(earlyEnd){
   var endBtn = document.getElementById('cgEndBtn');
   if(endBtn){
     endBtn.textContent = 'Back to Games';
-    endBtn.onclick = function(){ window.location.href = 'games.html'; };
+    endBtn.onclick = function(){ waitThenGo(savePromise, 'games.html'); };
     endBtn.style.display = 'inline-block';
   }
 }
@@ -5144,8 +5154,7 @@ function dtiNextRound(){
 
 function dtiEndGame(){
   if(dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval = null; }
-  postGameScore('dti', dtiState.totalScore);
-  window.location.href = 'games.html';
+  waitThenGo(postGameScore('dti', dtiState.totalScore), 'games.html');
 }
 
 // ─── FETCH WITH TIMEOUT UTILITY ──────────────────────────
