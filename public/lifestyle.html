@@ -43,6 +43,10 @@
     html.sl-has-profile #quizWrap{display:none !important;}
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Satisfy&family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="preload" href="/stuflover-nav.css" as="style"/>
+  <link rel="stylesheet" href="/stuflover-nav.css"/>
+  <link rel="preload" href="/stuflover-nav.js" as="script"/>
+  <script src="/stuflover-theme-boot.js"></script>
   <style>
     :root{
       /* Cozy pastel palette (Stuf Lifestyle Redesign). Legacy var names retained
@@ -64,11 +68,6 @@
     body{font-family:'Quicksand','Space Grotesk',sans-serif;background:linear-gradient(135deg,var(--cream) 0%,var(--soft-white) 50%,var(--sky) 100%);color:var(--ink);overflow-x:hidden;transition:background 0.8s,color 0.8s;line-height:1.6;font-size:15px;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     .serif{font-family:'Barlow Condensed',sans-serif;font-weight:900;}
-
-    /* Hide legacy per-page nav — sl-top-nav (injected by stuflover-nav.js)
-       replaces it. Doing this in CSS stops the old bar from flashing before
-       the swap. */
-    nav#mainNav, nav.sl-nav, .top-bar{display:none !important;}
 
     /* NAV */
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}

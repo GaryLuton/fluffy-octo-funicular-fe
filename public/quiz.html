@@ -18,6 +18,10 @@
   <meta name="twitter:description" content="2 minutes. A few honest answers. Then we build you a page so personal it is scary accurate."/>
   <meta name="twitter:image" content="https://stuflover.com/favicon.svg"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="preload" href="/stuflover-nav.css" as="style"/>
+  <link rel="stylesheet" href="/stuflover-nav.css"/>
+  <link rel="preload" href="/stuflover-nav.js" as="script"/>
+  <script src="/stuflover-theme-boot.js"></script>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     :root{--pink:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--brown:#2a1a14;--white:#fff;}
@@ -28,9 +32,6 @@
     input,button,select,textarea{font-size:16px;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--pink);color:var(--brown);overflow-x:hidden;line-height:1.6;font-size:15px;}
     .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
-
-    /* Hide legacy per-page nav — sl-top-nav (injected by stuflover-nav.js) replaces it. */
-    nav#mainNav, nav.sl-nav, .top-bar{display:none !important;}
 
     nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);}
     .logo{font-size:1.7rem;letter-spacing:4px;text-decoration:none;}

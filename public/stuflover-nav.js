@@ -1,16 +1,20 @@
 /* ============================================================
    STUFLOVER SHARED NAV
    Injects a consistent 4-tab nav on every page.
-   Desktop: sticky top bar. Mobile: top logo + bottom tab bar.
+   Desktop: sticky top bar. Mobile: top logo + top tabs.
    Idempotent — safe to include multiple times.
+
+   NOTE: Nav CSS now lives in the static stylesheet stuflover-nav.css.
+   This file only builds the nav DOM and wires behavior. Pages must
+   link stuflover-nav.css in <head> before this script runs.
    ============================================================ */
 
 /* ── View Transition interrupt guard ──────────────────────────
-   @view-transition { navigation: auto } below drives automatic
-   cross-document transitions. When a user clicks a second link
-   before the first transition settles, Chrome rejects the in-flight
-   transition promise with an AbortError that can surface as an
-   uncaught rejection in DevTools. Swallow only that error.
+   @view-transition { navigation: auto } in stuflover-nav.css drives
+   automatic cross-document transitions. When a user clicks a second
+   link before the first transition settles, Chrome rejects the
+   in-flight transition promise with an AbortError that can surface
+   as an uncaught rejection in DevTools. Swallow only that error.
    ============================================================ */
 (function(){
   if (window.__sluVtGuard) return;
@@ -24,9 +28,10 @@
 })();
 
 /* ── SITE THEME / EXPERIENCE SYSTEM ───────────────────────────
-   Applies user-chosen colors and experience settings (text size,
-   motion, texture) site-wide. Settings live in localStorage so
-   they persist across pages. Controls are exposed on the Me page.
+   Applies user-chosen colors and experience settings. The first
+   paint is handled by the tiny inline boot script in each page's
+   <head> (see sl-theme-boot). This block exposes the full API
+   (presets, update, reset) for the Me page.
    ============================================================ */
 (function () {
   if (window.StufloverTheme) return;
@@ -100,7 +105,6 @@
     var accentDark = shade(accent, -0.2);
 
     var r = document.documentElement;
-    // Design-system tokens
     r.style.setProperty('--sl-pink-light', preset.bg);
     r.style.setProperty('--sl-pink-mid', preset.bgMid);
     r.style.setProperty('--sl-peach', preset.bgMid);
@@ -113,7 +117,6 @@
     r.style.setProperty('--sl-ac', accent);
     r.style.setProperty('--sl-ac-hover', accentDark);
     r.style.setProperty('--sl-surface', preset.surface);
-    // Page-local aliases used by individual pages that redefine vars
     r.style.setProperty('--pink-light', preset.bg);
     r.style.setProperty('--pink-mid', preset.bgMid);
     r.style.setProperty('--pink', preset.bg);
@@ -122,7 +125,6 @@
     r.style.setProperty('--terracotta-dark', accentDark);
     r.style.setProperty('--brown', preset.tx);
     r.style.setProperty('--white', preset.surface);
-    // Short aliases used by activities.html and aesthetic pages
     r.style.setProperty('--bg', preset.bg);
     r.style.setProperty('--tx', preset.tx);
     r.style.setProperty('--ac', accent);
@@ -134,48 +136,11 @@
     r.setAttribute('data-sl-theme', s.preset);
     r.setAttribute('data-sl-motion', s.motion ? 'on' : 'off');
     r.setAttribute('data-sl-texture', s.texture ? 'on' : 'off');
-    // Only force the body/text overrides when the user has actively chosen
-    // settings — otherwise per-page aesthetic (PAL) palettes keep working.
     if (hasCustom()) r.setAttribute('data-sl-custom', 'on');
     else r.removeAttribute('data-sl-custom');
   }
 
   apply();
-
-  function injectThemeStyles() {
-    if (document.getElementById('sl-theme-styles')) return;
-    // These use !important so they override per-page inline styles set by
-    // aesthetic/PAL scripts (e.g. document.body.style.background = ...).
-    var css = ''
-      + 'html[data-sl-custom="on"] body {'
-      + '  background-color: var(--sl-bg) !important;'
-      + '  color: var(--sl-tx) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] h1, html[data-sl-custom="on"] h2,'
-      + 'html[data-sl-custom="on"] h3, html[data-sl-custom="on"] h4,'
-      + 'html[data-sl-custom="on"] h5, html[data-sl-custom="on"] h6,'
-      + 'html[data-sl-custom="on"] .bc, html[data-sl-custom="on"] .logo {'
-      + '  color: var(--sl-tx) !important;'
-      + '}'
-      + 'html[data-sl-custom="on"] a { color: var(--sl-ac); }'
-      /* Nav already uses theme tokens unconditionally in stuflover-nav.js,
-         so no extra custom-theme overrides are needed here. */
-      + 'html[data-sl-motion="off"] *, html[data-sl-motion="off"] *::before, html[data-sl-motion="off"] *::after {'
-      + '  animation-duration: 0ms !important; animation-delay: 0ms !important;'
-      + '  transition-duration: 0ms !important; transition-delay: 0ms !important;'
-      + '  scroll-behavior: auto !important;'
-      + '}'
-      + 'html[data-sl-texture="off"] body { background-image: none !important; }';
-    var style = document.createElement('style');
-    style.id = 'sl-theme-styles';
-    style.textContent = css;
-    (document.head || document.documentElement).appendChild(style);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectThemeStyles);
-  } else {
-    injectThemeStyles();
-  }
 
   function getPalette() {
     var s = load();
@@ -205,9 +170,6 @@
     getPalette: getPalette,
     update: function (partial) {
       var s = load();
-      // If a preset is being chosen explicitly and no custom palette is
-      // provided in the same update, clear any prior custom palette so the
-      // chosen preset takes effect.
       if (partial && partial.preset && !partial.customPreset) s.customPreset = null;
       for (var k in partial) s[k] = partial[k];
       save(s);
@@ -241,8 +203,6 @@
   }
 
   function activeTabId() {
-    // A page can override the active tab (e.g. lifestyle.html stays on
-    // "Play" while a game is open, even though the URL is lifestyle.html).
     if (window.__slActiveTabOverride) return window.__slActiveTabOverride;
     var file = currentFile();
     for (var i = 0; i < TABS.length; i++) {
@@ -260,128 +220,18 @@
   }
 
   function hrefFor(tab) {
-    // Me tab: unauthed → auth page.
     if (tab.id === 'me' && !isAuthed()) return 'auth.html';
     return tab.href;
   }
 
   function removeLegacyNav() {
-    var selectors = [
-      'nav#mainNav',
-      'nav.sl-nav',
-      '.top-bar'
-    ];
+    var selectors = ['nav#mainNav', 'nav.sl-nav', '.top-bar'];
     selectors.forEach(function (sel) {
       document.querySelectorAll(sel).forEach(function (el) { el.remove(); });
     });
-    // index.html wraps nav in <nav class="sl-nav"> too — already covered above.
   }
 
-  function injectStyles() {
-    if (document.getElementById('sl-nav-styles')) return;
-    var css = '\
-/* Cross-document view transitions: keep the nav visually stable when\
-   navigating between pages so it does not flash/rebuild. Supported in\
-   Chromium; older browsers ignore it harmlessly. */\
-@view-transition { navigation: auto; }\
-::view-transition-group(sl-top-nav),\
-::view-transition-group(sl-bottom-tabs) { animation-duration: 0ms; }\
-::view-transition-old(sl-top-nav),\
-::view-transition-new(sl-top-nav),\
-::view-transition-old(sl-bottom-tabs),\
-::view-transition-new(sl-bottom-tabs) { animation: none; mix-blend-mode: normal; }\
-/* Hide legacy per-page nav immediately so it never flashes before sl-top-nav mounts. */\
-nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }\
-:root { --sl-nav-h: 60px; --sl-tabs-h: 62px; }\
-body { padding-top: var(--sl-nav-h); }\
-#sl-top-nav {\
-  position: fixed; top: 0; left: 0; right: 0; height: var(--sl-nav-h);\
-  display: flex; align-items: center; justify-content: space-between;\
-  gap: 12px; padding: 0 24px; z-index: 300;\
-  background: color-mix(in srgb, var(--sl-bg, #faf0f0) 92%, transparent);\
-  backdrop-filter: blur(18px) saturate(1.4);\
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);\
-  border-bottom: 1px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 12%, transparent);\
-  view-transition-name: sl-top-nav;\
-}\
-#sl-top-nav .sl-logo {\
-  font-family: "Barlow Condensed", sans-serif; font-weight: 900;\
-  font-size: 1.4rem; letter-spacing: 3px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
-}\
-#sl-top-nav .sl-left { display: flex; align-items: center; gap: 14px; min-width: 0; }\
-#sl-top-nav .sl-back-chip {\
-  display: inline-flex; align-items: center; gap: 6px;\
-  padding: 7px 14px; border-radius: 999px;\
-  border: 1.5px solid color-mix(in srgb, var(--sl-tx, #2a1a14) 18%, transparent);\
-  font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
-  font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
-  transition: border-color 180ms ease, background 180ms ease;\
-}\
-#sl-top-nav .sl-back-chip:hover {\
-  border-color: var(--sl-tx, #2a1a14);\
-  background: color-mix(in srgb, var(--sl-tx, #2a1a14) 6%, transparent);\
-}\
-#sl-top-nav .sl-tabs { display: flex; gap: 4px; flex-wrap: nowrap; }\
-#sl-top-nav .sl-tab {\
-  display: inline-flex; align-items: center; gap: 8px;\
-  padding: 10px 18px; border-radius: 999px;\
-  font-family: "Barlow Condensed", sans-serif; font-weight: 800;\
-  font-size: 0.82rem; letter-spacing: 2.5px; text-transform: uppercase;\
-  color: var(--sl-tx, #2a1a14); text-decoration: none; white-space: nowrap;\
-  transition: background 180ms ease, color 180ms ease;\
-}\
-#sl-top-nav .sl-tab:hover { background: color-mix(in srgb, var(--sl-tx, #2a1a14) 8%, transparent); }\
-#sl-top-nav .sl-tab.is-active {\
-  background: var(--sl-ac, #c87860);\
-  color: var(--sl-surface, #fff);\
-}\
-#sl-top-nav .sl-tab svg { width: 16px; height: 16px; flex-shrink: 0; }\
-#sl-top-nav .sl-user {\
-  font-family: "Barlow Condensed", sans-serif; font-weight: 700;\
-  font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase;\
-  color: color-mix(in srgb, var(--sl-tx, #2a1a14) 60%, transparent); white-space: nowrap;\
-  max-width: 160px; overflow: hidden; text-overflow: ellipsis;\
-}\
-#sl-bottom-tabs { display: none !important; }\
-/* Tablet / narrow desktop — drop the user greeting and tighten tab padding so tabs don\'t collide */\
-@media (max-width: 999px) {\
-  #sl-top-nav .sl-user { display: none; }\
-  #sl-top-nav .sl-tab { padding: 9px 12px; letter-spacing: 1.5px; font-size: 0.78rem; gap: 6px; }\
-  #sl-top-nav .sl-tab svg { width: 15px; height: 15px; }\
-}\
-/* Mobile — keep tabs in the top bar so the nav stays at the top of the screen */\
-@media (max-width: 760px) {\
-  #sl-top-nav { padding: 0 12px; gap: 8px; }\
-  #sl-top-nav .sl-logo { font-size: 1.15rem; letter-spacing: 1.8px; }\
-  #sl-top-nav .sl-tabs { gap: 2px; }\
-  #sl-top-nav .sl-tab { padding: 8px 10px; letter-spacing: 1px; font-size: 0.7rem; gap: 4px; }\
-  #sl-top-nav .sl-tab svg { width: 14px; height: 14px; }\
-}\
-/* Small phones — drop tab labels so all four tabs + logo fit in the top bar */\
-@media (max-width: 480px) {\
-  #sl-top-nav { padding: 0 10px; gap: 6px; }\
-  #sl-top-nav .sl-logo { font-size: 1.05rem; letter-spacing: 1.5px; }\
-  #sl-top-nav .sl-back-chip { padding: 6px 10px; font-size: 0.65rem; letter-spacing: 1.5px; }\
-  #sl-top-nav .sl-tab { padding: 8px; }\
-  #sl-top-nav .sl-tab span { display: none; }\
-  #sl-top-nav .sl-tab svg { width: 18px; height: 18px; }\
-}\
-/* Very small phones — shrink the logo further so icon tabs never collide */\
-@media (max-width: 360px) {\
-  #sl-top-nav .sl-logo { font-size: 0.95rem; letter-spacing: 1px; }\
-  #sl-top-nav .sl-tab { padding: 7px; }\
-  #sl-top-nav .sl-tab svg { width: 20px; height: 20px; }\
-}\
-';
-    var style = document.createElement('style');
-    style.id = 'sl-nav-styles';
-    style.textContent = css;
-    document.head.appendChild(style);
-  }
-
-  function tabLink(tab, active, variant) {
+  function tabLink(tab, active) {
     var a = document.createElement('a');
     a.className = 'sl-tab' + (active ? ' is-active' : '');
     a.href = hrefFor(tab);
@@ -389,12 +239,23 @@ body { padding-top: var(--sl-nav-h); }\
     if (active) {
       a.setAttribute('aria-current', 'page');
       a.addEventListener('click', function (e) { e.preventDefault(); });
+    } else {
+      a.addEventListener('click', markNavStart);
     }
     a.appendChild(tab.icon());
     var span = document.createElement('span');
     span.textContent = tab.label;
     a.appendChild(span);
     return a;
+  }
+
+  function markNavStart() {
+    try {
+      if (window.performance && performance.mark) {
+        performance.mark('sl-nav-click');
+        try { localStorage.setItem('sl_nav_click_ts', String(Date.now())); } catch (e) {}
+      }
+    } catch (e) {}
   }
 
   function buildNav() {
@@ -410,6 +271,7 @@ body { padding-top: var(--sl-nav-h); }\
     logo.className = 'sl-logo';
     logo.href = 'index.html';
     logo.textContent = 'Stuflover';
+    logo.addEventListener('click', markNavStart);
     left.appendChild(logo);
 
     if (isPlayChild()) {
@@ -418,13 +280,14 @@ body { padding-top: var(--sl-nav-h); }\
       back.href = 'activities.html';
       back.setAttribute('aria-label', 'Back to Play');
       back.textContent = '← Play';
+      back.addEventListener('click', markNavStart);
       left.appendChild(back);
     }
     top.appendChild(left);
 
     var tabsWrap = document.createElement('div');
     tabsWrap.className = 'sl-tabs';
-    TABS.forEach(function (t) { tabsWrap.appendChild(tabLink(t, t.id === active, 'top')); });
+    TABS.forEach(function (t) { tabsWrap.appendChild(tabLink(t, t.id === active)); });
     top.appendChild(tabsWrap);
 
     var user = document.createElement('span');
@@ -437,13 +300,12 @@ body { padding-top: var(--sl-nav-h); }\
     var bottom = document.createElement('nav');
     bottom.id = 'sl-bottom-tabs';
     bottom.setAttribute('aria-label', 'Main (mobile)');
-    TABS.forEach(function (t) { bottom.appendChild(tabLink(t, t.id === active, 'bottom')); });
+    TABS.forEach(function (t) { bottom.appendChild(tabLink(t, t.id === active)); });
 
     document.body.insertBefore(top, document.body.firstChild);
     document.body.appendChild(bottom);
   }
 
-  // ── SVG icon helpers ─────────────────────────────────────
   function svg(pathD) {
     var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     s.setAttribute('viewBox', '0 0 24 24');
@@ -462,16 +324,62 @@ body { padding-top: var(--sl-nav-h); }\
   function iconUsers() { return svg('M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM3 21a7 7 0 0 1 14 0M21 21a5 5 0 0 0-4-4.9'); }
   function iconUser()  { return svg('M20 21a8 8 0 0 0-16 0M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z'); }
 
-  function mount() {
-    injectStyles();
-    removeLegacyNav();
-    buildNav();
+  /* ── Idle prefetch of top nav targets ───────────────────────
+     After the current page settles, warm the HTTP cache for the
+     other top-level nav pages so the next click lands instantly.
+     Skipped when the user has opted into data-saver. */
+  function prefetchNavTargets() {
+    try {
+      var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+    } catch (e) {}
+
+    var here = currentFile();
+    var seen = {};
+    TABS.forEach(function (t) {
+      var href = hrefFor(t);
+      if (href === here || seen[href]) return;
+      seen[href] = true;
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = href;
+      link.setAttribute('as', 'document');
+      document.head.appendChild(link);
+    });
   }
 
-  // Inject nav styles ASAP (synchronously at script eval) so legacy nav never
-  // paints before sl-top-nav mounts. Safe because we append to document.head
-  // or documentElement.
-  injectStyles();
+  function scheduleIdle(fn) {
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(fn, { timeout: 2000 });
+    } else {
+      setTimeout(fn, 800);
+    }
+  }
+
+  function measureArrival() {
+    try {
+      if (!window.performance || !performance.mark) return;
+      var ts = null;
+      try { ts = parseInt(localStorage.getItem('sl_nav_click_ts') || '', 10); } catch (e) {}
+      if (!ts || !isFinite(ts)) return;
+      var delta = Date.now() - ts;
+      if (delta > 0 && delta < 10000) {
+        performance.mark('sl-nav-paint');
+        try { performance.measure('sl-nav-transition', { start: performance.timeOrigin + 0, duration: delta }); } catch (e) {}
+        if (window.__slNavDebug) {
+          try { console.log('[sl-nav] transition ' + currentFile() + ': ' + delta + 'ms'); } catch (e) {}
+        }
+      }
+      try { localStorage.removeItem('sl_nav_click_ts'); } catch (e) {}
+    } catch (e) {}
+  }
+
+  function mount() {
+    removeLegacyNav();
+    buildNav();
+    measureArrival();
+    scheduleIdle(prefetchNavTargets);
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount);
@@ -479,9 +387,6 @@ body { padding-top: var(--sl-nav-h); }\
     mount();
   }
 
-  // Public API: lets a page override which tab is highlighted when the URL
-  // alone isn't enough (e.g. lifestyle.html shows a game and should stay on
-  // the Play tab, not My Page). Safe to call before or after the nav mounts.
   function setActiveTab(id) {
     window.__slActiveTabOverride = id || null;
     var tabs = document.querySelectorAll('#sl-top-nav .sl-tab, #sl-bottom-tabs .sl-tab');
