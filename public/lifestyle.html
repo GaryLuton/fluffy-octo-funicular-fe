@@ -27,10 +27,21 @@
         if(!localStorage.getItem('stuflover_token')) return;
         var saved = JSON.parse(localStorage.getItem('stuflover_profile')||'null');
         var hasQuiz = saved && saved.aesthetics && Object.keys(saved.aesthetics).length>0;
-        if(!hasQuiz){ window.location.replace('/quiz.html'); }
+        if(!hasQuiz){ window.location.replace('/quiz.html'); return; }
+        // Returning user with a completed quiz: mark the document so the hero
+        // is hidden from the very first paint. autoLoad() (end of body) then
+        // renders the personalised page into #lifestylePage.
+        document.documentElement.classList.add('sl-has-profile');
       }catch(e){ window.location.replace('/quiz.html'); }
     })();
   </script>
+  <style>
+    /* Suppress the "Find Your Aesthetic" hero for returning users with a
+       completed quiz — prevents a flash of the landing page before autoLoad
+       swaps in the personalised result. */
+    html.sl-has-profile #heroSection,
+    html.sl-has-profile #quizWrap{display:none !important;}
+  </style>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&family=Satisfy&family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root{
