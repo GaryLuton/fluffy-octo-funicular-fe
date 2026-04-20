@@ -156,8 +156,18 @@
     window.location.href = '/auth.html';
   }
 </script>
+<script src="/stuflover-config.js"></script>
+<script src="/stuflover-backend.js"></script>
 <script>
 (function(){
+  // Route /api/... through the real API base so these calls hit the
+  // Railway backend even when games.html is served from stuflover.com.
+  function gFetch(path, opts){
+    var base = (window.STUFLOVER_API_URL || '');
+    var f = window._origFetch || window.fetch;
+    return f.call(window, base + path, opts);
+  }
+
   var ICONS = {
     hanger: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a2 2 0 1 1 2 2c0 .8-.5 1.4-1.4 1.7L3 14h18L12 9.7"/></svg>',
     heart:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.8 8.7 2.3 5 6 5c2.1 0 3.5 1.1 4.5 2.5C11.5 6.1 12.9 5 15 5c3.7 0 5.2 3.7 3.5 7-2.5 4.5-9.5 9-9.5 9z"/></svg>',
@@ -202,7 +212,7 @@
     group.items.forEach(function(g){
       var tile = document.createElement('a');
       tile.className = 'game-tile';
-      tile.href = 'lifestyle.html#game=' + encodeURIComponent(g.id);
+      tile.href = 'play.html?game=' + encodeURIComponent(g.id);
       tile.style.animationDelay = (tileIdx * 40) + 'ms';
       tileIdx++;
       tile.innerHTML =
@@ -223,7 +233,7 @@
   var allGames = GAMES.reduce(function(a,g){ return a.concat(g.items); }, []);
   function loadTileBests(){
     allGames.forEach(function(g){
-      fetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
+      gFetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
         headers:{'Authorization':'Bearer ' + token}
       }).then(function(r){return r.ok?r.json():null;}).then(function(d){
         if(!d || !d.best) return;
@@ -282,7 +292,7 @@
     var scope = activeScope;
     var endpoint = scope === 'friends' ? 'friends-leaderboard' : 'leaderboard';
     listEl.innerHTML = '<div class="lb-loading">Loading…</div>';
-    fetch('/api/games/' + encodeURIComponent(id) + '/' + endpoint + '?limit=10', {
+    gFetch('/api/games/' + encodeURIComponent(id) + '/' + endpoint + '?limit=10', {
       headers:{'Authorization':'Bearer ' + token}
     }).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
       if(id !== activeGameId || scope !== activeScope) return;
@@ -344,7 +354,7 @@
   });
 
   function loadAchievements(){
-    fetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
+    gFetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(d){
         if(!d || !d.achievements) return;
@@ -364,7 +374,7 @@
   allGames.forEach(function(g){ gameNameById[g.id] = g.name; });
 
   function loadStats(){
-    fetch('/api/games/my-stats', {headers:{'Authorization':'Bearer ' + token}})
+    gFetch('/api/games/my-stats', {headers:{'Authorization':'Bearer ' + token}})
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(d){
         if(!d) return;
@@ -399,8 +409,6 @@
   });
 })();
 </script>
-<script src="/stuflover-config.js"></script>
-<script src="/stuflover-backend.js"></script>
 <script src="/stuflover-ux.js"></script>
 <script src="/stuflover-nav.js" defer></script>
 </body>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <title>Play — Stuflover</title>
+  <style>
+    html,body{margin:0;background:#faf0f0;color:#2a1a14;font-family:'Space Grotesk',sans-serif;}
+    .p-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .p-msg{opacity:0.5;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+  </style>
+</head>
+<body>
+<div class="p-wrap"><div class="p-msg">Loading…</div></div>
+<script>
+(function(){
+  if(!localStorage.getItem('stuflover_token')){
+    window.location.replace('/auth.html');
+    return;
+  }
+  var m = (window.location.search || '').match(/[?&]game=([a-zA-Z0-9_-]+)/);
+  if(!m){
+    window.location.replace('/games.html');
+    return;
+  }
+  try {
+    localStorage.setItem('stuflover_open_section', 'floverhub');
+    localStorage.setItem('stuflover_open_game', m[1]);
+  } catch(e){}
+  window.location.replace('/lifestyle.html');
+})();
+</script>
+</body>
+</html>
