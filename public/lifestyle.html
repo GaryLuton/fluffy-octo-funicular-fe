@@ -426,11 +426,22 @@
     .study-btn:hover{transform:translateY(-2px);}
     .study-btn.active{border-color:currentColor;}
 
-    /* SECRET DIARY */
-    .diary-entry{padding:16px 18px;border-radius:14px;margin-bottom:10px;position:relative;}
-    .diary-date{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:6px;}
-    .diary-text{font-size:0.88rem;line-height:1.7;font-family:'Caveat',cursive;font-size:1.05rem;}
-    .diary-input{width:100%;min-height:100px;padding:14px 16px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.12);background:rgba(128,128,128,0.03);font-family:'Caveat',cursive;font-size:1.1rem;color:inherit;outline:none;resize:none;line-height:1.7;}
+    /* SECRET DIARY — scrapbook */
+    .diary-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px 14px;padding:10px 6px 24px;}
+    .diary-entry{padding:18px 18px 22px;border-radius:4px;position:relative;box-shadow:0 6px 16px rgba(0,0,0,0.12),0 2px 4px rgba(0,0,0,0.08);transition:transform 0.2s ease;break-inside:avoid;}
+    .diary-entry:hover{transform:translateY(-3px) rotate(0deg) !important;z-index:3;}
+    .diary-entry::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%) rotate(-4deg);width:58px;height:18px;background:rgba(255,245,180,0.75);box-shadow:0 2px 4px rgba(0,0,0,0.1);border-radius:1px;pointer-events:none;}
+    .diary-entry:nth-child(3n)::before{transform:translateX(-50%) rotate(6deg);background:rgba(255,200,210,0.75);}
+    .diary-entry:nth-child(3n+1)::before{transform:translateX(-50%) rotate(-8deg);background:rgba(200,230,255,0.75);}
+    .diary-entry:nth-child(2n){transform:rotate(1.5deg);}
+    .diary-entry:nth-child(3n){transform:rotate(-2deg);}
+    .diary-entry:nth-child(5n){transform:rotate(2.5deg);}
+    .diary-entry:nth-child(7n){transform:rotate(-1deg);}
+    .diary-date{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;opacity:0.45;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:8px;margin-top:6px;}
+    .diary-text{font-size:1.05rem;line-height:1.5;font-family:'Caveat',cursive;white-space:pre-wrap;word-wrap:break-word;}
+    .diary-input{width:100%;min-height:120px;padding:16px 18px;border-radius:4px;border:none;background:rgba(255,253,240,0.55);font-family:'Caveat',cursive;font-size:1.15rem;color:inherit;outline:none;resize:none;line-height:1.6;box-shadow:0 4px 12px rgba(0,0,0,0.08),inset 0 0 0 1px rgba(0,0,0,0.04);background-image:repeating-linear-gradient(transparent,transparent 28px,rgba(120,120,120,0.18) 28px,rgba(120,120,120,0.18) 29px);}
+    .diary-close-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;border:1.5px solid currentColor;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.72rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;opacity:0.7;}
+    .diary-close-btn:hover{opacity:1;transform:translateY(-1px);}
 
     /* AE VS REALITY */
     .aevs-card{border-radius:18px;padding:24px;text-align:center;}
@@ -6154,29 +6165,44 @@ function openSecretDiary(){
   if(!vc) return;
   var entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
 
-  var entriesHtml = entries.slice().reverse().slice(0,20).map(function(e){
+  var paperTints = [
+    'rgba(255,248,220,0.95)', // cream
+    'rgba(255,228,235,0.95)', // pink
+    'rgba(220,240,255,0.95)', // blue
+    'rgba(230,250,225,0.95)', // mint
+    'rgba(255,235,205,0.95)', // peach
+    'rgba(240,230,255,0.95)'  // lavender
+  ];
+
+  var entriesHtml = entries.slice().reverse().slice(0,40).map(function(e, i){
     var d = new Date(e.time);
     var dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     var timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    return '<div class="diary-entry" style="background:'+pal.tx+'04;border:1px solid '+pal.tx+'06;">'+
-      '<div class="diary-date" style="color:'+pal.tx+';">'+dateStr+' at '+timeStr+'</div>'+
-      '<div class="diary-text" style="color:'+pal.tx+';">'+escHtml(e.text)+'</div>'+
+    var bg = paperTints[i % paperTints.length];
+    return '<div class="diary-entry" style="background:'+bg+';color:#3a2e26;">'+
+      '<div class="diary-date">'+dateStr+' · '+timeStr+'</div>'+
+      '<div class="diary-text">'+escHtml(e.text)+'</div>'+
     '</div>';
   }).join('');
 
   vc.innerHTML =
-    '<div style="max-width:500px;margin:0 auto;">'+
-      '<div style="text-align:center;margin-bottom:20px;">'+
-        '<div style="font-size:2rem;margin-bottom:6px;">🔒</div>'+
-        '<h2 class="bc" style="font-size:clamp(1.5rem,4vw,2rem);color:'+pal.tx+';margin-bottom:4px;">SECRET DIARY</h2>'+
-        '<div style="font-size:0.78rem;opacity:0.4;color:'+pal.tx+';line-height:1.6;">just you. no one else can see this. ever. not even us.</div>'+
+    '<div style="max-width:760px;margin:0 auto;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">'+
+        '<button onclick="goHome()" class="diary-close-btn" style="color:'+pal.tx+';" aria-label="Close diary and return to lifestyle">'+
+          '<span style="font-size:1rem;line-height:1;">←</span> Close Diary'+
+        '</button>'+
+        '<div style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;opacity:0.45;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">'+entries.length+' note'+(entries.length===1?'':'s')+'</div>'+
       '</div>'+
-      '<textarea id="diaryInput" class="diary-input" style="border-color:'+pal.tx+'12;background:'+pal.tx+'04;color:'+pal.tx+';" placeholder="what is on your mind rn..."></textarea>'+
-      '<button onclick="saveDiaryEntry()" class="bc" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:all 0.2s;">save this thought</button>'+
-      '<div style="margin-top:24px;">'+
+      '<div style="text-align:center;margin-bottom:24px;">'+
+        '<h2 class="bc" style="font-size:clamp(1.6rem,4.5vw,2.2rem);color:'+pal.tx+';margin-bottom:6px;">my scrapbook</h2>'+
+        '<div style="font-size:0.8rem;opacity:0.5;color:'+pal.tx+';line-height:1.6;font-family:Caveat,cursive;">a little wall of thoughts, clippings, and moments ✿</div>'+
+      '</div>'+
+      '<textarea id="diaryInput" class="diary-input" placeholder="pin a new note to the wall..."></textarea>'+
+      '<button onclick="saveDiaryEntry()" class="bc" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:all 0.2s;">pin this note</button>'+
+      '<div style="margin-top:28px;">'+
         (entries.length > 0 ?
-          '<div style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:12px;color:'+pal.tx+';">your thoughts ('+entries.length+')</div>' + entriesHtml
-          : '<div style="text-align:center;padding:30px;opacity:0.25;font-style:italic;color:'+pal.tx+';">your first entry goes here</div>'
+          '<div class="diary-board">'+entriesHtml+'</div>'
+          : '<div style="text-align:center;padding:40px 20px;opacity:0.4;font-family:Caveat,cursive;font-size:1.15rem;color:'+pal.tx+';">your wall is empty — pin your first note ✨</div>'
         )+
       '</div>'+
     '</div>';
