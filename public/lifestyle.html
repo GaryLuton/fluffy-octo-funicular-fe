@@ -3937,7 +3937,8 @@ function postGameScore(gameId, score){
   fetch('/api/games/'+encodeURIComponent(gameId)+'/score',{
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify({score: Math.max(0, Math.floor(score))})
+    body:JSON.stringify({score: Math.max(0, Math.floor(score))}),
+    keepalive:true
   }).catch(function(){});
 }
 
