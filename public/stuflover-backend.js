@@ -121,7 +121,7 @@
   window.stufloverLogout = function () {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    window.location.href = '/auth.html';
+    window.location.href = '/';
   };
 
   // ─── Track page visits ───
