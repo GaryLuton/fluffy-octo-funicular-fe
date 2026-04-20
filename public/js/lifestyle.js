@@ -8,7 +8,7 @@
 // class alone stops paint work for all animation-driven UI.
 (function _slVisibilityShim(){
   function apply(){
-    let hidden = document.visibilityState !== 'visible';
+    var hidden = document.visibilityState !== 'visible';
     document.documentElement.classList.toggle('sl-tab-hidden', hidden);
   }
   document.addEventListener('visibilitychange', apply);
@@ -27,7 +27,7 @@ function _slVisibleInterval(fn, ms){
 // (e.g. onclick="foo('…')"). Use escJsString whenever user-provided data
 // is interpolated into a JS string — HTML escaping alone does NOT prevent
 // ' or \ from breaking out.
-function _escHtml(s){ let d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function _escHtml(s){ var d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
 function _escAttr(s){ return _escHtml(s).replace(/"/g,'&quot;'); }
 function _escJsString(s){
   return String(s==null?'':s)
@@ -36,13 +36,10 @@ function _escJsString(s){
     .replace(/"/g,'\\"')
     .replace(/\n/g,'\\n')
     .replace(/\r/g,'\\r')
-    .replace(/</g,'\\u003c')   // close </script> and HTML parsing confusion
+    .replace(/</g,'\\u003c')
     .replace(/>/g,'\\u003e')
     .replace(/&/g,'\\u0026');
 }
-// NOTE: Preferred migration path for user-data rendering is to stop using
-// innerHTML and build nodes with document.createElement + textContent/append,
-// or event delegation with data-* attributes (see data-action handler below).
 
 // ─── NAV TAB HELPER ─────────────────────────────────────
 // Set the override so activeTabId() resolves correctly, and call
@@ -614,7 +611,7 @@ function tog(i){
 
 function togCustom(i, qid){
   tog(i);
-  let wrap = document.getElementById('customInputWrap');
+  var wrap = document.getElementById('customInputWrap');
   if(multiSel.includes(i)){
     wrap.style.display='block';
     document.getElementById('customArtistInput').focus();
@@ -626,10 +623,10 @@ function togCustom(i, qid){
 function submitMulti(qid){
   const q=getQ(qid);
   multiSel.forEach(function(i){
-    let opt = q.opts[i];
+    var opt = q.opts[i];
     if(opt.isCustom){
       // Save custom artist name
-      let customName = (document.getElementById('customArtistInput')||{}).value||'';
+      var customName = (document.getElementById('customArtistInput')||{}).value||'';
       customName = customName.trim();
       if(customName){
         P.music.push('custom');
@@ -760,7 +757,7 @@ function resolvePalette(){
 
 // ─── COLOUR HELPERS ───────────────────────────────────────
 function hexToRgb(hex){ try{return[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];}catch(e){return[200,150,160];} }
-function toHex(v){ let h=Math.round(Math.max(0,Math.min(255,v))).toString(16); return h.length<2?'0'+h:h; }
+function toHex(v){ var h=Math.round(Math.max(0,Math.min(255,v))).toString(16); return h.length<2?'0'+h:h; }
 function lightenHex(hex,a){ const[r,g,b]=hexToRgb(hex); return '#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a); }
 function darkenHex(hex,a){ const[r,g,b]=hexToRgb(hex); return '#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a)); }
 function shiftHue(hex,deg){
@@ -792,7 +789,7 @@ function buildPage(){
   // Snapshot the quiz result BEFORE anything else so it survives a redirect
   // to auth. The full save to stuflover_profile happens further down; this
   // backup lets auth.html restore the result after sign-in / sign-up.
-  let quizSnapshot = {
+  var quizSnapshot = {
     aesthetics:P.aesthetics,music:P.music,interests:P.interests,
     social:P.social,age:P.age,gender:P.gender,
     faveColour:P.faveColour,faveShop:P.faveShop,
@@ -821,25 +818,25 @@ function buildPage(){
   const nav = document.getElementById('mainNav');
   nav.style.background = pal.bg+'f4';
   nav.style.borderColor = pal.tx+'10';
-  let navLogo = document.getElementById('navLogo');
+  var navLogo = document.getElementById('navLogo');
   if(navLogo) navLogo.style.color = pal.tx;
-  let navHome = document.getElementById('navHome');
+  var navHome = document.getElementById('navHome');
   if(navHome){ navHome.style.color = pal.tx; navHome.style.borderColor = pal.tx+'25'; }
-  let navAcct = document.getElementById('navAccount');
+  var navAcct = document.getElementById('navAccount');
   if(navAcct){ navAcct.style.color = pal.tx; navAcct.style.borderColor = pal.tx+'25'; }
 
   // BG SVG
   buildBgSvg(pal, topK);
 
   // Personalized header
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let username = (user && user.username) || '';
-  let hour = new Date().getHours();
-  let timeGreet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var username = (user && user.username) || '';
+  var hour = new Date().getHours();
+  var timeGreet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
 
   // Personalized eyebrow based on mood + time
-  let name = username || 'bestie';
-  let eyebrowTexts = {
+  var name = username || 'bestie';
+  var eyebrowTexts = {
     good: [name+' you are LITERALLY glowing rn', 'ok '+name+' main character energy today', name+'!! the vibe is immaculate today', 'not '+name+' looking iconic as always'],
     creative: ['the ideas are FLOWING '+name, name+' your creative era is insane rn', 'ok artist mode activated '+name, name+' is about to create something iconic'],
     low: [name+' soft hours activated — you deserve this', 'gentle reminder '+name+' you are doing amazing', name+' cozy era — no rushing today', 'sending '+name+' the biggest hug rn'],
@@ -847,8 +844,8 @@ function buildPage(){
     cosy: [name+' cosy mode unlocked', 'ok '+name+' blanket burrito era', name+' comfort is the vibe today', 'the coziest person alive: '+name],
     tired: [name+' rest IS the flex', 'taking it easy because '+name+' deserves it', name+' recharging era — so valid', 'permission to do nothing granted '+name],
   };
-  let moodArr = eyebrowTexts[P.moodToday] || [timeGreet+' '+name+' — your world is waiting', name+'!! welcome back to the best page on the internet', 'ok '+name+' let us make today iconic', name+' the vibes are already immaculate'];
-  let personalEyebrow = moodArr[Math.floor(Math.random()*moodArr.length)];
+  var moodArr = eyebrowTexts[P.moodToday] || [timeGreet+' '+name+' — your world is waiting', name+'!! welcome back to the best page on the internet', 'ok '+name+' let us make today iconic', name+' the vibes are already immaculate'];
+  var personalEyebrow = moodArr[Math.floor(Math.random()*moodArr.length)];
   document.getElementById('aeEyebrow').textContent = personalEyebrow;
 
   document.getElementById('aeTitle').textContent = aeName.toUpperCase();
@@ -856,46 +853,46 @@ function buildPage(){
   document.getElementById('aeEyebrow').style.color = pal.tx;
 
   // Add personal stats below the title
-  let headerEl = document.querySelector('.page-header');
-  let existingStats = document.getElementById('personalStats');
+  var headerEl = document.querySelector('.page-header');
+  var existingStats = document.getElementById('personalStats');
   if(existingStats) existingStats.remove();
-  let stats = document.createElement('div');
+  var stats = document.createElement('div');
   stats.id = 'personalStats';
   stats.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;opacity:0.4;font-size:0.72rem;';
-  let statItems = [];
+  var statItems = [];
   if(P.faveColour) statItems.push('<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:'+P.faveColour.hex+';display:inline-block;"></span>'+P.faveColour.name+'</span>');
   if(P.music.length > 0){
-    let topArtist = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    var topArtist = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
     statItems.push('listening to '+topArtist);
   }
   if(P.moodToday) statItems.push('feeling '+P.moodToday);
   if(P.energyWord) statItems.push(P.energyWord+' energy');
   stats.innerHTML = statItems.map(function(s){return '<span style="color:'+pal.tx+'">'+s+'</span>';}).join('<span style="opacity:0.3;color:'+pal.tx+'">·</span>');
-  let searchWrap = document.getElementById('searchWrap');
+  var searchWrap = document.getElementById('searchWrap');
   if(searchWrap && headerEl) headerEl.insertBefore(stats, searchWrap);
 
   // ── Wrap tip, fact, poll, share into a collapsible daily section ──
-  let existingDaily = document.getElementById('dailySection');
+  var existingDaily = document.getElementById('dailySection');
   if(existingDaily) existingDaily.remove();
-  let dailyWrap = document.createElement('div');
+  var dailyWrap = document.createElement('div');
   dailyWrap.id = 'dailySection';
   dailyWrap.style.cssText = 'margin-bottom:20px;';
 
-  let dailyToggle = document.createElement('button');
+  var dailyToggle = document.createElement('button');
   dailyToggle.style.cssText = 'width:100%;padding:12px 16px;border-radius:14px;background:'+pal.ac+'08;border:1.5px solid '+pal.tx+'06;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;font-weight:500;transition:all 0.2s;';
   dailyToggle.innerHTML = '<span>Your daily stuff</span><span id="dailyArrow" style="font-size:0.7rem;opacity:0.3;transition:transform 0.2s;">v</span>';
 
-  let dailyContent = document.createElement('div');
+  var dailyContent = document.createElement('div');
   dailyContent.id = 'dailyContent';
   dailyContent.style.cssText = 'display:none;margin-top:12px;display:flex;flex-direction:column;gap:12px;';
-  let dailyOpen = localStorage.getItem('stuflover_daily_open') === 'true';
+  var dailyOpen = localStorage.getItem('stuflover_daily_open') === 'true';
   dailyContent.style.display = dailyOpen ? 'flex' : 'none';
   if(dailyOpen) document.getElementById('dailyArrow')&&0; // arrow will be set after append
 
   dailyToggle.onclick = function(){
-    let c = document.getElementById('dailyContent');
-    let a = document.getElementById('dailyArrow');
-    let open = c.style.display === 'none';
+    var c = document.getElementById('dailyContent');
+    var a = document.getElementById('dailyArrow');
+    var open = c.style.display === 'none';
     c.style.display = open ? 'flex' : 'none';
     if(a) a.style.transform = open ? 'rotate(180deg)' : '';
     localStorage.setItem('stuflover_daily_open', open.toString());
@@ -907,19 +904,19 @@ function buildPage(){
 
   // Set arrow state
   setTimeout(function(){
-    let a = document.getElementById('dailyArrow');
+    var a = document.getElementById('dailyArrow');
     if(a && dailyOpen) a.style.transform = 'rotate(180deg)';
   }, 10);
 
   // ── Share card ──
-  let existingShare = document.getElementById('shareCard');
+  var existingShare = document.getElementById('shareCard');
   if(existingShare) existingShare.remove();
-  let shareCard = document.createElement('div');
+  var shareCard = document.createElement('div');
   shareCard.id = 'shareCard';
   shareCard.style.cssText = 'margin-bottom:24px;padding:18px 22px;border-radius:16px;background:'+pal.ac+'10;border:1.5px solid '+pal.tx+'08;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;';
-  let shareText = 'i am '+aeName.toLowerCase()+' aesthetic';
+  var shareText = 'i am '+aeName.toLowerCase()+' aesthetic';
   if(P.music.length > 0){
-    let topA = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    var topA = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
     shareText += ', i listen to ' + topA;
   }
   if(P.faveColour) shareText += ', my colour is ' + P.faveColour.name.toLowerCase();
@@ -929,13 +926,13 @@ function buildPage(){
       '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:4px;">Share your vibe</div>'+
       '<div style="font-size:0.82rem;color:'+pal.tx+';opacity:0.6;line-height:1.5;">'+escHtml(shareText)+'</div>'+
     '</div>'+
-    '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'Copied!\';let b=this;setTimeout(function(){b.textContent=\'Copy\'},1500)}.bind(this))" style="padding:8px 18px;border:none;border-radius:10px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Copy</button>';
+    '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'Copied!\';var b=this;setTimeout(function(){b.textContent=\'Copy\'},1500)}.bind(this))" style="padding:8px 18px;border:none;border-radius:10px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Copy</button>';
   dailyContent.appendChild(shareCard);
 
   // Daily tip based on aesthetic
-  let existingTip = document.getElementById('dailyTip');
+  var existingTip = document.getElementById('dailyTip');
   if(existingTip) existingTip.remove();
-  let tips = {
+  var tips = {
     kawaii:['ok hear me out — pastel mood board on your wall. it literally fixes your whole mood','i started matching my phone case to my outfits and people notice i promise','get coloured pens for journaling trust me you will actually want to write'],
     softgirl:['soft lighting changes photos SO much its embarrassing how good you look','ok a silk pillowcase sounds bougie but my skin and hair have never been better','layer your necklaces even if you think its too much — its not. do it.'],
     cleangirl:['slicked back hair + hoops + lip gloss = you are literally unstoppable','real talk a capsule wardrobe saved me 20 minutes every single morning','i started drinking ice water first thing and i genuinely have more energy now'],
@@ -952,18 +949,18 @@ function buildPage(){
     indie:['follow a small artist on spotify today. it costs you nothing and means everything to them','you could make a zine about literally anything you care about and it would be cool','shoot on film once. just once. you will understand why people never go back'],
     emo:['write lyrics about how you feel right now. even bad ones. it is the most underrated outlet','there are eyeliner techniques that will genuinely change your whole face shape','screaming along to songs in your room alone is valid therapy and i stand by that'],
   };
-  let aeTips = tips[topK] || tips.softgirl;
-  let todayTip = aeTips[new Date().getDate() % aeTips.length];
-  let tipDiv = document.createElement('div');
+  var aeTips = tips[topK] || tips.softgirl;
+  var todayTip = aeTips[new Date().getDate() % aeTips.length];
+  var tipDiv = document.createElement('div');
   tipDiv.id = 'dailyTip';
   tipDiv.style.cssText = 'margin-bottom:20px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'06;font-size:0.8rem;line-height:1.6;color:'+pal.tx+';opacity:0.7;';
   tipDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:4px;">Today\'s micro wisdom</span>' + escHtml(todayTip);
   dailyContent.appendChild(tipDiv);
 
   // ── "Did You Know?" — surprising facts matched to aesthetic ──
-  let existingFact = document.getElementById('surpriseFact');
+  var existingFact = document.getElementById('surpriseFact');
   if(existingFact) existingFact.remove();
-  let facts = {
+  var facts = {
     kawaii:['japan has a word — "kawaii" — that describes the culture of cuteness as a form of power and social influence, not weakness','the colour pink actually suppresses aggression. prisons have used "baker-miller pink" rooms to calm inmates. your aesthetic is literally scientifically calming','hello kitty has no mouth because the designers wanted the viewer to project their own feelings onto her. she feels what you feel.','cute things trigger the same brain response as seeing a baby — your aesthetic literally activates your nurturing instincts'],
     softgirl:['the "soft girl" aesthetic originated from black women on tiktok in 2019 and became one of the most influential style movements of the decade','your brain releases oxytocin when you see soft pastel colours. your entire aesthetic is literally a hormone boost','cloud watching has been shown to reduce cortisol levels by 30%. being soft is not lazy — it is biochemistry','the reason soft textures feel comforting is because your skin has specific nerve endings that respond to gentle touch and send signals to your emotional brain'],
     cleangirl:['minimalism actually makes your brain more creative. when there is less visual clutter your prefrontal cortex can focus on generating ideas','the "clean girl" look takes an average of 45 minutes to achieve. "effortless" is literally an effort and that makes it more impressive','your brain makes 35,000 decisions a day. a capsule wardrobe eliminates hundreds of them. you are not being basic — you are being efficient','drinking water first thing in the morning boosts your metabolism by 24% for the next 90 minutes. the clean girls were right all along'],
@@ -980,18 +977,18 @@ function buildPage(){
     indie:['the word "indie" originally meant independently produced music. now it describes a feeling more than a production method','film photography forces you to be intentional because every shot costs money. it literally teaches mindfulness','vinyl records sound different from digital because they capture sound as a continuous wave instead of data points. you are hearing sound the way it actually exists','zines have been a form of self-publishing since the 1930s. every blogger and content creator owes their existence to the zine community'],
     emo:['the word "emo" comes from "emotional hardcore" a subgenre of punk from the 1980s. it was never meant to be an insult','studies show that listening to sad music when you are sad actually makes you feel better. it is called "mood congruency" and it is real science','my chemical romance once said they wanted to save lives not end them. the emo community has one of the strongest mutual support networks of any subculture','black eyeliner has been worn since ancient egypt where it was believed to protect the wearer from evil spirits. your makeup has a 5000 year history'],
   };
-  let aeFacts = facts[topK] || facts.softgirl;
-  let todayFact = aeFacts[new Date().getDate() % aeFacts.length];
-  let factDiv = document.createElement('div');
+  var aeFacts = facts[topK] || facts.softgirl;
+  var todayFact = aeFacts[new Date().getDate() % aeFacts.length];
+  var factDiv = document.createElement('div');
   factDiv.id = 'surpriseFact';
   factDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.tx+'06;border-left:3px solid '+pal.ac+'40;';
   factDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:6px;color:'+pal.tx+';">Did you know?</span><span style="font-size:0.82rem;line-height:1.65;color:'+pal.tx+';opacity:0.65;">'+escHtml(todayFact)+'</span>';
   dailyContent.appendChild(factDiv);
 
   // ── ENGAGEMENT: Daily Poll (quick interaction, replayable) ──
-  let existingPoll = document.getElementById('dailyPoll');
+  var existingPoll = document.getElementById('dailyPoll');
   if(existingPoll) existingPoll.remove();
-  let pollQuestions = [
+  var pollQuestions = [
     {q:'be honest — what are you wearing rn',a:['something cosy','all black','that one outfit','whatever was clean']},
     {q:'your energy today — no lying',a:['main character','cosy goblin','chaotic neutral','unbothered queen']},
     {q:'you are on stuflover instead of',a:['homework','sleeping','socializing','cleaning my room']},
@@ -1003,18 +1000,18 @@ function buildPage(){
     {q:'your comfort activity when sad is',a:['rewatching something','making a playlist','online shopping','lying in bed doing nothing']},
     {q:'how many tabs do you have open rn',a:['like 3 im normal','10-20 its fine','30+ and thriving','i dont want to talk about it']},
   ];
-  let todayPoll = pollQuestions[new Date().getDate() % pollQuestions.length];
-  let pollVoteKey = 'stuflover_poll_'+new Date().toDateString();
-  let existingVote = localStorage.getItem(pollVoteKey);
+  var todayPoll = pollQuestions[new Date().getDate() % pollQuestions.length];
+  var pollVoteKey = 'stuflover_poll_'+new Date().toDateString();
+  var existingVote = localStorage.getItem(pollVoteKey);
 
-  let pollDiv = document.createElement('div');
+  var pollDiv = document.createElement('div');
   pollDiv.id = 'dailyPoll';
   pollDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.ac+'0a;border:1.5px solid '+pal.tx+'06;';
-  let pollHtml = '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:8px;">Daily Poll</div>';
+  var pollHtml = '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:8px;">Daily Poll</div>';
   pollHtml += '<div style="font-size:0.95rem;font-weight:600;color:'+pal.tx+';margin-bottom:12px;line-height:1.4;">'+escHtml(todayPoll.q)+'</div>';
   pollHtml += '<div id="pollOptions" style="display:flex;flex-wrap:wrap;gap:6px;">';
   todayPoll.a.forEach(function(opt,i){
-    let voted = existingVote === i.toString();
+    var voted = existingVote === i.toString();
     pollHtml += '<button onclick="votePoll('+i+')" style="padding:8px 16px;border-radius:20px;font-size:0.78rem;font-family:Space Grotesk,sans-serif;font-weight:500;cursor:pointer;transition:all 0.2s;border:1.5px solid '+(voted?pal.ac:pal.tx+'12')+';background:'+(voted?pal.ac+'18':'transparent')+';color:'+pal.tx+';" '+(existingVote?'disabled':'')+'>'+escHtml(opt)+'</button>';
   });
   pollHtml += '</div>';
@@ -1025,17 +1022,17 @@ function buildPage(){
   dailyContent.appendChild(pollDiv);
 
   // ── ENGAGEMENT: Streak counter (completion + replayability) ──
-  let existingStreak = document.getElementById('streakCounter');
+  var existingStreak = document.getElementById('streakCounter');
   if(existingStreak) existingStreak.remove();
-  let streakKey = 'stuflover_streak';
-  let lastVisitKey = 'stuflover_last_visit';
-  let today = new Date().toDateString();
-  let lastVisit = localStorage.getItem(lastVisitKey);
-  let streak = parseInt(localStorage.getItem(streakKey)||'0');
+  var streakKey = 'stuflover_streak';
+  var lastVisitKey = 'stuflover_last_visit';
+  var today = new Date().toDateString();
+  var lastVisit = localStorage.getItem(lastVisitKey);
+  var streak = parseInt(localStorage.getItem(streakKey)||'0');
   if(lastVisit === today){
     // already counted today
   } else {
-    let yesterday = new Date(Date.now()-86400000).toDateString();
+    var yesterday = new Date(Date.now()-86400000).toDateString();
     if(lastVisit === yesterday){ streak++; }
     else if(lastVisit){ streak = 1; }
     else { streak = 1; }
@@ -1043,10 +1040,10 @@ function buildPage(){
     localStorage.setItem(lastVisitKey, today);
   }
   if(streak > 0){
-    let streakDiv = document.createElement('div');
+    var streakDiv = document.createElement('div');
     streakDiv.id = 'streakCounter';
     streakDiv.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:'+pal.ac+'14;font-size:0.72rem;font-weight:600;color:'+pal.tx+';margin-bottom:16px;';
-    let fireWord = streak >= 7 ? 'on fire' : streak >= 3 ? 'keeping it going' : 'just getting started';
+    var fireWord = streak >= 7 ? 'on fire' : streak >= 3 ? 'keeping it going' : 'just getting started';
     streakDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;font-size:0.85rem;color:'+pal.ac+';">'+streak+'</span> day streak — '+fireWord;
     if(headerEl) headerEl.insertBefore(streakDiv, document.getElementById('aeEyebrow'));
   }
@@ -1067,17 +1064,17 @@ function buildPage(){
   // page (Play, Friends, Me, etc.) reflects their aesthetic. This is
   // overridden if the user later picks a different preset on the Me page.
   try {
-    let surface = '#ffffff';
+    var surface = '#ffffff';
     // Dark backgrounds need a dark surface so cards remain readable.
-    let bgHex = pal.bg.replace('#','');
+    var bgHex = pal.bg.replace('#','');
     if (bgHex.length === 6) {
-      let r = parseInt(bgHex.substr(0,2),16),
+      var r = parseInt(bgHex.substr(0,2),16),
           g = parseInt(bgHex.substr(2,2),16),
           b = parseInt(bgHex.substr(4,2),16);
-      let lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+      var lum = (0.299*r + 0.587*g + 0.114*b) / 255;
       if (lum < 0.35) surface = lightenHex(pal.bg, 0.12);
     }
-    let themeState = {
+    var themeState = {
       preset: 'quiz',
       accent: null,
       textSize: 'default',
@@ -1103,7 +1100,7 @@ function buildPage(){
   // first time a user reaches an aesthetic — never clobbers a manual pick.
   try {
     if (!localStorage.getItem('stuflover_chat_font')) {
-      let aeFont = (AE_FONTS && AE_FONTS[topK]) || 'default';
+      var aeFont = (AE_FONTS && AE_FONTS[topK]) || 'default';
       localStorage.setItem('stuflover_chat_font', aeFont);
     }
   } catch(e) {}
@@ -1113,31 +1110,31 @@ function buildPage(){
   window.scrollTo(0,0);
 
   // ── Quiz completion celebration ──
-  let isFirstTime = !localStorage.getItem('stuflover_quiz_done');
+  var isFirstTime = !localStorage.getItem('stuflover_quiz_done');
   localStorage.setItem('stuflover_quiz_done','true');
   if(isFirstTime){
     // Show celebration overlay briefly
-    let celebDiv = document.createElement('div');
+    var celebDiv = document.createElement('div');
     celebDiv.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:'+pal.bg+';color:'+pal.tx+';text-align:center;padding:40px;animation:fadeSlide 0.5s ease both;';
     celebDiv.innerHTML =
       '<div style="font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:12px;">Quiz Complete</div>'+
       '<div style="font-size:clamp(2rem,6vw,3.5rem);font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9;margin-bottom:16px;">You Are<br>'+aeName+'</div>'+
       '<div style="font-size:0.9rem;opacity:0.45;max-width:320px;line-height:1.7;margin-bottom:24px;">your page is ready. everything is personalized to you now.</div>'+
       '<button onclick="this.parentNode.remove()" style="padding:14px 40px;background:'+pal.ac+';color:'+pal.bg+';border:none;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">See My Page</button>'+
-      '<button onclick="let t=\'i just took the stuflover quiz and i am '+aeName.toLowerCase()+' aesthetic — take it at stuflover.vercel.app\';navigator.clipboard.writeText(t);this.textContent=\'Copied!\';let b=this;setTimeout(function(){b.textContent=\'Share My Result\'},1500)" style="padding:10px 28px;background:transparent;color:'+pal.tx+';border:1.5px solid '+pal.tx+'20;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Share My Result</button>';
+      '<button onclick="var t=\'i just took the stuflover quiz and i am '+aeName.toLowerCase()+' aesthetic — take it at stuflover.vercel.app\';navigator.clipboard.writeText(t);this.textContent=\'Copied!\';var b=this;setTimeout(function(){b.textContent=\'Share My Result\'},1500)" style="padding:10px 28px;background:transparent;color:'+pal.tx+';border:1.5px solid '+pal.tx+'20;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Share My Result</button>';
     document.body.appendChild(celebDiv);
   }
 
   // Nav welcome
   if(username){
-    let wel = document.getElementById('navWelcome');
+    var wel = document.getElementById('navWelcome');
     if(wel){ wel.textContent=username; wel.style.display='inline'; }
   }
 
   // Style the For You section
-  let fyTitle = document.querySelector('.foryou-title');
+  var fyTitle = document.querySelector('.foryou-title');
   if(fyTitle) fyTitle.style.color = searchPal.tx;
-  let fyBtn = document.getElementById('foryouRefresh');
+  var fyBtn = document.getElementById('foryouRefresh');
   if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
 
   // Load scrapbook
@@ -1155,10 +1152,10 @@ function buildPage(){
   buildInstantFeed();
 
   // What's New popup
-  let updateVersion = '2.5';
-  let lastSeen = localStorage.getItem('stuflover_update_seen');
+  var updateVersion = '2.5';
+  var lastSeen = localStorage.getItem('stuflover_update_seen');
   if(lastSeen !== updateVersion){
-    let updatePopup = document.createElement('div');
+    var updatePopup = document.createElement('div');
     updatePopup.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);animation:fadeSlide 0.3s ease;';
     updatePopup.innerHTML =
       '<div style="background:'+pal.bg+';color:'+pal.tx+';border-radius:20px;padding:28px 24px;max-width:360px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">'+
@@ -1196,29 +1193,29 @@ function buildPage(){
   document.querySelectorAll('.feed-cta').forEach(function(c){c.style.color=searchPal.tx;});
 
   // Intersection Observer — fade in on scroll like TikTok FYP.
-  // rootMargin expanded at the bottom so cards reveal BEFORE they scroll into
-  // view, closing the empty-stretch gap before the observer fires. The first
-  // N above-the-fold sections are also pre-marked visible so they never fade
-  // in after first paint.
-  let feedObs = new IntersectionObserver(function(entries){
+  // rootMargin expanded at the bottom so cards reveal BEFORE they scroll
+  // into view, closing the empty-stretch gap before the observer fires.
+  // The first N above-the-fold sections are also pre-marked visible so
+  // they never fade in after first paint.
+  var feedObs = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if(e.isIntersecting){
         e.target.classList.add('visible');
       }
     });
   },{threshold:0,rootMargin:'0px 0px 240px 0px'});
-  let _feedAll = document.querySelectorAll('.feed-reveal');
+  var _feedAll = document.querySelectorAll('.feed-reveal');
   _feedAll.forEach(function(el, i){
     if(i < 2){ el.classList.add('visible'); return; }
     feedObs.observe(el);
   });
   // Add emoji pickers to chat inputs
-  let chatRow1 = document.querySelector('#normalChat .chat-input-row');
+  var chatRow1 = document.querySelector('#normalChat .chat-input-row');
   if(chatRow1) createEmojiPicker('chatInput', chatRow1);
 }
 
 // ─── SCRAPBOOK ───────────────────────────────────────────
-let _sb = {
+var _sb = {
   cache: null,       // array of 5 {cat, title, desc} objects
   positions: {},     // {0:{x,y}, 1:{x,y}, ...}
   dragReady: false,  // whether drag listeners are attached
@@ -1234,8 +1231,8 @@ function sbSave(){
   // Cache locally for instant restore on back-navigation
   try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
   try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
-  let h = _sb.auth();
-  let base = _sb.api();
+  var h = _sb.auth();
+  var base = _sb.api();
   return Promise.all([
     fetch(base+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
     fetch(base+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})})
@@ -1245,23 +1242,23 @@ function sbSave(){
 async function sbLoad(){
   // Try sessionStorage first for instant render
   try{
-    let sc = sessionStorage.getItem('sb_cache');
-    let sp = sessionStorage.getItem('sb_pos');
-    if(sc){ let parsed = JSON.parse(sc); if(Array.isArray(parsed)&&parsed.length>0) _sb.cache = parsed; }
-    if(sp){ let parsed2 = JSON.parse(sp); if(typeof parsed2==='object') _sb.positions = parsed2; }
+    var sc = sessionStorage.getItem('sb_cache');
+    var sp = sessionStorage.getItem('sb_pos');
+    if(sc){ var parsed = JSON.parse(sc); if(Array.isArray(parsed)&&parsed.length>0) _sb.cache = parsed; }
+    if(sp){ var parsed2 = JSON.parse(sp); if(typeof parsed2==='object') _sb.positions = parsed2; }
   }catch(e){}
   // If sessionStorage had data, we're done — render will be instant
   if(_sb.cache) return;
   // Otherwise fetch from server
-  let base = _sb.api();
-  let authOnly = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+  var base = _sb.api();
+  var authOnly = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
   try{
-    let r = await Promise.all([
+    var r = await Promise.all([
       fetch(base+'/api/data/foryou_cache',{headers:authOnly}),
       fetch(base+'/api/data/sb_positions',{headers:authOnly})
     ]);
-    if(r[0].ok){ let d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
-    if(r[1].ok){ let d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
+    if(r[0].ok){ var d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
+    if(r[1].ok){ var d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
     // Store in sessionStorage for next time
     if(_sb.cache){
       try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
@@ -1271,8 +1268,8 @@ async function sbLoad(){
 }
 
 function sbDelete(){
-  let h = _sb.auth();
-  let base = _sb.api();
+  var h = _sb.auth();
+  var base = _sb.api();
   try{ sessionStorage.removeItem('sb_cache'); sessionStorage.removeItem('sb_pos'); }catch(e){}
   fetch(base+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
   fetch(base+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
@@ -1280,9 +1277,9 @@ function sbDelete(){
 
 // ── Build user profile string for AI ──
 function buildRecProfile(){
-  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
-  let music = (P.music||[]).slice(0,4).join(', ');
-  let interests = (P.interests||[]).slice(0,5).join(', ');
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
+  var music = (P.music||[]).slice(0,4).join(', ');
+  var interests = (P.interests||[]).slice(0,5).join(', ');
   return [
     'Aesthetic: '+(topAe.join(', ')||'not set'),
     'Favourite colour: '+(P.faveColour?P.faveColour.name:'not set'),
@@ -1300,7 +1297,7 @@ function buildRecProfile(){
 
 // ── Generate new recommendations via AI ──
 async function sbGenerate(){
-  let res = await fetch('https://api.anthropic.com/v1/messages',{
+  var res = await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST', headers:{},
     body:JSON.stringify({
       model:'claude-sonnet-4-20250514',
@@ -1309,29 +1306,29 @@ async function sbGenerate(){
       messages:[{role:'user',content:'My profile:\n'+buildRecProfile()+'\n\nGenerate 5 personalised recommendations for me right now.'}]
     })
   });
-  let data = await res.json();
-  let text = (data.content&&data.content[0]&&data.content[0].text)||'';
-  let match = text.match(/\[[\s\S]*\]/);
+  var data = await res.json();
+  var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+  var match = text.match(/\[[\s\S]*\]/);
   if(!match) throw new Error('No recommendations returned');
-  let recs = JSON.parse(match[0]);
+  var recs = JSON.parse(match[0]);
   if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty recommendations');
   return recs;
 }
 
 // ── Render cards into the board ──
 function sbRender(){
-  let board = document.getElementById('recBoard');
+  var board = document.getElementById('recBoard');
   if(!board || !searchPal || !_sb.cache) return;
-  let pal = searchPal;
-  let catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
-  let mob = window.innerWidth < 768;
-  let cardW = mob ? board.clientWidth - 16 : _sb.CARD_W;
+  var pal = searchPal;
+  var catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
+  var mob = window.innerWidth < 768;
+  var cardW = mob ? board.clientWidth - 16 : _sb.CARD_W;
 
   board.innerHTML = '';
   board.style.height = _sb.BOARD_H + 'px';
 
   // Default positions: 3 across top, 2 across bottom (desktop) or stacked (mobile)
-  let defaults = mob ? [
+  var defaults = mob ? [
     {x:8, y:10},{x:8, y:170},{x:8, y:330},{x:8, y:490},{x:8, y:650}
   ] : [
     {x:10, y:10},
@@ -1342,7 +1339,7 @@ function sbRender(){
   ];
 
   _sb.cache.forEach(function(rec, i){
-    let card = document.createElement('div');
+    var card = document.createElement('div');
     card.className = 'sb-card';
     card.style.width = cardW + 'px';
     card.style.background = pal.bg;
@@ -1356,7 +1353,7 @@ function sbRender(){
       '<div class="sb-card-body">'+escHtml(rec.desc||'')+'</div>';
 
     // Position: use saved or default
-    let pos = _sb.positions[i] || defaults[i] || {x:10, y:10};
+    var pos = _sb.positions[i] || defaults[i] || {x:10, y:10};
     card.style.left = pos.x + 'px';
     card.style.top = pos.y + 'px';
     card.style.zIndex = i + 1;
@@ -1365,9 +1362,9 @@ function sbRender(){
   });
 
   // Update board height to fit content
-  let maxB = 0;
+  var maxB = 0;
   board.querySelectorAll('.sb-card').forEach(function(c){
-    let b = parseFloat(c.style.top) + c.offsetHeight;
+    var b = parseFloat(c.style.top) + c.offsetHeight;
     if(b > maxB) maxB = b;
   });
   board.style.height = Math.max(_sb.BOARD_H, maxB + 30) + 'px';
@@ -1377,11 +1374,11 @@ function sbRender(){
 
 // ── Drag and drop ──
 function sbInitDrag(){
-  let board = document.getElementById('recBoard');
+  var board = document.getElementById('recBoard');
   if(!board || _sb.dragReady) return;
   _sb.dragReady = true;
 
-  let dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, moved = false;
+  var dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, moved = false;
 
   function ptr(e){
     if(e.touches && e.touches.length) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
@@ -1397,11 +1394,11 @@ function sbInitDrag(){
   }
 
   function down(e){
-    let card = findCard(e.target);
+    var card = findCard(e.target);
     if(!card) return;
     dragging = card;
     moved = false;
-    let p = ptr(e);
+    var p = ptr(e);
     startX = p.x; startY = p.y;
     origX = parseFloat(dragging.style.left) || 0;
     origY = parseFloat(dragging.style.top) || 0;
@@ -1415,16 +1412,16 @@ function sbInitDrag(){
   function move(e){
     if(!dragging) return;
     e.preventDefault();
-    let p = ptr(e);
-    let dx = p.x - startX, dy = p.y - startY;
+    var p = ptr(e);
+    var dx = p.x - startX, dy = p.y - startY;
     if(!moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
     if(!moved){ moved = true; dragging.classList.add('dragging'); }
 
-    let newX = origX + dx;
-    let newY = origY + dy;
+    var newX = origX + dx;
+    var newY = origY + dy;
     // Same boundary for every card: 0 to (board - card) in both axes
-    let maxX = board.clientWidth - dragging.offsetWidth;
-    let maxY = board.clientHeight - dragging.offsetHeight;
+    var maxX = board.clientWidth - dragging.offsetWidth;
+    var maxY = board.clientHeight - dragging.offsetHeight;
     newX = Math.max(0, Math.min(newX, maxX));
     newY = Math.max(0, Math.min(newY, maxY));
     dragging.style.left = newX + 'px';
@@ -1435,7 +1432,7 @@ function sbInitDrag(){
     if(!dragging) return;
     dragging.classList.remove('dragging');
     if(moved){
-      let idx = dragging.dataset.idx;
+      var idx = dragging.dataset.idx;
       _sb.positions[idx] = {x: parseFloat(dragging.style.left)||0, y: parseFloat(dragging.style.top)||0};
       sbSave();
     }
@@ -1452,7 +1449,7 @@ function sbInitDrag(){
 
 // ── Main entry: load scrapbook ──
 async function loadScrapbook(){
-  let board = document.getElementById('recBoard');
+  var board = document.getElementById('recBoard');
   if(!board) return;
   if(!searchPal){ setTimeout(loadScrapbook, 300); return; }
 
@@ -1469,9 +1466,9 @@ async function loadScrapbook(){
   }
 
   // No cache — show loading state and generate new via AI
-  let pal = searchPal;
+  var pal = searchPal;
   board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Personalising your scrapbook...</div>';
-  let btn = document.getElementById('foryouRefresh');
+  var btn = document.getElementById('foryouRefresh');
   if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
 
   try{
@@ -1490,9 +1487,9 @@ async function loadScrapbook(){
 async function refreshForYou(){
   _sb.cache = null;
   _sb.positions = {};
-  let board = document.getElementById('recBoard');
+  var board = document.getElementById('recBoard');
   if(board && searchPal) board.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
-  let btn = document.getElementById('foryouRefresh');
+  var btn = document.getElementById('foryouRefresh');
   if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
 
   sbDelete();
@@ -1509,28 +1506,28 @@ async function refreshForYou(){
   if(btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
 }
 
-function escHtml(s){ let d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function escHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // ─── FITFORIT (CLOSET & OUTFIT BUILDER) ──────────────────
-let ffiCurrentCat='all', ffiCurrentTab='closet', ffiBuilderCat='tops';
-let ffiOutfitPicks={tops:null,bottoms:null,dresses:null,outerwear:null,shoes:null,bags:null,accessories:null};
-let FFI_CATS=['all','tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
+var ffiCurrentCat='all', ffiCurrentTab='closet', ffiBuilderCat='tops';
+var ffiOutfitPicks={tops:null,bottoms:null,dresses:null,outerwear:null,shoes:null,bags:null,accessories:null};
+var FFI_CATS=['all','tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
 
 function ffiGetCloset(){try{return JSON.parse(localStorage.getItem('stuflover_closet')||'[]');}catch(e){return[];}}
 function ffiSaveCloset(items){localStorage.setItem('stuflover_closet',JSON.stringify(items));}
 
 function ffiApplyStyles(){
-  let pal=searchPal; if(!pal) return;
-  let ab=document.getElementById('ffiAddItemBtn'); if(ab){ab.style.background=pal.ac;ab.style.color=pal.bg;}
-  let as=document.getElementById('ffiAddSubmit'); if(as){as.style.background=pal.ac;as.style.color=pal.bg;as.style.padding='10px 24px';as.style.borderRadius='8px';as.style.border='none';as.style.fontFamily="'Barlow Condensed',sans-serif";as.style.fontWeight='900';as.style.fontSize='0.82rem';as.style.letterSpacing='2px';as.style.textTransform='uppercase';as.style.cursor='pointer';}
-  let sb=document.getElementById('ffiSuggestBtn'); if(sb){sb.style.background=pal.ac;sb.style.color=pal.bg;}
-  let mb=document.getElementById('ffiAddModalBox'); if(mb){mb.style.background=pal.bg;mb.style.color=pal.tx;}
+  var pal=searchPal; if(!pal) return;
+  var ab=document.getElementById('ffiAddItemBtn'); if(ab){ab.style.background=pal.ac;ab.style.color=pal.bg;}
+  var as=document.getElementById('ffiAddSubmit'); if(as){as.style.background=pal.ac;as.style.color=pal.bg;as.style.padding='10px 24px';as.style.borderRadius='8px';as.style.border='none';as.style.fontFamily="'Barlow Condensed',sans-serif";as.style.fontWeight='900';as.style.fontSize='0.82rem';as.style.letterSpacing='2px';as.style.textTransform='uppercase';as.style.cursor='pointer';}
+  var sb=document.getElementById('ffiSuggestBtn'); if(sb){sb.style.background=pal.ac;sb.style.color=pal.bg;}
+  var mb=document.getElementById('ffiAddModalBox'); if(mb){mb.style.background=pal.bg;mb.style.color=pal.tx;}
   document.querySelectorAll('.ffi-tab').forEach(function(t){t.style.color=pal.tx;});
 }
 
 function ffiSwitchTab(tab){
   ffiCurrentTab=tab;
-  let pal=searchPal;
+  var pal=searchPal;
   document.getElementById('ffiTabCloset').classList.toggle('on',tab==='closet');
   document.getElementById('ffiTabBuilder').classList.toggle('on',tab==='builder');
   document.getElementById('ffiClosetView').style.display=tab==='closet'?'block':'none';
@@ -1539,80 +1536,80 @@ function ffiSwitchTab(tab){
 }
 
 function ffiRenderCloset(){
-  let pal=searchPal; if(!pal) return;
-  let items=ffiGetCloset();
-  let filtered=ffiCurrentCat==='all'?items:items.filter(function(i){return i.cat===ffiCurrentCat;});
+  var pal=searchPal; if(!pal) return;
+  var items=ffiGetCloset();
+  var filtered=ffiCurrentCat==='all'?items:items.filter(function(i){return i.cat===ffiCurrentCat;});
   document.getElementById('ffiClosetCount').textContent=items.length+' item'+(items.length!==1?'s':'');
-  let catsHtml='';
+  var catsHtml='';
   FFI_CATS.forEach(function(c){
-    let on=c===ffiCurrentCat?' on':'';
+    var on=c===ffiCurrentCat?' on':'';
     catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiCurrentCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiFilterCat(\''+c+'\')">'+c+'</button>';
   });
   document.getElementById('ffiClosetCats').innerHTML=catsHtml;
-  let grid=document.getElementById('ffiClosetGrid');
+  var grid=document.getElementById('ffiClosetGrid');
   if(filtered.length===0){grid.innerHTML='<div class="ffi-grid-empty">'+(items.length===0?'Your closet is empty — add items to get started!':'No items in this category')+'</div>';return;}
   grid.innerHTML='';
   filtered.forEach(function(item){
-    let idx=items.indexOf(item);
-    let card=document.createElement('div');card.className='ffi-grid-item';card.style.background=pal.tx+'06';
+    var idx=items.indexOf(item);
+    var card=document.createElement('div');card.className='ffi-grid-item';card.style.background=pal.tx+'06';
     card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"/><div class="ffi-grid-placeholder" style="display:none;aspect-ratio:3/4;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:0.75rem;opacity:0.4;background:'+pal.ac+'10;border-radius:8px;">'+escHtml(item.name)+'</div><div class="ffi-grid-item-info" style="color:'+pal.tx+'"><div class="ffi-grid-item-name">'+escHtml(item.name)+'</div><div class="ffi-grid-item-cat">'+escHtml(item.cat)+'</div></div><button class="ffi-grid-item-del" onclick="ffiDeleteItem(event,'+idx+')">x</button>';
     grid.appendChild(card);
   });
 }
 function ffiFilterCat(c){ffiCurrentCat=c;ffiRenderCloset();}
-function ffiDeleteItem(e,idx){e.stopPropagation();let items=ffiGetCloset();items.splice(idx,1);ffiSaveCloset(items);ffiRenderCloset();}
+function ffiDeleteItem(e,idx){e.stopPropagation();var items=ffiGetCloset();items.splice(idx,1);ffiSaveCloset(items);ffiRenderCloset();}
 
 function ffiOpenAddModal(){document.getElementById('ffiAddModal').classList.add('open');document.getElementById('ffiAddUrl').value='';document.getElementById('ffiAddName').value='';document.getElementById('ffiAddCat').value='';document.getElementById('ffiAddErr').textContent='';document.getElementById('ffiAddPreview').style.display='none';setTimeout(function(){document.getElementById('ffiAddUrl').focus();},100);}
 function ffiCloseAddModal(){document.getElementById('ffiAddModal').classList.remove('open');}
-function ffiPreviewAdd(){let url=document.getElementById('ffiAddUrl').value.trim();let p=document.getElementById('ffiAddPreview');if(url&&url.match(/^https?:\/\//)){p.src=url;p.style.display='block';p.onerror=function(){p.style.display='none';};}else{p.style.display='none';}}
+function ffiPreviewAdd(){var url=document.getElementById('ffiAddUrl').value.trim();var p=document.getElementById('ffiAddPreview');if(url&&url.match(/^https?:\/\//)){p.src=url;p.style.display='block';p.onerror=function(){p.style.display='none';};}else{p.style.display='none';}}
 function ffiAddItem(){
-  let url=document.getElementById('ffiAddUrl').value.trim(),name=document.getElementById('ffiAddName').value.trim(),cat=document.getElementById('ffiAddCat').value,err=document.getElementById('ffiAddErr');
+  var url=document.getElementById('ffiAddUrl').value.trim(),name=document.getElementById('ffiAddName').value.trim(),cat=document.getElementById('ffiAddCat').value,err=document.getElementById('ffiAddErr');
   if(!url){err.textContent='Paste a photo URL';err.style.color='#c44';return;}
   if(!name){err.textContent='Give it a name';err.style.color='#c44';return;}
   if(!cat){err.textContent='Pick a category';err.style.color='#c44';return;}
-  let items=ffiGetCloset();items.push({url:url,name:name,cat:cat,added:Date.now()});ffiSaveCloset(items);ffiCloseAddModal();ffiRenderCloset();
+  var items=ffiGetCloset();items.push({url:url,name:name,cat:cat,added:Date.now()});ffiSaveCloset(items);ffiCloseAddModal();ffiRenderCloset();
 }
 
 function ffiRenderBuilder(){
-  let pal=searchPal; if(!pal) return;
-  let preview=document.getElementById('ffiBuilderPreview');
-  let slots=['tops','bottoms','shoes','outerwear','accessories'];
+  var pal=searchPal; if(!pal) return;
+  var preview=document.getElementById('ffiBuilderPreview');
+  var slots=['tops','bottoms','shoes','outerwear','accessories'];
   preview.innerHTML='';
   slots.forEach(function(cat){
-    let pick=ffiOutfitPicks[cat];let slot=document.createElement('div');slot.className='ffi-builder-slot';
+    var pick=ffiOutfitPicks[cat];var slot=document.createElement('div');slot.className='ffi-builder-slot';
     if(pick){slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt="'+escHtml(pick.name)+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"/><div class="ffi-builder-slot-label">'+cat+'</div>';}
     else{slot.innerHTML='<div class="ffi-builder-slot-empty">'+cat+'</div><div class="ffi-builder-slot-label">'+cat+'</div>';}
     preview.appendChild(slot);
   });
-  let catsHtml='';
+  var catsHtml='';
   ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'].forEach(function(c){
-    let on=c===ffiBuilderCat?' on':'';
+    var on=c===ffiBuilderCat?' on':'';
     catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiBuilderCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiPickBuilderCat(\''+c+'\')">'+c+'</button>';
   });
   document.getElementById('ffiBuilderCats').innerHTML=catsHtml;
-  let items=ffiGetCloset().filter(function(i){return i.cat===ffiBuilderCat;});
-  let grid=document.getElementById('ffiBuilderItems');grid.innerHTML='';
+  var items=ffiGetCloset().filter(function(i){return i.cat===ffiBuilderCat;});
+  var grid=document.getElementById('ffiBuilderItems');grid.innerHTML='';
   if(items.length===0){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;opacity:0.3;font-style:italic;">No '+ffiBuilderCat+' in your closet</div>';return;}
   items.forEach(function(item){
-    let isPicked=ffiOutfitPicks[ffiBuilderCat]&&ffiOutfitPicks[ffiBuilderCat].url===item.url;
-    let card=document.createElement('div');card.className='ffi-builder-item'+(isPicked?' picked':'');card.style.borderColor=isPicked?pal.ac:'transparent';card.style.background=pal.tx+'06';
+    var isPicked=ffiOutfitPicks[ffiBuilderCat]&&ffiOutfitPicks[ffiBuilderCat].url===item.url;
+    var card=document.createElement('div');card.className='ffi-builder-item'+(isPicked?' picked':'');card.style.borderColor=isPicked?pal.ac:'transparent';card.style.background=pal.tx+'06';
     card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" onerror="this.style.background=\''+pal.ac+'12\';this.style.minHeight=\'60px\'"/>';
     card.onclick=function(){if(isPicked){ffiOutfitPicks[ffiBuilderCat]=null;}else{ffiOutfitPicks[ffiBuilderCat]=item;}ffiRenderBuilder();};
     grid.appendChild(card);
   });
 }
 function ffiPickBuilderCat(c){ffiBuilderCat=c;ffiRenderBuilder();}
-function ffiClearOutfit(){for(let k in ffiOutfitPicks)ffiOutfitPicks[k]=null;let r=document.getElementById('ffiSuggestResult');if(r)r.style.display='none';ffiRenderBuilder();}
+function ffiClearOutfit(){for(var k in ffiOutfitPicks)ffiOutfitPicks[k]=null;var r=document.getElementById('ffiSuggestResult');if(r)r.style.display='none';ffiRenderBuilder();}
 
 async function ffiAiSuggest(){
-  let items=ffiGetCloset();if(items.length<3){alert('Add at least 3 items first!');return;}
-  let btn=document.getElementById('ffiSuggestBtn');btn.disabled=true;btn.textContent='Thinking...';
-  let closetDesc=items.map(function(i){return i.cat+': '+i.name;}).join('\n');
-  let aeName=Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];aeName=aeName?aeName[0]:'casual';
+  var items=ffiGetCloset();if(items.length<3){alert('Add at least 3 items first!');return;}
+  var btn=document.getElementById('ffiSuggestBtn');btn.disabled=true;btn.textContent='Thinking...';
+  var closetDesc=items.map(function(i){return i.cat+': '+i.name;}).join('\n');
+  var aeName=Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];aeName=aeName?aeName[0]:'casual';
   try{
-    let res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'You are a personal stylist. The user has a '+aeName+' aesthetic. Given their closet items, suggest ONE complete outfit combination. Be specific — name the exact items from their list. Explain why it works in 1-2 sentences. Keep it fun and encouraging.',messages:[{role:'user',content:'Here is everything in my closet:\n'+closetDesc+'\n\nSuggest a complete outfit from these items!'}]})});
-    let data=await res.json();let text=(data.content&&data.content[0]&&data.content[0].text)||'Could not generate suggestion.';
-    let result=document.getElementById('ffiSuggestResult');result.textContent=text;result.style.display='block';result.style.background=searchPal.ac+'12';result.style.color=searchPal.tx;
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'You are a personal stylist. The user has a '+aeName+' aesthetic. Given their closet items, suggest ONE complete outfit combination. Be specific — name the exact items from their list. Explain why it works in 1-2 sentences. Keep it fun and encouraging.',messages:[{role:'user',content:'Here is everything in my closet:\n'+closetDesc+'\n\nSuggest a complete outfit from these items!'}]})});
+    var data=await res.json();var text=(data.content&&data.content[0]&&data.content[0].text)||'Could not generate suggestion.';
+    var result=document.getElementById('ffiSuggestResult');result.textContent=text;result.style.display='block';result.style.background=searchPal.ac+'12';result.style.color=searchPal.tx;
   }catch(e){}
   btn.disabled=false;btn.textContent='AI Suggest Outfit';
 }
@@ -1625,7 +1622,7 @@ function openFitforIt(){
 }
 
 // ─── FLOVEEHUB PERSONALITY PER AESTHETIC ──────────────────
-let FLOVEE_VIBES = {
+var FLOVEE_VIBES = {
   kawaii: {
     name:'Luna', tone:'bubbly, soft, sweet, uses lots of !, says things like "omg", "sooo cute", "ahhh". giggly energy. texts in lowercase with cute reactions.',
     topics:'sanrio, cute stationery, pastel everything, boba, plushies, anime, cozy games, cute room decor, matching outfits',
@@ -1731,24 +1728,24 @@ let FLOVEE_VIBES = {
 };
 
 function getFloveeName(){
-  let topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
   topK = topK?topK[0]:'softgirl';
   return (FLOVEE_VIBES[topK]||FLOVEE_VIBES.softgirl).name;
 }
 
 // ─── FLOVEEHUB GAMES ─────────────────────────────────────
-let currentHubGame = null;
+var currentHubGame = null;
 
 
 // ─── MODAL HISTORY HELPER ─────────────────────────────────
 // Full-screen overlays register here so the URL hash, document.title,
 // browser back-button, Escape key and focus state all stay in sync with
 // what's on screen.
-let __sluModal = { active:null, prevTitle:null, closeFns:{}, els:{}, opener:null, closing:false };
+var __sluModal = { active:null, prevTitle:null, closeFns:{}, els:{}, opener:null, closing:false };
 
 function _sluTabbables(el){
   if(!el) return [];
-  let sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  var sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
   return Array.prototype.filter.call(el.querySelectorAll(sel), function(n){
     // skip nodes that are visually hidden or inside a hidden subtree
     return !!(n.offsetWidth || n.offsetHeight || n.getClientRects().length);
@@ -1763,14 +1760,14 @@ function _sluModalKey(e){
     return;
   }
   if(e.key !== 'Tab') return;
-  let el = __sluModal.els[__sluModal.active];
-  let tabs = _sluTabbables(el);
+  var el = __sluModal.els[__sluModal.active];
+  var tabs = _sluTabbables(el);
   if(tabs.length === 0){
     e.preventDefault();
     if(el){ el.setAttribute('tabindex','-1'); el.focus(); }
     return;
   }
-  let first = tabs[0], last = tabs[tabs.length - 1];
+  var first = tabs[0], last = tabs[tabs.length - 1];
   if(e.shiftKey && document.activeElement === first){
     e.preventDefault();
     last.focus();
@@ -1804,10 +1801,10 @@ function openModalView(name, title, closeFn, el){
   if(title) document.title = title;
   // Move focus inside the modal on the next tick so content has rendered.
   setTimeout(function(){
-    let node = __sluModal.els[name];
+    var node = __sluModal.els[name];
     if(!node) return;
-    let tabs = _sluTabbables(node);
-    let target = tabs.length ? tabs[0] : (function(){ node.setAttribute('tabindex','-1'); return node; })();
+    var tabs = _sluTabbables(node);
+    var target = tabs.length ? tabs[0] : (function(){ node.setAttribute('tabindex','-1'); return node; })();
     try{ target.focus(); }catch(e){}
   }, 30);
 }
@@ -1821,9 +1818,9 @@ function closeModalView(){
 window.addEventListener('popstate', function(){
   if(!__sluModal.active || __sluModal.closing) return;
   __sluModal.closing = true;
-  let name = __sluModal.active;
-  let fn = __sluModal.closeFns[name];
-  let opener = __sluModal.opener;
+  var name = __sluModal.active;
+  var fn = __sluModal.closeFns[name];
+  var opener = __sluModal.opener;
   __sluModal.active = null;
   __sluModal.opener = null;
   delete __sluModal.closeFns[name];
@@ -1840,8 +1837,8 @@ window.addEventListener('popstate', function(){
 function fetchWithTimeout(fetchFn, path, opts, timeoutMs){
   timeoutMs = timeoutMs || 10000;
   return new Promise(function(resolve, reject){
-    let timedOut = false;
-    let timer = setTimeout(function(){
+    var timedOut = false;
+    var timer = setTimeout(function(){
       timedOut = true;
       reject(new Error('Request timed out'));
     }, timeoutMs);
@@ -1856,11 +1853,11 @@ function fetchWithTimeout(fetchFn, path, opts, timeoutMs){
 }
 
 // ─── READIT (Book community) ─────────────────────────────
-let riTab = 'new';
+var riTab = 'new';
 
 function riFetch(path, opts){
-  let url = (window.STUFLOVER_API_URL||'') + path;
-  let f = window._origFetch || window.fetch;
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
   return f.call(window, url, opts);
 }
 function riHeaders(){
@@ -1869,7 +1866,7 @@ function riHeaders(){
 
 function riSwitchTab(tab){
   riTab = tab;
-  let pal = searchPal;
+  var pal = searchPal;
   document.getElementById('riTabNew').classList.toggle('on',tab==='new');
   document.getElementById('riTabTop').classList.toggle('on',tab==='top');
   document.getElementById('riTabNew').style.borderColor = tab==='new'?pal.ac:'rgba(128,128,128,0.1)';
@@ -1878,9 +1875,9 @@ function riSwitchTab(tab){
 }
 
 async function loadRiFeed(){
-  let feed = document.getElementById('riFeed');
-  let detail = document.getElementById('riDetail');
-  let pal = searchPal;
+  var feed = document.getElementById('riFeed');
+  var detail = document.getElementById('riDetail');
+  var pal = searchPal;
   detail.style.display = 'none';
   detail.classList.remove('active');
   feed.style.display = 'flex';
@@ -1897,29 +1894,29 @@ async function loadRiFeed(){
 
   feed.innerHTML = '<div class="ri-empty">Loading...</div>';
   try{
-    let res = await fetchWithTimeout(riFetch, '/api/books/posts?page=0',{headers:riHeaders()}, 10000);
+    var res = await fetchWithTimeout(riFetch, '/api/books/posts?page=0',{headers:riHeaders()}, 10000);
     if(!res.ok){
-      let errData = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
+      var errData = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
       feed.innerHTML = '<div class="ri-empty has-error">'+escHtml(errData.error||'Could not load posts')+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
       return;
     }
-    let data = await res.json();
-    let posts = data.posts||[];
+    var data = await res.json();
+    var posts = data.posts||[];
     if(riTab==='top') posts.sort(function(a,b){return b.votes-a.votes;});
     if(posts.length===0){
       feed.innerHTML = '<div class="ri-empty">No posts yet — start the conversation!</div>';
       return;
     }
-    let tagColors = {discussion:'#6080c0',review:'#c06040',recommendation:'#40a060',booktok:'#c040a0',tbr:'#a08030',haul:'#4090a0',quote:'#8060c0'};
+    var tagColors = {discussion:'#6080c0',review:'#c06040',recommendation:'#40a060',booktok:'#c040a0',tbr:'#a08030',haul:'#4090a0',quote:'#8060c0'};
     feed.innerHTML = '';
     posts.forEach(function(p){
-      let card = document.createElement('div');
+      var card = document.createElement('div');
       card.className = 'ri-post';
       card.style.background = pal.tx+'05';
-      let upOn = p.userVote>0?' on':'';
-      let downOn = p.userVote<0?' on':'';
-      let tagBg = (tagColors[p.tag]||pal.ac)+'20';
-      let tagColor = tagColors[p.tag]||pal.ac;
+      var upOn = p.userVote>0?' on':'';
+      var downOn = p.userVote<0?' on':'';
+      var tagBg = (tagColors[p.tag]||pal.ac)+'20';
+      var tagColor = tagColors[p.tag]||pal.ac;
       card.innerHTML =
         '<div class="ri-vote">'+
           '<button class="ri-vote-btn'+upOn+'" onclick="riVote(event,'+p.id+',1)" style="color:'+(p.userVote>0?pal.ac:pal.tx)+'">&#9650;</button>'+
@@ -1937,7 +1934,7 @@ async function loadRiFeed(){
       feed.appendChild(card);
     });
   }catch(e){
-    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load posts — check your connection';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load posts — check your connection';
     feed.innerHTML = '<div class="ri-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
   }
 }
@@ -1949,17 +1946,17 @@ async function riVote(e,postId,vote){
 }
 
 async function openRiDetail(postId){
-  let feed = document.getElementById('riFeed');
-  let detail = document.getElementById('riDetail');
-  let pal = searchPal;
+  var feed = document.getElementById('riFeed');
+  var detail = document.getElementById('riDetail');
+  var pal = searchPal;
   feed.style.display = 'none';
   detail.style.display = 'flex';
   detail.classList.add('active');
   detail.innerHTML = '<div class="ri-empty">Loading...</div>';
   try{
-    let res = await riFetch('/api/books/posts/'+postId,{headers:riHeaders()});
-    let data = await res.json();
-    let p = data.post; let comments = data.comments||[];
+    var res = await riFetch('/api/books/posts/'+postId,{headers:riHeaders()});
+    var data = await res.json();
+    var p = data.post; var comments = data.comments||[];
     detail.innerHTML =
       '<button class="ri-detail-back" onclick="loadRiFeed()" style="color:'+pal.tx+'">&#8592; Back</button>'+
       '<div class="ri-detail-title" style="color:'+pal.tx+'">'+escHtml(p.title)+'</div>'+
@@ -1972,13 +1969,13 @@ async function openRiDetail(postId){
         '<input id="riCommentInput" placeholder="Add a comment..." maxlength="1000" onkeydown="if(event.key===\'Enter\')riComment('+p.id+')" style="color:'+pal.tx+'"/>'+
         '<button onclick="riComment('+p.id+')" style="background:'+pal.ac+';color:'+pal.bg+'">Reply</button>'+
       '</div>';
-    let commentsEl = document.getElementById('riComments');
+    var commentsEl = document.getElementById('riComments');
     comments.forEach(function(c){
-      let div = document.createElement('div');
+      var div = document.createElement('div');
       div.className = 'ri-comment';
       div.style.background = pal.tx+'06';
       div.style.color = pal.tx;
-      let userEl = document.createElement('div');
+      var userEl = document.createElement('div');
       userEl.className = 'ri-comment-user';
       userEl.textContent = 'u/' + (c.username || '');
       div.appendChild(userEl);
@@ -1991,13 +1988,13 @@ async function openRiDetail(postId){
 }
 
 async function riComment(postId){
-  let input = document.getElementById('riCommentInput');
-  let text = input.value.trim();
+  var input = document.getElementById('riCommentInput');
+  var text = input.value.trim();
   if(!text) return;
   input.value = '';
   try{
-    let res = await riFetch('/api/books/posts/'+postId+'/comment',{method:'POST',headers:riHeaders(),body:JSON.stringify({text:text})});
-    let data = await res.json();
+    var res = await riFetch('/api/books/posts/'+postId+'/comment',{method:'POST',headers:riHeaders(),body:JSON.stringify({text:text})});
+    var data = await res.json();
     if(data.error){alert(data.error);return;}
     openRiDetail(postId);
   }catch(e){}
@@ -2017,19 +2014,19 @@ function openRiModal(){
 function closeRiModal(){document.getElementById('riModal').classList.remove('open');}
 
 async function submitRiPost(){
-  let title = document.getElementById('riTitle').value.trim();
-  let body = document.getElementById('riBody').value.trim();
-  let bookTitle = document.getElementById('riBookTitle').value.trim();
-  let bookAuthor = document.getElementById('riBookAuthor').value.trim();
-  let tag = document.getElementById('riTag').value;
-  let imageUrl = document.getElementById('riImageUrl').value.trim();
-  let err = document.getElementById('riErr');
+  var title = document.getElementById('riTitle').value.trim();
+  var body = document.getElementById('riBody').value.trim();
+  var bookTitle = document.getElementById('riBookTitle').value.trim();
+  var bookAuthor = document.getElementById('riBookAuthor').value.trim();
+  var tag = document.getElementById('riTag').value;
+  var imageUrl = document.getElementById('riImageUrl').value.trim();
+  var err = document.getElementById('riErr');
   if(!title||title.length<3){err.textContent='Title must be at least 3 characters';err.style.color='#c44';return;}
   err.textContent='Posting...';err.style.color=searchPal.tx;
   try{
-    let res = await riFetch('/api/books/posts',{method:'POST',headers:riHeaders(),
+    var res = await riFetch('/api/books/posts',{method:'POST',headers:riHeaders(),
       body:JSON.stringify({title:title,body:body,bookTitle:bookTitle,bookAuthor:bookAuthor,tag:tag,imageUrl:imageUrl})});
-    let data = await res.json();
+    var data = await res.json();
     if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
     closeRiModal();
     loadRiFeed();
@@ -2037,11 +2034,11 @@ async function submitRiPost(){
 }
 
 // ─── FLOVEE GROUPS ───────────────────────────────────────
-let fgTab = 'all';
+var fgTab = 'all';
 
 function fgFetch(path, opts){
-  let url = (window.STUFLOVER_API_URL||'') + path;
-  let f = window._origFetch || window.fetch;
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
   return f.call(window, url, opts);
 }
 function fgHeaders(){
@@ -2050,7 +2047,7 @@ function fgHeaders(){
 
 function switchGroupTab(tab){
   fgTab = tab;
-  let pal = searchPal;
+  var pal = searchPal;
   document.getElementById('fgTabAll').classList.toggle('on', tab==='all');
   document.getElementById('fgTabMine').classList.toggle('on', tab==='mine');
   document.getElementById('fgTabAll').style.borderColor = tab==='all'?pal.ac:'rgba(128,128,128,0.12)';
@@ -2059,8 +2056,8 @@ function switchGroupTab(tab){
 }
 
 async function loadGroups(tab){
-  let list = document.getElementById('fgList');
-  let pal = searchPal;
+  var list = document.getElementById('fgList');
+  var pal = searchPal;
   document.getElementById('groupsView').style.background = pal.bg;
   document.getElementById('groupsView').style.color = pal.tx;
   document.getElementById('fgCreateBtn').style.background = pal.ac;
@@ -2073,32 +2070,32 @@ async function loadGroups(tab){
 
   list.innerHTML = '<div class="fg-empty">Loading...</div>';
   try{
-    let res = await fetchWithTimeout(fgFetch, '/api/groups',{headers:fgHeaders()}, 10000);
+    var res = await fetchWithTimeout(fgFetch, '/api/groups',{headers:fgHeaders()}, 10000);
     if(!res.ok){
       list.innerHTML = '<div class="fg-empty has-error">Could not load communities (server error)<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
       return;
     }
-    let data = await res.json();
-    let groups = data.groups||[];
+    var data = await res.json();
+    var groups = data.groups||[];
     if(tab==='mine') groups = groups.filter(function(g){return g.joined;});
     if(groups.length===0){
       list.innerHTML = '<div class="fg-empty">'+(tab==='mine'?'You have not joined any groups yet':'No groups yet — create the first one!')+'</div>';
       return;
     }
     list.innerHTML = '';
-    let hues = [0,30,60,120,180,220,260,300];
+    var hues = [0,30,60,120,180,220,260,300];
     groups.forEach(function(g, i){
-      let card = document.createElement('div');
+      var card = document.createElement('div');
       card.className = 'fg-card';
       card.style.background = pal.ac+'06';
       card.style.cursor = 'pointer';
       card.onclick = function(e){ if(!e.target.closest('.fg-card-btn')) openGroupDetail(g.id); };
-      let iconBg = 'hsl('+(hues[i%hues.length])+',50%,55%)';
-      let initial = g.name.charAt(0).toUpperCase();
-      let btnClass = g.joined ? 'fg-card-btn joined' : 'fg-card-btn';
-      let btnText = g.joined ? 'Joined' : 'Join';
-      let btnAction = g.joined ? 'leaveGroup('+g.id+')' : 'joinGroup('+g.id+')';
-      let btnStyle = g.joined ? 'color:'+pal.tx : 'background:'+pal.ac+';color:'+pal.bg;
+      var iconBg = 'hsl('+(hues[i%hues.length])+',50%,55%)';
+      var initial = g.name.charAt(0).toUpperCase();
+      var btnClass = g.joined ? 'fg-card-btn joined' : 'fg-card-btn';
+      var btnText = g.joined ? 'Joined' : 'Join';
+      var btnAction = g.joined ? 'leaveGroup('+g.id+')' : 'joinGroup('+g.id+')';
+      var btnStyle = g.joined ? 'color:'+pal.tx : 'background:'+pal.ac+';color:'+pal.bg;
       card.innerHTML =
         '<div class="fg-card-icon" style="background:'+iconBg+'">'+initial+'</div>'+
         '<div class="fg-card-body" style="color:'+pal.tx+'">'+
@@ -2110,7 +2107,7 @@ async function loadGroups(tab){
       list.appendChild(card);
     });
   }catch(e){
-    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load communities — check your connection';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load communities — check your connection';
     list.innerHTML = '<div class="fg-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
   }
 }
@@ -2134,14 +2131,14 @@ function openFgModal(){
 function closeFgModal(){document.getElementById('fgModal').classList.remove('open');}
 
 async function createGroup(){
-  let name = document.getElementById('fgNameInput').value.trim();
-  let desc = document.getElementById('fgDescInput').value.trim();
-  let err = document.getElementById('fgErr');
+  var name = document.getElementById('fgNameInput').value.trim();
+  var desc = document.getElementById('fgDescInput').value.trim();
+  var err = document.getElementById('fgErr');
   if(!name||name.length<2){err.textContent='Name must be at least 2 characters';err.style.color='#c44';return;}
   err.textContent='Creating...';err.style.color=searchPal.tx;
   try{
-    let res = await fgFetch('/api/groups',{method:'POST',headers:fgHeaders(),body:JSON.stringify({name:name,description:desc})});
-    let data = await res.json();
+    var res = await fgFetch('/api/groups',{method:'POST',headers:fgHeaders(),body:JSON.stringify({name:name,description:desc})});
+    var data = await res.json();
     if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
     closeFgModal();
     loadGroups(fgTab);
@@ -2149,39 +2146,39 @@ async function createGroup(){
 }
 
 // ─── GROUP DETAIL VIEW ──────────────────────────────────
-let fgdGroup = null;
-let fgdTab = 'about';
-let fgdMembers = [];
+var fgdGroup = null;
+var fgdTab = 'about';
+var fgdMembers = [];
 
 async function openGroupDetail(groupId){
-  let pal = searchPal;
+  var pal = searchPal;
   // Update section nav to show back to groups
   document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / ...';
   // Hide group list, show detail
   document.getElementById('groupsView').style.display = 'none';
-  let dv = document.getElementById('fgDetailView');
+  var dv = document.getElementById('fgDetailView');
   dv.style.display = 'flex';
   dv.classList.add('active');
   dv.style.background = pal.bg;
   dv.style.color = pal.tx;
 
   try{
-    let res = await fgFetch('/api/groups/'+groupId,{headers:fgHeaders()});
-    let data = await res.json();
+    var res = await fgFetch('/api/groups/'+groupId,{headers:fgHeaders()});
+    var data = await res.json();
     fgdGroup = data.group;
     fgdMembers = data.members || [];
   }catch(e){ return; }
 
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
-  let initial = fgdGroup.name.charAt(0).toUpperCase();
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  var initial = fgdGroup.name.charAt(0).toUpperCase();
 
   // Update section nav
   document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / '+escHtml(fgdGroup.name);
 
   // Render header
-  let header = document.getElementById('fgdHeader');
-  let joinBtn = fgdGroup.joined
+  var header = document.getElementById('fgdHeader');
+  var joinBtn = fgdGroup.joined
     ? '<button class="fgd-join-btn" style="background:transparent;border:1.5px solid '+pal.tx+'30;color:'+pal.tx+'" onclick="fgdLeave()">Joined</button>'
     : '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdJoin()">Join</button>';
   header.innerHTML =
@@ -2198,7 +2195,7 @@ async function openGroupDetail(groupId){
 
 function fgdSwitchTab(tab){
   fgdTab = tab;
-  let pal = searchPal;
+  var pal = searchPal;
   document.querySelectorAll('.fgd-tab').forEach(function(t){
     t.classList.toggle('on', t.dataset.tab === tab);
     t.style.borderBottomColor = t.dataset.tab === tab ? pal.ac : 'transparent';
@@ -2209,13 +2206,13 @@ function fgdSwitchTab(tab){
 }
 
 function fgdRenderAbout(){
-  let content = document.getElementById('fgdContent');
-  let pal = searchPal;
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
-  let desc = fgdGroup.description || 'No description yet.';
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  var desc = fgdGroup.description || 'No description yet.';
 
-  let membersHtml = fgdMembers.map(function(m){
+  var membersHtml = fgdMembers.map(function(m){
     return '<span style="display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.75rem;background:'+pal.ac+'12;margin:3px;">'+escHtml(m.username)+'</span>';
   }).join('');
 
@@ -2236,7 +2233,7 @@ function fgdRenderAbout(){
 }
 
 async function fgdSaveAbout(){
-  let text = document.getElementById('fgdAboutText').value.trim();
+  var text = document.getElementById('fgdAboutText').value.trim();
   try{
     await fgFetch('/api/groups/'+fgdGroup.id+'/about',{method:'PUT',headers:fgHeaders(),body:JSON.stringify({description:text})});
     fgdGroup.description = text;
@@ -2245,40 +2242,40 @@ async function fgdSaveAbout(){
 }
 
 async function fgdRenderPosts(){
-  let content = document.getElementById('fgdContent');
-  let pal = searchPal;
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let myId = user ? parseInt(user.id) : 0;
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var myId = user ? parseInt(user.id) : 0;
 
-  let inputHtml = fgdGroup.joined
+  var inputHtml = fgdGroup.joined
     ? '<div class="fgd-post-input"><input id="fgdPostInput" placeholder="Write something..." maxlength="500" onkeydown="if(event.key===\'Enter\')fgdPost()"/><button style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdPost()">Post</button></div>'
     : '<div style="text-align:center;padding:12px;opacity:0.4;font-size:0.82rem;">Join this group to post</div>';
 
   content.innerHTML = inputHtml + '<div id="fgdPostsList"><div class="fgd-empty">Loading...</div></div>';
 
   try{
-    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{headers:fgHeaders()});
-    let data = await res.json();
-    let posts = data.posts || [];
-    let list = document.getElementById('fgdPostsList');
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{headers:fgHeaders()});
+    var data = await res.json();
+    var posts = data.posts || [];
+    var list = document.getElementById('fgdPostsList');
     if(posts.length === 0){ list.innerHTML = '<div class="fgd-empty">No posts yet</div>'; return; }
     list.innerHTML = posts.map(function(p){
-      let time = new Date(p.created_at+'Z');
-      let ts = time.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+time.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
-      let del = (p.username === (user&&user.username)) ? '<button class="fgd-post-del" onclick="fgdDeletePost('+p.id+')">delete</button>' : '';
+      var time = new Date(p.created_at+'Z');
+      var ts = time.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+time.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      var del = (p.username === (user&&user.username)) ? '<button class="fgd-post-del" onclick="fgdDeletePost('+p.id+')">delete</button>' : '';
       return '<div class="fgd-post"><div class="fgd-post-user" style="color:'+pal.ac+'">'+escHtml(p.username)+'</div><div class="fgd-post-text">'+escHtml(p.text)+'</div><div class="fgd-post-time">'+ts+del+'</div></div>';
     }).join('');
   }catch(e){ document.getElementById('fgdPostsList').innerHTML = '<div class="fgd-empty">Could not load posts</div>'; }
 }
 
 async function fgdPost(){
-  let input = document.getElementById('fgdPostInput');
-  let text = input.value.trim();
+  var input = document.getElementById('fgdPostInput');
+  var text = input.value.trim();
   if(!text) return;
   input.value = '';
   try{
-    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{method:'POST',headers:fgHeaders(),body:JSON.stringify({text:text})});
-    let data = await res.json();
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{method:'POST',headers:fgHeaders(),body:JSON.stringify({text:text})});
+    var data = await res.json();
     if(data.error){ alert(data.error); return; }
     fgdRenderPosts();
   }catch(e){}
@@ -2290,12 +2287,12 @@ async function fgdDeletePost(postId){
 }
 
 async function fgdRenderStore(){
-  let content = document.getElementById('fgdContent');
-  let pal = searchPal;
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  var content = document.getElementById('fgdContent');
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var isOwner = user && fgdGroup.owner_id === parseInt(user.id);
 
-  let addHtml = isOwner
+  var addHtml = isOwner
     ? '<div class="fgd-add-item"><div class="fg-title bc" style="margin-bottom:8px;">Add Item</div>'+
       '<input id="fgdStoreName" placeholder="Item name..."/>'+
       '<input id="fgdStorePrice" placeholder="Price (e.g. $12.99)..."/>'+
@@ -2308,15 +2305,15 @@ async function fgdRenderStore(){
   content.innerHTML = addHtml + '<div id="fgdStoreGrid" class="fgd-store-grid"><div class="fgd-empty" style="grid-column:1/-1;">Loading...</div></div>';
 
   try{
-    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/store',{headers:fgHeaders()});
-    let data = await res.json();
-    let items = data.items || [];
-    let grid = document.getElementById('fgdStoreGrid');
+    var res = await fgFetch('/api/groups/'+fgdGroup.id+'/store',{headers:fgHeaders()});
+    var data = await res.json();
+    var items = data.items || [];
+    var grid = document.getElementById('fgdStoreGrid');
     if(items.length === 0){ grid.innerHTML = '<div class="fgd-empty" style="grid-column:1/-1;">No items in store yet</div>'; return; }
     grid.innerHTML = items.map(function(item){
-      let img = item.image_url ? '<img class="fgd-store-img" src="'+escHtml(item.image_url)+'" onerror="this.style.display=\'none\'"/>' : '';
-      let link = item.link ? '<a class="fgd-store-link" href="'+escHtml(item.link)+'" target="_blank" style="color:'+pal.ac+'">Buy Now</a>' : '';
-      let del = isOwner ? '<button class="fgd-store-del" onclick="fgdDeleteStoreItem('+item.id+')">x</button>' : '';
+      var img = item.image_url ? '<img class="fgd-store-img" src="'+escHtml(item.image_url)+'" onerror="this.style.display=\'none\'"/>' : '';
+      var link = item.link ? '<a class="fgd-store-link" href="'+escHtml(item.link)+'" target="_blank" style="color:'+pal.ac+'">Buy Now</a>' : '';
+      var del = isOwner ? '<button class="fgd-store-del" onclick="fgdDeleteStoreItem('+item.id+')">x</button>' : '';
       return '<div class="fgd-store-item" style="background:'+pal.ac+'08;position:relative;">'+img+
         '<div class="fgd-store-name">'+escHtml(item.name)+'</div>'+
         (item.price ? '<div class="fgd-store-price">'+escHtml(item.price)+'</div>' : '')+
@@ -2327,9 +2324,9 @@ async function fgdRenderStore(){
 }
 
 async function fgdAddStoreItem(){
-  let name = document.getElementById('fgdStoreName').value.trim();
+  var name = document.getElementById('fgdStoreName').value.trim();
   if(!name){ alert('Item name required'); return; }
-  let body = {
+  var body = {
     name: name,
     price: document.getElementById('fgdStorePrice').value.trim(),
     image_url: document.getElementById('fgdStoreImg').value.trim(),
@@ -2366,8 +2363,8 @@ function fgdBackToList(){
 }
 
 // ─── STUFLOVER DAILY (Trending notifications) ─────────────
-let sdCache = null;
-let sdFallbackAlerts = [
+var sdCache = null;
+var sdFallbackAlerts = [
   {tag:'tiktok',title:'New Dance Trend Taking Over',desc:'Everyone is learning this viral choreography — the sound already has 50M+ uses.'},
   {tag:'fashion',title:'Oversized Everything is Back',desc:'Baggy jeans, oversized blazers, and chunky sneakers are dominating street style this season.'},
   {tag:'music',title:'Fresh Drops You Need to Hear',desc:'This week\'s new releases are stacked — add these to your playlist before everyone else does.'},
@@ -2379,10 +2376,10 @@ let sdFallbackAlerts = [
 ];
 
 function switchDiscoverTab(tab){
-  let tabs = document.getElementById('discoverTabs').querySelectorAll('.discover-tab');
+  var tabs = document.getElementById('discoverTabs').querySelectorAll('.discover-tab');
   tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-discover') === tab); });
-  let dv = document.getElementById('dailyView');
-  let cv = document.getElementById('contentView');
+  var dv = document.getElementById('dailyView');
+  var cv = document.getElementById('contentView');
   if(tab === 'trending'){
     cv.style.display = 'none'; cv.classList.remove('active');
     dv.style.display = 'flex'; dv.classList.add('active');
@@ -2395,9 +2392,9 @@ function switchDiscoverTab(tab){
 }
 
 async function loadDailyFeed(){
-  let feed = document.getElementById('sdFeed');
-  let btn = document.getElementById('sdRefreshBtn');
-  let pal = searchPal;
+  var feed = document.getElementById('sdFeed');
+  var btn = document.getElementById('sdRefreshBtn');
+  var pal = searchPal;
 
   document.getElementById('dailyView').style.background = pal.bg;
   document.getElementById('dailyView').style.color = pal.tx;
@@ -2413,14 +2410,14 @@ async function loadDailyFeed(){
   btn.disabled = true;
   btn.textContent = 'Loading...';
 
-  let aeName = resolveAeName();
-  let music = (P.music||[]).slice(0,4).join(', ')||'pop';
-  let interests = (P.interests||[]).slice(0,5).join(', ')||'fashion, music';
-  let age = P.age || '18-25';
+  var aeName = resolveAeName();
+  var music = (P.music||[]).slice(0,4).join(', ')||'pop';
+  var interests = (P.interests||[]).slice(0,5).join(', ')||'fashion, music';
+  var age = P.age || '18-25';
 
-  let maxRetries = 2;
-  let attempt = 0;
-  let success = false;
+  var maxRetries = 2;
+  var attempt = 0;
+  var success = false;
 
   while(attempt <= maxRetries && !success){
     try{
@@ -2429,9 +2426,9 @@ async function loadDailyFeed(){
         feed.innerHTML = '<div class="sd-loading">Retrying... (attempt '+(attempt+1)+'/'+(maxRetries+1)+')</div>';
       }
 
-      let sdController = new AbortController();
-      let sdTimer = setTimeout(function(){ sdController.abort(); }, 10000);
-      let res = await fetch('https://api.anthropic.com/v1/messages',{
+      var sdController = new AbortController();
+      var sdTimer = setTimeout(function(){ sdController.abort(); }, 10000);
+      var res = await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: sdController.signal,
@@ -2445,7 +2442,7 @@ async function loadDailyFeed(){
       clearTimeout(sdTimer);
 
       if(!res.ok){
-        let errData;
+        var errData;
         try{ errData = await res.json(); }catch(e){ errData = {}; }
 
         // Rate-limited — don't retry, tell the user to wait
@@ -2459,11 +2456,11 @@ async function loadDailyFeed(){
         throw new Error(errData.error || 'Server returned ' + res.status);
       }
 
-      let data = await res.json();
-      let text = (data.content&&data.content[0]&&data.content[0].text)||'';
-      let match = text.match(/\[[\s\S]*\]/);
+      var data = await res.json();
+      var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+      var match = text.match(/\[[\s\S]*\]/);
       if(match){
-        let alerts = JSON.parse(match[0]);
+        var alerts = JSON.parse(match[0]);
         if(Array.isArray(alerts) && alerts.length > 0){
           sdCache = alerts;
           renderDailyFeed(alerts);
@@ -2493,21 +2490,21 @@ async function loadDailyFeed(){
 }
 
 function renderDailyFeed(alerts){
-  let feed = document.getElementById('sdFeed');
-  let pal = searchPal;
-  let tagColors = {
+  var feed = document.getElementById('sdFeed');
+  var pal = searchPal;
+  var tagColors = {
     tiktok:'#e0405090',fashion:'#c0522a90',music:'#8040a090',
     beauty:'#e0809090',culture:'#4080c090',aesthetic:'#60a06090'
   };
-  let times = ['2 min ago','8 min ago','15 min ago','32 min ago','1 hr ago','2 hrs ago','3 hrs ago','5 hrs ago'];
+  var times = ['2 min ago','8 min ago','15 min ago','32 min ago','1 hr ago','2 hrs ago','3 hrs ago','5 hrs ago'];
 
   feed.innerHTML = '';
   alerts.forEach(function(a, i){
-    let card = document.createElement('div');
+    var card = document.createElement('div');
     card.className = 'sd-card' + (i < 3 ? ' unread' : '');
     card.style.background = pal.ac + (i < 3 ? '0c' : '04');
     card.style.borderLeftColor = i < 3 ? pal.ac : 'transparent';
-    let dotColor = tagColors[(a.tag||'').toLowerCase()] || pal.ac+'60';
+    var dotColor = tagColors[(a.tag||'').toLowerCase()] || pal.ac+'60';
     card.innerHTML =
       '<div class="sd-card-dot" style="background:'+dotColor+'"></div>'+
       '<div class="sd-card-body">'+
@@ -2522,8 +2519,8 @@ function renderDailyFeed(alerts){
 
 // ─── CONTENT WITH IT (Pinterest board) ────────────────────
 function cwFetch(path, opts){
-  let url = (window.STUFLOVER_API_URL||'') + path;
-  let f = window._origFetch || window.fetch;
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
   return f.call(window, url, opts);
 }
 function cwHeaders(){
@@ -2531,7 +2528,7 @@ function cwHeaders(){
 }
 
 async function openContentView(){
-  let pal = searchPal;
+  var pal = searchPal;
   document.getElementById('contentView').style.background = pal.bg;
   document.getElementById('contentView').style.color = pal.tx;
   document.getElementById('cwPostBtn').style.background = pal.ac;
@@ -2544,27 +2541,27 @@ async function openContentView(){
 }
 
 async function loadCwFeed(){
-  let grid = document.getElementById('cwGrid');
-  let pal = searchPal;
+  var grid = document.getElementById('cwGrid');
+  var pal = searchPal;
   grid.innerHTML = '<div class="cw-empty">Loading your board...</div>';
   try{
-    let res = await fetchWithTimeout(cwFetch, '/api/posts?page=0',{headers:cwHeaders()}, 10000);
+    var res = await fetchWithTimeout(cwFetch, '/api/posts?page=0',{headers:cwHeaders()}, 10000);
     if(!res.ok){
       grid.innerHTML = '<div class="cw-empty has-error">Could not load board (server error)<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
       return;
     }
-    let data = await res.json();
+    var data = await res.json();
     if(!data.posts || data.posts.length === 0){
       grid.innerHTML = '<div class="cw-empty">No posts yet — be the first to share!</div>';
       return;
     }
     grid.innerHTML = '';
     data.posts.forEach(function(p){
-      let card = document.createElement('div');
+      var card = document.createElement('div');
       card.className = 'cw-card';
       card.style.background = pal.tx+'06';
-      let heartFill = p.liked ? pal.ac : 'none';
-      let heartStroke = p.liked ? pal.ac : pal.tx;
+      var heartFill = p.liked ? pal.ac : 'none';
+      var heartStroke = p.liked ? pal.ac : pal.tx;
       card.innerHTML =
         '<img src="'+escHtml(p.image_url)+'" alt="" onerror="this.style.display=\'none\'"/>'+
         '<div class="cw-card-info" style="color:'+pal.tx+'">'+
@@ -2581,7 +2578,7 @@ async function loadCwFeed(){
       grid.appendChild(card);
     });
   }catch(e){
-    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load board — check your connection';
+    var errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load board — check your connection';
     grid.innerHTML = '<div class="cw-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
   }
 }
@@ -2599,8 +2596,8 @@ async function toggleCwLike(e, postId, shouldLike){
 }
 
 function previewCwImage(){
-  let url = document.getElementById('cwUrlInput').value.trim();
-  let preview = document.getElementById('cwPreview');
+  var url = document.getElementById('cwUrlInput').value.trim();
+  var preview = document.getElementById('cwPreview');
   if(url && url.match(/^https?:\/\//)){
     preview.src = url;
     preview.style.display = 'block';
@@ -2622,19 +2619,19 @@ function openCwModal(){
 function closeCwModal(){ document.getElementById('cwModal').classList.remove('open'); }
 
 async function submitCwPost(){
-  let url = document.getElementById('cwUrlInput').value.trim();
-  let caption = document.getElementById('cwCaptionInput').value.trim();
-  let tags = document.getElementById('cwTagsInput').value.trim();
-  let err = document.getElementById('cwErr');
+  var url = document.getElementById('cwUrlInput').value.trim();
+  var caption = document.getElementById('cwCaptionInput').value.trim();
+  var tags = document.getElementById('cwTagsInput').value.trim();
+  var err = document.getElementById('cwErr');
   if(!url){ err.textContent='Paste an image URL'; err.style.color='#c44'; return; }
   if(!url.match(/^https?:\/\//)){err.textContent='Must be a valid URL starting with https://'; err.style.color='#c44'; return; }
   err.textContent='Posting...'; err.style.color=searchPal.tx;
   try{
-    let res = await cwFetch('/api/posts',{
+    var res = await cwFetch('/api/posts',{
       method:'POST', headers:cwHeaders(),
       body:JSON.stringify({imageUrl:url, caption:caption, tags:tags})
     });
-    let data = await res.json();
+    var data = await res.json();
     if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
     closeCwModal();
     await loadCwFeed();
@@ -2642,17 +2639,17 @@ async function submitCwPost(){
 }
 
 // ─── FRIENDS / MESSAGES ──────────────────────────────────
-let frSelectedFriend = null;
-let frPollInterval = null;
-let frLastMsgCount = 0;
-let frGlobalPollInterval = null;
+var frSelectedFriend = null;
+var frPollInterval = null;
+var frLastMsgCount = 0;
+var frGlobalPollInterval = null;
 
 // Notification sound using Web Audio API
 function playPing(){
   try{
-    let ctx = new (window.AudioContext||window.webkitAudioContext)();
-    let osc = ctx.createOscillator();
-    let gain = ctx.createGain();
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.frequency.value = 880;
@@ -2662,8 +2659,8 @@ function playPing(){
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime+0.3);
     // Second tone for a cute double-ping
-    let osc2 = ctx.createOscillator();
-    let gain2 = ctx.createGain();
+    var osc2 = ctx.createOscillator();
+    var gain2 = ctx.createGain();
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
     osc2.frequency.value = 1100;
@@ -2695,23 +2692,23 @@ function startGlobalMsgPoll(){
   if(frGlobalPollInterval) return;
   frGlobalPollInterval = setInterval(async function(){
     try{
-      let res = await frFetch('/api/friends',{headers:frHeaders()});
-      let data = await res.json();
-      let friends = data.friends||[];
+      var res = await frFetch('/api/friends',{headers:frHeaders()});
+      var data = await res.json();
+      var friends = data.friends||[];
       // Check each friend for new messages
-      for(let i=0;i<friends.length;i++){
-        let f = friends[i];
+      for(var i=0;i<friends.length;i++){
+        var f = friends[i];
         try{
-          let mres = await frFetch('/api/friends/messages/'+f.id,{headers:frHeaders()});
-          let mdata = await mres.json();
-          let msgs = mdata.messages||[];
-          let key = 'stuflover_lastmsg_'+f.id;
-          let lastKnown = parseInt(localStorage.getItem(key)||'0');
+          var mres = await frFetch('/api/friends/messages/'+f.id,{headers:frHeaders()});
+          var mdata = await mres.json();
+          var msgs = mdata.messages||[];
+          var key = 'stuflover_lastmsg_'+f.id;
+          var lastKnown = parseInt(localStorage.getItem(key)||'0');
           if(msgs.length > 0){
-            let latest = msgs[msgs.length-1];
-            let latestId = latest.id||0;
-            let user = window.stufloverUser ? window.stufloverUser() : null;
-            let myId = user ? parseInt(user.id) : 0;
+            var latest = msgs[msgs.length-1];
+            var latestId = latest.id||0;
+            var user = window.stufloverUser ? window.stufloverUser() : null;
+            var myId = user ? parseInt(user.id) : 0;
             if(latestId > lastKnown && parseInt(latest.from_user) !== myId){
               playPing();
               showNotification('New message from '+f.username, latest.text.substring(0,60));
@@ -2727,8 +2724,8 @@ function startGlobalMsgPoll(){
 }
 
 function frFetch(path, opts){
-  let url = (window.STUFLOVER_API_URL||'') + path;
-  let f = window._origFetch || window.fetch;
+  var url = (window.STUFLOVER_API_URL||'') + path;
+  var f = window._origFetch || window.fetch;
   return f.call(window, url, opts);
 }
 function frHeaders(){
@@ -2736,11 +2733,11 @@ function frHeaders(){
 }
 
 async function openFriendsView(){
-  let pal = searchPal;
+  var pal = searchPal;
   // Hide settings button so it doesn't overlap the send button
-  let csBtn = document.getElementById('cursorSettingsBtn');
+  var csBtn = document.getElementById('cursorSettingsBtn');
   if(csBtn) csBtn.style.display = 'none';
-  let csPanel = document.getElementById('cursorPanel');
+  var csPanel = document.getElementById('cursorPanel');
   if(csPanel) csPanel.style.display = 'none';
   document.getElementById('frSidebar').style.background = pal.bg;
   document.getElementById('frSidebar').style.color = pal.tx;
@@ -2766,11 +2763,11 @@ async function openFriendsView(){
 
 async function loadFrRequests(){
   try{
-    let res = await frFetch('/api/friends/requests',{headers:frHeaders()});
-    let data = await res.json();
-    let container = document.getElementById('frRequests');
+    var res = await frFetch('/api/friends/requests',{headers:frHeaders()});
+    var data = await res.json();
+    var container = document.getElementById('frRequests');
     if(!data.requests || data.requests.length===0){ container.innerHTML=''; return; }
-    let pal = searchPal;
+    var pal = searchPal;
     container.innerHTML = data.requests.map(function(r){
       return '<div class="fr-req" style="color:'+pal.tx+'">'+
         '<span class="fr-req-name">'+escHtml(r.username)+'</span>'+
@@ -2783,28 +2780,28 @@ async function loadFrRequests(){
 
 async function loadFrList(){
   try{
-    let pal = searchPal;
-    let container = document.getElementById('frList');
-    let results = await Promise.all([
+    var pal = searchPal;
+    var container = document.getElementById('frList');
+    var results = await Promise.all([
       frFetch('/api/friends',{headers:frHeaders()}),
       frFetch('/api/friends/sent-requests',{headers:frHeaders()}),
       frFetch('/api/friends/unread',{headers:frHeaders()})
     ]);
-    let data = await results[0].json();
-    let sentData = await results[1].json();
-    let unreadData = await results[2].json();
-    let friends = data.friends || [];
-    let sent = sentData.requests || [];
-    let unreadMap = {};
+    var data = await results[0].json();
+    var sentData = await results[1].json();
+    var unreadData = await results[2].json();
+    var friends = data.friends || [];
+    var sent = sentData.requests || [];
+    var unreadMap = {};
     (unreadData.perFriend||[]).forEach(function(u){ unreadMap[u.from_user] = u.count; });
     if(friends.length===0 && sent.length===0){
       container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.3;font-style:italic;font-size:0.82rem;">No friends yet — add someone!</div>';
       return;
     }
-    let html = friends.map(function(f){
-      let isOn = frSelectedFriend && frSelectedFriend.id === f.id;
-      let unread = unreadMap[f.id] || 0;
-      let badge = unread > 0 ? '<div class="fr-item-unread" style="background:'+pal.ac+';color:'+pal.bg+'">'+unread+'</div>' : '';
+    var html = friends.map(function(f){
+      var isOn = frSelectedFriend && frSelectedFriend.id === f.id;
+      var unread = unreadMap[f.id] || 0;
+      var badge = unread > 0 ? '<div class="fr-item-unread" style="background:'+pal.ac+';color:'+pal.bg+'">'+unread+'</div>' : '';
       return '<div class="fr-item'+(isOn?' on':'')+'" onclick="selectFriend('+f.id+',\''+_escJsString(f.username)+'\')" style="color:'+pal.tx+'">'+
         '<div class="fr-item-avatar" style="background:'+pal.ac+'">'+f.username.charAt(0).toUpperCase()+'</div>'+
         '<div class="fr-item-name">'+escHtml(f.username)+'</div>'+
@@ -2826,7 +2823,7 @@ async function loadFrList(){
 
 async function selectFriend(id, username){
   frSelectedFriend = {id:id, username:username};
-  let pal = searchPal;
+  var pal = searchPal;
   document.getElementById('frEmpty').style.display = 'none';
   document.getElementById('frChatHeader').style.display = 'flex';
   document.getElementById('frChatHeader').innerHTML = '<div class="fr-item-avatar" style="background:'+pal.ac+';width:28px;height:28px;font-size:0.6rem;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;">'+username.charAt(0).toUpperCase()+'</div>'+escHtml(username);
@@ -2840,27 +2837,27 @@ async function selectFriend(id, username){
 
 async function toggleFrProfile(){
   if(!frSelectedFriend) return;
-  let panel = document.getElementById('frProfile');
-  let msgs = document.getElementById('frMsgs');
-  let input = document.getElementById('frInputRow');
+  var panel = document.getElementById('frProfile');
+  var msgs = document.getElementById('frMsgs');
+  var input = document.getElementById('frInputRow');
   if(panel.classList.contains('open')){
     panel.classList.remove('open');
     msgs.style.display = 'flex';
     input.style.display = 'flex';
     return;
   }
-  let pal = searchPal;
+  var pal = searchPal;
   panel.style.color = pal.tx;
   panel.innerHTML = '<div style="opacity:0.4;font-size:0.8rem;">Loading...</div>';
   panel.classList.add('open');
   msgs.style.display = 'none';
   input.style.display = 'none';
   try{
-    let res = await frFetch('/api/friends/profile/'+frSelectedFriend.id,{headers:frHeaders()});
-    let data = await res.json();
-    let p = data.profile || {};
-    let joined = p.created_at ? new Date(p.created_at+'Z') : null;
-    let joinedStr = joined ? joined.toLocaleDateString(undefined,{month:'long',year:'numeric'}) : '';
+    var res = await frFetch('/api/friends/profile/'+frSelectedFriend.id,{headers:frHeaders()});
+    var data = await res.json();
+    var p = data.profile || {};
+    var joined = p.created_at ? new Date(p.created_at+'Z') : null;
+    var joinedStr = joined ? joined.toLocaleDateString(undefined,{month:'long',year:'numeric'}) : '';
     panel.innerHTML =
       '<div class="fr-profile-avatar" style="background:'+pal.ac+'">'+escHtml((p.username||'?').charAt(0).toUpperCase())+'</div>'+
       '<div class="fr-profile-name" style="color:'+pal.tx+'">'+escHtml(p.username||frSelectedFriend.username)+'</div>'+
@@ -2877,8 +2874,8 @@ async function toggleFrProfile(){
 async function deleteFriend(friendId){
   if(!confirm('Remove this friend? You won\'t be able to message them anymore.')) return;
   try{
-    let res = await frFetch('/api/friends/'+friendId,{method:'DELETE',headers:frHeaders()});
-    let data = await res.json();
+    var res = await frFetch('/api/friends/'+friendId,{method:'DELETE',headers:frHeaders()});
+    var data = await res.json();
     if(data.error){ alert(data.error); return; }
     frSelectedFriend = null;
     document.getElementById('frProfile').classList.remove('open');
@@ -2893,26 +2890,26 @@ async function deleteFriend(friendId){
 
 async function loadFrMessages(friend){
   try{
-    let res = await frFetch('/api/friends/messages/'+friend.id,{headers:frHeaders()});
-    let data = await res.json();
-    let container = document.getElementById('frMsgs');
-    let pal = searchPal;
-    let user = window.stufloverUser ? window.stufloverUser() : null;
-    let myId = user ? parseInt(user.id) : 0;
-    let msgs = data.messages||[];
+    var res = await frFetch('/api/friends/messages/'+friend.id,{headers:frHeaders()});
+    var data = await res.json();
+    var container = document.getElementById('frMsgs');
+    var pal = searchPal;
+    var user = window.stufloverUser ? window.stufloverUser() : null;
+    var myId = user ? parseInt(user.id) : 0;
+    var msgs = data.messages||[];
     // Detect new incoming message and ping
     if(msgs.length > frLastMsgCount && frLastMsgCount > 0){
-      let latest = msgs[msgs.length-1];
+      var latest = msgs[msgs.length-1];
       if(parseInt(latest.from_user) !== myId) playPing();
     }
     frLastMsgCount = msgs.length;
     // Update last known for global poll
     if(msgs.length>0) localStorage.setItem('stuflover_lastmsg_'+friend.id, (msgs[msgs.length-1].id||0).toString());
     container.innerHTML = msgs.map(function(m){
-      let isMe = parseInt(m.from_user) === myId;
-      let time = new Date(m.created_at+'Z');
-      let h = time.getHours(); let min = time.getMinutes();
-      let ts = (h%12||12)+':'+(min<10?'0':'')+min+(h<12?' am':' pm');
+      var isMe = parseInt(m.from_user) === myId;
+      var time = new Date(m.created_at+'Z');
+      var h = time.getHours(); var min = time.getMinutes();
+      var ts = (h%12||12)+':'+(min<10?'0':'')+min+(h<12?' am':' pm');
       return '<div class="fr-msg '+(isMe?'me':'them')+'" style="background:'+(isMe?pal.tx+'12':pal.ac+'18')+';color:'+pal.tx+'">'+
         escHtml(m.text)+
         '<div class="fr-msg-time">'+ts+'</div>'+
@@ -2924,20 +2921,20 @@ async function loadFrMessages(friend){
 
 async function sendFrMsg(){
   if(!frSelectedFriend) return;
-  let input = document.getElementById('frInput');
-  let text = input.value.trim();
+  var input = document.getElementById('frInput');
+  var text = input.value.trim();
   if(!text) return;
   input.value = '';
   try{
-    let res = await frFetch('/api/friends/message',{
+    var res = await frFetch('/api/friends/message',{
       method:'POST', headers:frHeaders(),
       body:JSON.stringify({friendId:frSelectedFriend.id, text:text})
     });
-    let data = await res.json();
+    var data = await res.json();
     if(data.error){
       // Show error inline instead of alert
-      let container = document.getElementById('frMsgs');
-      let errDiv = document.createElement('div');
+      var container = document.getElementById('frMsgs');
+      var errDiv = document.createElement('div');
       errDiv.style.cssText = 'text-align:center;padding:8px;font-size:0.75rem;opacity:0.5;color:#c44;';
       errDiv.textContent = data.error;
       container.appendChild(errDiv);
@@ -2974,15 +2971,15 @@ function openFrAddModal(){
 function closeFrAddModal(){ document.getElementById('frAddModal').classList.remove('open'); }
 
 async function sendFrRequest(){
-  let username = document.getElementById('frAddInput').value.trim();
-  let err = document.getElementById('frAddErr');
+  var username = document.getElementById('frAddInput').value.trim();
+  var err = document.getElementById('frAddErr');
   if(!username){ err.textContent='Enter a username'; err.style.color='#c44'; return; }
   err.textContent='Searching...'; err.style.color=searchPal.tx;
   try{
     // First check if user exists
-    let check = await frFetch('/api/friends/search/'+encodeURIComponent(username),{headers:frHeaders()});
+    var check = await frFetch('/api/friends/search/'+encodeURIComponent(username),{headers:frHeaders()});
     if(check.ok){
-      let checkData = await check.json();
+      var checkData = await check.json();
       if(!checkData.found){
         err.textContent='No account found for "'+username+'" — they need to sign up at '+window.location.origin+'/auth.html first';
         err.style.color='#c44';
@@ -2996,11 +2993,11 @@ async function sendFrRequest(){
       }
     }
     // Send the request
-    let res = await frFetch('/api/friends/request',{
+    var res = await frFetch('/api/friends/request',{
       method:'POST', headers:frHeaders(),
       body:JSON.stringify({username:username})
     });
-    let data = await res.json().catch(function(){return{error:'Server error'};});
+    var data = await res.json().catch(function(){return{error:'Server error'};});
     if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
     err.textContent='Request sent to '+username+'!'; err.style.color=searchPal.ac;
     document.getElementById('frAddInput').value='';
@@ -3010,7 +3007,7 @@ async function sendFrRequest(){
 }
 
 // ─── ROUTINE BUILDER ─────────────────────────────────────
-let rtMode = 'morning'; // or 'night'
+var rtMode = 'morning'; // or 'night'
 
 function getRoutines(){
   try{ return JSON.parse(localStorage.getItem('stuflover_routines')||'null')||{morning:[],night:[]}; }
@@ -3028,7 +3025,7 @@ function switchRoutine(mode){
 }
 
 function openRoutineView(){
-  let pal = searchPal;
+  var pal = searchPal;
   document.getElementById('routineView').style.background = pal.bg;
   document.getElementById('routineView').style.color = pal.tx;
   document.getElementById('rtAddBtn').style.background = pal.ac;
@@ -3038,13 +3035,13 @@ function openRoutineView(){
 }
 
 function renderRoutineSteps(){
-  let pal = searchPal;
-  let routines = getRoutines();
-  let steps = routines[rtMode] || [];
-  let title = rtMode === 'morning' ? 'My Morning Routine' : 'My Night Routine';
+  var pal = searchPal;
+  var routines = getRoutines();
+  var steps = routines[rtMode] || [];
+  var title = rtMode === 'morning' ? 'My Morning Routine' : 'My Night Routine';
   document.getElementById('rtColTitle').textContent = title;
 
-  let container = document.getElementById('rtSteps');
+  var container = document.getElementById('rtSteps');
   container.innerHTML = '';
 
   if(steps.length === 0){
@@ -3053,7 +3050,7 @@ function renderRoutineSteps(){
   }
 
   steps.forEach(function(step, i){
-    let div = document.createElement('div');
+    var div = document.createElement('div');
     div.className = 'routine-step';
     div.style.background = pal.ac + '08';
     div.style.borderColor = pal.tx + '0a';
@@ -3066,10 +3063,10 @@ function renderRoutineSteps(){
 }
 
 function addRoutineStep(){
-  let time = document.getElementById('rtAddTime').value.trim();
-  let text = document.getElementById('rtAddText').value.trim();
+  var time = document.getElementById('rtAddTime').value.trim();
+  var text = document.getElementById('rtAddText').value.trim();
   if(!text) return;
-  let routines = getRoutines();
+  var routines = getRoutines();
   if(!routines[rtMode]) routines[rtMode] = [];
   routines[rtMode].push({time:time, text:text});
   saveRoutines(routines);
@@ -3079,27 +3076,27 @@ function addRoutineStep(){
 }
 
 function deleteRoutineStep(idx){
-  let routines = getRoutines();
+  var routines = getRoutines();
   if(routines[rtMode]) routines[rtMode].splice(idx, 1);
   saveRoutines(routines);
   renderRoutineSteps();
 }
 
 async function suggestRoutineSteps(){
-  let btn = document.getElementById('rtSuggestBtn');
+  var btn = document.getElementById('rtSuggestBtn');
   btn.disabled = true;
   btn.textContent = 'Generating...';
 
-  let aeName = resolveAeName();
-  let interests = (P.interests||[]).join(', ') || 'various';
-  let mood = P.moodToday || 'okay';
-  let jsonInstruction = 'IMPORTANT: Return ONLY a valid JSON array like [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
-  let prompt = rtMode === 'morning'
+  var aeName = resolveAeName();
+  var interests = (P.interests||[]).join(', ') || 'various';
+  var mood = P.moodToday || 'okay';
+  var jsonInstruction = 'IMPORTANT: Return ONLY a valid JSON array like [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
+  var prompt = rtMode === 'morning'
     ? jsonInstruction + 'Generate a morning routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
     : jsonInstruction + 'Generate a night routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
 
   try{
-    let res = await fetch('https://api.anthropic.com/v1/messages',{
+    var res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST', headers:{},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
@@ -3109,14 +3106,14 @@ async function suggestRoutineSteps(){
         messages:[{role:'user',content:prompt}]
       })
     });
-    let data = await res.json();
-    let text = (data.content&&data.content[0]&&data.content[0].text)||'';
-    let match = text.match(/\[[\s\S]*\]/);
+    var data = await res.json();
+    var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    var match = text.match(/\[[\s\S]*\]/);
     if(match){
-      let fixedJson = match[0].replace(/(\{|,)\s*(\w+)\s*:/g, '$1"$2":');
-      let steps = JSON.parse(fixedJson);
+      var fixedJson = match[0].replace(/(\{|,)\s*(\w+)\s*:/g, '$1"$2":');
+      var steps = JSON.parse(fixedJson);
       if(Array.isArray(steps) && steps.length > 0){
-        let routines = getRoutines();
+        var routines = getRoutines();
         routines[rtMode] = steps.map(function(s){ return {time:s.time||'', text:s.text||s.step||''}; });
         saveRoutines(routines);
         renderRoutineSteps();
@@ -3138,7 +3135,7 @@ async function suggestRoutineSteps(){
 }
 
 // ─── MY PROFILE ──────────────────────────────────────────
-let PROFILE_THEMES = [
+var PROFILE_THEMES = [
   {name:'Rose',bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'},
   {name:'Lavender',bg:'#e8d0f0',tx:'#1a0828',ac:'#8040a0'},
   {name:'Mint',bg:'#c8ecd8',tx:'#0a2010',ac:'#2a8a4a'},
@@ -3149,7 +3146,7 @@ let PROFILE_THEMES = [
   {name:'Berry',bg:'#e8c0d8',tx:'#280818',ac:'#a83070'},
 ];
 
-let PROFILE_DECOS = [
+var PROFILE_DECOS = [
   {id:'sparkles',label:'Sparkles'},
   {id:'stars',label:'Star Border'},
   {id:'glow',label:'Glow'},
@@ -3157,33 +3154,33 @@ let PROFILE_DECOS = [
 ];
 
 function openProfileView(){
-  let pal = searchPal;
-  let user = window.stufloverUser ? window.stufloverUser() : null;
-  let username = (user && user.username) || 'you';
-  let bio = localStorage.getItem('stuflover_bio') || '';
-  let theme = JSON.parse(localStorage.getItem('stuflover_profile_theme') || 'null');
-  let decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
-  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  var pal = searchPal;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
+  var username = (user && user.username) || 'you';
+  var bio = localStorage.getItem('stuflover_bio') || '';
+  var theme = JSON.parse(localStorage.getItem('stuflover_profile_theme') || 'null');
+  var decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
   topAe = topAe ? topAe[0] : 'softgirl';
-  let aeName = resolveAeName();
-  let colName = P.faveColour ? P.faveColour.name : 'not set';
-  let colHex = P.faveColour ? P.faveColour.hex : pal.ac;
+  var aeName = resolveAeName();
+  var colName = P.faveColour ? P.faveColour.name : 'not set';
+  var colHex = P.faveColour ? P.faveColour.hex : pal.ac;
 
   // Apply theme or default palette
-  let t = theme || pal;
-  let card = document.getElementById('profileCard');
+  var t = theme || pal;
+  var card = document.getElementById('profileCard');
   card.style.background = t.bg || pal.bg;
   card.style.color = t.tx || pal.tx;
   card.className = 'profile-card';
   decos.forEach(function(d){ card.classList.add('deco-'+d); });
   if(decos.includes('glow')){
     card.style.setProperty('--glow-color', t.ac || pal.ac);
-    let before = card.querySelector(':scope');//just set via style
+    var before = card.querySelector(':scope');//just set via style
     card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10), 0 0 40px '+(t.ac||pal.ac)+'40';
   }
 
   // Avatar
-  let av = document.getElementById('profileAvatar');
+  var av = document.getElementById('profileAvatar');
   av.style.background = t.ac || pal.ac;
   av.textContent = username.charAt(0).toUpperCase();
 
@@ -3202,19 +3199,19 @@ function openProfileView(){
   document.getElementById('profileColourName').textContent = colName;
 
   // Join date
-  let jd = user && user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB',{month:'short',year:'numeric'}) : '';
+  var jd = user && user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB',{month:'short',year:'numeric'}) : '';
   document.getElementById('profileJoinDate').textContent = jd ? 'Joined '+jd : '';
 
   // Save button
-  let saveBtn = document.getElementById('profileBioSaveBtn');
+  var saveBtn = document.getElementById('profileBioSaveBtn');
   saveBtn.style.background = t.ac || pal.ac;
   saveBtn.style.color = t.bg || pal.bg;
 
   // Theme grid
-  let tGrid = document.getElementById('profileThemeGrid');
+  var tGrid = document.getElementById('profileThemeGrid');
   tGrid.innerHTML = '';
   PROFILE_THEMES.forEach(function(pt){
-    let sw = document.createElement('div');
+    var sw = document.createElement('div');
     sw.className = 'profile-theme-swatch' + (theme && theme.name===pt.name ? ' on' : '');
     sw.style.background = 'linear-gradient(135deg,'+pt.bg+','+pt.ac+'40)';
     sw.title = pt.name;
@@ -3223,10 +3220,10 @@ function openProfileView(){
   });
 
   // Deco grid
-  let dGrid = document.getElementById('profileDecoGrid');
+  var dGrid = document.getElementById('profileDecoGrid');
   dGrid.innerHTML = '';
   PROFILE_DECOS.forEach(function(dc){
-    let btn = document.createElement('button');
+    var btn = document.createElement('button');
     btn.className = 'profile-deco-toggle' + (decos.includes(dc.id) ? ' on' : '');
     btn.textContent = dc.label;
     btn.style.color = t.tx || pal.tx;
@@ -3241,15 +3238,15 @@ function openProfileView(){
 }
 
 function onProfileBioInput(){
-  let input = document.getElementById('profileBioInput');
+  var input = document.getElementById('profileBioInput');
   document.getElementById('profileBioCount').textContent = input.value.length + ' / 150';
 }
 
 function saveProfileBio(){
-  let bio = document.getElementById('profileBioInput').value.trim().substring(0,150);
+  var bio = document.getElementById('profileBioInput').value.trim().substring(0,150);
   localStorage.setItem('stuflover_bio', bio);
   document.getElementById('profileBioDisplay').textContent = bio || 'no bio yet';
-  let btn = document.getElementById('profileBioSaveBtn');
+  var btn = document.getElementById('profileBioSaveBtn');
   btn.textContent = 'Saved!';
   setTimeout(function(){ btn.textContent = 'Save Bio'; }, 1500);
 }
@@ -3260,8 +3257,8 @@ function pickProfileTheme(pt){
 }
 
 function toggleProfileDeco(id){
-  let decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
-  let idx = decos.indexOf(id);
+  var decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  var idx = decos.indexOf(id);
   if(idx >= 0) decos.splice(idx,1); else decos.push(id);
   localStorage.setItem('stuflover_profile_decos', JSON.stringify(decos));
   openProfileView();
@@ -3269,17 +3266,17 @@ function toggleProfileDeco(id){
 
 // ─── VIRAL DECORATIONS ───────────────────────────────────
 // Sparkle cursor trail on lifestyle page
-let sparklePool = [];
+var sparklePool = [];
 function initSparkleTrail(){
-  let trailOn = localStorage.getItem('stuflover_cursor_on') !== 'false';
+  var trailOn = localStorage.getItem('stuflover_cursor_on') !== 'false';
   if(!trailOn) return;
-  let trailType = localStorage.getItem('stuflover_cursor_type') || 'dots';
-  let trailColor = localStorage.getItem('stuflover_cursor_color') || 'palette';
-  let color = trailColor === 'palette' ? searchPal.ac : trailColor === 'pink' ? '#e8829a' : trailColor === 'purple' ? '#9070e0' : trailColor === 'gold' ? '#d4aa70' : '#ffffff';
+  var trailType = localStorage.getItem('stuflover_cursor_type') || 'dots';
+  var trailColor = localStorage.getItem('stuflover_cursor_color') || 'palette';
+  var color = trailColor === 'palette' ? searchPal.ac : trailColor === 'pink' ? '#e8829a' : trailColor === 'purple' ? '#9070e0' : trailColor === 'gold' ? '#d4aa70' : '#ffffff';
 
   document.addEventListener('mousemove', function(e){
     if(sparklePool.length > 12) return;
-    let el = document.createElement('div');
+    var el = document.createElement('div');
     el.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;left:'+e.clientX+'px;top:'+e.clientY+'px;transition:all 0.5s ease;';
     if(trailType === 'hearts'){
       el.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+color+'"/></svg>';
@@ -3299,18 +3296,18 @@ function initSparkleTrail(){
 // Cursor trail settings panel
 // ─── INSTANT FEED (no API, loads immediately) ─────────────
 function buildInstantFeed(){
-  let feed = document.getElementById('instantFeed');
+  var feed = document.getElementById('instantFeed');
   if(!feed || !searchPal) return;
-  let pal = searchPal;
-  let aeName = resolveAeName();
-  let topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  var pal = searchPal;
+  var aeName = resolveAeName();
+  var topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
   topK = topK?topK[0]:'softgirl';
 
   // Shuffle and pick 4 items from a large pool
-  let allItems = [];
+  var allItems = [];
 
   // This or That (instant, no API)
-  let totQs = [
+  var totQs = [
     ['morning person','night owl'],['sweet','savoury'],['texting','calling'],['summer','winter'],
     ['cats','dogs'],['city','countryside'],['music with lyrics','instrumental'],['iced coffee','hot coffee'],
     ['reading','watching'],['photos','videos'],['early bird','last minute'],['cosy in','going out'],
@@ -3322,7 +3319,7 @@ function buildInstantFeed(){
   });
 
   // Rate prompts (0 API)
-  let ratePrompts = [
+  var ratePrompts = [
     'rate your outfit today 1-10 and be honest','rate your current mood on a scale of cosy to chaotic',
     'rate how well your room matches your aesthetic rn','rate your music taste — are you a 10?',
     'rate your current phone wallpaper vibes','rate how productive you have been today no lying',
@@ -3330,7 +3327,7 @@ function buildInstantFeed(){
   ratePrompts.forEach(function(p){ allItems.push({type:'rate', prompt:p}); });
 
   // Mini challenges (instant)
-  let challenges = [
+  var challenges = [
     'open your camera roll — the 7th photo is your new aesthetic. what is it?',
     'describe your outfit right now using only 3 words',
     'pick a colour. now name 5 things in your room that colour.',
@@ -3345,17 +3342,17 @@ function buildInstantFeed(){
   challenges.forEach(function(c){ allItems.push({type:'challenge', text:c}); });
 
   // Shuffle
-  for(let i=allItems.length-1;i>0;i--){
-    let j=Math.floor(Math.random()*(i+1));
-    let tmp=allItems[i]; allItems[i]=allItems[j]; allItems[j]=tmp;
+  for(var i=allItems.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=allItems[i]; allItems[i]=allItems[j]; allItems[j]=tmp;
   }
 
   // Pick 4
-  let picked = allItems.slice(0,4);
+  var picked = allItems.slice(0,4);
   feed.innerHTML = '';
 
   picked.forEach(function(item, idx){
-    let card = document.createElement('div');
+    var card = document.createElement('div');
     card.style.cssText = 'padding:16px 18px;border-radius:14px;margin-bottom:10px;background:'+pal.tx+'05;border:1px solid '+pal.tx+'06;animation:fadeSlideIn 0.3s ease both;animation-delay:'+(idx*0.08)+'s;';
 
     if(item.type === 'tot'){
@@ -3387,7 +3384,7 @@ function buildInstantFeed(){
   });
 
   // "Show more" button
-  let more = document.createElement('button');
+  var more = document.createElement('button');
   more.style.cssText = 'width:100%;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'33;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;cursor:pointer;transition:color 0.15s, border-color 0.15s;margin-bottom:16px;';
   more.textContent = 'show me more';
   more.onmouseenter = function(){ this.style.color = pal.ac; this.style.borderColor = pal.ac; };
@@ -3399,7 +3396,7 @@ function buildInstantFeed(){
 }
 
 // ─── FLOVEE POST — YOUR AI BEST FRIEND ───────────────────
-let FLOVEE_DATA = {
+var FLOVEE_DATA = {
   lumi:   {name:'Lumi',   emoji:'✨', color:'#a8d8ea', darkColor:'#2a4a5a', vibe:'wellness queen', aesthetic:'clean girl', gradient:'linear-gradient(135deg,#a8d8ea,#dceef5)'},
   delara: {name:'Delara', emoji:'📖', color:'#8b7355', darkColor:'#3d2f1e', vibe:'book girly',     aesthetic:'dark academia', gradient:'linear-gradient(135deg,#8b7355,#c4a882)'},
   vesper: {name:'Vesper', emoji:'🎀', color:'#f4a0b0', darkColor:'#5a2030', vibe:'coquette princess', aesthetic:'coquette', gradient:'linear-gradient(135deg,#f4a0b0,#fcd4dc)'},
@@ -3410,43 +3407,43 @@ let FLOVEE_DATA = {
   nox:    {name:'Nox',    emoji:'🖤', color:'#90a4ae', darkColor:'#263238', vibe:'deadpan icon',    aesthetic:'goth',      gradient:'linear-gradient(135deg,#78909c,#b0bec5)'},
 };
 
-let floveeReacted = false;
+var floveeReacted = false;
 
 function getUserFloveeId(){
-  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
-  let aeKey = topAe ? topAe[0] : 'softgirl';
-  let aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
+  var topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
   return aeMap[aeKey] || 'remi';
 }
 
-let _floveeTimerInterval = null;
+var _floveeTimerInterval = null;
 async function loadFloveePost(){
   if(_floveeTimerInterval){ clearInterval(_floveeTimerInterval); _floveeTimerInterval = null; }
-  let wrap = document.getElementById('floveePostWrap');
+  var wrap = document.getElementById('floveePostWrap');
   if(!wrap || !searchPal) return;
-  let pal = searchPal;
-  let base = window.STUFLOVER_API_URL || '';
-  let token = localStorage.getItem('stuflover_token');
+  var pal = searchPal;
+  var base = window.STUFLOVER_API_URL || '';
+  var token = localStorage.getItem('stuflover_token');
   if(!token) return;
 
   try{
-    let res = await (window._origFetch||fetch).call(window, base+'/api/flovee/post',{
+    var res = await (window._origFetch||fetch).call(window, base+'/api/flovee/post',{
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
     });
-    let data = await res.json();
+    var data = await res.json();
 
     if(data.status === 'active' && data.post){
-      let fd = FLOVEE_DATA[data.post.flovee_id] || FLOVEE_DATA.remi;
-      let exp = new Date(data.post.expires_at);
-      let hoursLeft = Math.max(0, Math.round((exp - Date.now()) / 3600000));
-      let minsLeft = Math.max(0, Math.round((exp - Date.now()) / 60000));
-      let timeLabel = hoursLeft > 6 ? hoursLeft+'h left' : hoursLeft > 1 ? hoursLeft+'h left' : (minsLeft >= 1 ? minsLeft+'m left' : '<1m left');
-      let urgency = hoursLeft <= 1 ? 'animation:pulse 1.5s ease-in-out infinite;' : '';
-      let timerWidth = Math.max(5, Math.min(100, (minsLeft / (18*60)) * 100));
+      var fd = FLOVEE_DATA[data.post.flovee_id] || FLOVEE_DATA.remi;
+      var exp = new Date(data.post.expires_at);
+      var hoursLeft = Math.max(0, Math.round((exp - Date.now()) / 3600000));
+      var minsLeft = Math.max(0, Math.round((exp - Date.now()) / 60000));
+      var timeLabel = hoursLeft > 6 ? hoursLeft+'h left' : hoursLeft > 1 ? hoursLeft+'h left' : (minsLeft >= 1 ? minsLeft+'m left' : '<1m left');
+      var urgency = hoursLeft <= 1 ? 'animation:pulse 1.5s ease-in-out infinite;' : '';
+      var timerWidth = Math.max(5, Math.min(100, (minsLeft / (18*60)) * 100));
 
       // Check if first time seeing flovee
-      let seenFlovee = localStorage.getItem('stuflover_seen_flovee');
-      let introHtml = '';
+      var seenFlovee = localStorage.getItem('stuflover_seen_flovee');
+      var introHtml = '';
       if(!seenFlovee){
         introHtml =
           '<div style="padding:12px 16px;border-radius:12px;background:'+pal.tx+'05;margin-bottom:14px;border:1px dashed '+pal.tx+'10;">'+
@@ -3457,8 +3454,8 @@ async function loadFloveePost(){
       }
 
       wrap.style.display = 'block';
-      let shareText = fd.emoji+' '+fd.name+' just texted me: "'+data.post.content+'" — my AI bestie on stuflover.com';
-      let savedReaction = localStorage.getItem('flovee_react_'+data.post.id);
+      var shareText = fd.emoji+' '+fd.name+' just texted me: "'+data.post.content+'" — my AI bestie on stuflover.com';
+      var savedReaction = localStorage.getItem('flovee_react_'+data.post.id);
 
       wrap.innerHTML = introHtml +
         '<div style="border-radius:24px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.08);">'+
@@ -3505,23 +3502,22 @@ async function loadFloveePost(){
       wrap._replyData = { content: data.post.content, floveeId: data.post.flovee_id };
 
       // Live countdown timer — update every 30s, reload when expired
-      let _floveeExpiry = exp.getTime();
+      var _floveeExpiry = exp.getTime();
       _floveeTimerInterval = setInterval(function(){
-        let now = Date.now();
-        let msLeft = _floveeExpiry - now;
+        var now = Date.now();
+        var msLeft = _floveeExpiry - now;
         if(msLeft <= 0){
           clearInterval(_floveeTimerInterval);
           _floveeTimerInterval = null;
           loadFloveePost();
           return;
         }
-        let h = Math.max(0, Math.round(msLeft / 3600000));
-        let m = Math.max(0, Math.round(msLeft / 60000));
-        // Clamp the "<1m" case so the label never reads "0m left" pre-reload.
-        let label = h > 6 ? h+'h left' : h > 1 ? h+'h left' : (m >= 1 ? m+'m left' : '<1m left');
-        let dot = document.getElementById('floveeTimerDot');
-        let lbl = document.getElementById('floveeTimerLabel');
-        let fill = document.getElementById('floveeTimerFill');
+        var h = Math.max(0, Math.round(msLeft / 3600000));
+        var m = Math.max(0, Math.round(msLeft / 60000));
+        var label = h > 6 ? h+'h left' : h > 1 ? h+'h left' : (m >= 1 ? m+'m left' : '<1m left');
+        var dot = document.getElementById('floveeTimerDot');
+        var lbl = document.getElementById('floveeTimerLabel');
+        var fill = document.getElementById('floveeTimerFill');
         if(lbl) lbl.textContent = label;
         if(dot){
           dot.style.background = h<=1?'#ef5350':h<=3?'#ff9800':'#4caf50';
@@ -3536,7 +3532,7 @@ async function loadFloveePost(){
       }, 30000);
 
     } else if(data.status === 'missed'){
-      let mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
+      var mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
       wrap.style.display = 'block';
       wrap.innerHTML =
         '<div style="padding:24px 22px;border-radius:22px;background:'+pal.tx+'04;border:1.5px dashed '+pal.tx+'08;text-align:center;">'+
@@ -3561,9 +3557,9 @@ async function loadFloveePost(){
 }
 
 function buildReactionBtn(emoji,name,postId,pal,saved){
-  let isActive = saved === name;
-  let bg = isActive ? pal.ac+'25' : pal.tx+'08';
-  let scale = isActive ? 'transform:scale(1.15);' : '';
+  var isActive = saved === name;
+  var bg = isActive ? pal.ac+'25' : pal.tx+'08';
+  var scale = isActive ? 'transform:scale(1.15);' : '';
   return '<button onclick="reactFlovee(\''+name+'\','+postId+',this)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid '+(isActive?pal.ac+'40':pal.tx+'08')+';background:'+bg+';font-size:0.9rem;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;'+scale+'" onmouseover="this.style.transform=\'scale(1.2)\'" onmouseout="this.style.transform=\''+(isActive?'scale(1.15)':'scale(1)')+'\'">'+emoji+'</button>';
 }
 
@@ -3575,7 +3571,7 @@ function reactFlovee(name,postId,btn){
   btn.style.borderColor = searchPal.ac+'50';
   setTimeout(function(){ btn.style.transform = 'scale(1.15)'; }, 200);
   // Reset others
-  let siblings = btn.parentNode.querySelectorAll('button');
+  var siblings = btn.parentNode.querySelectorAll('button');
   siblings.forEach(function(s){
     if(s !== btn){
       s.style.background = searchPal.tx+'08';
@@ -3584,13 +3580,13 @@ function reactFlovee(name,postId,btn){
     }
   });
   // Navigate to flovee chat with the emoji reaction as context
-  let wrap = document.getElementById('floveePostWrap');
+  var wrap = document.getElementById('floveePostWrap');
   if(wrap && wrap._replyData){
-    let replyData = JSON.parse(JSON.stringify(wrap._replyData));
+    var replyData = JSON.parse(JSON.stringify(wrap._replyData));
     replyData.reaction = name;
     localStorage.setItem('stuflover_flovee_reply', JSON.stringify(replyData));
   }
-  let reactPeer = (wrap && wrap._replyData && wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]) ? wrap._replyData.floveeId : '';
+  var reactPeer = (wrap && wrap._replyData && wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]) ? wrap._replyData.floveeId : '';
   setTimeout(function(){
     window.location.href = reactPeer
       ? 'friends.html?peer=' + encodeURIComponent(reactPeer)
@@ -3599,21 +3595,21 @@ function reactFlovee(name,postId,btn){
 }
 
 function shareFloveePost(){
-  let wrap = document.getElementById('floveePostWrap');
-  let text = wrap && wrap._shareText ? wrap._shareText : 'check out stuflover.com';
+  var wrap = document.getElementById('floveePostWrap');
+  var text = wrap && wrap._shareText ? wrap._shareText : 'check out stuflover.com';
   if(navigator.share){
     navigator.share({text:text}).catch(function(){});
   } else {
     navigator.clipboard.writeText(text).then(function(){
-      let btn = wrap.querySelector('[onclick="shareFloveePost()"]');
+      var btn = wrap.querySelector('[onclick="shareFloveePost()"]');
       if(btn){ btn.textContent='copied!'; setTimeout(function(){btn.textContent='share';},1500); }
     });
   }
 }
 
 function replyToFlovee(){
-  let wrap = document.getElementById('floveePostWrap');
-  let peer = '';
+  var wrap = document.getElementById('floveePostWrap');
+  var peer = '';
   if(wrap && wrap._replyData){
     localStorage.setItem('stuflover_flovee_reply', JSON.stringify(wrap._replyData));
     if(wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]){
@@ -3630,10 +3626,10 @@ setInterval(loadFloveePost, 60000);
 
 // ─── POLL VOTE ────────────────────────────────────────────
 function votePoll(idx){
-  let key = 'stuflover_poll_'+new Date().toDateString();
+  var key = 'stuflover_poll_'+new Date().toDateString();
   localStorage.setItem(key, idx.toString());
   // Refresh to show result
-  let pollOpts = document.getElementById('pollOptions');
+  var pollOpts = document.getElementById('pollOptions');
   if(pollOpts){
     pollOpts.querySelectorAll('button').forEach(function(b,i){
       b.disabled = true;
@@ -3645,7 +3641,7 @@ function votePoll(idx){
         b.style.opacity = '0.4';
       }
     });
-    let result = document.createElement('div');
+    var result = document.createElement('div');
     result.style.cssText = 'font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+searchPal.tx+';';
     result.textContent = 'nice pick — new poll tomorrow';
     pollOpts.parentNode.appendChild(result);
@@ -3654,50 +3650,50 @@ function votePoll(idx){
 
 // ─── SCRAPBOOK DECORATIONS ────────────────────────────────
 function addScrapbookDecos(){
-  let container = document.getElementById('scrapDecos');
+  var container = document.getElementById('scrapDecos');
   if(!container) return;
-  let pal = searchPal;
+  var pal = searchPal;
   container.innerHTML = '';
 
   // Washi tape strips
-  let tapePatterns = [
+  var tapePatterns = [
     'repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.25) 3px,rgba(255,255,255,0.25) 6px)',
     'radial-gradient(circle,rgba(255,255,255,0.3) 1.5px,transparent 1.5px)',
     'repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,0.2) 4px,rgba(255,255,255,0.2) 8px)',
   ];
-  for(let t=0;t<4;t++){
-    let tape = document.createElement('div');
-    let tx = (5+Math.random()*80);
-    let ty = (80+Math.random()*400);
-    let tw = (50+Math.random()*80);
-    let trot = (Math.random()*30-15).toFixed(1);
+  for(var t=0;t<4;t++){
+    var tape = document.createElement('div');
+    var tx = (5+Math.random()*80);
+    var ty = (80+Math.random()*400);
+    var tw = (50+Math.random()*80);
+    var trot = (Math.random()*30-15).toFixed(1);
     tape.style.cssText = 'position:absolute;width:'+tw+'px;height:20px;left:'+tx+'%;top:'+ty+'px;transform:rotate('+trot+'deg);background-color:'+pal.ac+'30;background-image:'+tapePatterns[t%3]+';border-radius:1px;opacity:0.5;';
     container.appendChild(tape);
   }
 
   // Cute sticker doodles (SVG)
-  let stickers = [
+  var stickers = [
     '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+pal.ac+'" opacity="0.15"/></svg>',
     '<svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="'+pal.ac+'" opacity="0.12"/></svg>',
     '<svg width="18" height="18" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="'+pal.ac+'" opacity="0.15"/></svg>',
     '<svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="'+pal.ac+'" opacity="0.12"/><ellipse cx="12" cy="5" rx="2.5" ry="3.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="12" cy="19" rx="2.5" ry="3.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="5" cy="12" rx="3.5" ry="2.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="19" cy="12" rx="3.5" ry="2.5" fill="'+pal.ac+'" opacity="0.08"/></svg>',
   ];
-  for(let s=0;s<8;s++){
-    let stk = document.createElement('div');
+  for(var s=0;s<8;s++){
+    var stk = document.createElement('div');
     stk.style.cssText = 'position:absolute;left:'+(3+Math.random()*90)+'%;top:'+(60+Math.random()*500)+'px;transform:rotate('+(Math.random()*40-20).toFixed(0)+'deg);opacity:0.6;';
     stk.innerHTML = stickers[s%stickers.length];
     container.appendChild(stk);
   }
 
   // Handwritten label near the grid
-  let label = document.createElement('div');
+  var label = document.createElement('div');
   label.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%) rotate(-2deg);top:'+((document.querySelector('.content-grid')?document.querySelector('.content-grid').offsetTop-20:300))+'px;font-family:Caveat,cursive;font-size:1rem;opacity:0.2;letter-spacing:1px;color:'+pal.tx+';z-index:3;white-space:nowrap;';
   label.textContent = 'tap to explore';
   container.appendChild(label);
 }
 
 // ─── CUSTOM EMOJI SYSTEM ─────────────────────────────────
-let CUSTOM_EMOJIS = {
+var CUSTOM_EMOJIS = {
   'Stuf Emojis': [
     {code:':heart:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>'},
     {code:':star:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="currentColor"/></svg>'},
@@ -3725,9 +3721,9 @@ let CUSTOM_EMOJIS = {
 };
 
 function createEmojiPicker(inputId, parentEl){
-  let wrap = document.createElement('div');
+  var wrap = document.createElement('div');
   wrap.style.cssText = 'position:relative;display:inline-block;';
-  let btn = document.createElement('button');
+  var btn = document.createElement('button');
   btn.className = 'emoji-btn';
   btn.type = 'button';
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>';
@@ -3735,12 +3731,12 @@ function createEmojiPicker(inputId, parentEl){
   btn.setAttribute('aria-label', 'Insert emoji');
   btn.setAttribute('aria-haspopup', 'true');
   btn.setAttribute('aria-expanded', 'false');
-  let picker = document.createElement('div');
+  var picker = document.createElement('div');
   picker.className = 'emoji-picker';
   picker.style.background = searchPal.bg;
   picker.style.color = searchPal.tx;
-  let html = '';
-  for(let cat in CUSTOM_EMOJIS){
+  var html = '';
+  for(var cat in CUSTOM_EMOJIS){
     html += '<div class="emoji-picker-label">'+cat+'</div><div class="emoji-picker-grid">';
     CUSTOM_EMOJIS[cat].forEach(function(em){
       html += '<button type="button" class="emoji-pick" title="'+em.code+'" aria-label="Insert '+em.code.replace(/:/g,'')+' emoji" data-code="'+em.code+'" data-input="'+inputId+'">'+em.display.replace('<svg ','<svg aria-hidden="true" focusable="false" ')+'</button>';
@@ -3759,9 +3755,9 @@ function createEmojiPicker(inputId, parentEl){
     wrap.querySelectorAll('.emoji-pick').forEach(function(b){
       b.onclick = function(e){
         e.stopPropagation();
-        let input = document.getElementById(b.dataset.input);
+        var input = document.getElementById(b.dataset.input);
         if(input){
-          let code = b.dataset.code;
+          var code = b.dataset.code;
           input.value += ' '+code+' ';
           input.focus();
         }
@@ -3775,10 +3771,10 @@ function createEmojiPicker(inputId, parentEl){
 
 // Replace :emoji: codes with SVG in displayed messages
 function renderCustomEmojis(text){
-  let result = text;
-  for(let cat in CUSTOM_EMOJIS){
+  var result = text;
+  for(var cat in CUSTOM_EMOJIS){
     CUSTOM_EMOJIS[cat].forEach(function(em){
-      let regex = new RegExp(em.code.replace(/([.*+?^${}()|[\]\\])/g,'\\$1'),'g');
+      var regex = new RegExp(em.code.replace(/([.*+?^${}()|[\]\\])/g,'\\$1'),'g');
       result = result.replace(regex, '<span class="inline-emoji" style="display:inline-flex;vertical-align:middle;margin:0 1px;">'+em.display+'</span>');
     });
   }
@@ -3786,7 +3782,7 @@ function renderCustomEmojis(text){
 }
 
 // ─── FONT PICKER ─────────────────────────────────────────
-let CHAT_FONTS = [
+var CHAT_FONTS = [
   {id:'default', name:'Default', family:"'Space Grotesk',sans-serif"},
   {id:'cute', name:'Cute', family:"'Quicksand',sans-serif"},
   {id:'handwritten', name:'Handwritten', family:"'Caveat',cursive"},
@@ -3795,7 +3791,7 @@ let CHAT_FONTS = [
 ];
 
 function getChatFont(){
-  let id = localStorage.getItem('stuflover_chat_font') || 'default';
+  var id = localStorage.getItem('stuflover_chat_font') || 'default';
   return CHAT_FONTS.find(function(f){return f.id===id;})||CHAT_FONTS[0];
 }
 
@@ -3805,21 +3801,21 @@ function setChatFont(id){
 }
 
 function applyChatFont(){
-  let font = getChatFont();
+  var font = getChatFont();
   document.querySelectorAll('.cmsg,.fr-msg,.ri-comment,.chat-input,.fr-input').forEach(function(el){
     el.style.fontFamily = font.family;
   });
 }
 
 function initFontPicker(){
-  let btn = document.getElementById('cursorSettingsBtn');
+  var btn = document.getElementById('cursorSettingsBtn');
   if(!btn) return;
   // Add font section to the cursor panel
-  let panel = document.getElementById('cursorPanel');
+  var panel = document.getElementById('cursorPanel');
   if(!panel) return;
-  let fontHtml = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(128,128,128,0.1);">'+
+  var fontHtml = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(128,128,128,0.1);">'+
     '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;">Chat Font</div>';
-  let current = getChatFont();
+  var current = getChatFont();
   CHAT_FONTS.forEach(function(f){
     fontHtml += '<button class="font-option'+(f.id===current.id?' on':'')+'" onclick="setChatFont(\''+f.id+'\')" style="font-family:'+f.family+'">'+f.name+'</button>';
   });
@@ -3828,7 +3824,7 @@ function initFontPicker(){
 }
 
 function initCursorSettings(){
-  let btn = document.createElement('div');
+  var btn = document.createElement('div');
   btn.id = 'cursorSettingsBtn';
   btn.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:200;padding:8px 16px;border-radius:20px;border:1.5px solid '+searchPal.tx+'18;background:'+searchPal.bg+'f0;color:'+searchPal.tx+';backdrop-filter:blur(14px);box-shadow:0 4px 18px rgba(0,0,0,0.1);transition:all 0.25s;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;';
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="'+searchPal.ac+'"/></svg> Settings';
@@ -3838,12 +3834,12 @@ function initCursorSettings(){
   btn.onclick = toggleCursorPanel;
   document.body.appendChild(btn);
 
-  let panel = document.createElement('div');
+  var panel = document.createElement('div');
   panel.id = 'cursorPanel';
   panel.style.cssText = 'position:fixed;bottom:56px;right:20px;width:220px;padding:18px;border-radius:16px;z-index:200;display:none;background:'+searchPal.bg+';color:'+searchPal.tx+';border:1.5px solid '+searchPal.tx+'10;box-shadow:0 12px 40px rgba(0,0,0,0.15);backdrop-filter:blur(20px);font-size:0.78rem;animation:fadeSlideIn 0.2s ease both;';
-  let curType = localStorage.getItem('stuflover_cursor_type')||'dots';
-  let curColor = localStorage.getItem('stuflover_cursor_color')||'palette';
-  let curOn = localStorage.getItem('stuflover_cursor_on')!=='false';
+  var curType = localStorage.getItem('stuflover_cursor_type')||'dots';
+  var curColor = localStorage.getItem('stuflover_cursor_color')||'palette';
+  var curOn = localStorage.getItem('stuflover_cursor_on')!=='false';
   panel.innerHTML =
     '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:8px;">Cursor Trail</div>'+
     '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="cursorOnOff" '+(curOn?'checked':'')+' onchange="saveCursorSetting(\'on\',this.checked)"/> Trail On</label>'+
@@ -3859,7 +3855,7 @@ function initCursorSettings(){
 }
 
 function toggleCursorPanel(){
-  let p = document.getElementById('cursorPanel');
+  var p = document.getElementById('cursorPanel');
   p.style.display = p.style.display==='none'?'block':'none';
 }
 
@@ -3873,13 +3869,13 @@ function saveCursorSetting(key, val){
 
 // Floating hearts
 function initFloatingHearts(){
-  let page = document.getElementById('lifestylePage');
+  var page = document.getElementById('lifestylePage');
   if(!page) return;
-  let css = document.createElement('style');
+  var css = document.createElement('style');
   css.textContent = '@keyframes floatHeart{0%{transform:translateY(0) scale(1);opacity:0.12;}50%{opacity:0.18;}100%{transform:translateY(-100vh) scale(0.6);opacity:0;}}';
   document.head.appendChild(css);
-  for(let i=0;i<4;i++){
-    let h = document.createElement('div');
+  for(var i=0;i<4;i++){
+    var h = document.createElement('div');
     h.style.cssText = 'position:fixed;bottom:-20px;left:'+(10+Math.random()*80)+'%;z-index:0;pointer-events:none;animation:floatHeart '+(8+Math.random()*6)+'s ease-in infinite;animation-delay:'+(i*3)+'s;';
     h.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+searchPal.ac+'" opacity="0.5"/></svg>';
     page.appendChild(h);
@@ -3888,10 +3884,10 @@ function initFloatingHearts(){
 
 // Glowing title
 function initGlowTitle(){
-  let title = document.getElementById('aeTitle');
+  var title = document.getElementById('aeTitle');
   if(!title) return;
   title.style.textShadow = '0 0 20px '+searchPal.ac+'30, 0 0 40px '+searchPal.ac+'15';
-  let css = document.createElement('style');
+  var css = document.createElement('style');
   css.textContent = '@keyframes titleGlow{0%,100%{text-shadow:0 0 20px '+searchPal.ac+'30,0 0 40px '+searchPal.ac+'15;}50%{text-shadow:0 0 30px '+searchPal.ac+'50,0 0 60px '+searchPal.ac+'25;}}';
   document.head.appendChild(css);
   title.style.animation = 'titleGlow 4s ease-in-out infinite';
@@ -4039,7 +4035,7 @@ function loadChat(secId){
 }
 
 function saveChat(secId){
-  let data = {messages: chatHistory.map(function(m){
+  var data = {messages: chatHistory.map(function(m){
     return {role:m.role, content:m.content, time:m.time||Date.now()};
   }), lastActive: Date.now()};
   localStorage.setItem(chatKey(secId), JSON.stringify(data));
@@ -4049,48 +4045,48 @@ function clearChatHistory(){
   if(!currentSection) return;
   chatHistory = [];
   localStorage.removeItem(chatKey(currentSection.id));
-  let msgsId = 'chatMessages';
+  var msgsId = 'chatMessages';
   document.getElementById(msgsId).innerHTML='';
-  let opener = buildOpener(currentSection);
+  var opener = buildOpener(currentSection);
   addMsg(opener,'flovee');
 }
 
 function formatMsgTime(ts){
-  let d = new Date(ts);
-  let h = d.getHours(); let m = d.getMinutes();
+  var d = new Date(ts);
+  var h = d.getHours(); var m = d.getMinutes();
   return (h%12||12)+':'+(m<10?'0':'')+m+(h<12?' am':' pm');
 }
 
 function formatDateSep(ts){
-  let d = new Date(ts); let now = new Date();
-  let today = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
-  let msgDay = new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+  var d = new Date(ts); var now = new Date();
+  var today = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  var msgDay = new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
   if(msgDay===today) return 'Today';
   if(msgDay===today-86400000) return 'Yesterday';
-  let days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  let months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   if(today-msgDay<604800000) return days[d.getDay()];
   return months[d.getMonth()]+' '+d.getDate();
 }
 
 function buildPreviousContext(secId){
-  let saved = loadChat(secId);
+  var saved = loadChat(secId);
   if(!saved.messages.length) return '';
-  let recent = saved.messages.slice(-30);
-  let lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
+  var recent = saved.messages.slice(-30);
+  var lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
   return '\n\nPREVIOUS CONVERSATION (you already had this chat with them — remember it and reference things they told you naturally. Do not repeat yourself or re-introduce yourself):\n'+lines.join('\n');
 }
 
 function restoreMessages(secId, messages, pal){
-  let msgsId = 'chatMessages';
-  let container = document.getElementById(msgsId);
+  var msgsId = 'chatMessages';
+  var container = document.getElementById(msgsId);
   if(!container) return;
 
-  let lastDateStr = '';
+  var lastDateStr = '';
   messages.forEach(function(m){
-    let dateStr = formatDateSep(m.time);
+    var dateStr = formatDateSep(m.time);
     if(dateStr !== lastDateStr){
-      let sep = document.createElement('div');
+      var sep = document.createElement('div');
       sep.className = 'chat-date-sep';
       sep.textContent = dateStr;
       sep.style.color = pal.tx;
@@ -4098,8 +4094,8 @@ function restoreMessages(secId, messages, pal){
       lastDateStr = dateStr;
     }
 
-    let role = m.role==='user' ? 'user' : 'flovee';
-    let div = document.createElement('div');
+    var role = m.role==='user' ? 'user' : 'flovee';
+    var div = document.createElement('div');
     div.className = 'cmsg '+role;
     div.style.background = role==='user' ? pal.tx+'12' : pal.ac+'1a';
     div.style.color = pal.tx;
@@ -4107,7 +4103,7 @@ function restoreMessages(secId, messages, pal){
     div.textContent = m.content;
 
     if(m.time){
-      let timeEl = document.createElement('div');
+      var timeEl = document.createElement('div');
       timeEl.className = 'cmsg-time';
       timeEl.textContent = formatMsgTime(m.time);
       timeEl.style.color = pal.tx;
@@ -4117,7 +4113,7 @@ function restoreMessages(secId, messages, pal){
     container.appendChild(div);
   });
 
-  let clearRow = document.createElement('div');
+  var clearRow = document.createElement('div');
   clearRow.style.cssText = 'text-align:center;padding:8px 0 4px;';
   clearRow.innerHTML = '<button class="clear-chat-btn" onclick="clearChatHistory()">Clear chat</button>';
   container.appendChild(clearRow);
@@ -4150,7 +4146,7 @@ function openSection(id, opts){
 
   document.getElementById('sectionNameNav').textContent = sec.name;
   document.getElementById('sectionNameNav').style.color = pal.tx;
-  let navBack = document.getElementById('navBack');
+  var navBack = document.getElementById('navBack');
   if(navBack){ navBack.style.borderColor = pal.tx+'25'; navBack.style.color = pal.tx; }
 
   // Hide hub and profile views by default
@@ -4299,7 +4295,7 @@ function openSection(id, opts){
     document.getElementById('friendsView').style.display = 'none';
     document.getElementById('discoverTabs').style.display = 'flex';
     document.getElementById('discoverTabs').classList.add('active');
-    let defaultTab = sec.id === 'contentwithit' ? 'inspo' : 'trending';
+    var defaultTab = sec.id === 'contentwithit' ? 'inspo' : 'trending';
     switchDiscoverTab(defaultTab);
     return;
   } else if(sec.id === 'friends'){
@@ -4337,7 +4333,7 @@ function openSection(id, opts){
   }
 
   // Load saved messages or show opener
-  let saved = loadChat(sec.id);
+  var saved = loadChat(sec.id);
   if(saved.messages.length > 0){
     chatHistory = saved.messages.map(function(m){ return {role:m.role, content:m.content, time:m.time}; });
     restoreMessages(sec.id, saved.messages, searchPal);
@@ -4396,7 +4392,7 @@ function goHome(){
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('sectionView').style.display = 'none';
   // Restore settings button
-  let csBtn = document.getElementById('cursorSettingsBtn');
+  var csBtn = document.getElementById('cursorSettingsBtn');
   if(csBtn) csBtn.style.display = '';
   document.getElementById('hubView').style.display = 'none';
   document.getElementById('hubView').classList.remove('active');
@@ -4421,7 +4417,7 @@ function goHome(){
   document.getElementById('chatMessages').innerHTML='';
   document.getElementById('normalChat').style.display='none';
   // Re-render scrapbook if cards are missing from DOM but cache exists
-  let recB = document.getElementById('recBoard');
+  var recB = document.getElementById('recBoard');
   if(recB && !recB.querySelector('.sb-card') && _sb.cache){
     try{ sbRender(); }catch(e){}
   }
@@ -4451,14 +4447,14 @@ function buildSystemPrompt(sec){
     styleHint = ` User texts ${chatUserStyle.casual?'casual lowercase':'more formal'}, avg ${Math.round(chatUserStyle.avgLen)} chars${chatUserStyle.emoji?', uses emoji':''}. Mirror this.`;
   }
 
-  let chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
-  let prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
+  var chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
+  var prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
 
   return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it. NEVER help create websites, write code, build apps, or do programming. You are a lifestyle companion ONLY. If asked to code, politely decline and redirect to your purpose.${styleHint}${prevContext}`;
 }
 
 function buildOpener(sec){
-  let raw = typeof sec.opener === 'function' ? sec.opener() : sec.opener;
+  var raw = typeof sec.opener === 'function' ? sec.opener() : sec.opener;
   return raw.replace('{AE}', resolveAeName()).replace('{MUSIC}', P.music.slice(0,2).map(k=>ARTISTS[k]?.name||k).join(' and ')||'your music');
 }
 
@@ -4479,7 +4475,7 @@ async function runChat(msg, sendBtnId){
   if(msg===msg.toLowerCase()&&msg.length>3) chatUserStyle.casual=true;
 
   addMsg(msg,'user');
-  let now = Date.now();
+  var now = Date.now();
   chatHistory.push({role:'user',content:msg,time:now});
   if(currentSection) saveChat(currentHubGame ? 'floverhub_'+currentHubGame.id : currentSection.id);
 
@@ -4526,12 +4522,12 @@ function addMsg(text, roleClass){
   div.style.color = pal.tx;
   div.style.fontFamily = getChatFont().family;
   // Render custom emojis
-  let rendered = renderCustomEmojis(escHtml(text));
+  var rendered = renderCustomEmojis(escHtml(text));
   if(rendered !== escHtml(text)){ div.innerHTML = rendered; } else { div.textContent = text; }
 
   // Add timestamp (not on typing indicators)
   if(!isTyping){
-    let timeEl = document.createElement('div');
+    var timeEl = document.createElement('div');
     timeEl.className = 'cmsg-time';
     timeEl.textContent = formatMsgTime(Date.now());
     timeEl.style.color = pal.tx;
@@ -4744,24 +4740,24 @@ function showShopMenu(e, item, pal){
 
 // ─── HELPER: HIDE ALL SECTION VIEWS ──────────────────────
 function hideAllViews(){
-  let ids = ['hubView','dtiView','cardGameView','profileView','routineView','friendsView','contentView','dailyView','groupsView','fgDetailView','readitView','fitforitView','viralView'];
+  var ids = ['hubView','dtiView','cardGameView','profileView','routineView','friendsView','contentView','dailyView','groupsView','fgDetailView','readitView','fitforitView','viralView'];
   ids.forEach(function(id){
-    let el = document.getElementById(id);
+    var el = document.getElementById(id);
     if(el){ el.style.display='none'; el.classList.remove('active'); }
   });
 }
 
 // ─── OUTFIT ROAST ────────────────────────────────────────
 function openOutfitRoast(){
-  let pal = searchPal;
-  let vc = document.getElementById('viralContent');
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
   if(!vc) return;
   // Determine user's flovee
-  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
-  let aeKey = topAe ? topAe[0] : 'softgirl';
-  let aeMap = {kawaii:'zola',softgirl:'nox',cleangirl:'zola',coquette:'nox',goth:'zola',darkacad:'nox',grunge:'zola',y2k:'nox',street:'zola',cottage:'nox',hippie:'zola',oldmoney:'nox',preppy:'zola',indie:'nox',emo:'zola'};
-  let fid = aeMap[aeKey] || 'zola';
-  let fd = FLOVEE_DATA[fid] || FLOVEE_DATA.zola;
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeMap = {kawaii:'zola',softgirl:'nox',cleangirl:'zola',coquette:'nox',goth:'zola',darkacad:'nox',grunge:'zola',y2k:'nox',street:'zola',cottage:'nox',hippie:'zola',oldmoney:'nox',preppy:'zola',indie:'nox',emo:'zola'};
+  var fid = aeMap[aeKey] || 'zola';
+  var fd = FLOVEE_DATA[fid] || FLOVEE_DATA.zola;
 
   vc.innerHTML =
     '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
@@ -4775,28 +4771,28 @@ function openOutfitRoast(){
 }
 
 async function getOutfitRoast(){
-  let input = document.getElementById('roastInput');
-  let btn = document.getElementById('roastBtn');
-  let result = document.getElementById('roastResult');
+  var input = document.getElementById('roastInput');
+  var btn = document.getElementById('roastBtn');
+  var result = document.getElementById('roastResult');
   if(!input || !input.value.trim()) return;
-  let pal = searchPal;
+  var pal = searchPal;
 
   btn.disabled = true;
   btn.textContent = 'JUDGING...';
   result.style.display = 'none';
 
-  let base = window.STUFLOVER_API_URL || '';
-  let token = localStorage.getItem('stuflover_token');
+  var base = window.STUFLOVER_API_URL || '';
+  var token = localStorage.getItem('stuflover_token');
   try{
-    let res = await (window._origFetch||fetch).call(window, base+'/api/flovee/roast',{
+    var res = await (window._origFetch||fetch).call(window, base+'/api/flovee/roast',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
       body:JSON.stringify({outfitDescription:input.value.trim()})
     });
-    let data = await res.json();
+    var data = await res.json();
     if(data.roast){
-      let fd = FLOVEE_DATA[data.floveeId] || FLOVEE_DATA.zola;
-      let shareText = fd.emoji+' '+fd.name+' roasted my outfit: "'+data.roast+'" — get roasted at stuflover.com';
+      var fd = FLOVEE_DATA[data.floveeId] || FLOVEE_DATA.zola;
+      var shareText = fd.emoji+' '+fd.name+' roasted my outfit: "'+data.roast+'" — get roasted at stuflover.com';
       result.style.display = 'block';
       result.innerHTML =
         '<div style="padding:22px 24px;border-radius:20px;background:'+fd.gradient+';position:relative;text-align:left;">'+
@@ -4806,7 +4802,7 @@ async function getOutfitRoast(){
           '</div>'+
           '<div style="font-size:1.05rem;line-height:1.75;color:'+fd.darkColor+';">'+escHtml(data.roast)+'</div>'+
           '<div style="margin-top:14px;display:flex;gap:8px;">'+
-            '<button onclick="navigator.share?navigator.share({text:\''+_escJsString(shareText)+'\'}):navigator.clipboard.writeText(\''+_escJsString(shareText)+'\').then(function(){this.textContent=\'copied!\';let b=this;setTimeout(function(){b.textContent=\'share roast\'},1500)}.bind(this))" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.3);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">share roast</button>'+
+            '<button onclick="navigator.share?navigator.share({text:\''+_escJsString(shareText)+'\'}):navigator.clipboard.writeText(\''+_escJsString(shareText)+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share roast\'},1500)}.bind(this))" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.3);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">share roast</button>'+
             '<button onclick="document.getElementById(\'roastInput\').value=\'\';document.getElementById(\'roastResult\').style.display=\'none\';" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.15);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">try again</button>'+
           '</div>'+
         '</div>';
@@ -4821,15 +4817,15 @@ async function getOutfitRoast(){
 
 // ─── SECRET DIARY ────────────────────────────────────────
 function openSecretDiary(){
-  let pal = searchPal;
-  let vc = document.getElementById('viralContent');
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
   if(!vc) return;
-  let entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+  var entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
 
-  let entriesHtml = entries.slice().reverse().slice(0,20).map(function(e){
-    let d = new Date(e.time);
-    let dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    let timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  var entriesHtml = entries.slice().reverse().slice(0,20).map(function(e){
+    var d = new Date(e.time);
+    var dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    var timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
     return '<div class="diary-entry" style="background:'+pal.tx+'04;border:1px solid '+pal.tx+'06;">'+
       '<div class="diary-date" style="color:'+pal.tx+';">'+dateStr+' at '+timeStr+'</div>'+
       '<div class="diary-text" style="color:'+pal.tx+';">'+escHtml(e.text)+'</div>'+
@@ -4855,9 +4851,9 @@ function openSecretDiary(){
 }
 
 function saveDiaryEntry(){
-  let input = document.getElementById('diaryInput');
+  var input = document.getElementById('diaryInput');
   if(!input || !input.value.trim()) return;
-  let entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+  var entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
   entries.push({text:input.value.trim(), time:Date.now()});
   localStorage.setItem('stuflover_diary', JSON.stringify(entries));
   input.value = '';
@@ -4865,28 +4861,28 @@ function saveDiaryEntry(){
 }
 
 // ─── STUDY ROOM ──────────────────────────────────────────
-let studyTimerInterval = null;
-let studyTimeLeft = 0;
-let studyMode = 'focus'; // focus or break
+var studyTimerInterval = null;
+var studyTimeLeft = 0;
+var studyMode = 'focus'; // focus or break
 
 function openStudyRoom(){
-  let pal = searchPal;
-  let vc = document.getElementById('viralContent');
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
   if(!vc) return;
   if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
 
-  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
-  let aeKey = topAe ? topAe[0] : 'softgirl';
-  let aeName = (typeof AE !== 'undefined' && AE[aeKey]) ? AE[aeKey].name : aeKey;
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
+  var aeName = (typeof AE !== 'undefined' && AE[aeKey]) ? AE[aeKey].name : aeKey;
 
-  let ambients = {
+  var ambients = {
     kawaii:'lofi beats + rain sounds',softgirl:'soft piano + ambient',cleangirl:'white noise + coffee shop',
     coquette:'french cafe + vinyl crackle',goth:'thunderstorm + dark ambient',darkacad:'library sounds + rain',
     grunge:'lo-fi indie + vinyl',y2k:'2000s pop instrumentals',street:'chill hip hop beats',
     cottage:'birds + gentle stream',hippie:'nature sounds + acoustic',oldmoney:'classical piano + fireplace',
     preppy:'upbeat lofi + typing sounds',indie:'bedroom indie + rain',emo:'acoustic covers + rain'
   };
-  let ambient = ambients[aeKey] || 'lofi beats + rain';
+  var ambient = ambients[aeKey] || 'lofi beats + rain';
 
   vc.innerHTML =
     '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
@@ -4914,23 +4910,23 @@ function openStudyRoom(){
   studyTimeLeft = 25 * 60;
 }
 
-let studyTotalTime = 25 * 60;
+var studyTotalTime = 25 * 60;
 function startStudy(mins){
   if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
   studyTimeLeft = mins * 60;
   studyTotalTime = mins * 60;
   studyMode = 'focus';
   updateStudyDisplay();
-  let btns = document.querySelectorAll('.study-controls .study-btn');
+  var btns = document.querySelectorAll('.study-controls .study-btn');
   btns.forEach(function(b){ b.classList.remove('active'); b.style.borderColor=searchPal.tx+'15'; });
   event.target.classList.add('active');
   event.target.style.borderColor=searchPal.tx+'25';
-  let startBtn = document.getElementById('studyStartBtn');
+  var startBtn = document.getElementById('studyStartBtn');
   if(startBtn) startBtn.textContent = 'start focusing';
 }
 
 function toggleStudy(){
-  let btn = document.getElementById('studyStartBtn');
+  var btn = document.getElementById('studyStartBtn');
   if(studyTimerInterval){
     clearInterval(studyTimerInterval);
     studyTimerInterval = null;
@@ -4947,7 +4943,7 @@ function toggleStudy(){
           studyTimeLeft = 5 * 60;
           studyTotalTime = 5 * 60;
           if(btn) btn.textContent = 'start break';
-          let label = document.getElementById('studyModeLabel');
+          var label = document.getElementById('studyModeLabel');
           if(label) label.textContent = 'break time — you earned it';
           try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
         } else {
@@ -4955,58 +4951,58 @@ function toggleStudy(){
           studyTimeLeft = 25 * 60;
           studyTotalTime = 25 * 60;
           if(btn) btn.textContent = 'start focusing';
-          let label = document.getElementById('studyModeLabel');
+          var label = document.getElementById('studyModeLabel');
           if(label) label.textContent = 'focus time';
         }
       }
       updateStudyDisplay();
     }, 1000);
     if(btn) btn.textContent = 'pause';
-    let label = document.getElementById('studyModeLabel');
+    var label = document.getElementById('studyModeLabel');
     if(label) label.textContent = studyMode === 'focus' ? 'focusing...' : 'on break...';
   }
 }
 
 function updateStudyDisplay(){
-  let timer = document.getElementById('studyTimer');
-  let progress = document.getElementById('studyProgress');
+  var timer = document.getElementById('studyTimer');
+  var progress = document.getElementById('studyProgress');
   if(timer){
-    let m = Math.floor(studyTimeLeft/60);
-    let s = studyTimeLeft%60;
+    var m = Math.floor(studyTimeLeft/60);
+    var s = studyTimeLeft%60;
     timer.textContent = m+':'+(s<10?'0':'')+s;
   }
   if(progress){
-    let pct = ((studyTotalTime - studyTimeLeft) / studyTotalTime) * 100;
+    var pct = ((studyTotalTime - studyTimeLeft) / studyTotalTime) * 100;
     progress.style.width = pct+'%';
   }
-  let sessions = document.getElementById('studySessions');
+  var sessions = document.getElementById('studySessions');
   if(sessions) sessions.textContent = getStudySessions()+' completed';
 }
 
 function getStudySessions(){
-  let key = 'stuflover_study_'+new Date().toDateString();
+  var key = 'stuflover_study_'+new Date().toDateString();
   return parseInt(localStorage.getItem(key)||'0');
 }
 function incrementStudySessions(){
-  let key = 'stuflover_study_'+new Date().toDateString();
-  let n = parseInt(localStorage.getItem(key)||'0') + 1;
+  var key = 'stuflover_study_'+new Date().toDateString();
+  var n = parseInt(localStorage.getItem(key)||'0') + 1;
   localStorage.setItem(key, n.toString());
 }
 
 // ─── AESTHETIC VS REALITY GAME ───────────────────────────
-let aevsScore = 0;
-let aevsRound = 0;
-let aevsQuestions = [];
+var aevsScore = 0;
+var aevsRound = 0;
+var aevsQuestions = [];
 
 function openAeVsReality(){
-  let pal = searchPal;
-  let vc = document.getElementById('viralContent');
+  var pal = searchPal;
+  var vc = document.getElementById('viralContent');
   if(!vc) return;
   aevsScore = 0;
   aevsRound = 0;
 
-  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
-  let aeKey = topAe ? topAe[0] : 'softgirl';
+  var topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  var aeKey = topAe ? topAe[0] : 'softgirl';
 
   // Build questions based on aesthetic
   aevsQuestions = [
@@ -5025,17 +5021,17 @@ function openAeVsReality(){
 
 function showAevsRound(pal){
   if(!pal) pal = searchPal;
-  let vc = document.getElementById('viralContent');
+  var vc = document.getElementById('viralContent');
   if(!vc) return;
 
   if(aevsRound >= aevsQuestions.length){
     // Show results
-    let aeCount = aevsQuestions.filter(function(q){return q.pick==='ae';}).length;
-    let realCount = aevsQuestions.filter(function(q){return q.pick==='reality';}).length;
-    let verdict = aeCount > realCount ? 'you are living the aesthetic fantasy and honestly good for you' :
+    var aeCount = aevsQuestions.filter(function(q){return q.pick==='ae';}).length;
+    var realCount = aevsQuestions.filter(function(q){return q.pick==='reality';}).length;
+    var verdict = aeCount > realCount ? 'you are living the aesthetic fantasy and honestly good for you' :
                   aeCount === realCount ? 'perfectly balanced between delulu and real — as all things should be' :
                   'you are SO real for this. the aesthetic is aspirational and that is valid';
-    let shareText = 'i got '+aeCount+' aesthetic vs '+realCount+' reality on stuflover — '+verdict;
+    var shareText = 'i got '+aeCount+' aesthetic vs '+realCount+' reality on stuflover — '+verdict;
 
     vc.innerHTML =
       '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
@@ -5054,13 +5050,13 @@ function showAevsRound(pal){
         '<div style="font-size:0.88rem;line-height:1.6;opacity:0.55;color:'+pal.tx+';margin-bottom:20px;">'+verdict+'</div>'+
         '<div style="display:flex;gap:8px;justify-content:center;">'+
           '<button onclick="openAeVsReality()" class="bc" style="padding:12px 24px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">play again</button>'+
-          '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';let b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" class="bc" style="padding:12px 24px;border:1.5px solid '+pal.tx+'15;border-radius:12px;background:transparent;color:'+pal.tx+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">share</button>'+
+          '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';var b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" class="bc" style="padding:12px 24px;border:1.5px solid '+pal.tx+'15;border-radius:12px;background:transparent;color:'+pal.tx+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">share</button>'+
         '</div>'+
       '</div>';
     return;
   }
 
-  let q = aevsQuestions[aevsRound];
+  var q = aevsQuestions[aevsRound];
   vc.innerHTML =
     '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
       '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:6px;color:'+pal.tx+';">round '+(aevsRound+1)+' of '+aevsQuestions.length+'</div>'+
@@ -5092,7 +5088,7 @@ function pickAevs(choice){
 // quiz — their aesthetic is locked behind sign-in at the reveal step.
 (function autoLoad(){
   if (!localStorage.getItem('stuflover_token')) return;
-  let saved;
+  var saved;
   try { saved = JSON.parse(localStorage.getItem('stuflover_profile')||'null'); } catch(e) { saved=null; }
   if(!saved || !saved.aesthetics || Object.keys(saved.aesthetics).length===0) return;
 
@@ -5126,9 +5122,9 @@ function pickAevs(choice){
   }
 
   // Show welcome message
-  let user = window.stufloverUser ? window.stufloverUser() : null;
+  var user = window.stufloverUser ? window.stufloverUser() : null;
   if(user && user.username){
-    let wel = document.getElementById('navWelcome');
+    var wel = document.getElementById('navWelcome');
     if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
   }
 })();
