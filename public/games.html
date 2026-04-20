@@ -221,15 +221,18 @@
   var token = localStorage.getItem('stuflover_token');
   if(!token) return;
   var allGames = GAMES.reduce(function(a,g){ return a.concat(g.items); }, []);
-  allGames.forEach(function(g){
-    fetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
-      headers:{'Authorization':'Bearer ' + token}
-    }).then(function(r){return r.ok?r.json():null;}).then(function(d){
-      if(!d || !d.best) return;
-      var el = document.querySelector('.game-best[data-game-id="' + g.id + '"]');
-      if(el){ el.textContent = 'Best: ' + d.best; el.classList.add('visible'); }
-    }).catch(function(){});
-  });
+  function loadTileBests(){
+    allGames.forEach(function(g){
+      fetch('/api/games/' + encodeURIComponent(g.id) + '/my-scores', {
+        headers:{'Authorization':'Bearer ' + token}
+      }).then(function(r){return r.ok?r.json():null;}).then(function(d){
+        if(!d || !d.best) return;
+        var el = document.querySelector('.game-best[data-game-id="' + g.id + '"]');
+        if(el){ el.textContent = 'Best: ' + d.best; el.classList.add('visible'); }
+      }).catch(function(){});
+    });
+  }
+  loadTileBests();
 
   // ─── Leaderboard ─────────────────────────────────
   var chipsEl = document.getElementById('lbChips');
@@ -340,39 +343,60 @@
     stripEl.appendChild(tile);
   });
 
-  fetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      if(!d || !d.achievements) return;
-      var unlocked = {};
-      d.achievements.forEach(function(a){ unlocked[a.code] = true; });
-      Array.prototype.forEach.call(stripEl.children, function(tile){
-        if(unlocked[tile.dataset.code]){
-          tile.classList.remove('is-locked');
-          tile.classList.add('is-unlocked');
-        }
-      });
-    }).catch(function(){});
+  function loadAchievements(){
+    fetch('/api/achievements/mine', {headers:{'Authorization':'Bearer ' + token}})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d || !d.achievements) return;
+        var unlocked = {};
+        d.achievements.forEach(function(a){ unlocked[a.code] = true; });
+        Array.prototype.forEach.call(stripEl.children, function(tile){
+          var on = !!unlocked[tile.dataset.code];
+          tile.classList.toggle('is-unlocked', on);
+          tile.classList.toggle('is-locked', !on);
+        });
+      }).catch(function(){});
+  }
+  loadAchievements();
 
   // ─── Stats card ─────────────────────────────────
   var gameNameById = {};
   allGames.forEach(function(g){ gameNameById[g.id] = g.name; });
 
-  fetch('/api/games/my-stats', {headers:{'Authorization':'Bearer ' + token}})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      if(!d) return;
-      document.getElementById('statPoints').textContent = d.total_points | 0;
-      document.getElementById('statGames').textContent = d.games_played | 0;
-      document.getElementById('statRounds').textContent = d.total_rounds | 0;
-      document.getElementById('statAchievements').textContent = d.achievements_unlocked | 0;
-      if(d.top_game && d.top_game.game_id){
-        var nm = gameNameById[d.top_game.game_id] || d.top_game.game_id;
-        document.getElementById('statTopGame').textContent = 'Top: ' + nm;
-      }
-      var of = ACHIEVEMENTS.length;
-      document.getElementById('statAchievementsSub').textContent = 'of ' + of;
-    }).catch(function(){});
+  function loadStats(){
+    fetch('/api/games/my-stats', {headers:{'Authorization':'Bearer ' + token}})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(d){
+        if(!d) return;
+        document.getElementById('statPoints').textContent = d.total_points | 0;
+        document.getElementById('statGames').textContent = d.games_played | 0;
+        document.getElementById('statRounds').textContent = d.total_rounds | 0;
+        document.getElementById('statAchievements').textContent = d.achievements_unlocked | 0;
+        if(d.top_game && d.top_game.game_id){
+          var nm = gameNameById[d.top_game.game_id] || d.top_game.game_id;
+          document.getElementById('statTopGame').textContent = 'Top: ' + nm;
+        } else {
+          document.getElementById('statTopGame').innerHTML = '&nbsp;';
+        }
+        var of = ACHIEVEMENTS.length;
+        document.getElementById('statAchievementsSub').textContent = 'of ' + of;
+      }).catch(function(){});
+  }
+  loadStats();
+
+  // Refresh all game data when the user returns to this page —
+  // e.g. browser back from a game, or bfcache restore — so the
+  // score they just finished appears without a manual reload.
+  window.addEventListener('pageshow', function(ev){
+    if(!ev.persisted && performance && performance.getEntriesByType){
+      var nav = performance.getEntriesByType('navigation')[0];
+      if(nav && nav.type !== 'back_forward') return;
+    }
+    loadTileBests();
+    loadLeaderboard();
+    loadAchievements();
+    loadStats();
+  });
 })();
 </script>
 <script src="/stuflover-config.js"></script>
