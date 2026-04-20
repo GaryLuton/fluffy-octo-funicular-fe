@@ -1,0 +1,5135 @@
+
+// ─── VISIBILITY-AWARE TIMER HELPERS ─────────────────────
+// Lightweight shim: toggles an html class so CSS pauses every animation
+// when the tab is hidden, and exposes an interval wrapper that skips the
+// tick when the document is not visible. New interval callers should use
+// _slVisibleInterval instead of raw setInterval to halve wake-ups on
+// backgrounded tabs. Existing setInterval sites still work — the CSS
+// class alone stops paint work for all animation-driven UI.
+(function _slVisibilityShim(){
+  function apply(){
+    let hidden = document.visibilityState !== 'visible';
+    document.documentElement.classList.toggle('sl-tab-hidden', hidden);
+  }
+  document.addEventListener('visibilitychange', apply);
+  apply();
+})();
+function _slVisibleInterval(fn, ms){
+  return setInterval(function(){
+    if(document.visibilityState !== 'visible') return;
+    try{ fn(); }catch(e){}
+  }, ms);
+}
+
+// ─── SAFE STRING HELPERS ────────────────────────────────
+// escHtml: HTML body context. escAttr: HTML attribute context (double-quoted).
+// escJsString: inside a JS string literal embedded in an HTML attribute
+// (e.g. onclick="foo('…')"). Use escJsString whenever user-provided data
+// is interpolated into a JS string — HTML escaping alone does NOT prevent
+// ' or \ from breaking out.
+function _escHtml(s){ let d=document.createElement('div'); d.textContent=String(s==null?'':s); return d.innerHTML; }
+function _escAttr(s){ return _escHtml(s).replace(/"/g,'&quot;'); }
+function _escJsString(s){
+  return String(s==null?'':s)
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/"/g,'\\"')
+    .replace(/\n/g,'\\n')
+    .replace(/\r/g,'\\r')
+    .replace(/</g,'\\u003c')   // close </script> and HTML parsing confusion
+    .replace(/>/g,'\\u003e')
+    .replace(/&/g,'\\u0026');
+}
+// NOTE: Preferred migration path for user-data rendering is to stop using
+// innerHTML and build nodes with document.createElement + textContent/append,
+// or event delegation with data-* attributes (see data-action handler below).
+
+// ─── NAV TAB HELPER ─────────────────────────────────────
+// Set the override so activeTabId() resolves correctly, and call
+// setActiveTab to re-sync the DOM classes if the nav is already mounted.
+function slSetNavTab(id){
+  window.__slActiveTabOverride = id || null;
+  if(window.StufloverNav && window.StufloverNav.setActiveTab){
+    window.StufloverNav.setActiveTab(id);
+  }
+}
+
+// ─── ALL DATA + QUIZ JS (preserved from original) ────────
+// ─── PROFILE ─────────────────────────────────────────────
+// Every dimension tracked independently — no single answer decides anything
+const P = {
+  aesthetics: {},  // scored from ALL answers combined
+  music: [],
+  interests: [],
+  social: null,
+  age: null,              // age range
+  gender: null,           // gender identity
+  // Rich contextual data from specific questions
+  faveColour: null,       // {hex, name, dark}
+  faveShop: null,
+  friendGroup: null,
+  energyWord: null,
+  moodToday: null,
+  phoneScreen: null,      // what's on their phone
+  saturdayMorning: null,  // what they do Saturday morning
+  coffeeOrder: null,      // coffee / drink order
+  notesApp: null,         // what their notes app is like
+  lastBought: null,       // last thing they bought for themselves
+  extraTags: [],
+  answered: new Set(),
+};
+
+
+// ─── COLOURS ─────────────────────────────────────────────
+const COLOURS = {
+  pink:    {hex:"#ffb3c6",name:"Pink",       dark:false},
+  red:     {hex:"#e03050",name:"Red",        dark:false},
+  orange:  {hex:"#e06820",name:"Orange",     dark:false},
+  yellow:  {hex:"#f0c030",name:"Yellow",     dark:false},
+  green:   {hex:"#40a050",name:"Green",      dark:false},
+  sage:    {hex:"#88a878",name:"Sage Green", dark:false},
+  blue:    {hex:"#3060c0",name:"Blue",       dark:false},
+  purple:  {hex:"#8040c0",name:"Purple",     dark:false},
+  black:   {hex:"#181018",name:"Black",      dark:true},
+  white:   {hex:"#f8f4f0",name:"White",      dark:false},
+  brown:   {hex:"#a06030",name:"Brown",      dark:false},
+  beige:   {hex:"#e8d8b8",name:"Beige",      dark:false},
+  lilac:   {hex:"#c8a8e0",name:"Lilac",      dark:false},
+  hotpink: {hex:"#ff4080",name:"Hot Pink",   dark:false},
+  navy:    {hex:"#182858",name:"Navy",       dark:true},
+  terra:   {hex:"#c05030",name:"Terracotta", dark:false},
+};
+
+
+// ─── AESTHETICS ───────────────────────────────────────────
+// Each aesthetic has a default chat font. If the user hasn't explicitly
+// picked one we apply this on quiz completion so every aesthetic ships
+// with its own set colours, fonts and flovee.
+const AE_FONTS = {
+  kawaii:'cute',      softgirl:'cute',      cleangirl:'default',
+  coquette:'fancy',   goth:'default',       darkacad:'default',
+  grunge:'default',   y2k:'round',          street:'default',
+  cottage:'handwritten', hippie:'handwritten', oldmoney:'default',
+  preppy:'default',   tomato:'handwritten', indie:'default',
+  emo:'default',      ballet:'fancy',
+};
+
+const AE = {
+  kawaii:      {name:"Kawaii",        quote:"Be so cute they cannot handle it."},
+  softgirl:    {name:"Soft Girl",     quote:"Be so soft they underestimate you. Then bloom."},
+  cleangirl:   {name:"Clean Girl",    quote:"The most luxurious thing you can be is unbothered."},
+  coquette:    {name:"Coquette",      quote:"She moved through the world like she was always arriving."},
+  goth:        {name:"Goth",          quote:"I am not dark. I am depth."},
+  darkacad:    {name:"Dark Academia", quote:"I am homesick for a place I am not sure even exists."},
+  grunge:      {name:"Grunge",        quote:"Here we are now. Entertain us."},
+  y2k:         {name:"Y2K",           quote:"She was low-rise and unapologetic and the world was not ready."},
+  street:      {name:"Streetwear",    quote:"Style is a way to say who you are without having to speak."},
+  cottage:     {name:"Cottagecore",   quote:"She had wildflowers in her hair and mud on her boots."},
+  hippie:      {name:"Hippie",        quote:"She turned her can'ts into cans and her dreams into plans."},
+  oldmoney:    {name:"Old Money",     quote:"True luxury is being able to move through the world unhurried."},
+  preppy:      {name:"Preppy",        quote:"She looked like she had never not known what she was doing."},
+  tomato:      {name:"Tomato Girl",   quote:"She smelled like sunshine and stayed like the sea."},
+  indie:       {name:"Indie Alt",     quote:"She had the kind of taste that could not be bought or taught."},
+  emo:         {name:"Emo",           quote:"I am not okay and that is okay."},
+  ballet:      {name:"Balletcore",    quote:"She moved like a poem that had not been written yet."},
+};
+
+
+const ARTISTS = {
+  katseye:    {name:"Katseye",          tracks:[{t:"Debut",d:"3:12"},{t:"Touch",d:"2:58"},{t:"Gnarly",d:"3:04"}]},
+  newjeans:   {name:"NewJeans",         tracks:[{t:"Super Shy",d:"3:01"},{t:"Hype Boy",d:"3:01"},{t:"OMG",d:"3:10"}]},
+  illit:      {name:"ILLIT",            tracks:[{t:"Magnetic",d:"3:04"},{t:"Lucky Girl",d:"3:10"},{t:"My World",d:"2:58"}]},
+  lesserafim: {name:"LE SSERAFIM",      tracks:[{t:"Antifragile",d:"2:57"},{t:"UNFORGIVEN",d:"3:39"},{t:"Easy",d:"3:05"}]},
+  aespa:      {name:"aespa",            tracks:[{t:"Supernova",d:"3:18"},{t:"Drama",d:"3:04"},{t:"Spicy",d:"3:15"}]},
+  sabrina:    {name:"Sabrina Carpenter",tracks:[{t:"Espresso",d:"2:55"},{t:"Please Please Please",d:"3:06"},{t:"Taste",d:"3:08"}]},
+  olivia:     {name:"Olivia Rodrigo",   tracks:[{t:"vampire",d:"3:39"},{t:"good 4 u",d:"2:58"},{t:"brutal",d:"2:17"}]},
+  taylor:     {name:"Taylor Swift",     tracks:[{t:"Cruel Summer",d:"2:58"},{t:"august",d:"4:21"},{t:"Anti-Hero",d:"3:20"}]},
+  sza:        {name:"SZA",              tracks:[{t:"Saturn",d:"3:37"},{t:"Kill Bill",d:"2:34"},{t:"Snooze",d:"3:31"}]},
+  doja:       {name:"Doja Cat",         tracks:[{t:"Agora Hills",d:"3:13"},{t:"Say So",d:"3:57"},{t:"Woman",d:"2:52"}]},
+  chappell:   {name:"Chappell Roan",    tracks:[{t:"Good Luck, Babe!",d:"3:38"},{t:"Pink Pony Club",d:"4:43"},{t:"Red Wine Supernova",d:"3:24"}]},
+  charli:     {name:"Charli XCX",       tracks:[{t:"Apple",d:"2:33"},{t:"Von dutch",d:"2:47"},{t:"360",d:"2:52"}]},
+  fleetwood:  {name:"Fleetwood Mac",    tracks:[{t:"Dreams",d:"4:14"},{t:"The Chain",d:"4:29"},{t:"Rhiannon",d:"4:11"}]},
+  phoebe:     {name:"Phoebe Bridgers",  tracks:[{t:"Garden Song",d:"3:38"},{t:"Moon Song",d:"3:35"},{t:"Savior Complex",d:"4:00"}]},
+  lana:       {name:"Lana Del Rey",     tracks:[{t:"Summertime Sadness",d:"4:25"},{t:"Young and Beautiful",d:"3:39"},{t:"Video Games",d:"4:41"}]},
+  mcr:        {name:"My Chemical Romance",tracks:[{t:"Welcome to the Black Parade",d:"5:11"},{t:"Helena",d:"3:21"},{t:"Famous Last Words",d:"5:06"}]},
+  paramore:   {name:"Paramore",         tracks:[{t:"Misery Business",d:"3:31"},{t:"Decode",d:"4:41"},{t:"Hard Times",d:"3:45"}]},
+  beabadoobee:{name:"Beabadoobee",      tracks:[{t:"Death Bed",d:"3:05"},{t:"See Through",d:"3:09"},{t:"Coffee",d:"2:41"}]},
+  arctic:     {name:"Arctic Monkeys",   tracks:[{t:"Do I Wanna Know?",d:"4:32"},{t:"R U Mine?",d:"3:21"},{t:"505",d:"4:13"}]},
+  nirvana:    {name:"Nirvana",          tracks:[{t:"Smells Like Teen Spirit",d:"5:01"},{t:"Come As You Are",d:"3:38"},{t:"Heart-Shaped Box",d:"4:41"}]},
+  mitski:     {name:"Mitski",           tracks:[{t:"Nobody",d:"3:13"},{t:"Washing Machine Heart",d:"2:53"},{t:"Your Best American Girl",d:"4:10"}]},
+  billie:     {name:"Billie Eilish",    tracks:[{t:"bad guy",d:"3:14"},{t:"What Was I Made For?",d:"3:42"},{t:"Ocean Eyes",d:"3:20"}]},
+};
+
+
+const RECS = {
+  reading:    {name:"Reading",    rec:"The Secret History. Normal People. Daisy Jones. A Little Life if you are ready."},
+  youtube:    {name:"YouTube",    rec:"bestdressed. Mina Le. Sarah Z. Karolina Zebrowska. Kurtis Conner when you need to laugh."},
+  art:        {name:"Art",        rec:"Procreate or Clip Studio. Follow @loish and @cyarine. Pinterest is your moodboard."},
+  fashion:    {name:"Fashion",    rec:"Rouje, Sezane, Depop. Follow @natalyafrg. Pinterest for outfit building."},
+  sport:      {name:"Sport",      rec:"Try reformer pilates or bouldering. Sydney Cummings on YouTube. Nike Run Club."},
+  gaming:     {name:"Gaming",     rec:"Stardew Valley, Hades, Spiritfarer. Sims 4 with mods. Animal Crossing for comfort."},
+  cooking:    {name:"Cooking",    rec:"Salt Fat Acid Heat by Samin Nosrat. Ottolenghi Simple. Follow @itsmekelleym on TikTok."},
+  photography:{name:"Photography",rec:"Start with a Fujifilm disposable or Olympus Stylus. Edit in VSCO. Follow @anaiviladrich."},
+  writing:    {name:"Writing",    rec:"Morning Pages — 3 pages, no rules. Bear or Notion. Start: write the last thing that surprised you."},
+  music_make: {name:"Making Music",rec:"GarageBand to start. FL Studio for beats. Andrew Huang on YouTube."},
+  dance:      {name:"Dance",      rec:"Street dance or jazz funk classes. WilldaBeast Adams on YouTube."},
+  travel:     {name:"Travel",     rec:"Add: Lisbon, Porto, Bologna, Tbilisi. Follow @saltinourhair."},
+  film_tv:    {name:"Film / TV",  rec:"Letterboxd for logging. Try: Portrait of a Lady on Fire, Saltburn, Everything Everywhere."},
+  skincare:   {name:"Skincare",   rec:"SPF every day — Altruist is cheap. CeraVe. The Ordinary niacinamide."},
+  anime:      {name:"Anime",      rec:"Violet Evergarden, Your Lie in April, Attack on Titan, Spy x Family."},
+  thrifting:  {name:"Thrifting",  rec:"Depop, Vinted, local charity shops. Search by colour first. Wash everything."},
+  journalling:{name:"Journalling",rec:"No rules. Pen and paper. Start with your current feeling, one sentence."},
+};
+
+
+// ─── QUESTION BANK ────────────────────────────────────────
+// Every question is designed to reveal something specific
+// ae scores are SMALL — no single question decides the result
+// Exactly 10 questions — enough signal for palette, flovee and interests
+// without ever running long.
+const CORE_IDS = [
+  "q_age","q_mood","q_fave_colour","q_music","q_interests",
+  "q_room","q_shoes","q_friday","q_fave_shop","q_energy_word"
+];
+
+const QS = [
+  {id:"q_age", cat:"ABOUT YOU", multi:false,
+   text:"How old are you?",
+   opts:[
+     {t:"Under 18",     ae:{}, ag:"under-18"},
+     {t:"18–25",        ae:{}, ag:"18-25"},
+     {t:"26–35",        ae:{}, ag:"26-35"},
+     {t:"36–50",        ae:{}, ag:"36-50"},
+     {t:"50+",          ae:{}, ag:"50+"},
+   ]
+  },
+
+  {id:"q_gender", cat:"ABOUT YOU", multi:false,
+   text:"What style do you shop for?",
+   hint:"This helps us personalise your recommendations.",
+   opts:[
+     {t:"Women's",       ae:{}, gn:"womens"},
+     {t:"Men's",         ae:{}, gn:"mens"},
+     {t:"Unisex / All",  ae:{}, gn:"unisex"},
+   ]
+  },
+
+  {id:"q_mood", cat:"RIGHT NOW", multi:false,
+   text:"How are you actually feeling today?",
+   opts:[
+     {t:"Good — genuinely in a good place",       ae:{softgirl:1,cleangirl:1},              md:"good"},
+     {t:"Creative — my brain will not stop",      ae:{indie:2,darkacad:1},                  md:"creative"},
+     {t:"A bit low honestly",                     ae:{goth:1,darkacad:1,emo:1},             md:"low"},
+     {t:"Hyped — ready for something",            ae:{y2k:1,street:1,kawaii:1},             md:"hyped"},
+     {t:"Cosy and calm",                          ae:{softgirl:1,cottage:1},                md:"cosy"},
+     {t:"Honestly just tired",                   ae:{grunge:1,indie:1},                    md:"tired"},
+   ]
+  },
+
+  {id:"q_saturday", cat:"YOUR SATURDAY MORNING", multi:false,
+   text:"Last Saturday morning — what did you actually do?",
+   hint:"Be specific. This one matters.",
+   opts:[
+     {t:"Stayed in bed scrolling until noon, no regrets",              ae:{grunge:1,indie:1,y2k:1},           sm:"bed_scroll"},
+     {t:"Up early, skincare, maybe a workout, felt productive",        ae:{cleangirl:2,preppy:1},             sm:"productive"},
+     {t:"Made tea or coffee slowly, listened to music, unhurried",     ae:{cottage:2,darkacad:1,softgirl:1},  sm:"slow_morning"},
+     {t:"Got ready properly and went somewhere — cafe, market, out",   ae:{coquette:1,tomato:2,oldmoney:1},   sm:"out_early"},
+     {t:"Was deep in something creative — art, writing, a project",   ae:{indie:2,darkacad:2},               sm:"creative_morning"},
+     {t:"Honestly I do not remember — it blurs into the week",        ae:{grunge:1,indie:1},                 sm:"blur"},
+   ]
+  },
+
+  {id:"q_music", cat:"YOUR MUSIC", multi:true,
+   hint:"Pick everything actually in your rotation right now.",
+   text:"Which artists are you actually listening to?",
+   opts:[
+     {t:"Katseye",              mu:"katseye",    ae:{kawaii:2,softgirl:1}},
+     {t:"NewJeans",             mu:"newjeans",   ae:{kawaii:2,softgirl:1}},
+     {t:"ILLIT",                mu:"illit",      ae:{kawaii:2,softgirl:1}},
+     {t:"LE SSERAFIM",          mu:"lesserafim", ae:{kawaii:1,street:1}},
+     {t:"aespa",                mu:"aespa",      ae:{kawaii:1,y2k:1}},
+     {t:"Sabrina Carpenter",    mu:"sabrina",    ae:{softgirl:2,coquette:1}},
+     {t:"Olivia Rodrigo",       mu:"olivia",     ae:{softgirl:2,indie:1}},
+     {t:"Taylor Swift",         mu:"taylor",     ae:{softgirl:1,preppy:1}},
+     {t:"SZA",                  mu:"sza",        ae:{street:1,indie:2}},
+     {t:"Doja Cat",             mu:"doja",       ae:{y2k:1,street:2}},
+     {t:"Chappell Roan",        mu:"chappell",   ae:{indie:2,coquette:1}},
+     {t:"Charli XCX",           mu:"charli",     ae:{y2k:1,street:1,indie:1}},
+     {t:"Fleetwood Mac",        mu:"fleetwood",  ae:{cottage:2,hippie:1}},
+     {t:"Phoebe Bridgers",      mu:"phoebe",     ae:{indie:2,darkacad:1}},
+     {t:"Lana Del Rey",         mu:"lana",       ae:{darkacad:2,coquette:1}},
+     {t:"MCR / Fall Out Boy",   mu:"mcr",        ae:{goth:2,grunge:1,emo:2}},
+     {t:"Paramore",             mu:"paramore",   ae:{goth:1,grunge:1,indie:1,emo:1}},
+     {t:"Beabadoobee",          mu:"beabadoobee",ae:{indie:2,grunge:1}},
+     {t:"Arctic Monkeys",       mu:"arctic",     ae:{indie:2,grunge:1}},
+     {t:"Nirvana",              mu:"nirvana",    ae:{grunge:3,indie:1}},
+     {t:"Mitski",               mu:"mitski",     ae:{indie:2,darkacad:1}},
+     {t:"Billie Eilish",        mu:"billie",     ae:{indie:1,goth:1}},
+     {t:"Someone else",         mu:"_custom",    ae:{},              isCustom:true},
+   ]
+  },
+
+  {id:"q_interests", cat:"YOUR INTERESTS", multi:true,
+   hint:"Pick everything genuinely part of your life.",
+   text:"What do you actually spend time on?",
+   opts:[
+     {t:"Reading books",            in:"reading",     ae:{darkacad:1,indie:1}},
+     {t:"Watching YouTube",         in:"youtube",     ae:{indie:1}},
+     {t:"Art or drawing",           in:"art",         ae:{indie:1,kawaii:1}},
+     {t:"Fashion and getting dressed",in:"fashion",   ae:{coquette:1,cleangirl:1}},
+     {t:"Sport or working out",     in:"sport",       ae:{cleangirl:1,preppy:1}},
+     {t:"Gaming",                   in:"gaming",      ae:{indie:1}},
+     {t:"Cooking or baking",        in:"cooking",     ae:{cottage:1,hippie:1}},
+     {t:"Photography or film",      in:"photography", ae:{indie:1,darkacad:1}},
+     {t:"Writing",                  in:"writing",     ae:{darkacad:1,indie:1}},
+     {t:"Making music",             in:"music_make",  ae:{indie:1,grunge:1}},
+     {t:"Dance",                    in:"dance",       ae:{kawaii:1,street:1}},
+     {t:"Travel",                   in:"travel",      ae:{tomato:1,hippie:1}},
+     {t:"Film and TV",              in:"film_tv",     ae:{indie:1,darkacad:1}},
+     {t:"Skincare",                 in:"skincare",    ae:{cleangirl:1,softgirl:1}},
+     {t:"Anime",                    in:"anime",       ae:{kawaii:1}},
+     {t:"Thrifting",                in:"thrifting",   ae:{indie:1,grunge:1}},
+     {t:"Journalling",              in:"journalling", ae:{darkacad:1,softgirl:1}},
+   ]
+  },
+
+  {id:"q_fave_colour", cat:"YOUR COLOUR", multi:false,
+   text:"What is your favourite colour?",
+   opts:[
+     {t:"Pink or hot pink",      ae:{kawaii:2,softgirl:2,coquette:1},    col:"pink"},
+     {t:"Black",                 ae:{goth:3,grunge:2,darkacad:1},        col:"black"},
+     {t:"Purple or lilac",       ae:{kawaii:1,indie:1,y2k:1},            col:"purple"},
+     {t:"Green — any shade",     ae:{cottage:2,hippie:2},                col:"green"},
+     {t:"Blue or navy",          ae:{preppy:2,cleangirl:1,oldmoney:1},   col:"blue"},
+     {t:"Red or terracotta",     ae:{tomato:2,coquette:1},               col:"terra"},
+     {t:"White, beige or cream", ae:{cleangirl:2,oldmoney:2},            col:"beige"},
+     {t:"Yellow or orange",      ae:{hippie:2,cottage:1},                col:"yellow"},
+     {t:"Sage or olive green",   ae:{cottage:2,tomato:1,indie:1},        col:"sage"},
+     {t:"Navy or dark blue",     ae:{preppy:2,oldmoney:2,darkacad:1},    col:"navy"},
+   ]
+  },
+
+  {id:"q_phone_screen", cat:"YOUR PHONE", multi:false,
+   text:"What is on your phone screen right now — honestly?",
+   opts:[
+     {t:"Fancams, kpop edits, group content",          ae:{kawaii:3,softgirl:1},   ph:"kpop"},
+     {t:"Aesthetic photos, moodboard saves, Pinterest", ae:{coquette:2,softgirl:1},ph:"aesthetic"},
+     {t:"Tumblr, Reddit or a niche forum",             ae:{darkacad:2,indie:2,goth:1},ph:"deep_web"},
+     {t:"TikTok FYP — just scrolling",                 ae:{y2k:1,street:1,softgirl:1},ph:"tiktok"},
+     {t:"YouTube — something long playing in the background",ae:{indie:1,darkacad:1,cottage:1},ph:"youtube"},
+     {t:"Notes app or a writing app",                  ae:{darkacad:2,indie:1},     ph:"writing"},
+     {t:"Group chat chaos with my friends",            ae:{y2k:1,street:1},         ph:"chat"},
+     {t:"Spotify or music apps",                       ae:{indie:1,grunge:1,goth:1},ph:"music"},
+   ]
+  },
+
+  {id:"q_coffee", cat:"YOUR ORDER", multi:false,
+   text:"What are you actually ordering at a cafe?",
+   opts:[
+     {t:"Iced matcha or strawberry latte — something pink or green",ae:{kawaii:2,softgirl:2,cleangirl:1},   co:"matcha"},
+     {t:"Just a flat white or americano — nothing fussy",           ae:{darkacad:2,grunge:1,oldmoney:1},    co:"black"},
+     {t:"Complicated iced drink with syrups and oat milk",          ae:{y2k:1,softgirl:1,cleangirl:1},      co:"fancy"},
+     {t:"Herbal tea or something calming",                          ae:{cottage:2,hippie:2},                co:"tea"},
+     {t:"I do not really do cafes — I eat at home",                ae:{cottage:2,grunge:1},                co:"home"},
+     {t:"Whatever is most expensive and interesting",               ae:{oldmoney:2,coquette:1},             co:"expensive"},
+   ]
+  },
+
+  {id:"q_room", cat:"YOUR SPACE", multi:false,
+   text:"Your room actually looks like:",
+   opts:[
+     {t:"Pink, stickers, fairy lights, organised chaos of cute things",ae:{kawaii:3,softgirl:2},       rv:"kawaii", et:["room_kawaii"]},
+     {t:"Dark walls, books stacked, candles, one lamp, moody",        ae:{darkacad:3,goth:2,indie:1},  rv:"dark",   et:["room_dark"]},
+     {t:"Plants, linen, natural light, genuinely calm",               ae:{cottage:3,hippie:1,tomato:1},rv:"cottage",et:["room_cottage"]},
+     {t:"Minimal, neutral, everything exactly in its place",          ae:{cleangirl:2,oldmoney:2},     rv:"clean",  et:["room_clean"]},
+     {t:"Posters everywhere, clothes on floor, maximum personality",  ae:{grunge:2,indie:2,y2k:1},    rv:"chaos",  et:["room_chaos"]},
+     {t:"Maximalist, curated, lots happening but it works",           ae:{y2k:2,coquette:2},           rv:"maximal",et:["room_maximal"]},
+   ],
+   unlocks:{kawaii:["q_cute_depth"],dark:["q_dark_depth"],cottage:["q_nature_depth"],chaos:["q_alt_depth"],clean:["q_clean_depth"]}
+  },
+
+  {id:"q_friday", cat:"FRIDAY NIGHT", multi:false,
+   text:"9pm on a Friday — where are you?",
+   opts:[
+     {t:"In my room doing something I genuinely love",          ae:{darkacad:1,indie:1,kawaii:1},  so:"introvert"},
+     {t:"At a gig, show or the front of something live",        ae:{goth:2,grunge:2,indie:1},      so:"extrovert"},
+     {t:"Fully dressed up, going out, completely in my element",ae:{y2k:2,coquette:1,street:1},   so:"extrovert"},
+     {t:"Sofa, snacks, film — perfectly content",               ae:{cottage:1,softgirl:1,grunge:1},so:"introvert"},
+     {t:"With a small group of people I actually like",         ae:{indie:1,oldmoney:1},           so:"ambivert"},
+   ]
+  },
+
+  {id:"q_notes_app", cat:"YOUR NOTES APP", multi:false,
+   text:"Your notes app is mostly:",
+   opts:[
+     {t:"Unfinished ideas, song lyrics I liked, thoughts at 2am", ae:{indie:2,darkacad:2,emo:1},   na:"chaotic_creative"},
+     {t:"To-do lists, plans, organised sections",                  ae:{cleangirl:2,preppy:1},        na:"organised"},
+     {t:"Literally empty — I never use it",                       ae:{grunge:2,street:1},           na:"empty"},
+     {t:"Journal entries, emotional processing paragraphs",       ae:{softgirl:1,darkacad:2},       na:"journal"},
+     {t:"Outfit inspo, aesthetic notes, things I want to buy",    ae:{coquette:2,y2k:1,kawaii:1},  na:"aesthetic"},
+     {t:"Recipe ideas, things I want to cook or bake",            ae:{cottage:2,hippie:1},          na:"foodie"},
+   ]
+  },
+
+  {id:"q_shoes", cat:"YOUR SHOES", multi:false,
+   text:"What are you wearing on your feet most days?",
+   opts:[
+     {t:"Mary Janes, ballet flats or anything with a bow",          ae:{kawaii:2,coquette:2,softgirl:1}},
+     {t:"Doc Martens, chunky boots or anything heavy",              ae:{goth:2,grunge:2,darkacad:1}},
+     {t:"Fresh trainers — specific colourways, the box is kept",    ae:{street:3,y2k:1}},
+     {t:"White trainers, loafers or anything clean and classic",    ae:{preppy:2,cleangirl:2,oldmoney:1}},
+     {t:"Sandals, birkenstocks or as little as possible",           ae:{cottage:1,hippie:2,tomato:2}},
+     {t:"Platform boots, heels or anything with actual height",     ae:{y2k:2,coquette:1,grunge:1}},
+   ]
+  },
+
+  {id:"q_last_bought", cat:"YOUR SPENDING", multi:false,
+   text:"Last thing you actually bought for yourself:",
+   opts:[
+     {t:"Something for my appearance — clothes, beauty, skincare",  ae:{coquette:1,cleangirl:1,kawaii:1},  lb:"appearance"},
+     {t:"A book, a record or something for a creative hobby",       ae:{indie:2,darkacad:2},               lb:"creative"},
+     {t:"Food, a coffee, something to eat or drink",                ae:{cottage:1,tomato:1,grunge:1},      lb:"food"},
+     {t:"Something for my phone or tech",                           ae:{street:1,y2k:1},                   lb:"tech"},
+     {t:"Something small and cute — sticker, keyring, accessory",  ae:{kawaii:3,softgirl:1},              lb:"cute"},
+     {t:"I genuinely cannot remember — I spend without tracking",   ae:{grunge:1,indie:1},                 lb:"forgettable"},
+   ]
+  },
+
+  {id:"q_friend_group", cat:"YOUR PEOPLE", multi:false,
+   text:"Your friend group dynamic:",
+   opts:[
+     {t:"We bond over artists, fandoms, music — that is our thing",  ae:{kawaii:2,softgirl:1},  fg:"fandom"},
+     {t:"Creative types — we make things, go to gigs, share inspo", ae:{indie:2,darkacad:1},   fg:"creative"},
+     {t:"Athletic or outdoorsy — we do stuff together",             ae:{preppy:1,street:1},    fg:"sporty"},
+     {t:"All very aesthetic — strong personal styles across everyone",ae:{coquette:1,cleangirl:1},fg:"aesthetic"},
+     {t:"Chaotic energy — no plans, always fun, rarely organised",  ae:{y2k:1,grunge:1},       fg:"chaotic"},
+     {t:"Very small and close — deep conversations over big groups", ae:{indie:1,darkacad:1},   fg:"close"},
+     {t:"Mainly online — my closest people are not nearby",         ae:{kawaii:1,indie:1},     fg:"online"},
+   ]
+  },
+
+  {id:"q_fave_shop", cat:"WHERE YOU SHOP", multi:false,
+   text:"Where do you actually shop for clothes most?",
+   hint:"This is used to personalise your page — not to define your aesthetic.",
+   opts:[
+     {t:"Depop or Vinted — second-hand always",       ae:{indie:1,grunge:1,hippie:1},  shop:"Depop / Vinted"},
+     {t:"ASOS or H&M — accessible and easy",          ae:{y2k:1,softgirl:1},           shop:"ASOS / H&M"},
+     {t:"Urban Outfitters",                           ae:{indie:1,grunge:1,y2k:1},     shop:"Urban Outfitters"},
+     {t:"Sezane, Rouje or similar",                   ae:{coquette:2,oldmoney:1},      shop:"Sezane / Rouje"},
+     {t:"Nike, New Balance or sportswear brands",     ae:{street:2},                   shop:"Nike / NB"},
+     {t:"Charity shops and vintage markets",          ae:{indie:1,grunge:1,hippie:1},  shop:"Charity Shops"},
+     {t:"Brandy Melville or similar soft-girl spots", ae:{softgirl:2,kawaii:1},        shop:"Brandy Melville"},
+     {t:"Princess Polly or trend-led sites",          ae:{y2k:2,softgirl:1},           shop:"Princess Polly"},
+     {t:"I honestly do not have one — it varies",     ae:{indie:1},                    shop:"No favourite"},
+   ]
+  },
+
+  {id:"q_dream_job", cat:"YOUR FUTURE", multi:false,
+   text:"What is your dream job?",
+   hint:"No wrong answers — just what calls to you.",
+   opts:[
+     {t:"Creative director — running the vision",            ae:{indie:2,coquette:1,cleangirl:1},   dj:"creative_director"},
+     {t:"Influencer or content creator",                     ae:{y2k:2,softgirl:1,kawaii:1},         dj:"influencer"},
+     {t:"Doctor, scientist or something that helps people",  ae:{cleangirl:1,preppy:1},              dj:"doctor"},
+     {t:"Teacher or professor — sharing knowledge",          ae:{darkacad:2,cottage:1},              dj:"teacher"},
+     {t:"Artist — painter, illustrator, something visual",   ae:{indie:2,kawaii:1},                  dj:"artist"},
+     {t:"Musician or something in the music industry",       ae:{grunge:2,indie:1,goth:1},          dj:"musician"},
+     {t:"Entrepreneur — building my own thing",              ae:{street:2,oldmoney:1},               dj:"entrepreneur"},
+     {t:"Athlete or fitness coach",                          ae:{preppy:2,street:1},                 dj:"athlete"},
+   ]
+  },
+
+  {id:"q_weekend_plan", cat:"YOUR WEEKENDS", multi:false,
+   text:"Pick your ideal weekend plan:",
+   opts:[
+     {t:"Shopping with friends — trying things on, getting food after",  ae:{y2k:1,coquette:1,softgirl:1},     wp:"shopping"},
+     {t:"Cosy day in — blankets, candles, comfort content",             ae:{cottage:2,softgirl:1},             wp:"cosy_in"},
+     {t:"Going to a concert or live show",                              ae:{indie:2,grunge:1,goth:1},          wp:"concert"},
+     {t:"Exploring nature — a walk, a hike, being outside",             ae:{cottage:1,hippie:2,tomato:1},      wp:"nature"},
+     {t:"Creating something — art, music, writing, a project",          ae:{indie:2,darkacad:1},               wp:"creating"},
+     {t:"Gaming all day — no interruptions",                            ae:{indie:1,grunge:1},                 wp:"gaming"},
+     {t:"Studying or working on something I care about",                ae:{darkacad:2,cleangirl:1,preppy:1},  wp:"studying"},
+     {t:"Baking or cooking something from scratch",                     ae:{cottage:2,hippie:1},               wp:"baking"},
+   ]
+  },
+
+  {id:"q_wallpaper", cat:"YOUR PHONE", multi:false,
+   text:"What is your phone wallpaper usually?",
+   opts:[
+     {t:"An aesthetic photo — moody, curated, very specific vibe",  ae:{coquette:2,indie:1,darkacad:1},    wp2:"aesthetic"},
+     {t:"My pet — obviously",                                      ae:{cottage:1,softgirl:1,kawaii:1},     wp2:"pet"},
+     {t:"My favourite artist or a concert photo",                   ae:{indie:2,grunge:1,goth:1},          wp2:"artist"},
+     {t:"Nature — sky, ocean, flowers, something peaceful",         ae:{cottage:2,hippie:1},               wp2:"nature"},
+     {t:"Anime or cartoon character",                               ae:{kawaii:3},                          wp2:"anime"},
+     {t:"Solid colour or a simple gradient — clean vibes",          ae:{cleangirl:2,oldmoney:1},           wp2:"solid"},
+     {t:"A photo of me and my friends",                             ae:{preppy:1,y2k:1,softgirl:1},       wp2:"friends"},
+   ]
+  },
+
+  {id:"q_energy_word", cat:"LAST ONE", multi:false,
+   text:"One word — which is actually you?",
+   opts:[
+     {t:"Soft",     ae:{softgirl:2,kawaii:1,ballet:1},  ew:"Soft"},
+     {t:"Intense",  ae:{goth:2,darkacad:2},              ew:"Intense"},
+     {t:"Free",     ae:{hippie:2,cottage:1,indie:1},     ew:"Free"},
+     {t:"Refined",  ae:{oldmoney:2,cleangirl:1},         ew:"Refined"},
+     {t:"Bold",     ae:{street:2,y2k:1},                 ew:"Bold"},
+     {t:"Real",     ae:{indie:2,grunge:2},               ew:"Real"},
+     {t:"Romantic", ae:{coquette:2,cottage:1},           ew:"Romantic"},
+     {t:"Chaotic",  ae:{y2k:1,grunge:1,hippie:1},        ew:"Chaotic"},
+   ]
+  },
+
+  // Depth questions — unlocked by room answer
+  {id:"q_cute_depth", cat:"YOUR KAWAII SIDE", multi:false,
+   text:"How far does the kawaii go?",
+   opts:[
+     {t:"All the way — stickers, plushies, the full thing",              ae:{kawaii:3},         et:["kawaii_full"]},
+     {t:"Cute but also kind of dark — pastel goth energy",              ae:{kawaii:2,goth:2},  et:["pastel_goth"]},
+     {t:"Soft and cute but not excessively so",                         ae:{softgirl:2,kawaii:1}},
+     {t:"Cute room but my style is actually quite different",           ae:{kawaii:1}},
+   ]
+  },
+  {id:"q_dark_depth", cat:"YOUR DARK SIDE", multi:false,
+   text:"Dark room — but which direction?",
+   opts:[
+     {t:"Dark academia — the books, candles, intellectual vibe",       ae:{darkacad:3},       et:["dark_academic"]},
+     {t:"Goth — fully committed, black everything, liner always",      ae:{goth:3},           et:["full_goth"]},
+     {t:"Emo energy — the music, the feelings, all of it",             ae:{emo:3,goth:1},     et:["emo_core"]},
+     {t:"Dark but also soft — dark feminine or dark coquette",         ae:{goth:2,coquette:2},et:["dark_fem"]},
+   ]
+  },
+  {id:"q_nature_depth", cat:"YOUR COTTAGE SIDE", multi:false,
+   text:"How deep does the cottagecore go?",
+   opts:[
+     {t:"All the way — I want a garden and I bake my own bread",       ae:{cottage:3},        et:["full_cottage"]},
+     {t:"I love the aesthetic but I am not actually growing anything", ae:{cottage:2,indie:1}},
+     {t:"Natural and earthy but very much a city person",             ae:{tomato:2,indie:1}},
+     {t:"Calm room but my actual style is something else",            ae:{indie:1}},
+   ]
+  },
+  {id:"q_alt_depth", cat:"YOUR ALT SIDE", multi:false,
+   text:"Poster wall, chaotic room — which direction?",
+   opts:[
+     {t:"Grunge — flannel, docs, zero effort, all second-hand",       ae:{grunge:3},         et:["full_grunge"]},
+     {t:"Indie and vintage — thrifted, 35mm camera, ahead of trends", ae:{indie:3},          et:["full_indie"]},
+     {t:"Y2K chaos — posters are Bratz and 2000s icons",             ae:{y2k:3},            et:["y2k_chaos"]},
+     {t:"Just chaotic — not one specific thing",                      ae:{indie:1,grunge:1}},
+   ]
+  },
+  {id:"q_clean_depth", cat:"YOUR CLEAN SIDE", multi:false,
+   text:"Minimal room — which flavour?",
+   opts:[
+     {t:"That girl era — workouts, green drinks, skin first",         ae:{cleangirl:3},      et:["that_girl"]},
+     {t:"Old money / quiet luxury — understated but expensive",       ae:{oldmoney:3},       et:["quiet_luxury"]},
+     {t:"Preppy — plaid, polo, classic all the way",                 ae:{preppy:3},         et:["full_preppy"]},
+     {t:"Clean but with something soft or romantic underneath",       ae:{cleangirl:2,coquette:1,softgirl:1}},
+   ]
+  },
+];
+
+
+// ─── ENGINE ──────────────────────────────────────────────
+let queue=[], multiSel=[], qCount=0;
+Object.keys(AE).forEach(k=>P.aesthetics[k]=0);
+
+function initQ(){ queue=[...CORE_IDS]; }
+function getQ(id){ return QS.find(q=>q.id===id); }
+
+function confidence(){
+  const vals=Object.values(P.aesthetics).sort((a,b)=>b-a);
+  const top=vals[0]||0, sec=vals[1]||0;
+  const ready=P.music.length>0&&P.interests.length>0&&P.social!==null&&P.faveColour!==null&&P.faveShop!==null&&P.friendGroup!==null;
+  if(top>=12&&(top-sec)>=4&&ready) return "high";
+  if(top>=8&&ready) return "medium";
+  return "low";
+}
+
+function shouldContinue(){
+  // Quiz is always exactly 10 questions — no more, no less.
+  return qCount < 10;
+}
+
+function nextId(){
+  while(queue.length>0){ const id=queue.shift(); if(!P.answered.has(id)) return id; }
+  return null;
+}
+
+function startQuiz(){
+  // Reset all state for fresh quiz
+  qCount=0;
+  Object.keys(AE).forEach(k=>P.aesthetics[k]=0);
+  P.music=[]; P.interests=[]; P.social=null;
+  P.age=null; P.gender=null;
+  P.faveColour=null; P.faveShop=null; P.friendGroup=null;
+  P.energyWord=null; P.moodToday=null; P.phoneScreen=null;
+  P.saturdayMorning=null; P.coffeeOrder=null; P.notesApp=null;
+  P.lastBought=null; P.dreamJob=null; P.weekendPlan=null; P.wallpaper=null;
+  P.extraTags=[]; P.answered=new Set();
+  queue=[];
+  document.getElementById('lifestylePage').classList.remove('active');
+  document.getElementById('heroSection').style.display='none';
+  document.getElementById('quizWrap').classList.add('active');
+  initQ(); renderNext();
+}
+
+function renderNext(){
+  if(!shouldContinue()){ buildPage(); return; }
+  const id=nextId();
+  if(!id){ buildPage(); return; }
+  renderQ(id);
+}
+
+function renderQ(id){
+  const q=getQ(id); if(!q){renderNext();return;}
+  P.answered.add(id); qCount++;
+  document.getElementById('pFill').style.width=((qCount/10)*100)+'%';
+  document.getElementById('pLabel').textContent=`Question ${qCount} of 10`;
+  multiSel=[];
+  const area=document.getElementById('qArea');
+  area.className='q-anim';
+  if(q.multi){
+    const hintHtml = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
+    const optsHtml = q.opts.map((o,i)=>{
+      if(o.isCustom){
+        return '<button class="opt-check" id="mc'+i+'" onclick="togCustom('+i+',\''+id+'\')">'+o.t+'</button>';
+      }
+      return '<button class="opt-check" id="mc'+i+'" onclick="tog('+i+')">'+o.t+'</button>';
+    }).join('');
+    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml+'<div class="opts-multi" id="mGrid">'+optsHtml+'</div><div id="customInputWrap" style="display:none;margin-bottom:12px;"><input type="text" id="customArtistInput" placeholder="Type your artist name..." style="width:100%;padding:14px 18px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.12);font-family:Space Grotesk,sans-serif;font-size:0.95rem;outline:none;background:transparent;color:inherit;"/></div><button class="next-btn bc" id="nBtn" onclick="submitMulti(\''+id+'\')">Continue</button>';
+    document.getElementById('nBtn').disabled = true;
+  } else {
+    const hintHtml2 = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
+    const optsHtml2 = q.opts.map((o,i)=>'<button class="opt" onclick="pickSingle(\''+id+'\','+i+')">'+o.t+'</button>').join('');
+    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml2+'<div class="opts-single">'+optsHtml2+'</div>';
+  }
+}
+
+function tog(i){
+  const btn=document.getElementById('mc'+i);
+  if(multiSel.includes(i)){multiSel=multiSel.filter(x=>x!==i);btn.classList.remove('on');}
+  else{multiSel.push(i);btn.classList.add('on');}
+  document.getElementById('nBtn').disabled=multiSel.length===0;
+}
+
+function togCustom(i, qid){
+  tog(i);
+  let wrap = document.getElementById('customInputWrap');
+  if(multiSel.includes(i)){
+    wrap.style.display='block';
+    document.getElementById('customArtistInput').focus();
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function submitMulti(qid){
+  const q=getQ(qid);
+  multiSel.forEach(function(i){
+    let opt = q.opts[i];
+    if(opt.isCustom){
+      // Save custom artist name
+      let customName = (document.getElementById('customArtistInput')||{}).value||'';
+      customName = customName.trim();
+      if(customName){
+        P.music.push('custom');
+        if(!P.customArtists) P.customArtists = [];
+        P.customArtists.push(customName);
+        // Add to ARTISTS lookup so it displays properly
+        if(typeof ARTISTS !== 'undefined') ARTISTS['custom'] = {name:customName};
+      }
+    } else {
+      applyOpt(opt);
+    }
+  });
+  renderNext();
+}
+
+function pickSingle(qid,i){
+  const q=getQ(qid); const opt=q.opts[i]; applyOpt(opt);
+  // Depth-question unlocks are disabled — the quiz is a fixed 10 questions.
+  renderNext();
+}
+
+function applyOpt(opt){
+  if(opt.ae) Object.entries(opt.ae).forEach(([k,v])=>{P.aesthetics[k]=(P.aesthetics[k]||0)+v;});
+  if(opt.mu&&!P.music.includes(opt.mu)) P.music.push(opt.mu);
+  if(opt.in&&!P.interests.includes(opt.in)) P.interests.push(opt.in);
+  if(opt.so&&!P.social) P.social=opt.so;
+  if(opt.et) opt.et.forEach(t=>{if(!P.extraTags.includes(t)) P.extraTags.push(t);});
+  if(opt.ag) P.age=opt.ag;
+  if(opt.gn) P.gender=opt.gn;
+  if(opt.md) P.moodToday=opt.md;
+  if(opt.col) P.faveColour=COLOURS[opt.col]||null;
+  if(opt.shop) P.faveShop=opt.shop;
+  if(opt.fg) P.friendGroup=opt.fg;
+  if(opt.ew) P.energyWord=opt.ew;
+  if(opt.ph) P.phoneScreen=opt.ph;
+  if(opt.sm) P.saturdayMorning=opt.sm;
+  if(opt.co) P.coffeeOrder=opt.co;
+  if(opt.na) P.notesApp=opt.na;
+  if(opt.lb) P.lastBought=opt.lb;
+  if(opt.dj) P.dreamJob=opt.dj;
+  if(opt.wp) P.weekendPlan=opt.wp;
+  if(opt.wp2) P.wallpaper=opt.wp2;
+}
+
+
+// ─── RESOLVE ─────────────────────────────────────────────
+function resolveAeName(){
+  const ae=P.aesthetics; const et=P.extraTags;
+  const sorted=Object.entries(ae).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0]?.[0]; const sec=sorted[1]?.[0];
+  const nm=k=>AE[k]?.name||k;
+  // Special combos
+  if(et.includes('pastel_goth')) return "Pastel Goth";
+  if(et.includes('dark_fem')) return "Dark Feminine";
+  if(et.includes('emo_core')) return "Emo";
+  if(et.includes('quiet_luxury')) return "Quiet Luxury";
+  if(et.includes('that_girl')) return "That Girl";
+  if(et.includes('full_preppy')) return "Preppy";
+  if(et.includes('full_grunge')) return "Grunge";
+  if(et.includes('full_indie')) return "Indie Alt";
+  if(et.includes('y2k_chaos')) return "Y2K";
+  if(et.includes('full_cottage')) return "Cottagecore";
+  if(et.includes('dark_academic')) return "Dark Academia";
+  if(et.includes('full_goth')) return "Goth";
+  if(et.includes('kawaii_full')) return "Kawaii";
+  // Blended if close
+  if(sec&&(ae[sec]||0)>=(ae[top]||0)*0.62&&nm(top)!==nm(sec)){
+    return nm(top)+' × '+nm(sec);
+  }
+  return nm(top)||'Soft Girl';
+}
+
+function resolveQuote(){
+  const ae=P.aesthetics; const et=P.extraTags;
+  const top=Object.entries(ae).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  if(et.includes('pastel_goth')) return "Sweet on the outside. Dark on the inside. Always.";
+  if(et.includes('dark_fem')) return "She was soft and sharp at the same time.";
+  if(et.includes('emo_core')) return "I am not okay and that is okay.";
+  return AE[top]?.quote||"Your page. Your rules.";
+}
+
+// Build a palette from fave colour + dominant aesthetic
+function resolvePalette(){
+  const ae=P.aesthetics; const et=P.extraTags;
+  const sorted=Object.entries(ae).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0]?.[0];
+  const fc=P.faveColour;
+
+  // Fave colour is the DOMINANT input — build palette around it
+  if(fc){
+    const h=fc.hex;
+    if(fc.dark){
+      // Dark colour — deep background, light text, accent is the colour
+      return {bg:darkenHex(h,0.3), tx:lightenHex(h,0.7), ac:h, ac2:shiftHue(h,25)};
+    } else {
+      // Light version as bg, colour as accent
+      const bg=lightenHex(h,0.82);
+      const tx=darkenHex(h,0.55);
+      const ac=h;
+      const ac2=shiftHue(h,20);
+      return {bg,tx,ac,ac2};
+    }
+  }
+
+  // Aesthetic fallback
+  const fb={
+    kawaii:{bg:"#fff0f5",tx:"#3d0020",ac:"#ff80ab",ac2:"#ffc0d8"},
+    softgirl:{bg:"#fce4ec",tx:"#2d0814",ac:"#e8829a",ac2:"#f9c4c4"},
+    cleangirl:{bg:"#f2ede6",tx:"#1a1408",ac:"#8a7a5a",ac2:"#d4c8a8"},
+    coquette:{bg:"#fdf0f5",tx:"#280010",ac:"#e06080",ac2:"#f0a0b0"},
+    goth:{bg:"#120810",tx:"#e8d0f0",ac:"#9040c0",ac2:"#6020a0"},
+    darkacad:{bg:"#100e08",tx:"#e8d8a8",ac:"#c4a438",ac2:"#a08030"},
+    grunge:{bg:"#1e1208",tx:"#f0d4a0",ac:"#c4943a",ac2:"#a07030"},
+    y2k:{bg:"#f0c8ec",tx:"#1a0028",ac:"#c03ab0",ac2:"#9020a0"},
+    street:{bg:"#141414",tx:"#f4c8a0",ac:"#e08040",ac2:"#c06020"},
+    cottage:{bg:"#d8ecc4",tx:"#0e2008",ac:"#4a8a2a",ac2:"#3a7020"},
+    hippie:{bg:"#d8cc88",tx:"#1a1400",ac:"#8a7000",ac2:"#6a5000"},
+    oldmoney:{bg:"#e8e0d0",tx:"#1a140a",ac:"#7a6840",ac2:"#5a4820"},
+    preppy:{bg:"#e8f0fc",tx:"#0a1840",ac:"#3060c0",ac2:"#1040a0"},
+    tomato:{bg:"#e8c498",tx:"#1e0800",ac:"#c46418",ac2:"#a04408"},
+    indie:{bg:"#1a1030",tx:"#d8ccf8",ac:"#9070e0",ac2:"#7050c0"},
+    emo:{bg:"#180a18",tx:"#f4c4f4",ac:"#c464c4",ac2:"#a030a0"},
+  };
+  if(et.includes('pastel_goth')) return {bg:"#1a0a1a",tx:"#f8c0f8",ac:"#ff80c0",ac2:"#c060c0"};
+  if(et.includes('dark_fem')) return {bg:"#180810",tx:"#f0c0d0",ac:"#c04070",ac2:"#802040"};
+  return fb[top]||fb.softgirl;
+}
+
+// ─── COLOUR HELPERS ───────────────────────────────────────
+function hexToRgb(hex){ try{return[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];}catch(e){return[200,150,160];} }
+function toHex(v){ let h=Math.round(Math.max(0,Math.min(255,v))).toString(16); return h.length<2?'0'+h:h; }
+function lightenHex(hex,a){ const[r,g,b]=hexToRgb(hex); return '#'+toHex(r+(255-r)*a)+toHex(g+(255-g)*a)+toHex(b+(255-b)*a); }
+function darkenHex(hex,a){ const[r,g,b]=hexToRgb(hex); return '#'+toHex(r*(1-a))+toHex(g*(1-a))+toHex(b*(1-a)); }
+function shiftHue(hex,deg){
+  try{
+    let[r,g,b]=[...hexToRgb(hex)].map(v=>v/255);
+    const max=Math.max(r,g,b),min=Math.min(r,g,b),l=(max+min)/2;
+    let h,s,d=max-min;
+    if(d===0){h=0;s=0;}else{s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}}
+    h=(h+deg/360)%1; if(h<0)h+=1;
+    if(s===0){const v=Math.round(l*255);return'#'+toHex(v)+toHex(v)+toHex(v);}
+    const q=l<0.5?l*(1+s):l+s-l*s,p=2*l-q;
+    const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+    return'#'+toHex(hue2rgb(p,q,h+1/3)*255)+toHex(hue2rgb(p,q,h)*255)+toHex(hue2rgb(p,q,h-1/3)*255);
+  }catch(e){return hex;}
+}
+function shiftRgb(col,a){ try{const m=col.match(/\d+/g);if(!m||m.length<3)return col;const c=v=>Math.max(0,Math.min(255,v+a));return`rgb(${c(+m[0])},${c(+m[1])},${c(+m[2])})`;}catch(e){return col;} }
+
+
+
+// ─── BUILD PAGE ───────────────────────────────────────────
+function buildPage(){
+  document.getElementById('pFill').style.width='100%';
+
+  const pal = resolvePalette();
+  const aeName = resolveAeName();
+  const sorted = Object.entries(P.aesthetics).sort((a,b)=>b[1]-a[1]);
+  const topK = sorted[0]?.[0] || 'softgirl';
+
+  // Snapshot the quiz result BEFORE anything else so it survives a redirect
+  // to auth. The full save to stuflover_profile happens further down; this
+  // backup lets auth.html restore the result after sign-in / sign-up.
+  let quizSnapshot = {
+    aesthetics:P.aesthetics,music:P.music,interests:P.interests,
+    social:P.social,age:P.age,gender:P.gender,
+    faveColour:P.faveColour,faveShop:P.faveShop,
+    friendGroup:P.friendGroup,energyWord:P.energyWord,moodToday:P.moodToday,
+    phoneScreen:P.phoneScreen,saturdayMorning:P.saturdayMorning,
+    coffeeOrder:P.coffeeOrder,notesApp:P.notesApp,lastBought:P.lastBought,
+    dreamJob:P.dreamJob,weekendPlan:P.weekendPlan,wallpaper:P.wallpaper,
+    customArtists:P.customArtists||[],
+    extraTags:P.extraTags,
+    aesthetic:aeName,aestheticKey:topK
+  };
+
+  // You must be signed in to see your aesthetic. If not, park the quiz
+  // result and bounce to auth — a fresh visitor can create an account there.
+  if(!localStorage.getItem('stuflover_token')){
+    try{ localStorage.setItem('stuflover_pending_quiz', JSON.stringify(quizSnapshot)); }catch(e){}
+    window.location.href = '/auth.html?quiz=1';
+    return;
+  }
+
+  document.getElementById('quizWrap').classList.remove('active');
+
+  // Colours
+  document.body.style.background = pal.bg;
+  document.body.style.color = pal.tx;
+  const nav = document.getElementById('mainNav');
+  nav.style.background = pal.bg+'f4';
+  nav.style.borderColor = pal.tx+'10';
+  let navLogo = document.getElementById('navLogo');
+  if(navLogo) navLogo.style.color = pal.tx;
+  let navHome = document.getElementById('navHome');
+  if(navHome){ navHome.style.color = pal.tx; navHome.style.borderColor = pal.tx+'25'; }
+  let navAcct = document.getElementById('navAccount');
+  if(navAcct){ navAcct.style.color = pal.tx; navAcct.style.borderColor = pal.tx+'25'; }
+
+  // BG SVG
+  buildBgSvg(pal, topK);
+
+  // Personalized header
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let username = (user && user.username) || '';
+  let hour = new Date().getHours();
+  let timeGreet = hour < 12 ? 'good morning' : hour < 17 ? 'good afternoon' : 'good evening';
+
+  // Personalized eyebrow based on mood + time
+  let name = username || 'bestie';
+  let eyebrowTexts = {
+    good: [name+' you are LITERALLY glowing rn', 'ok '+name+' main character energy today', name+'!! the vibe is immaculate today', 'not '+name+' looking iconic as always'],
+    creative: ['the ideas are FLOWING '+name, name+' your creative era is insane rn', 'ok artist mode activated '+name, name+' is about to create something iconic'],
+    low: [name+' soft hours activated — you deserve this', 'gentle reminder '+name+' you are doing amazing', name+' cozy era — no rushing today', 'sending '+name+' the biggest hug rn'],
+    hyped: ['NOBODY can stop '+name+' today', name+' THE ENERGY IS UNREAL', 'ok '+name+' is literally unstoppable rn', name+'!! this energy is contagious'],
+    cosy: [name+' cosy mode unlocked', 'ok '+name+' blanket burrito era', name+' comfort is the vibe today', 'the coziest person alive: '+name],
+    tired: [name+' rest IS the flex', 'taking it easy because '+name+' deserves it', name+' recharging era — so valid', 'permission to do nothing granted '+name],
+  };
+  let moodArr = eyebrowTexts[P.moodToday] || [timeGreet+' '+name+' — your world is waiting', name+'!! welcome back to the best page on the internet', 'ok '+name+' let us make today iconic', name+' the vibes are already immaculate'];
+  let personalEyebrow = moodArr[Math.floor(Math.random()*moodArr.length)];
+  document.getElementById('aeEyebrow').textContent = personalEyebrow;
+
+  document.getElementById('aeTitle').textContent = aeName.toUpperCase();
+  document.getElementById('aeTitle').style.color = pal.tx;
+  document.getElementById('aeEyebrow').style.color = pal.tx;
+
+  // Add personal stats below the title
+  let headerEl = document.querySelector('.page-header');
+  let existingStats = document.getElementById('personalStats');
+  if(existingStats) existingStats.remove();
+  let stats = document.createElement('div');
+  stats.id = 'personalStats';
+  stats.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;opacity:0.4;font-size:0.72rem;';
+  let statItems = [];
+  if(P.faveColour) statItems.push('<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:'+P.faveColour.hex+';display:inline-block;"></span>'+P.faveColour.name+'</span>');
+  if(P.music.length > 0){
+    let topArtist = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    statItems.push('listening to '+topArtist);
+  }
+  if(P.moodToday) statItems.push('feeling '+P.moodToday);
+  if(P.energyWord) statItems.push(P.energyWord+' energy');
+  stats.innerHTML = statItems.map(function(s){return '<span style="color:'+pal.tx+'">'+s+'</span>';}).join('<span style="opacity:0.3;color:'+pal.tx+'">·</span>');
+  let searchWrap = document.getElementById('searchWrap');
+  if(searchWrap && headerEl) headerEl.insertBefore(stats, searchWrap);
+
+  // ── Wrap tip, fact, poll, share into a collapsible daily section ──
+  let existingDaily = document.getElementById('dailySection');
+  if(existingDaily) existingDaily.remove();
+  let dailyWrap = document.createElement('div');
+  dailyWrap.id = 'dailySection';
+  dailyWrap.style.cssText = 'margin-bottom:20px;';
+
+  let dailyToggle = document.createElement('button');
+  dailyToggle.style.cssText = 'width:100%;padding:12px 16px;border-radius:14px;background:'+pal.ac+'08;border:1.5px solid '+pal.tx+'06;cursor:pointer;display:flex;align-items:center;justify-content:space-between;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;font-weight:500;transition:all 0.2s;';
+  dailyToggle.innerHTML = '<span>Your daily stuff</span><span id="dailyArrow" style="font-size:0.7rem;opacity:0.3;transition:transform 0.2s;">v</span>';
+
+  let dailyContent = document.createElement('div');
+  dailyContent.id = 'dailyContent';
+  dailyContent.style.cssText = 'display:none;margin-top:12px;display:flex;flex-direction:column;gap:12px;';
+  let dailyOpen = localStorage.getItem('stuflover_daily_open') === 'true';
+  dailyContent.style.display = dailyOpen ? 'flex' : 'none';
+  if(dailyOpen) document.getElementById('dailyArrow')&&0; // arrow will be set after append
+
+  dailyToggle.onclick = function(){
+    let c = document.getElementById('dailyContent');
+    let a = document.getElementById('dailyArrow');
+    let open = c.style.display === 'none';
+    c.style.display = open ? 'flex' : 'none';
+    if(a) a.style.transform = open ? 'rotate(180deg)' : '';
+    localStorage.setItem('stuflover_daily_open', open.toString());
+  };
+
+  dailyWrap.appendChild(dailyToggle);
+  dailyWrap.appendChild(dailyContent);
+  if(searchWrap && headerEl) headerEl.insertBefore(dailyWrap, searchWrap);
+
+  // Set arrow state
+  setTimeout(function(){
+    let a = document.getElementById('dailyArrow');
+    if(a && dailyOpen) a.style.transform = 'rotate(180deg)';
+  }, 10);
+
+  // ── Share card ──
+  let existingShare = document.getElementById('shareCard');
+  if(existingShare) existingShare.remove();
+  let shareCard = document.createElement('div');
+  shareCard.id = 'shareCard';
+  shareCard.style.cssText = 'margin-bottom:24px;padding:18px 22px;border-radius:16px;background:'+pal.ac+'10;border:1.5px solid '+pal.tx+'08;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;';
+  let shareText = 'i am '+aeName.toLowerCase()+' aesthetic';
+  if(P.music.length > 0){
+    let topA = P.customArtists && P.customArtists.length > 0 ? P.customArtists[0] : (typeof ARTISTS !== 'undefined' && ARTISTS[P.music[0]] ? ARTISTS[P.music[0]].name : P.music[0]);
+    shareText += ', i listen to ' + topA;
+  }
+  if(P.faveColour) shareText += ', my colour is ' + P.faveColour.name.toLowerCase();
+  shareText += ' — what are you? take the quiz at stuflover.com';
+  shareCard.innerHTML =
+    '<div style="flex:1;min-width:0;">'+
+      '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:4px;">Share your vibe</div>'+
+      '<div style="font-size:0.82rem;color:'+pal.tx+';opacity:0.6;line-height:1.5;">'+escHtml(shareText)+'</div>'+
+    '</div>'+
+    '<button onclick="navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'Copied!\';let b=this;setTimeout(function(){b.textContent=\'Copy\'},1500)}.bind(this))" style="padding:8px 18px;border:none;border-radius:10px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex-shrink:0;">Copy</button>';
+  dailyContent.appendChild(shareCard);
+
+  // Daily tip based on aesthetic
+  let existingTip = document.getElementById('dailyTip');
+  if(existingTip) existingTip.remove();
+  let tips = {
+    kawaii:['ok hear me out — pastel mood board on your wall. it literally fixes your whole mood','i started matching my phone case to my outfits and people notice i promise','get coloured pens for journaling trust me you will actually want to write'],
+    softgirl:['soft lighting changes photos SO much its embarrassing how good you look','ok a silk pillowcase sounds bougie but my skin and hair have never been better','layer your necklaces even if you think its too much — its not. do it.'],
+    cleangirl:['slicked back hair + hoops + lip gloss = you are literally unstoppable','real talk a capsule wardrobe saved me 20 minutes every single morning','i started drinking ice water first thing and i genuinely have more energy now'],
+    coquette:['put a ribbon in your hair right now. instant serotonin i am not joking','write an actual handwritten note to someone today. they will never forget it','spray your perfume on your pillow. you are welcome for the best sleep ever'],
+    goth:['journal by candlelight tonight. it sounds dramatic because it IS dramatic and its perfect','put on a dark playlist and walk somewhere. you are the main character in a film now','black nails. always. forever. it has never once missed'],
+    darkacad:['reading for literally 20 minutes before bed improved my sleep and i was shocked','buy a nice pen. just one. it makes studying feel 40% less painful i measured','take yourself on a library date. bring coffee. it is the most elite form of self care'],
+    grunge:['thrifting is not just a vibe it is literally saving the planet you are welcome','making a playlist specifically for your current mood is free therapy and it works','charity shop band tees hit different because someone loved that band before you'],
+    y2k:['butterfly clips are back and i am not ready to hear otherwise','bring a disposable camera to your next hangout. you will thank me in 6 months','low rise is a confidence thing and you have that confidence already'],
+    street:['white sneakers. with everything. always. this is not up for debate','layering is genuinely an art form and you are already better at it than you think','your playlist IS an accessory. curate it like one.'],
+    cottage:['bake something from scratch today even if its just cookies. the vibes are unmatched','put fresh flowers on your desk. actual flowers. it changes the whole room i promise','go for a walk without your phone. sounds scary. is actually magical.'],
+    hippie:['make a friendship bracelet for someone right now. it is genuinely therapeutic','putting a plant in your room boosts your mood and thats like actual science','tie dye is way easier than it looks and the results are always cute'],
+    oldmoney:['a blazer that actually fits you will change how you feel about every outfit','stand up straight right now. literally. good posture = instant confidence its real','buy fewer things but better things. your future self will literally thank you'],
+    preppy:['colour code your notes. yes it takes longer. yes your grades will improve.','get a planner and actually use it. the feeling of crossing things off? unmatched','tennis skirts go with literally everything and i will not be accepting debate'],
+    indie:['follow a small artist on spotify today. it costs you nothing and means everything to them','you could make a zine about literally anything you care about and it would be cool','shoot on film once. just once. you will understand why people never go back'],
+    emo:['write lyrics about how you feel right now. even bad ones. it is the most underrated outlet','there are eyeliner techniques that will genuinely change your whole face shape','screaming along to songs in your room alone is valid therapy and i stand by that'],
+  };
+  let aeTips = tips[topK] || tips.softgirl;
+  let todayTip = aeTips[new Date().getDate() % aeTips.length];
+  let tipDiv = document.createElement('div');
+  tipDiv.id = 'dailyTip';
+  tipDiv.style.cssText = 'margin-bottom:20px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'06;font-size:0.8rem;line-height:1.6;color:'+pal.tx+';opacity:0.7;';
+  tipDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:4px;">Today\'s micro wisdom</span>' + escHtml(todayTip);
+  dailyContent.appendChild(tipDiv);
+
+  // ── "Did You Know?" — surprising facts matched to aesthetic ──
+  let existingFact = document.getElementById('surpriseFact');
+  if(existingFact) existingFact.remove();
+  let facts = {
+    kawaii:['japan has a word — "kawaii" — that describes the culture of cuteness as a form of power and social influence, not weakness','the colour pink actually suppresses aggression. prisons have used "baker-miller pink" rooms to calm inmates. your aesthetic is literally scientifically calming','hello kitty has no mouth because the designers wanted the viewer to project their own feelings onto her. she feels what you feel.','cute things trigger the same brain response as seeing a baby — your aesthetic literally activates your nurturing instincts'],
+    softgirl:['the "soft girl" aesthetic originated from black women on tiktok in 2019 and became one of the most influential style movements of the decade','your brain releases oxytocin when you see soft pastel colours. your entire aesthetic is literally a hormone boost','cloud watching has been shown to reduce cortisol levels by 30%. being soft is not lazy — it is biochemistry','the reason soft textures feel comforting is because your skin has specific nerve endings that respond to gentle touch and send signals to your emotional brain'],
+    cleangirl:['minimalism actually makes your brain more creative. when there is less visual clutter your prefrontal cortex can focus on generating ideas','the "clean girl" look takes an average of 45 minutes to achieve. "effortless" is literally an effort and that makes it more impressive','your brain makes 35,000 decisions a day. a capsule wardrobe eliminates hundreds of them. you are not being basic — you are being efficient','drinking water first thing in the morning boosts your metabolism by 24% for the next 90 minutes. the clean girls were right all along'],
+    coquette:['the bow has been a symbol of femininity since the 1700s. when you wear one you are participating in 300 years of fashion history','the word "coquette" comes from french and originally described a rooster showing off its feathers. your aesthetic is literally peacocking','lana del rey did not invent the coquette aesthetic but she made it a lifestyle. before her it was called "romantic feminine"','ribbons were so valuable in the 1800s that people would leave them in their wills. your hair ribbon is historically significant'],
+    goth:['goth is the longest-surviving youth subculture in history. it has outlasted every trend since 1979','the colour black absorbs all wavelengths of light. when you wear all black you are literally absorbing the entire visible spectrum','gothic architecture was originally called "barbaric" as an insult. the goths reclaimed the word. your aesthetic has always been about reclaiming things','bats are not actually blind. they can see perfectly fine. the goth community adopted them because they thrive in darkness — not because they cannot see'],
+    darkacad:['reading fiction literally changes your brain structure. it strengthens the same neural pathways used for empathy','the smell of old books is caused by the chemical breakdown of compounds in paper. it has a name: "bibliosmia". you are not weird for loving it — there is a word for it','studying in different locations improves memory retention by 40% compared to studying in the same place. your aesthetic cafe rotation is backed by science','the "dark academia" aesthetic has roots in 1940s ivy league culture but was named by tumblr users in 2015. you are living a 80-year-old aesthetic with a 10-year-old name'],
+    grunge:['kurt cobain bought most of his iconic outfits from thrift stores for under $5. the most influential fashion of the 90s cost less than a coffee','the "grunge" sound was created partly by accident — producers in seattle could not afford expensive equipment so the distorted sound became the style','flannel shirts became popular with grunge because they were the cheapest warm layer available in the pacific northwest. fashion born from necessity','doc martens were originally designed for elderly women with foot problems in 1947. punk and grunge completely reinvented their meaning'],
+    y2k:['the early 2000s produced more one-hit wonders than any other decade in music history. that is why y2k nostalgia hits so hard — every song unlocks a different memory','low-rise jeans were actually invented in the 1960s not the 2000s. the y2k era just made them unavoidable','flip phones are making a genuine comeback. samsung sells millions of them. the y2k girlies predicted the future','the butterfly was the most popular tattoo design of 2001. twenty years later it is the most popular again. trends are a circle'],
+    street:['sneaker resale is a $6 billion industry. your shoe collection is literally an investment portfolio','the hoodie was invented in the 1930s for workers in cold warehouses. it became a cultural symbol entirely by accident','streetwear is the only fashion movement that started from the bottom (skate parks and hip hop) and infiltrated luxury fashion (louis vuitton, balenciaga) instead of the other way around','white air force 1s have been in continuous production since 1982. that is over 40 years of being cool. nothing else in fashion has that track record'],
+    cottage:['spending 20 minutes in nature reduces cortisol by 28%. cottagecore is not escapism — it is medicine','sourdough bread takes 3 days to make but uses only 3 ingredients. the most complex-tasting food comes from the simplest recipe','bees can recognize human faces. the ones in your garden might literally know who you are','wildflowers planted in gardens support 50x more pollinators than a maintained lawn. your aesthetic is saving ecosystems'],
+    hippie:['tie dye dates back to 6000 BC. it is one of the oldest textile techniques in human history','crystals do not have scientifically proven healing properties but the placebo effect is real and measurable. if it works for you it works','vinyl records outsold CDs for the first time in 2020. the hippies were right about analogue all along','the peace symbol was designed in 1958 for nuclear disarmament. it combines the semaphore signals for N and D (nuclear disarmament) into one design'],
+    oldmoney:['old money families communicate wealth through understatement. the most expensive item in the room is always the quietest','cashmere comes from goats in mongolia who shed their undercoat naturally every spring. each goat produces enough for one sweater per year','the colour navy blue became associated with wealth because it was the most expensive dye to produce before synthetic dyes were invented','good quality leather actually gets better with age. it is one of the only materials that improves the more you use it'],
+    preppy:['the original preppy style was a rebellion. ivy league students in the 1950s dressed casually to reject the formal dress codes of their wealthy parents','the polo shirt was invented by a tennis player who was tired of playing in a button-up. sport created fashion','plaid patterns were originally used by scottish clans to identify each other in battle. your school skirt has a military origin story','the colour combination of navy and white has been proven to be the most universally trusted colour pairing in psychology'],
+    indie:['the word "indie" originally meant independently produced music. now it describes a feeling more than a production method','film photography forces you to be intentional because every shot costs money. it literally teaches mindfulness','vinyl records sound different from digital because they capture sound as a continuous wave instead of data points. you are hearing sound the way it actually exists','zines have been a form of self-publishing since the 1930s. every blogger and content creator owes their existence to the zine community'],
+    emo:['the word "emo" comes from "emotional hardcore" a subgenre of punk from the 1980s. it was never meant to be an insult','studies show that listening to sad music when you are sad actually makes you feel better. it is called "mood congruency" and it is real science','my chemical romance once said they wanted to save lives not end them. the emo community has one of the strongest mutual support networks of any subculture','black eyeliner has been worn since ancient egypt where it was believed to protect the wearer from evil spirits. your makeup has a 5000 year history'],
+  };
+  let aeFacts = facts[topK] || facts.softgirl;
+  let todayFact = aeFacts[new Date().getDate() % aeFacts.length];
+  let factDiv = document.createElement('div');
+  factDiv.id = 'surpriseFact';
+  factDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.tx+'06;border-left:3px solid '+pal.ac+'40;';
+  factDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;font-size:0.58rem;opacity:0.4;display:block;margin-bottom:6px;color:'+pal.tx+';">Did you know?</span><span style="font-size:0.82rem;line-height:1.65;color:'+pal.tx+';opacity:0.65;">'+escHtml(todayFact)+'</span>';
+  dailyContent.appendChild(factDiv);
+
+  // ── ENGAGEMENT: Daily Poll (quick interaction, replayable) ──
+  let existingPoll = document.getElementById('dailyPoll');
+  if(existingPoll) existingPoll.remove();
+  let pollQuestions = [
+    {q:'be honest — what are you wearing rn',a:['something cosy','all black','that one outfit','whatever was clean']},
+    {q:'your energy today — no lying',a:['main character','cosy goblin','chaotic neutral','unbothered queen']},
+    {q:'you are on stuflover instead of',a:['homework','sleeping','socializing','cleaning my room']},
+    {q:'tonight you are definitely going to',a:['movie marathon','make a playlist','journal about everything','text someone back finally']},
+    {q:'the thing you secretly flex about',a:['my music taste','my aesthetic','my friend group','my skincare']},
+    {q:'what you actually need rn be real',a:['a nap honestly','someone to say im doing great','new music','literally just snacks']},
+    {q:'your most relatable trait',a:['online shopping at 2am','saying im fine (not fine)','starting shows never finishing','being too nice and hating it']},
+    {q:'the song stuck in your head rn is',a:['something embarrassing','a banger nobody knows','the same one for 3 days','i literally cannot remember']},
+    {q:'your comfort activity when sad is',a:['rewatching something','making a playlist','online shopping','lying in bed doing nothing']},
+    {q:'how many tabs do you have open rn',a:['like 3 im normal','10-20 its fine','30+ and thriving','i dont want to talk about it']},
+  ];
+  let todayPoll = pollQuestions[new Date().getDate() % pollQuestions.length];
+  let pollVoteKey = 'stuflover_poll_'+new Date().toDateString();
+  let existingVote = localStorage.getItem(pollVoteKey);
+
+  let pollDiv = document.createElement('div');
+  pollDiv.id = 'dailyPoll';
+  pollDiv.style.cssText = 'margin-bottom:20px;padding:18px 20px;border-radius:16px;background:'+pal.ac+'0a;border:1.5px solid '+pal.tx+'06;';
+  let pollHtml = '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;color:'+pal.tx+';margin-bottom:8px;">Daily Poll</div>';
+  pollHtml += '<div style="font-size:0.95rem;font-weight:600;color:'+pal.tx+';margin-bottom:12px;line-height:1.4;">'+escHtml(todayPoll.q)+'</div>';
+  pollHtml += '<div id="pollOptions" style="display:flex;flex-wrap:wrap;gap:6px;">';
+  todayPoll.a.forEach(function(opt,i){
+    let voted = existingVote === i.toString();
+    pollHtml += '<button onclick="votePoll('+i+')" style="padding:8px 16px;border-radius:20px;font-size:0.78rem;font-family:Space Grotesk,sans-serif;font-weight:500;cursor:pointer;transition:all 0.2s;border:1.5px solid '+(voted?pal.ac:pal.tx+'12')+';background:'+(voted?pal.ac+'18':'transparent')+';color:'+pal.tx+';" '+(existingVote?'disabled':'')+'>'+escHtml(opt)+'</button>';
+  });
+  pollHtml += '</div>';
+  if(existingVote){
+    pollHtml += '<div style="font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+pal.tx+';">you picked: '+escHtml(todayPoll.a[parseInt(existingVote)])+' — new poll tomorrow</div>';
+  }
+  pollDiv.innerHTML = pollHtml;
+  dailyContent.appendChild(pollDiv);
+
+  // ── ENGAGEMENT: Streak counter (completion + replayability) ──
+  let existingStreak = document.getElementById('streakCounter');
+  if(existingStreak) existingStreak.remove();
+  let streakKey = 'stuflover_streak';
+  let lastVisitKey = 'stuflover_last_visit';
+  let today = new Date().toDateString();
+  let lastVisit = localStorage.getItem(lastVisitKey);
+  let streak = parseInt(localStorage.getItem(streakKey)||'0');
+  if(lastVisit === today){
+    // already counted today
+  } else {
+    let yesterday = new Date(Date.now()-86400000).toDateString();
+    if(lastVisit === yesterday){ streak++; }
+    else if(lastVisit){ streak = 1; }
+    else { streak = 1; }
+    localStorage.setItem(streakKey, streak.toString());
+    localStorage.setItem(lastVisitKey, today);
+  }
+  if(streak > 0){
+    let streakDiv = document.createElement('div');
+    streakDiv.id = 'streakCounter';
+    streakDiv.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:'+pal.ac+'14;font-size:0.72rem;font-weight:600;color:'+pal.tx+';margin-bottom:16px;';
+    let fireWord = streak >= 7 ? 'on fire' : streak >= 3 ? 'keeping it going' : 'just getting started';
+    streakDiv.innerHTML = '<span style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;font-size:0.85rem;color:'+pal.ac+';">'+streak+'</span> day streak — '+fireWord;
+    if(headerEl) headerEl.insertBefore(streakDiv, document.getElementById('aeEyebrow'));
+  }
+
+  // Style search
+  initSearch(pal);
+
+  // Build grid
+  buildGrid(pal, aeName);
+
+  // Save profile — includes the resolved aesthetic so other pages never have
+  // to re-derive it from raw scores.
+  try{
+    localStorage.setItem('stuflover_profile', JSON.stringify(quizSnapshot));
+  }catch(e){}
+
+  // Apply the quiz-derived palette as the user's site-wide theme so every
+  // page (Play, Friends, Me, etc.) reflects their aesthetic. This is
+  // overridden if the user later picks a different preset on the Me page.
+  try {
+    let surface = '#ffffff';
+    // Dark backgrounds need a dark surface so cards remain readable.
+    let bgHex = pal.bg.replace('#','');
+    if (bgHex.length === 6) {
+      let r = parseInt(bgHex.substr(0,2),16),
+          g = parseInt(bgHex.substr(2,2),16),
+          b = parseInt(bgHex.substr(4,2),16);
+      let lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+      if (lum < 0.35) surface = lightenHex(pal.bg, 0.12);
+    }
+    let themeState = {
+      preset: 'quiz',
+      accent: null,
+      textSize: 'default',
+      motion: true,
+      texture: true,
+      source: 'quiz',
+      customPreset: {
+        name: aeName || 'Your Vibe',
+        bg: pal.bg,
+        bgMid: pal.ac2 || lightenHex(pal.bg, -0.05),
+        accent: pal.ac,
+        tx: pal.tx,
+        surface: surface
+      }
+    };
+    localStorage.setItem('stuflover_theme', JSON.stringify(themeState));
+    if (window.StufloverTheme && typeof window.StufloverTheme.apply === 'function') {
+      window.StufloverTheme.apply(themeState);
+    }
+  } catch(e) {}
+
+  // Every aesthetic ships with a default chat font too. Only applied the
+  // first time a user reaches an aesthetic — never clobbers a manual pick.
+  try {
+    if (!localStorage.getItem('stuflover_chat_font')) {
+      let aeFont = (AE_FONTS && AE_FONTS[topK]) || 'default';
+      localStorage.setItem('stuflover_chat_font', aeFont);
+    }
+  } catch(e) {}
+
+
+  document.getElementById('lifestylePage').classList.add('active');
+  window.scrollTo(0,0);
+
+  // ── Quiz completion celebration ──
+  let isFirstTime = !localStorage.getItem('stuflover_quiz_done');
+  localStorage.setItem('stuflover_quiz_done','true');
+  if(isFirstTime){
+    // Show celebration overlay briefly
+    let celebDiv = document.createElement('div');
+    celebDiv.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:'+pal.bg+';color:'+pal.tx+';text-align:center;padding:40px;animation:fadeSlide 0.5s ease both;';
+    celebDiv.innerHTML =
+      '<div style="font-size:0.6rem;letter-spacing:5px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:12px;">Quiz Complete</div>'+
+      '<div style="font-size:clamp(2rem,6vw,3.5rem);font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9;margin-bottom:16px;">You Are<br>'+aeName+'</div>'+
+      '<div style="font-size:0.9rem;opacity:0.45;max-width:320px;line-height:1.7;margin-bottom:24px;">your page is ready. everything is personalized to you now.</div>'+
+      '<button onclick="this.parentNode.remove()" style="padding:14px 40px;background:'+pal.ac+';color:'+pal.bg+';border:none;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;margin-bottom:12px;">See My Page</button>'+
+      '<button onclick="let t=\'i just took the stuflover quiz and i am '+aeName.toLowerCase()+' aesthetic — take it at stuflover.vercel.app\';navigator.clipboard.writeText(t);this.textContent=\'Copied!\';let b=this;setTimeout(function(){b.textContent=\'Share My Result\'},1500)" style="padding:10px 28px;background:transparent;color:'+pal.tx+';border:1.5px solid '+pal.tx+'20;border-radius:50px;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Share My Result</button>';
+    document.body.appendChild(celebDiv);
+  }
+
+  // Nav welcome
+  if(username){
+    let wel = document.getElementById('navWelcome');
+    if(wel){ wel.textContent=username; wel.style.display='inline'; }
+  }
+
+  // Style the For You section
+  let fyTitle = document.querySelector('.foryou-title');
+  if(fyTitle) fyTitle.style.color = searchPal.tx;
+  let fyBtn = document.getElementById('foryouRefresh');
+  if(fyBtn){ fyBtn.style.color = searchPal.tx; fyBtn.style.borderColor = searchPal.tx+'20'; }
+
+  // Load scrapbook
+  loadScrapbook();
+
+  // Viral decorations
+  initSparkleTrail();
+  initFloatingHearts();
+  initGlowTitle();
+  initCursorSettings();
+  initFontPicker();
+  applyChatFont();
+  addScrapbookDecos();
+  startGlobalMsgPoll();
+  buildInstantFeed();
+
+  // What's New popup
+  let updateVersion = '2.5';
+  let lastSeen = localStorage.getItem('stuflover_update_seen');
+  if(lastSeen !== updateVersion){
+    let updatePopup = document.createElement('div');
+    updatePopup.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);animation:fadeSlide 0.3s ease;';
+    updatePopup.innerHTML =
+      '<div style="background:'+pal.bg+';color:'+pal.tx+';border-radius:20px;padding:28px 24px;max-width:360px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">'+
+        '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.25;margin-bottom:8px;">What\'s New</div>'+
+        '<h2 style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1.4rem;margin-bottom:14px;">Stuflover v'+updateVersion+'</h2>'+
+        '<div style="font-size:0.82rem;line-height:1.7;opacity:0.6;">'+
+          '<p style="margin-bottom:10px;"><strong>Flovee Posts</strong> — your flovee now posts short disappearing moments throughout the day. check back to catch them before they vanish.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Instant Feed</strong> — this or that, mini challenges, and rate-yourself cards load instantly. no more waiting.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Instagram Story Bar</strong> — swipe through sections at the top of the page.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Scroll Progress</strong> — the thin bar at the top shows how far you have scrolled.</p>'+
+          '<p style="margin-bottom:10px;"><strong>Bug Fixes</strong> — friends deep link, camera permissions, account name, journal backup warning.</p>'+
+        '</div>'+
+        '<button onclick="localStorage.setItem(\'stuflover_update_seen\',\''+updateVersion+'\');this.closest(\'div\').parentNode.remove();" style="width:100%;padding:14px;margin-top:14px;border:none;border-radius:14px;background:'+pal.ac+';color:'+pal.bg+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.95rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;">Got It</button>'+
+      '</div>';
+    document.body.appendChild(updatePopup);
+  }
+
+  // Load flovee post
+  loadFloveePost();
+
+  // Auto-open was handled before fade-in (see above) to prevent flashing.
+
+  // Style story bar
+  document.querySelectorAll('.story-avatar').forEach(function(a){ a.style.background=searchPal.bg; a.style.color=searchPal.tx; });
+  document.querySelectorAll('.story-label').forEach(function(l){ l.style.color=searchPal.tx; });
+
+  // Style feed sections
+  document.querySelectorAll('.feed-heading').forEach(function(h){h.style.color=searchPal.tx;});
+  document.querySelectorAll('.feed-card').forEach(function(c){
+    c.style.background=searchPal.tx+'06';
+    c.style.color=searchPal.tx;
+    c.style.border='1px solid '+searchPal.tx+'08';
+    c.style.setProperty('--sl-cta-hover', searchPal.ac);
+  });
+  document.querySelectorAll('.feed-cta').forEach(function(c){c.style.color=searchPal.tx;});
+
+  // Intersection Observer — fade in on scroll like TikTok FYP.
+  // rootMargin expanded at the bottom so cards reveal BEFORE they scroll into
+  // view, closing the empty-stretch gap before the observer fires. The first
+  // N above-the-fold sections are also pre-marked visible so they never fade
+  // in after first paint.
+  let feedObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+      }
+    });
+  },{threshold:0,rootMargin:'0px 0px 240px 0px'});
+  let _feedAll = document.querySelectorAll('.feed-reveal');
+  _feedAll.forEach(function(el, i){
+    if(i < 2){ el.classList.add('visible'); return; }
+    feedObs.observe(el);
+  });
+  // Add emoji pickers to chat inputs
+  let chatRow1 = document.querySelector('#normalChat .chat-input-row');
+  if(chatRow1) createEmojiPicker('chatInput', chatRow1);
+}
+
+// ─── SCRAPBOOK ───────────────────────────────────────────
+let _sb = {
+  cache: null,       // array of 5 {cat, title, desc} objects
+  positions: {},     // {0:{x,y}, 1:{x,y}, ...}
+  dragReady: false,  // whether drag listeners are attached
+  BOARD_H: 480,      // fixed board height in px
+  CARD_W: 220,       // card width desktop
+  api: function(){ return (window.STUFLOVER_API_URL||''); },
+  auth: function(){ return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')}; }
+};
+
+// ── Server persistence ──
+function sbSave(){
+  if(!_sb.cache) return Promise.resolve();
+  // Cache locally for instant restore on back-navigation
+  try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
+  try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
+  let h = _sb.auth();
+  let base = _sb.api();
+  return Promise.all([
+    fetch(base+'/api/data/foryou_cache',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.cache})}),
+    fetch(base+'/api/data/sb_positions',{method:'PUT',headers:h,body:JSON.stringify({value:_sb.positions})})
+  ]).catch(function(e){ console.error('sbSave failed:', e); });
+}
+
+async function sbLoad(){
+  // Try sessionStorage first for instant render
+  try{
+    let sc = sessionStorage.getItem('sb_cache');
+    let sp = sessionStorage.getItem('sb_pos');
+    if(sc){ let parsed = JSON.parse(sc); if(Array.isArray(parsed)&&parsed.length>0) _sb.cache = parsed; }
+    if(sp){ let parsed2 = JSON.parse(sp); if(typeof parsed2==='object') _sb.positions = parsed2; }
+  }catch(e){}
+  // If sessionStorage had data, we're done — render will be instant
+  if(_sb.cache) return;
+  // Otherwise fetch from server
+  let base = _sb.api();
+  let authOnly = {'Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+  try{
+    let r = await Promise.all([
+      fetch(base+'/api/data/foryou_cache',{headers:authOnly}),
+      fetch(base+'/api/data/sb_positions',{headers:authOnly})
+    ]);
+    if(r[0].ok){ let d=await r[0].json(); if(d.data&&Array.isArray(d.data)&&d.data.length>0) _sb.cache=d.data; }
+    if(r[1].ok){ let d2=await r[1].json(); if(d2.data&&typeof d2.data==='object') _sb.positions=d2.data; }
+    // Store in sessionStorage for next time
+    if(_sb.cache){
+      try{ sessionStorage.setItem('sb_cache',JSON.stringify(_sb.cache)); }catch(e){}
+      try{ sessionStorage.setItem('sb_pos',JSON.stringify(_sb.positions)); }catch(e){}
+    }
+  }catch(e){ console.error('sbLoad failed:', e); }
+}
+
+function sbDelete(){
+  let h = _sb.auth();
+  let base = _sb.api();
+  try{ sessionStorage.removeItem('sb_cache'); sessionStorage.removeItem('sb_pos'); }catch(e){}
+  fetch(base+'/api/data/foryou_cache',{method:'DELETE',headers:h}).catch(function(){});
+  fetch(base+'/api/data/sb_positions',{method:'DELETE',headers:h}).catch(function(){});
+}
+
+// ── Build user profile string for AI ──
+function buildRecProfile(){
+  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0];});
+  let music = (P.music||[]).slice(0,4).join(', ');
+  let interests = (P.interests||[]).slice(0,5).join(', ');
+  return [
+    'Aesthetic: '+(topAe.join(', ')||'not set'),
+    'Favourite colour: '+(P.faveColour?P.faveColour.name:'not set'),
+    'Current mood: '+(P.moodToday||'okay'),
+    'Music taste: '+(music||'not set'),
+    'Shopping: '+(P.faveShop||'not set'),
+    'Interests: '+(interests||'not set'),
+    'Social energy: '+(P.social||'ambivert'),
+    'Energy: '+(P.energyWord||'chill'),
+    'Age: '+(P.age||'not set'),
+    'Saturday morning: '+(P.saturdayMorning||'not set'),
+    'Coffee order: '+(P.coffeeOrder||'not set')
+  ].join('\n');
+}
+
+// ── Generate new recommendations via AI ──
+async function sbGenerate(){
+  let res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST', headers:{},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1200,
+      system:'You are a lifestyle content personalization engine for a teen/young adult lifestyle website called Stuflover.\n\nGenerate 5 personalized recommendations based on the user\'s quiz data. Each recommendation should be specific and authentic to their vibe — not generic.\n\nCategories (use exactly these 5):\n1. playlist — A curated playlist idea matching their music taste + current mood. Suggest a playlist name and 3-4 specific songs/artists.\n2. room — Room decor or setup idea in their aesthetic + favourite colour. Be specific (e.g. "navy velvet throw pillows" not just "blue decor").\n3. activity — An activity matching their energy level + interests. If they are tired, suggest low-key things. If hyped, suggest exciting plans.\n4. shopping — A specific shopping recommendation from their preferred store. Name a real item type + style.\n5. selfcare — A self-care routine or ritual matching their vibe. Be specific and cozy.\n\nRules:\n- Be SPECIFIC. Reference their actual colour, aesthetic, mood, music by name.\n- If they are tired/low, everything should be cozy and low-effort. Do NOT suggest high-energy plans.\n- If they are hyped/creative, match that energy.\n- Keep each title under 8 words. Keep each description under 25 words.\n- Do NOT use any emojis anywhere in your response.\n- Return ONLY a JSON array of 5 objects: {cat, title, desc}\n  - cat: one of "playlist", "room", "activity", "shopping", "selfcare"\n  - title: short catchy title (no emojis)\n  - desc: brief specific description (no emojis)\n- No markdown, no code fences, no text outside the JSON array.',
+      messages:[{role:'user',content:'My profile:\n'+buildRecProfile()+'\n\nGenerate 5 personalised recommendations for me right now.'}]
+    })
+  });
+  let data = await res.json();
+  let text = (data.content&&data.content[0]&&data.content[0].text)||'';
+  let match = text.match(/\[[\s\S]*\]/);
+  if(!match) throw new Error('No recommendations returned');
+  let recs = JSON.parse(match[0]);
+  if(!Array.isArray(recs)||recs.length===0) throw new Error('Empty recommendations');
+  return recs;
+}
+
+// ── Render cards into the board ──
+function sbRender(){
+  let board = document.getElementById('recBoard');
+  if(!board || !searchPal || !_sb.cache) return;
+  let pal = searchPal;
+  let catLabels = {playlist:'Playlist',room:'Room Decor',activity:'Activity',shopping:'Shopping',selfcare:'Self Care'};
+  let mob = window.innerWidth < 768;
+  let cardW = mob ? board.clientWidth - 16 : _sb.CARD_W;
+
+  board.innerHTML = '';
+  board.style.height = _sb.BOARD_H + 'px';
+
+  // Default positions: 3 across top, 2 across bottom (desktop) or stacked (mobile)
+  let defaults = mob ? [
+    {x:8, y:10},{x:8, y:170},{x:8, y:330},{x:8, y:490},{x:8, y:650}
+  ] : [
+    {x:10, y:10},
+    {x:10 + cardW + 20, y:10},
+    {x:10 + (cardW + 20)*2, y:10},
+    {x:10, y:230},
+    {x:10 + cardW + 20, y:230}
+  ];
+
+  _sb.cache.forEach(function(rec, i){
+    let card = document.createElement('div');
+    card.className = 'sb-card';
+    card.style.width = cardW + 'px';
+    card.style.background = pal.bg;
+    card.style.color = pal.tx;
+    card.style.borderLeft = '3px solid ' + pal.ac + '50';
+    card.dataset.idx = i;
+
+    card.innerHTML =
+      '<div class="sb-card-cat" style="color:'+pal.ac+'">'+(catLabels[rec.cat]||rec.cat||'')+'</div>'+
+      '<div class="sb-card-title">'+escHtml(rec.title||'')+'</div>'+
+      '<div class="sb-card-body">'+escHtml(rec.desc||'')+'</div>';
+
+    // Position: use saved or default
+    let pos = _sb.positions[i] || defaults[i] || {x:10, y:10};
+    card.style.left = pos.x + 'px';
+    card.style.top = pos.y + 'px';
+    card.style.zIndex = i + 1;
+
+    board.appendChild(card);
+  });
+
+  // Update board height to fit content
+  let maxB = 0;
+  board.querySelectorAll('.sb-card').forEach(function(c){
+    let b = parseFloat(c.style.top) + c.offsetHeight;
+    if(b > maxB) maxB = b;
+  });
+  board.style.height = Math.max(_sb.BOARD_H, maxB + 30) + 'px';
+
+  sbInitDrag();
+}
+
+// ── Drag and drop ──
+function sbInitDrag(){
+  let board = document.getElementById('recBoard');
+  if(!board || _sb.dragReady) return;
+  _sb.dragReady = true;
+
+  let dragging = null, startX = 0, startY = 0, origX = 0, origY = 0, moved = false;
+
+  function ptr(e){
+    if(e.touches && e.touches.length) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
+    return {x:e.clientX, y:e.clientY};
+  }
+
+  function findCard(el){
+    while(el && el !== board){
+      if(el.classList && el.classList.contains('sb-card')) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function down(e){
+    let card = findCard(e.target);
+    if(!card) return;
+    dragging = card;
+    moved = false;
+    let p = ptr(e);
+    startX = p.x; startY = p.y;
+    origX = parseFloat(dragging.style.left) || 0;
+    origY = parseFloat(dragging.style.top) || 0;
+    e.preventDefault();
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchmove', move, {passive:false});
+    document.addEventListener('touchend', up);
+  }
+
+  function move(e){
+    if(!dragging) return;
+    e.preventDefault();
+    let p = ptr(e);
+    let dx = p.x - startX, dy = p.y - startY;
+    if(!moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+    if(!moved){ moved = true; dragging.classList.add('dragging'); }
+
+    let newX = origX + dx;
+    let newY = origY + dy;
+    // Same boundary for every card: 0 to (board - card) in both axes
+    let maxX = board.clientWidth - dragging.offsetWidth;
+    let maxY = board.clientHeight - dragging.offsetHeight;
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+    dragging.style.left = newX + 'px';
+    dragging.style.top = newY + 'px';
+  }
+
+  function up(){
+    if(!dragging) return;
+    dragging.classList.remove('dragging');
+    if(moved){
+      let idx = dragging.dataset.idx;
+      _sb.positions[idx] = {x: parseFloat(dragging.style.left)||0, y: parseFloat(dragging.style.top)||0};
+      sbSave();
+    }
+    dragging = null; moved = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('touchend', up);
+  }
+
+  board.addEventListener('mousedown', down);
+  board.addEventListener('touchstart', down, {passive:false});
+}
+
+// ── Main entry: load scrapbook ──
+async function loadScrapbook(){
+  let board = document.getElementById('recBoard');
+  if(!board) return;
+  if(!searchPal){ setTimeout(loadScrapbook, 300); return; }
+
+  // If cards are already in the DOM, don't reload
+  if(board.querySelector('.sb-card')) return;
+
+  // Try loading data (sessionStorage first, then server)
+  await sbLoad();
+
+  // If cache exists, render it immediately — no loading message needed
+  if(_sb.cache){
+    sbRender();
+    return;
+  }
+
+  // No cache — show loading state and generate new via AI
+  let pal = searchPal;
+  board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Personalising your scrapbook...</div>';
+  let btn = document.getElementById('foryouRefresh');
+  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  try{
+    _sb.cache = await sbGenerate();
+    _sb.positions = {};
+    await sbSave();
+    sbRender();
+  }catch(e){
+    console.error('Scrapbook generation failed:', e);
+    board.innerHTML = '<div class="rec-loading" style="color:'+pal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
+}
+
+// ── Refresh: clear and regenerate ──
+async function refreshForYou(){
+  _sb.cache = null;
+  _sb.positions = {};
+  let board = document.getElementById('recBoard');
+  if(board && searchPal) board.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Personalising your scrapbook...</div>';
+  let btn = document.getElementById('foryouRefresh');
+  if(btn){ btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  sbDelete();
+
+  try{
+    _sb.cache = await sbGenerate();
+    _sb.positions = {};
+    await sbSave();
+    sbRender();
+  }catch(e){
+    console.error('Scrapbook refresh failed:', e);
+    if(board && searchPal) board.innerHTML = '<div class="rec-loading" style="color:'+searchPal.tx+'">Could not load — tap <b>Refresh</b> to try again</div>';
+  }
+  if(btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
+}
+
+function escHtml(s){ let d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ─── FITFORIT (CLOSET & OUTFIT BUILDER) ──────────────────
+let ffiCurrentCat='all', ffiCurrentTab='closet', ffiBuilderCat='tops';
+let ffiOutfitPicks={tops:null,bottoms:null,dresses:null,outerwear:null,shoes:null,bags:null,accessories:null};
+let FFI_CATS=['all','tops','bottoms','dresses','outerwear','shoes','bags','accessories'];
+
+function ffiGetCloset(){try{return JSON.parse(localStorage.getItem('stuflover_closet')||'[]');}catch(e){return[];}}
+function ffiSaveCloset(items){localStorage.setItem('stuflover_closet',JSON.stringify(items));}
+
+function ffiApplyStyles(){
+  let pal=searchPal; if(!pal) return;
+  let ab=document.getElementById('ffiAddItemBtn'); if(ab){ab.style.background=pal.ac;ab.style.color=pal.bg;}
+  let as=document.getElementById('ffiAddSubmit'); if(as){as.style.background=pal.ac;as.style.color=pal.bg;as.style.padding='10px 24px';as.style.borderRadius='8px';as.style.border='none';as.style.fontFamily="'Barlow Condensed',sans-serif";as.style.fontWeight='900';as.style.fontSize='0.82rem';as.style.letterSpacing='2px';as.style.textTransform='uppercase';as.style.cursor='pointer';}
+  let sb=document.getElementById('ffiSuggestBtn'); if(sb){sb.style.background=pal.ac;sb.style.color=pal.bg;}
+  let mb=document.getElementById('ffiAddModalBox'); if(mb){mb.style.background=pal.bg;mb.style.color=pal.tx;}
+  document.querySelectorAll('.ffi-tab').forEach(function(t){t.style.color=pal.tx;});
+}
+
+function ffiSwitchTab(tab){
+  ffiCurrentTab=tab;
+  let pal=searchPal;
+  document.getElementById('ffiTabCloset').classList.toggle('on',tab==='closet');
+  document.getElementById('ffiTabBuilder').classList.toggle('on',tab==='builder');
+  document.getElementById('ffiClosetView').style.display=tab==='closet'?'block':'none';
+  document.getElementById('ffiBuilderView').style.display=tab==='builder'?'block':'none';
+  if(tab==='builder')ffiRenderBuilder();
+}
+
+function ffiRenderCloset(){
+  let pal=searchPal; if(!pal) return;
+  let items=ffiGetCloset();
+  let filtered=ffiCurrentCat==='all'?items:items.filter(function(i){return i.cat===ffiCurrentCat;});
+  document.getElementById('ffiClosetCount').textContent=items.length+' item'+(items.length!==1?'s':'');
+  let catsHtml='';
+  FFI_CATS.forEach(function(c){
+    let on=c===ffiCurrentCat?' on':'';
+    catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiCurrentCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiFilterCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('ffiClosetCats').innerHTML=catsHtml;
+  let grid=document.getElementById('ffiClosetGrid');
+  if(filtered.length===0){grid.innerHTML='<div class="ffi-grid-empty">'+(items.length===0?'Your closet is empty — add items to get started!':'No items in this category')+'</div>';return;}
+  grid.innerHTML='';
+  filtered.forEach(function(item){
+    let idx=items.indexOf(item);
+    let card=document.createElement('div');card.className='ffi-grid-item';card.style.background=pal.tx+'06';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"/><div class="ffi-grid-placeholder" style="display:none;aspect-ratio:3/4;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:0.75rem;opacity:0.4;background:'+pal.ac+'10;border-radius:8px;">'+escHtml(item.name)+'</div><div class="ffi-grid-item-info" style="color:'+pal.tx+'"><div class="ffi-grid-item-name">'+escHtml(item.name)+'</div><div class="ffi-grid-item-cat">'+escHtml(item.cat)+'</div></div><button class="ffi-grid-item-del" onclick="ffiDeleteItem(event,'+idx+')">x</button>';
+    grid.appendChild(card);
+  });
+}
+function ffiFilterCat(c){ffiCurrentCat=c;ffiRenderCloset();}
+function ffiDeleteItem(e,idx){e.stopPropagation();let items=ffiGetCloset();items.splice(idx,1);ffiSaveCloset(items);ffiRenderCloset();}
+
+function ffiOpenAddModal(){document.getElementById('ffiAddModal').classList.add('open');document.getElementById('ffiAddUrl').value='';document.getElementById('ffiAddName').value='';document.getElementById('ffiAddCat').value='';document.getElementById('ffiAddErr').textContent='';document.getElementById('ffiAddPreview').style.display='none';setTimeout(function(){document.getElementById('ffiAddUrl').focus();},100);}
+function ffiCloseAddModal(){document.getElementById('ffiAddModal').classList.remove('open');}
+function ffiPreviewAdd(){let url=document.getElementById('ffiAddUrl').value.trim();let p=document.getElementById('ffiAddPreview');if(url&&url.match(/^https?:\/\//)){p.src=url;p.style.display='block';p.onerror=function(){p.style.display='none';};}else{p.style.display='none';}}
+function ffiAddItem(){
+  let url=document.getElementById('ffiAddUrl').value.trim(),name=document.getElementById('ffiAddName').value.trim(),cat=document.getElementById('ffiAddCat').value,err=document.getElementById('ffiAddErr');
+  if(!url){err.textContent='Paste a photo URL';err.style.color='#c44';return;}
+  if(!name){err.textContent='Give it a name';err.style.color='#c44';return;}
+  if(!cat){err.textContent='Pick a category';err.style.color='#c44';return;}
+  let items=ffiGetCloset();items.push({url:url,name:name,cat:cat,added:Date.now()});ffiSaveCloset(items);ffiCloseAddModal();ffiRenderCloset();
+}
+
+function ffiRenderBuilder(){
+  let pal=searchPal; if(!pal) return;
+  let preview=document.getElementById('ffiBuilderPreview');
+  let slots=['tops','bottoms','shoes','outerwear','accessories'];
+  preview.innerHTML='';
+  slots.forEach(function(cat){
+    let pick=ffiOutfitPicks[cat];let slot=document.createElement('div');slot.className='ffi-builder-slot';
+    if(pick){slot.innerHTML='<img src="'+escHtml(pick.url)+'" alt="'+escHtml(pick.name)+'" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'"/><div class="ffi-builder-slot-label">'+cat+'</div>';}
+    else{slot.innerHTML='<div class="ffi-builder-slot-empty">'+cat+'</div><div class="ffi-builder-slot-label">'+cat+'</div>';}
+    preview.appendChild(slot);
+  });
+  let catsHtml='';
+  ['tops','bottoms','dresses','outerwear','shoes','bags','accessories'].forEach(function(c){
+    let on=c===ffiBuilderCat?' on':'';
+    catsHtml+='<button class="ffi-cat'+on+' bc" style="color:'+pal.tx+';border-color:'+(c===ffiBuilderCat?pal.ac:'rgba(128,128,128,0.12)')+'" onclick="ffiPickBuilderCat(\''+c+'\')">'+c+'</button>';
+  });
+  document.getElementById('ffiBuilderCats').innerHTML=catsHtml;
+  let items=ffiGetCloset().filter(function(i){return i.cat===ffiBuilderCat;});
+  let grid=document.getElementById('ffiBuilderItems');grid.innerHTML='';
+  if(items.length===0){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;opacity:0.3;font-style:italic;">No '+ffiBuilderCat+' in your closet</div>';return;}
+  items.forEach(function(item){
+    let isPicked=ffiOutfitPicks[ffiBuilderCat]&&ffiOutfitPicks[ffiBuilderCat].url===item.url;
+    let card=document.createElement('div');card.className='ffi-builder-item'+(isPicked?' picked':'');card.style.borderColor=isPicked?pal.ac:'transparent';card.style.background=pal.tx+'06';
+    card.innerHTML='<img src="'+escHtml(item.url)+'" alt="'+escHtml(item.name)+'" referrerpolicy="no-referrer" onerror="this.style.background=\''+pal.ac+'12\';this.style.minHeight=\'60px\'"/>';
+    card.onclick=function(){if(isPicked){ffiOutfitPicks[ffiBuilderCat]=null;}else{ffiOutfitPicks[ffiBuilderCat]=item;}ffiRenderBuilder();};
+    grid.appendChild(card);
+  });
+}
+function ffiPickBuilderCat(c){ffiBuilderCat=c;ffiRenderBuilder();}
+function ffiClearOutfit(){for(let k in ffiOutfitPicks)ffiOutfitPicks[k]=null;let r=document.getElementById('ffiSuggestResult');if(r)r.style.display='none';ffiRenderBuilder();}
+
+async function ffiAiSuggest(){
+  let items=ffiGetCloset();if(items.length<3){alert('Add at least 3 items first!');return;}
+  let btn=document.getElementById('ffiSuggestBtn');btn.disabled=true;btn.textContent='Thinking...';
+  let closetDesc=items.map(function(i){return i.cat+': '+i.name;}).join('\n');
+  let aeName=Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];aeName=aeName?aeName[0]:'casual';
+  try{
+    let res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,system:'You are a personal stylist. The user has a '+aeName+' aesthetic. Given their closet items, suggest ONE complete outfit combination. Be specific — name the exact items from their list. Explain why it works in 1-2 sentences. Keep it fun and encouraging.',messages:[{role:'user',content:'Here is everything in my closet:\n'+closetDesc+'\n\nSuggest a complete outfit from these items!'}]})});
+    let data=await res.json();let text=(data.content&&data.content[0]&&data.content[0].text)||'Could not generate suggestion.';
+    let result=document.getElementById('ffiSuggestResult');result.textContent=text;result.style.display='block';result.style.background=searchPal.ac+'12';result.style.color=searchPal.tx;
+  }catch(e){}
+  btn.disabled=false;btn.textContent='AI Suggest Outfit';
+}
+
+function openFitforIt(){
+  ffiApplyStyles();
+  ffiCurrentTab='closet';
+  ffiSwitchTab('closet');
+  ffiRenderCloset();
+}
+
+// ─── FLOVEEHUB PERSONALITY PER AESTHETIC ──────────────────
+let FLOVEE_VIBES = {
+  kawaii: {
+    name:'Luna', tone:'bubbly, soft, sweet, uses lots of !, says things like "omg", "sooo cute", "ahhh". giggly energy. texts in lowercase with cute reactions.',
+    topics:'sanrio, cute stationery, pastel everything, boba, plushies, anime, cozy games, cute room decor, matching outfits',
+    slang:'bestie, literally, slay, so cute i could cry, precious, aaaa, no bc, screaming',
+    opener:'hiiii omg i missed you!! what is going on tell me everything'
+  },
+  softgirl: {
+    name:'Rosie', tone:'warm, gentle, sweet but real. uses "babe" and "angel" naturally. soft lowercase texts. comforting but not fake. like a hug in text form.',
+    topics:'skincare, pink things, cloud aesthetics, romance books, soft playlists, journaling, self care days, strawberries',
+    slang:'babe, angel, so soft, im crying, thats so you, literally perfect, sending love',
+    opener:'hey babe how are you doing today? i have been thinking about you'
+  },
+  cleangirl: {
+    name:'Nora', tone:'calm, put-together, effortlessly cool. minimal texts — no rambling. clean punctuation. direct but warm. "less is more" energy in how she talks.',
+    topics:'skincare routines, minimalism, wellness, clean eating, pilates, neutral decor, gold jewelry, morning routines',
+    slang:'so chic, obsessed, clean, that works, noted, love that for you, very you',
+    opener:'hey. how is your day going?'
+  },
+  coquette: {
+    name:'Coco', tone:'flirty, feminine, romantic. uses "darling" and "love". dramatic but in a charming way. texts like she is writing in a diary. poetic lowercase.',
+    topics:'ribbons, bows, lana del rey, old hollywood, love letters, ballet flats, vintage perfume, cherry lips, romantic films',
+    slang:'darling, so divine, heavenly, im obsessed, ethereal, main character energy, its giving, angel',
+    opener:'darling hi — tell me something beautiful that happened today. or something messy. i want to hear it all'
+  },
+  goth: {
+    name:'Raven', tone:'dry humour, dark and witty, lowkey caring underneath the sarcasm. texts in lowercase, deadpan delivery. blunt but never mean. secretly soft.',
+    topics:'horror films, the cure, black lipstick, cemetery walks, tarot, crystals, vampire fiction, rain, candles, poetry',
+    slang:'iconic, dead, obsessed in a dark way, no literally, thats so real, im haunted by this, serve',
+    opener:'hey. what is happening in your world. entertain me'
+  },
+  darkacad: {
+    name:'Lyra', tone:'intellectual, thoughtful, curious. asks deep questions. uses proper grammar sometimes on purpose. literary references. warm but cerebral. like texting a clever friend in a library.',
+    topics:'classic literature, poetry, libraries, museums, coffee shops, tweed, philosophy, autumn, handwriting, old buildings',
+    slang:'fascinating, i have thoughts on this, genuinely, that reminds me of, consider this, quite, brilliant',
+    opener:'hello — i have been thinking about something. what has been on your mind lately?'
+  },
+  grunge: {
+    name:'Sid', tone:'raw, honest, zero filter. does not care about being polished. short texts, sometimes just one word. loyal underneath the chaos. real talk only.',
+    topics:'nirvana, thrifting, skateboarding, band tees, doc martens, vinyl, messy rooms, late nights, diy, concerts',
+    slang:'sick, dude, whatever, thats hard, nah, fr, lowkey, based, idc but also i do',
+    opener:'yo what is up. anything good happening or is everything still mid'
+  },
+  y2k: {
+    name:'Stacy', tone:'loud, fun, chaotic, nostalgic. texts like its 2003 but with gen z slang. loves drama and pop culture. exclamation marks everywhere. pink phone energy.',
+    topics:'2000s nostalgia, lip gloss, flip phones, paris hilton, low rise, butterfly clips, pop music, bedazzled everything, mall culture',
+    slang:'thats so fetch, obsessed, slay, iconic, living for this, no way, stoppp, WAIT',
+    opener:'HIIII ok so what is the tea today?? tell me everything i am SO ready'
+  },
+  street: {
+    name:'Ace', tone:'cool, confident, lowkey. does not try too hard. short punchy texts. street smart. loyal. knows what is cool before everyone else.',
+    topics:'sneakers, drops, hip hop, skating, basketball, streetwear brands, city life, late night runs, food spots',
+    slang:'bet, fire, nah thats crazy, lowkey, facts, say less, hard, no cap, valid',
+    opener:'yo. what is good. catch me up'
+  },
+  cottage: {
+    name:'Wren', tone:'warm, earthy, gentle. talks about nature and simple things. cozy energy. uses lowercase and soft punctuation. like getting a letter from a friend in the countryside.',
+    topics:'baking, wildflowers, farmers markets, mushroom foraging, linen dresses, handmade candles, poetry, rainy mornings, gardens, tea',
+    slang:'oh that is lovely, so cozy, my heart, gentle, beautiful, i love that, sending warmth',
+    opener:'hi lovely — how has your day been? i just made tea and wanted to check in'
+  },
+  hippie: {
+    name:'Sage', tone:'chill, spiritual, free-flowing. talks about energy and vibes unironically. peaceful. uses "man" and "dude" gently. wise without being preachy.',
+    topics:'crystals, meditation, nature, vintage clothes, vinyl, road trips, sunsets, astrology, plant care, tie dye, festivals',
+    slang:'vibes, the universe is telling you something, thats beautiful man, peace, groovy, far out, sending good energy',
+    opener:'hey beautiful soul — how are you feeling today? like really feeling'
+  },
+  oldmoney: {
+    name:'Eloise', tone:'elegant, composed, quietly confident. proper but not stiff. dry wit. texts with intention — never wastes words. understated luxury energy.',
+    topics:'tennis, sailing, cashmere, pearls, classical music, the hamptons, old bookshops, brunch, antiques, good manners, travel',
+    slang:'divine, rather, quite lovely, how wonderful, indeed, charming, impeccable taste',
+    opener:'good to see you. how have things been?'
+  },
+  preppy: {
+    name:'Blair', tone:'upbeat, ambitious, organised. peppy but with an edge. competitive in a fun way. supportive but pushes you to be your best. texts with energy and exclamation marks.',
+    topics:'study tips, lacrosse, ralph lauren, college life, planners, goal setting, brunch, leadership, blazers, iced coffee',
+    slang:'love that, youve got this, so proud, game plan, lets go, amazing, winning, 100%',
+    opener:'hey!! how is everything going? what are we working on today?'
+  },
+  tomato: {
+    name:'Bea', tone:'warm, vibrant, mediterranean energy. passionate about food and life. texts with exclamation marks and warmth. makes everything feel like a summer evening.',
+    topics:'italian summer, red lipstick, pasta, fresh tomatoes, linen, gold hoops, espresso, sun-kissed skin, olive oil, coastal towns',
+    slang:'gorgeous, oh my god yes, absolutely, chef kiss, divine, living, obsessed, bellissima',
+    opener:'ciao gorgeous!! how are you today? tell me something good'
+  },
+  indie: {
+    name:'Wren', tone:'thoughtful, a bit mysterious, niche taste. texts in lowercase, sometimes vague on purpose. recommends things no one has heard of. dry but affectionate.',
+    topics:'film photography, obscure music, independent films, record shops, zines, coffee shops, tote bags, poetry readings, art galleries',
+    slang:'so niche, you would love this, underrated, thats a vibe, very that, idk how to explain it but, raw',
+    opener:'hey. i found something that reminded me of you. but first — how are you'
+  },
+  emo: {
+    name:'Ember', tone:'emotional, intense, deeply caring. wears their heart on their sleeve in texts. uses ellipses and dashes. oscillates between dramatic and genuinely sweet. loyal to the core.',
+    topics:'my chemical romance, eyeliner, poetry, late night playlists, feelings, black nail polish, lyrics, journaling, concerts, rain',
+    slang:'im literally so, no bc this actually hurts, crying, screaming, that hit different, forever, always, so real',
+    opener:'hey... how are you actually doing? not the surface level stuff. like for real'
+  },
+  ballet: {
+    name:'Clara', tone:'graceful, disciplined, soft-spoken but strong. delicate texts with quiet confidence. poised but shows vulnerability. elegant and encouraging.',
+    topics:'ballet, dance, discipline, pink satin, buns, stretching, classical music, grace, tutus, stage, practice',
+    slang:'beautiful, graceful, you are so strong, elegant, stunning, breathtaking, poise',
+    opener:'hi lovely — how is everything? tell me what is going on with you today'
+  }
+};
+
+function getFloveeName(){
+  let topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topK = topK?topK[0]:'softgirl';
+  return (FLOVEE_VIBES[topK]||FLOVEE_VIBES.softgirl).name;
+}
+
+// ─── FLOVEEHUB GAMES ─────────────────────────────────────
+let currentHubGame = null;
+
+
+// ─── MODAL HISTORY HELPER ─────────────────────────────────
+// Full-screen overlays register here so the URL hash, document.title,
+// browser back-button, Escape key and focus state all stay in sync with
+// what's on screen.
+let __sluModal = { active:null, prevTitle:null, closeFns:{}, els:{}, opener:null, closing:false };
+
+function _sluTabbables(el){
+  if(!el) return [];
+  let sel = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.prototype.filter.call(el.querySelectorAll(sel), function(n){
+    // skip nodes that are visually hidden or inside a hidden subtree
+    return !!(n.offsetWidth || n.offsetHeight || n.getClientRects().length);
+  });
+}
+
+function _sluModalKey(e){
+  if(!__sluModal.active) return;
+  if(e.key === 'Escape'){
+    e.preventDefault();
+    closeModalView();
+    return;
+  }
+  if(e.key !== 'Tab') return;
+  let el = __sluModal.els[__sluModal.active];
+  let tabs = _sluTabbables(el);
+  if(tabs.length === 0){
+    e.preventDefault();
+    if(el){ el.setAttribute('tabindex','-1'); el.focus(); }
+    return;
+  }
+  let first = tabs[0], last = tabs[tabs.length - 1];
+  if(e.shiftKey && document.activeElement === first){
+    e.preventDefault();
+    last.focus();
+  } else if(!e.shiftKey && document.activeElement === last){
+    e.preventDefault();
+    first.focus();
+  }
+}
+
+function openModalView(name, title, closeFn, el){
+  if(__sluModal.active === name){
+    __sluModal.closeFns[name] = closeFn;
+    if(el) __sluModal.els[name] = el;
+    if(title) document.title = title;
+    return;
+  }
+  if(__sluModal.active){
+    // Replace the current modal entry rather than stacking, so back exits cleanly.
+    delete __sluModal.closeFns[__sluModal.active];
+    delete __sluModal.els[__sluModal.active];
+    try{ history.replaceState({stuModal:name}, '', '#'+name); }catch(e){}
+  } else {
+    if(!__sluModal.prevTitle) __sluModal.prevTitle = document.title;
+    __sluModal.opener = document.activeElement;
+    document.addEventListener('keydown', _sluModalKey);
+    try{ history.pushState({stuModal:name}, '', '#'+name); }catch(e){}
+  }
+  __sluModal.active = name;
+  __sluModal.closeFns[name] = closeFn;
+  if(el) __sluModal.els[name] = el;
+  if(title) document.title = title;
+  // Move focus inside the modal on the next tick so content has rendered.
+  setTimeout(function(){
+    let node = __sluModal.els[name];
+    if(!node) return;
+    let tabs = _sluTabbables(node);
+    let target = tabs.length ? tabs[0] : (function(){ node.setAttribute('tabindex','-1'); return node; })();
+    try{ target.focus(); }catch(e){}
+  }, 30);
+}
+
+function closeModalView(){
+  if(__sluModal.active && !__sluModal.closing){
+    try{ history.back(); }catch(e){}
+  }
+}
+
+window.addEventListener('popstate', function(){
+  if(!__sluModal.active || __sluModal.closing) return;
+  __sluModal.closing = true;
+  let name = __sluModal.active;
+  let fn = __sluModal.closeFns[name];
+  let opener = __sluModal.opener;
+  __sluModal.active = null;
+  __sluModal.opener = null;
+  delete __sluModal.closeFns[name];
+  delete __sluModal.els[name];
+  document.removeEventListener('keydown', _sluModalKey);
+  if(__sluModal.prevTitle){ document.title = __sluModal.prevTitle; __sluModal.prevTitle = null; }
+  try{ if(typeof fn === 'function') fn(); }catch(err){}
+  try{ if(opener && typeof opener.focus === 'function') opener.focus(); }catch(err){}
+  __sluModal.closing = false;
+});
+
+
+// ─── FETCH WITH TIMEOUT UTILITY ──────────────────────────
+function fetchWithTimeout(fetchFn, path, opts, timeoutMs){
+  timeoutMs = timeoutMs || 10000;
+  return new Promise(function(resolve, reject){
+    let timedOut = false;
+    let timer = setTimeout(function(){
+      timedOut = true;
+      reject(new Error('Request timed out'));
+    }, timeoutMs);
+    fetchFn(path, opts).then(function(res){
+      clearTimeout(timer);
+      if(!timedOut) resolve(res);
+    }).catch(function(err){
+      clearTimeout(timer);
+      if(!timedOut) reject(err);
+    });
+  });
+}
+
+// ─── READIT (Book community) ─────────────────────────────
+let riTab = 'new';
+
+function riFetch(path, opts){
+  let url = (window.STUFLOVER_API_URL||'') + path;
+  let f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function riHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+function riSwitchTab(tab){
+  riTab = tab;
+  let pal = searchPal;
+  document.getElementById('riTabNew').classList.toggle('on',tab==='new');
+  document.getElementById('riTabTop').classList.toggle('on',tab==='top');
+  document.getElementById('riTabNew').style.borderColor = tab==='new'?pal.ac:'rgba(128,128,128,0.1)';
+  document.getElementById('riTabTop').style.borderColor = tab==='top'?pal.ac:'rgba(128,128,128,0.1)';
+  loadRiFeed();
+}
+
+async function loadRiFeed(){
+  let feed = document.getElementById('riFeed');
+  let detail = document.getElementById('riDetail');
+  let pal = searchPal;
+  detail.style.display = 'none';
+  detail.classList.remove('active');
+  feed.style.display = 'flex';
+  document.getElementById('readitView').style.background = pal.bg;
+  document.getElementById('readitView').style.color = pal.tx;
+  document.getElementById('riNewBtn').style.background = pal.ac;
+  document.getElementById('riNewBtn').style.color = pal.bg;
+  document.getElementById('riModalBox').style.background = pal.bg;
+  document.getElementById('riModalBox').style.color = pal.tx;
+  document.getElementById('riSubmitBtn').style.background = pal.ac;
+  document.getElementById('riSubmitBtn').style.color = pal.bg;
+  document.querySelectorAll('.ri-tab').forEach(function(t){t.style.color=pal.tx;});
+  document.getElementById('riLogo').style.color = pal.tx;
+
+  feed.innerHTML = '<div class="ri-empty">Loading...</div>';
+  try{
+    let res = await fetchWithTimeout(riFetch, '/api/books/posts?page=0',{headers:riHeaders()}, 10000);
+    if(!res.ok){
+      let errData = await res.json().catch(function(){return{error:'Server error ('+res.status+')'};});
+      feed.innerHTML = '<div class="ri-empty has-error">'+escHtml(errData.error||'Could not load posts')+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
+      return;
+    }
+    let data = await res.json();
+    let posts = data.posts||[];
+    if(riTab==='top') posts.sort(function(a,b){return b.votes-a.votes;});
+    if(posts.length===0){
+      feed.innerHTML = '<div class="ri-empty">No posts yet — start the conversation!</div>';
+      return;
+    }
+    let tagColors = {discussion:'#6080c0',review:'#c06040',recommendation:'#40a060',booktok:'#c040a0',tbr:'#a08030',haul:'#4090a0',quote:'#8060c0'};
+    feed.innerHTML = '';
+    posts.forEach(function(p){
+      let card = document.createElement('div');
+      card.className = 'ri-post';
+      card.style.background = pal.tx+'05';
+      let upOn = p.userVote>0?' on':'';
+      let downOn = p.userVote<0?' on':'';
+      let tagBg = (tagColors[p.tag]||pal.ac)+'20';
+      let tagColor = tagColors[p.tag]||pal.ac;
+      card.innerHTML =
+        '<div class="ri-vote">'+
+          '<button class="ri-vote-btn'+upOn+'" onclick="riVote(event,'+p.id+',1)" style="color:'+(p.userVote>0?pal.ac:pal.tx)+'">&#9650;</button>'+
+          '<div class="ri-vote-count" style="color:'+pal.tx+'">'+p.votes+'</div>'+
+          '<button class="ri-vote-btn'+downOn+'" onclick="riVote(event,'+p.id+',-1)" style="color:'+(p.userVote<0?'#c44':pal.tx)+'">&#9660;</button>'+
+        '</div>'+
+        '<div class="ri-post-body" onclick="openRiDetail('+p.id+')" style="color:'+pal.tx+'">'+
+          '<div class="ri-post-tag" style="background:'+tagBg+';color:'+tagColor+'">'+escHtml(p.tag)+'</div>'+
+          '<div class="ri-post-title">'+escHtml(p.title)+'</div>'+
+          (p.book_title?'<div class="ri-post-book">'+escHtml(p.book_title)+(p.book_author?' by '+escHtml(p.book_author):'')+'</div>':'')+
+          (p.body?'<div class="ri-post-preview">'+escHtml(p.body)+'</div>':'')+
+          '<div class="ri-post-meta">u/'+escHtml(p.username)+' · '+p.comment_count+' comments</div>'+
+        '</div>'+
+        (p.image_url?'<img class="ri-post-img" src="'+escHtml(p.image_url)+'" onerror="this.style.display=\'none\'"/>':'');
+      feed.appendChild(card);
+    });
+  }catch(e){
+    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load posts — check your connection';
+    feed.innerHTML = '<div class="ri-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadRiFeed()">Retry</button></div>';
+  }
+}
+
+async function riVote(e,postId,vote){
+  e.stopPropagation();
+  try{await riFetch('/api/books/posts/'+postId+'/vote',{method:'POST',headers:riHeaders(),body:JSON.stringify({vote:vote})});}catch(e){}
+  loadRiFeed();
+}
+
+async function openRiDetail(postId){
+  let feed = document.getElementById('riFeed');
+  let detail = document.getElementById('riDetail');
+  let pal = searchPal;
+  feed.style.display = 'none';
+  detail.style.display = 'flex';
+  detail.classList.add('active');
+  detail.innerHTML = '<div class="ri-empty">Loading...</div>';
+  try{
+    let res = await riFetch('/api/books/posts/'+postId,{headers:riHeaders()});
+    let data = await res.json();
+    let p = data.post; let comments = data.comments||[];
+    detail.innerHTML =
+      '<button class="ri-detail-back" onclick="loadRiFeed()" style="color:'+pal.tx+'">&#8592; Back</button>'+
+      '<div class="ri-detail-title" style="color:'+pal.tx+'">'+escHtml(p.title)+'</div>'+
+      (p.book_title?'<div style="font-size:0.85rem;opacity:0.5;font-style:italic;">'+escHtml(p.book_title)+(p.book_author?' by '+escHtml(p.book_author):'')+'</div>':'')+
+      '<div class="ri-detail-body" style="color:'+pal.tx+'">'+escHtml(p.body||'')+'</div>'+
+      '<div style="font-size:0.62rem;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;">u/'+escHtml(p.username)+' · '+p.votes+' votes</div>'+
+      '<div style="font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-top:16px;">Comments ('+comments.length+')</div>'+
+      '<div class="ri-comments" id="riComments"></div>'+
+      '<div class="ri-comment-input">'+
+        '<input id="riCommentInput" placeholder="Add a comment..." maxlength="1000" onkeydown="if(event.key===\'Enter\')riComment('+p.id+')" style="color:'+pal.tx+'"/>'+
+        '<button onclick="riComment('+p.id+')" style="background:'+pal.ac+';color:'+pal.bg+'">Reply</button>'+
+      '</div>';
+    let commentsEl = document.getElementById('riComments');
+    comments.forEach(function(c){
+      let div = document.createElement('div');
+      div.className = 'ri-comment';
+      div.style.background = pal.tx+'06';
+      div.style.color = pal.tx;
+      let userEl = document.createElement('div');
+      userEl.className = 'ri-comment-user';
+      userEl.textContent = 'u/' + (c.username || '');
+      div.appendChild(userEl);
+      div.appendChild(document.createTextNode(c.text || ''));
+      commentsEl.appendChild(div);
+    });
+  }catch(e){
+    detail.innerHTML = '<div class="ri-empty">Could not load post</div>';
+  }
+}
+
+async function riComment(postId){
+  let input = document.getElementById('riCommentInput');
+  let text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    let res = await riFetch('/api/books/posts/'+postId+'/comment',{method:'POST',headers:riHeaders(),body:JSON.stringify({text:text})});
+    let data = await res.json();
+    if(data.error){alert(data.error);return;}
+    openRiDetail(postId);
+  }catch(e){}
+}
+
+function openRiModal(){
+  document.getElementById('riModal').classList.add('open');
+  document.getElementById('riTitle').value='';
+  document.getElementById('riBody').value='';
+  document.getElementById('riBookTitle').value='';
+  document.getElementById('riBookAuthor').value='';
+  document.getElementById('riImageUrl').value='';
+  document.getElementById('riTag').value='discussion';
+  document.getElementById('riErr').textContent='';
+  setTimeout(function(){document.getElementById('riTitle').focus();},100);
+}
+function closeRiModal(){document.getElementById('riModal').classList.remove('open');}
+
+async function submitRiPost(){
+  let title = document.getElementById('riTitle').value.trim();
+  let body = document.getElementById('riBody').value.trim();
+  let bookTitle = document.getElementById('riBookTitle').value.trim();
+  let bookAuthor = document.getElementById('riBookAuthor').value.trim();
+  let tag = document.getElementById('riTag').value;
+  let imageUrl = document.getElementById('riImageUrl').value.trim();
+  let err = document.getElementById('riErr');
+  if(!title||title.length<3){err.textContent='Title must be at least 3 characters';err.style.color='#c44';return;}
+  err.textContent='Posting...';err.style.color=searchPal.tx;
+  try{
+    let res = await riFetch('/api/books/posts',{method:'POST',headers:riHeaders(),
+      body:JSON.stringify({title:title,body:body,bookTitle:bookTitle,bookAuthor:bookAuthor,tag:tag,imageUrl:imageUrl})});
+    let data = await res.json();
+    if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
+    closeRiModal();
+    loadRiFeed();
+  }catch(e){err.textContent='Could not post';err.style.color='#c44';}
+}
+
+// ─── FLOVEE GROUPS ───────────────────────────────────────
+let fgTab = 'all';
+
+function fgFetch(path, opts){
+  let url = (window.STUFLOVER_API_URL||'') + path;
+  let f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function fgHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+function switchGroupTab(tab){
+  fgTab = tab;
+  let pal = searchPal;
+  document.getElementById('fgTabAll').classList.toggle('on', tab==='all');
+  document.getElementById('fgTabMine').classList.toggle('on', tab==='mine');
+  document.getElementById('fgTabAll').style.borderColor = tab==='all'?pal.ac:'rgba(128,128,128,0.12)';
+  document.getElementById('fgTabMine').style.borderColor = tab==='mine'?pal.ac:'rgba(128,128,128,0.12)';
+  loadGroups(tab);
+}
+
+async function loadGroups(tab){
+  let list = document.getElementById('fgList');
+  let pal = searchPal;
+  document.getElementById('groupsView').style.background = pal.bg;
+  document.getElementById('groupsView').style.color = pal.tx;
+  document.getElementById('fgCreateBtn').style.background = pal.ac;
+  document.getElementById('fgCreateBtn').style.color = pal.bg;
+  document.getElementById('fgModalBox').style.background = pal.bg;
+  document.getElementById('fgModalBox').style.color = pal.tx;
+  document.getElementById('fgSubmitBtn').style.background = pal.ac;
+  document.getElementById('fgSubmitBtn').style.color = pal.bg;
+  document.querySelectorAll('.fg-tab').forEach(function(t){t.style.color=pal.tx;});
+
+  list.innerHTML = '<div class="fg-empty">Loading...</div>';
+  try{
+    let res = await fetchWithTimeout(fgFetch, '/api/groups',{headers:fgHeaders()}, 10000);
+    if(!res.ok){
+      list.innerHTML = '<div class="fg-empty has-error">Could not load communities (server error)<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
+      return;
+    }
+    let data = await res.json();
+    let groups = data.groups||[];
+    if(tab==='mine') groups = groups.filter(function(g){return g.joined;});
+    if(groups.length===0){
+      list.innerHTML = '<div class="fg-empty">'+(tab==='mine'?'You have not joined any groups yet':'No groups yet — create the first one!')+'</div>';
+      return;
+    }
+    list.innerHTML = '';
+    let hues = [0,30,60,120,180,220,260,300];
+    groups.forEach(function(g, i){
+      let card = document.createElement('div');
+      card.className = 'fg-card';
+      card.style.background = pal.ac+'06';
+      card.style.cursor = 'pointer';
+      card.onclick = function(e){ if(!e.target.closest('.fg-card-btn')) openGroupDetail(g.id); };
+      let iconBg = 'hsl('+(hues[i%hues.length])+',50%,55%)';
+      let initial = g.name.charAt(0).toUpperCase();
+      let btnClass = g.joined ? 'fg-card-btn joined' : 'fg-card-btn';
+      let btnText = g.joined ? 'Joined' : 'Join';
+      let btnAction = g.joined ? 'leaveGroup('+g.id+')' : 'joinGroup('+g.id+')';
+      let btnStyle = g.joined ? 'color:'+pal.tx : 'background:'+pal.ac+';color:'+pal.bg;
+      card.innerHTML =
+        '<div class="fg-card-icon" style="background:'+iconBg+'">'+initial+'</div>'+
+        '<div class="fg-card-body" style="color:'+pal.tx+'">'+
+          '<div class="fg-card-name">'+escHtml(g.name)+'</div>'+
+          (g.description?'<div class="fg-card-desc">'+escHtml(g.description)+'</div>':'')+
+          '<div class="fg-card-meta">'+g.member_count+' member'+(g.member_count!==1?'s':'')+' · by '+escHtml(g.owner_name)+'</div>'+
+        '</div>'+
+        '<button class="'+btnClass+'" style="'+btnStyle+'" onclick="'+btnAction+'">'+btnText+'</button>';
+      list.appendChild(card);
+    });
+  }catch(e){
+    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load communities — check your connection';
+    list.innerHTML = '<div class="fg-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadGroups(fgTab)">Retry</button></div>';
+  }
+}
+
+async function joinGroup(id){
+  try{ await fgFetch('/api/groups/'+id+'/join',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  loadGroups(fgTab);
+}
+async function leaveGroup(id){
+  try{ await fgFetch('/api/groups/'+id+'/leave',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  loadGroups(fgTab);
+}
+
+function openFgModal(){
+  document.getElementById('fgModal').classList.add('open');
+  document.getElementById('fgNameInput').value='';
+  document.getElementById('fgDescInput').value='';
+  document.getElementById('fgErr').textContent='';
+  setTimeout(function(){document.getElementById('fgNameInput').focus();},100);
+}
+function closeFgModal(){document.getElementById('fgModal').classList.remove('open');}
+
+async function createGroup(){
+  let name = document.getElementById('fgNameInput').value.trim();
+  let desc = document.getElementById('fgDescInput').value.trim();
+  let err = document.getElementById('fgErr');
+  if(!name||name.length<2){err.textContent='Name must be at least 2 characters';err.style.color='#c44';return;}
+  err.textContent='Creating...';err.style.color=searchPal.tx;
+  try{
+    let res = await fgFetch('/api/groups',{method:'POST',headers:fgHeaders(),body:JSON.stringify({name:name,description:desc})});
+    let data = await res.json();
+    if(!res.ok||data.error){err.textContent=data.error||'Failed';err.style.color='#c44';return;}
+    closeFgModal();
+    loadGroups(fgTab);
+  }catch(e){err.textContent='Could not create group';err.style.color='#c44';}
+}
+
+// ─── GROUP DETAIL VIEW ──────────────────────────────────
+let fgdGroup = null;
+let fgdTab = 'about';
+let fgdMembers = [];
+
+async function openGroupDetail(groupId){
+  let pal = searchPal;
+  // Update section nav to show back to groups
+  document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / ...';
+  // Hide group list, show detail
+  document.getElementById('groupsView').style.display = 'none';
+  let dv = document.getElementById('fgDetailView');
+  dv.style.display = 'flex';
+  dv.classList.add('active');
+  dv.style.background = pal.bg;
+  dv.style.color = pal.tx;
+
+  try{
+    let res = await fgFetch('/api/groups/'+groupId,{headers:fgHeaders()});
+    let data = await res.json();
+    fgdGroup = data.group;
+    fgdMembers = data.members || [];
+  }catch(e){ return; }
+
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  let initial = fgdGroup.name.charAt(0).toUpperCase();
+
+  // Update section nav
+  document.getElementById('sectionNameNav').innerHTML = '<span onclick="fgdBackToList()" style="cursor:pointer;opacity:0.5;">FloveeGroup</span> / '+escHtml(fgdGroup.name);
+
+  // Render header
+  let header = document.getElementById('fgdHeader');
+  let joinBtn = fgdGroup.joined
+    ? '<button class="fgd-join-btn" style="background:transparent;border:1.5px solid '+pal.tx+'30;color:'+pal.tx+'" onclick="fgdLeave()">Joined</button>'
+    : '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdJoin()">Join</button>';
+  header.innerHTML =
+    '<div class="fgd-icon" style="background:'+pal.ac+'">'+initial+'</div>'+
+    '<div class="fgd-info"><div class="fgd-name">'+escHtml(fgdGroup.name)+'</div>'+
+    '<div class="fgd-meta">'+fgdGroup.member_count+' members · by '+escHtml(fgdGroup.owner_name)+'</div></div>'+
+    joinBtn;
+
+  // Style tabs
+  document.querySelectorAll('.fgd-tab').forEach(function(t){ t.style.color = pal.tx; });
+  fgdTab = 'about';
+  fgdSwitchTab('about');
+}
+
+function fgdSwitchTab(tab){
+  fgdTab = tab;
+  let pal = searchPal;
+  document.querySelectorAll('.fgd-tab').forEach(function(t){
+    t.classList.toggle('on', t.dataset.tab === tab);
+    t.style.borderBottomColor = t.dataset.tab === tab ? pal.ac : 'transparent';
+  });
+  if(tab === 'about') fgdRenderAbout();
+  else if(tab === 'posts') fgdRenderPosts();
+  else if(tab === 'store') fgdRenderStore();
+}
+
+function fgdRenderAbout(){
+  let content = document.getElementById('fgdContent');
+  let pal = searchPal;
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+  let desc = fgdGroup.description || 'No description yet.';
+
+  let membersHtml = fgdMembers.map(function(m){
+    return '<span style="display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.75rem;background:'+pal.ac+'12;margin:3px;">'+escHtml(m.username)+'</span>';
+  }).join('');
+
+  if(isOwner){
+    content.innerHTML =
+      '<div style="margin-bottom:16px;"><div class="fg-title bc" style="margin-bottom:8px;">Description</div>'+
+      '<textarea class="fgd-about-edit" id="fgdAboutText">'+escHtml(desc)+'</textarea>'+
+      '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdSaveAbout()">Save</button></div>'+
+      '<div class="fg-title bc" style="margin-bottom:8px;">Members ('+fgdMembers.length+')</div>'+
+      '<div>'+membersHtml+'</div>';
+  } else {
+    content.innerHTML =
+      '<div style="margin-bottom:16px;"><div class="fg-title bc" style="margin-bottom:8px;">Description</div>'+
+      '<div class="fgd-about-text">'+escHtml(desc)+'</div></div>'+
+      '<div class="fg-title bc" style="margin-bottom:8px;">Members ('+fgdMembers.length+')</div>'+
+      '<div>'+membersHtml+'</div>';
+  }
+}
+
+async function fgdSaveAbout(){
+  let text = document.getElementById('fgdAboutText').value.trim();
+  try{
+    await fgFetch('/api/groups/'+fgdGroup.id+'/about',{method:'PUT',headers:fgHeaders(),body:JSON.stringify({description:text})});
+    fgdGroup.description = text;
+    fgdRenderAbout();
+  }catch(e){}
+}
+
+async function fgdRenderPosts(){
+  let content = document.getElementById('fgdContent');
+  let pal = searchPal;
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let myId = user ? parseInt(user.id) : 0;
+
+  let inputHtml = fgdGroup.joined
+    ? '<div class="fgd-post-input"><input id="fgdPostInput" placeholder="Write something..." maxlength="500" onkeydown="if(event.key===\'Enter\')fgdPost()"/><button style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdPost()">Post</button></div>'
+    : '<div style="text-align:center;padding:12px;opacity:0.4;font-size:0.82rem;">Join this group to post</div>';
+
+  content.innerHTML = inputHtml + '<div id="fgdPostsList"><div class="fgd-empty">Loading...</div></div>';
+
+  try{
+    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{headers:fgHeaders()});
+    let data = await res.json();
+    let posts = data.posts || [];
+    let list = document.getElementById('fgdPostsList');
+    if(posts.length === 0){ list.innerHTML = '<div class="fgd-empty">No posts yet</div>'; return; }
+    list.innerHTML = posts.map(function(p){
+      let time = new Date(p.created_at+'Z');
+      let ts = time.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+time.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+      let del = (p.username === (user&&user.username)) ? '<button class="fgd-post-del" onclick="fgdDeletePost('+p.id+')">delete</button>' : '';
+      return '<div class="fgd-post"><div class="fgd-post-user" style="color:'+pal.ac+'">'+escHtml(p.username)+'</div><div class="fgd-post-text">'+escHtml(p.text)+'</div><div class="fgd-post-time">'+ts+del+'</div></div>';
+    }).join('');
+  }catch(e){ document.getElementById('fgdPostsList').innerHTML = '<div class="fgd-empty">Could not load posts</div>'; }
+}
+
+async function fgdPost(){
+  let input = document.getElementById('fgdPostInput');
+  let text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/posts',{method:'POST',headers:fgHeaders(),body:JSON.stringify({text:text})});
+    let data = await res.json();
+    if(data.error){ alert(data.error); return; }
+    fgdRenderPosts();
+  }catch(e){}
+}
+
+async function fgdDeletePost(postId){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/posts/'+postId,{method:'DELETE',headers:fgHeaders()}); }catch(e){}
+  fgdRenderPosts();
+}
+
+async function fgdRenderStore(){
+  let content = document.getElementById('fgdContent');
+  let pal = searchPal;
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let isOwner = user && fgdGroup.owner_id === parseInt(user.id);
+
+  let addHtml = isOwner
+    ? '<div class="fgd-add-item"><div class="fg-title bc" style="margin-bottom:8px;">Add Item</div>'+
+      '<input id="fgdStoreName" placeholder="Item name..."/>'+
+      '<input id="fgdStorePrice" placeholder="Price (e.g. $12.99)..."/>'+
+      '<input id="fgdStoreImg" placeholder="Image URL (optional)..."/>'+
+      '<input id="fgdStoreLink" placeholder="Link to buy (optional)..."/>'+
+      '<input id="fgdStoreDesc" placeholder="Description (optional)..."/>'+
+      '<button class="fgd-join-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="fgdAddStoreItem()">Add to Store</button></div>'
+    : '';
+
+  content.innerHTML = addHtml + '<div id="fgdStoreGrid" class="fgd-store-grid"><div class="fgd-empty" style="grid-column:1/-1;">Loading...</div></div>';
+
+  try{
+    let res = await fgFetch('/api/groups/'+fgdGroup.id+'/store',{headers:fgHeaders()});
+    let data = await res.json();
+    let items = data.items || [];
+    let grid = document.getElementById('fgdStoreGrid');
+    if(items.length === 0){ grid.innerHTML = '<div class="fgd-empty" style="grid-column:1/-1;">No items in store yet</div>'; return; }
+    grid.innerHTML = items.map(function(item){
+      let img = item.image_url ? '<img class="fgd-store-img" src="'+escHtml(item.image_url)+'" onerror="this.style.display=\'none\'"/>' : '';
+      let link = item.link ? '<a class="fgd-store-link" href="'+escHtml(item.link)+'" target="_blank" style="color:'+pal.ac+'">Buy Now</a>' : '';
+      let del = isOwner ? '<button class="fgd-store-del" onclick="fgdDeleteStoreItem('+item.id+')">x</button>' : '';
+      return '<div class="fgd-store-item" style="background:'+pal.ac+'08;position:relative;">'+img+
+        '<div class="fgd-store-name">'+escHtml(item.name)+'</div>'+
+        (item.price ? '<div class="fgd-store-price">'+escHtml(item.price)+'</div>' : '')+
+        (item.description ? '<div class="fgd-store-desc">'+escHtml(item.description)+'</div>' : '')+
+        link+del+'</div>';
+    }).join('');
+  }catch(e){ document.getElementById('fgdStoreGrid').innerHTML = '<div class="fgd-empty" style="grid-column:1/-1;">Could not load store</div>'; }
+}
+
+async function fgdAddStoreItem(){
+  let name = document.getElementById('fgdStoreName').value.trim();
+  if(!name){ alert('Item name required'); return; }
+  let body = {
+    name: name,
+    price: document.getElementById('fgdStorePrice').value.trim(),
+    image_url: document.getElementById('fgdStoreImg').value.trim(),
+    link: document.getElementById('fgdStoreLink').value.trim(),
+    description: document.getElementById('fgdStoreDesc').value.trim()
+  };
+  try{
+    await fgFetch('/api/groups/'+fgdGroup.id+'/store',{method:'POST',headers:fgHeaders(),body:JSON.stringify(body)});
+    fgdRenderStore();
+  }catch(e){}
+}
+
+async function fgdDeleteStoreItem(itemId){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/store/'+itemId,{method:'DELETE',headers:fgHeaders()}); }catch(e){}
+  fgdRenderStore();
+}
+
+async function fgdJoin(){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/join',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  openGroupDetail(fgdGroup.id);
+}
+
+async function fgdLeave(){
+  try{ await fgFetch('/api/groups/'+fgdGroup.id+'/leave',{method:'POST',headers:fgHeaders()}); }catch(e){}
+  openGroupDetail(fgdGroup.id);
+}
+
+function fgdBackToList(){
+  document.getElementById('fgDetailView').style.display = 'none';
+  document.getElementById('fgDetailView').classList.remove('active');
+  document.getElementById('groupsView').style.display = 'flex';
+  document.getElementById('groupsView').classList.add('active');
+  loadGroups(fgTab);
+}
+
+// ─── STUFLOVER DAILY (Trending notifications) ─────────────
+let sdCache = null;
+let sdFallbackAlerts = [
+  {tag:'tiktok',title:'New Dance Trend Taking Over',desc:'Everyone is learning this viral choreography — the sound already has 50M+ uses.'},
+  {tag:'fashion',title:'Oversized Everything is Back',desc:'Baggy jeans, oversized blazers, and chunky sneakers are dominating street style this season.'},
+  {tag:'music',title:'Fresh Drops You Need to Hear',desc:'This week\'s new releases are stacked — add these to your playlist before everyone else does.'},
+  {tag:'beauty',title:'Glass Skin Routine Going Viral',desc:'A 3-step skincare hack is blowing up and the results are unreal.'},
+  {tag:'culture',title:'This Meme is Everywhere Right Now',desc:'If you haven\'t seen it yet, you will — it\'s already taken over every group chat.'},
+  {tag:'aesthetic',title:'New Core Aesthetic Alert',desc:'A fresh aesthetic is emerging and your feed is about to be full of it.'},
+  {tag:'tiktok',title:'POV Videos Hit Different',desc:'A new POV trend is making everyone emotional — the comments are wild.'},
+  {tag:'fashion',title:'Thrift Flip Challenge Trending',desc:'People are turning $5 thrift finds into designer-looking pieces and the glow-ups are insane.'}
+];
+
+function switchDiscoverTab(tab){
+  let tabs = document.getElementById('discoverTabs').querySelectorAll('.discover-tab');
+  tabs.forEach(function(t){ t.classList.toggle('active', t.getAttribute('data-discover') === tab); });
+  let dv = document.getElementById('dailyView');
+  let cv = document.getElementById('contentView');
+  if(tab === 'trending'){
+    cv.style.display = 'none'; cv.classList.remove('active');
+    dv.style.display = 'flex'; dv.classList.add('active');
+    loadDailyFeed();
+  } else {
+    dv.style.display = 'none'; dv.classList.remove('active');
+    cv.style.display = 'flex'; cv.classList.add('active');
+    openContentView();
+  }
+}
+
+async function loadDailyFeed(){
+  let feed = document.getElementById('sdFeed');
+  let btn = document.getElementById('sdRefreshBtn');
+  let pal = searchPal;
+
+  document.getElementById('dailyView').style.background = pal.bg;
+  document.getElementById('dailyView').style.color = pal.tx;
+  btn.style.borderColor = pal.tx+'20';
+  btn.style.color = pal.tx;
+
+  // Force refresh on button click (when not already loading)
+  if(sdCache && !btn.disabled){ sdCache = null; }
+
+  if(sdCache){ renderDailyFeed(sdCache); return; }
+
+  feed.innerHTML = '<div class="sd-loading">Finding what is trending for you...</div>';
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+
+  let aeName = resolveAeName();
+  let music = (P.music||[]).slice(0,4).join(', ')||'pop';
+  let interests = (P.interests||[]).slice(0,5).join(', ')||'fashion, music';
+  let age = P.age || '18-25';
+
+  let maxRetries = 2;
+  let attempt = 0;
+  let success = false;
+
+  while(attempt <= maxRetries && !success){
+    try{
+      if(attempt > 0){
+        await new Promise(function(r){ setTimeout(r, 1000 * attempt); });
+        feed.innerHTML = '<div class="sd-loading">Retrying... (attempt '+(attempt+1)+'/'+(maxRetries+1)+')</div>';
+      }
+
+      let sdController = new AbortController();
+      let sdTimer = setTimeout(function(){ sdController.abort(); }, 10000);
+      let res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        signal: sdController.signal,
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:1200,
+          system:'You generate a personalized trending feed for a teen/young adult. Create 8 notification-style trend alerts that feel current and relevant to their aesthetic and interests.\n\nCategories (use a mix):\n- tiktok: viral TikTok trends, dances, sounds, challenges\n- fashion: trending outfits, drops, style moments\n- music: new releases, chart news, concert announcements\n- beauty: viral products, makeup trends, skincare\n- culture: memes, shows, celebrity moments, internet drama\n- aesthetic: trending aesthetics, room decor, mood boards\n\nRules:\n- Make each alert feel like a real notification — urgent, exciting, FOMO-inducing\n- Match their aesthetic and music taste specifically\n- Use current-feeling language (but do not reference specific dates)\n- Each alert: short punchy title (under 10 words) + 1-2 sentence description\n- Mix of categories\n- Keep everything clean and appropriate for teens\n- Return ONLY a JSON array of {tag, title, desc} — no markdown, no code fences',
+          messages:[{role:'user',content:'My vibe: '+aeName+' aesthetic, age '+age+', into '+music+' and '+interests+'. Give me 8 trending alerts that I need to know about right now.'}]
+        })
+      });
+      clearTimeout(sdTimer);
+
+      if(!res.ok){
+        let errData;
+        try{ errData = await res.json(); }catch(e){ errData = {}; }
+
+        // Rate-limited — don't retry, tell the user to wait
+        if(res.status === 429 || (errData && errData._rate_limited)){
+          feed.innerHTML = '<div class="sd-loading has-error">You\'re moving too fast — try again in a minute<button class="section-retry-btn" onclick="loadDailyFeed()">Retry</button></div>';
+          btn.disabled = false;
+          btn.textContent = 'Refresh';
+          return;
+        }
+
+        throw new Error(errData.error || 'Server returned ' + res.status);
+      }
+
+      let data = await res.json();
+      let text = (data.content&&data.content[0]&&data.content[0].text)||'';
+      let match = text.match(/\[[\s\S]*\]/);
+      if(match){
+        let alerts = JSON.parse(match[0]);
+        if(Array.isArray(alerts) && alerts.length > 0){
+          sdCache = alerts;
+          renderDailyFeed(alerts);
+          success = true;
+        } else {
+          throw new Error('Empty alerts');
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    }catch(e){
+      attempt++;
+      if(attempt > maxRetries){
+        // All retries exhausted — show fallback trends
+        sdCache = sdFallbackAlerts;
+        renderDailyFeed(sdFallbackAlerts);
+        feed.insertAdjacentHTML('afterbegin',
+          '<div class="sd-loading" style="font-size:0.75rem;opacity:0.6;padding:6px 12px;">'+
+          'Showing general trends — hit Refresh for personalized results</div>');
+        success = true;
+      }
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Refresh';
+}
+
+function renderDailyFeed(alerts){
+  let feed = document.getElementById('sdFeed');
+  let pal = searchPal;
+  let tagColors = {
+    tiktok:'#e0405090',fashion:'#c0522a90',music:'#8040a090',
+    beauty:'#e0809090',culture:'#4080c090',aesthetic:'#60a06090'
+  };
+  let times = ['2 min ago','8 min ago','15 min ago','32 min ago','1 hr ago','2 hrs ago','3 hrs ago','5 hrs ago'];
+
+  feed.innerHTML = '';
+  alerts.forEach(function(a, i){
+    let card = document.createElement('div');
+    card.className = 'sd-card' + (i < 3 ? ' unread' : '');
+    card.style.background = pal.ac + (i < 3 ? '0c' : '04');
+    card.style.borderLeftColor = i < 3 ? pal.ac : 'transparent';
+    let dotColor = tagColors[(a.tag||'').toLowerCase()] || pal.ac+'60';
+    card.innerHTML =
+      '<div class="sd-card-dot" style="background:'+dotColor+'"></div>'+
+      '<div class="sd-card-body">'+
+        '<div class="sd-card-tag" style="color:'+pal.tx+'">'+(a.tag||'trending')+'</div>'+
+        '<div class="sd-card-title" style="color:'+pal.tx+'">'+escHtml(a.title||'')+'</div>'+
+        '<div class="sd-card-desc" style="color:'+pal.tx+'">'+escHtml(a.desc||'')+'</div>'+
+        '<div class="sd-card-time" style="color:'+pal.tx+'">'+(times[i]||'today')+'</div>'+
+      '</div>';
+    feed.appendChild(card);
+  });
+}
+
+// ─── CONTENT WITH IT (Pinterest board) ────────────────────
+function cwFetch(path, opts){
+  let url = (window.STUFLOVER_API_URL||'') + path;
+  let f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function cwHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+async function openContentView(){
+  let pal = searchPal;
+  document.getElementById('contentView').style.background = pal.bg;
+  document.getElementById('contentView').style.color = pal.tx;
+  document.getElementById('cwPostBtn').style.background = pal.ac;
+  document.getElementById('cwPostBtn').style.color = pal.bg;
+  document.getElementById('cwModalBox').style.background = pal.bg;
+  document.getElementById('cwModalBox').style.color = pal.tx;
+  document.getElementById('cwSubmitBtn').style.background = pal.ac;
+  document.getElementById('cwSubmitBtn').style.color = pal.bg;
+  await loadCwFeed();
+}
+
+async function loadCwFeed(){
+  let grid = document.getElementById('cwGrid');
+  let pal = searchPal;
+  grid.innerHTML = '<div class="cw-empty">Loading your board...</div>';
+  try{
+    let res = await fetchWithTimeout(cwFetch, '/api/posts?page=0',{headers:cwHeaders()}, 10000);
+    if(!res.ok){
+      grid.innerHTML = '<div class="cw-empty has-error">Could not load board (server error)<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
+      return;
+    }
+    let data = await res.json();
+    if(!data.posts || data.posts.length === 0){
+      grid.innerHTML = '<div class="cw-empty">No posts yet — be the first to share!</div>';
+      return;
+    }
+    grid.innerHTML = '';
+    data.posts.forEach(function(p){
+      let card = document.createElement('div');
+      card.className = 'cw-card';
+      card.style.background = pal.tx+'06';
+      let heartFill = p.liked ? pal.ac : 'none';
+      let heartStroke = p.liked ? pal.ac : pal.tx;
+      card.innerHTML =
+        '<img src="'+escHtml(p.image_url)+'" alt="" onerror="this.style.display=\'none\'"/>'+
+        '<div class="cw-card-info" style="color:'+pal.tx+'">'+
+          (p.caption ? '<div class="cw-card-caption">'+escHtml(p.caption)+'</div>' : '')+
+          '<div class="cw-card-meta">'+
+            '<span class="cw-card-user">'+escHtml(p.username)+'</span>'+
+            '<span class="cw-card-likes'+(p.liked?' liked':'')+'" onclick="toggleCwLike(event,'+p.id+','+(!p.liked)+')">'+
+              '<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+heartFill+'" stroke="'+heartStroke+'" stroke-width="1.5"/></svg>'+
+              ' '+(p.likes||0)+
+            '</span>'+
+          '</div>'+
+          (p.tags ? '<div style="font-size:0.65rem;opacity:0.3;margin-top:4px;">'+escHtml(p.tags)+'</div>' : '')+
+        '</div>';
+      grid.appendChild(card);
+    });
+  }catch(e){
+    let errMsg = e.message === 'Request timed out' ? 'Loading took too long — please try again' : 'Could not load board — check your connection';
+    grid.innerHTML = '<div class="cw-empty has-error">'+errMsg+'<button class="section-retry-btn" onclick="loadCwFeed()">Retry</button></div>';
+  }
+}
+
+async function toggleCwLike(e, postId, shouldLike){
+  e.stopPropagation();
+  try{
+    if(shouldLike){
+      await cwFetch('/api/posts/'+postId+'/like',{method:'POST',headers:cwHeaders()});
+    } else {
+      await cwFetch('/api/posts/'+postId+'/like',{method:'DELETE',headers:cwHeaders()});
+    }
+    await loadCwFeed();
+  }catch(e){}
+}
+
+function previewCwImage(){
+  let url = document.getElementById('cwUrlInput').value.trim();
+  let preview = document.getElementById('cwPreview');
+  if(url && url.match(/^https?:\/\//)){
+    preview.src = url;
+    preview.style.display = 'block';
+    preview.onerror = function(){ preview.style.display='none'; };
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function openCwModal(){
+  document.getElementById('cwModal').classList.add('open');
+  document.getElementById('cwUrlInput').value = '';
+  document.getElementById('cwCaptionInput').value = '';
+  document.getElementById('cwTagsInput').value = '';
+  document.getElementById('cwErr').textContent = '';
+  document.getElementById('cwPreview').style.display = 'none';
+  setTimeout(function(){ document.getElementById('cwUrlInput').focus(); },100);
+}
+function closeCwModal(){ document.getElementById('cwModal').classList.remove('open'); }
+
+async function submitCwPost(){
+  let url = document.getElementById('cwUrlInput').value.trim();
+  let caption = document.getElementById('cwCaptionInput').value.trim();
+  let tags = document.getElementById('cwTagsInput').value.trim();
+  let err = document.getElementById('cwErr');
+  if(!url){ err.textContent='Paste an image URL'; err.style.color='#c44'; return; }
+  if(!url.match(/^https?:\/\//)){err.textContent='Must be a valid URL starting with https://'; err.style.color='#c44'; return; }
+  err.textContent='Posting...'; err.style.color=searchPal.tx;
+  try{
+    let res = await cwFetch('/api/posts',{
+      method:'POST', headers:cwHeaders(),
+      body:JSON.stringify({imageUrl:url, caption:caption, tags:tags})
+    });
+    let data = await res.json();
+    if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
+    closeCwModal();
+    await loadCwFeed();
+  }catch(e){ err.textContent='Could not post — try again'; err.style.color='#c44'; }
+}
+
+// ─── FRIENDS / MESSAGES ──────────────────────────────────
+let frSelectedFriend = null;
+let frPollInterval = null;
+let frLastMsgCount = 0;
+let frGlobalPollInterval = null;
+
+// Notification sound using Web Audio API
+function playPing(){
+  try{
+    let ctx = new (window.AudioContext||window.webkitAudioContext)();
+    let osc = ctx.createOscillator();
+    let gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.3);
+    // Second tone for a cute double-ping
+    let osc2 = ctx.createOscillator();
+    let gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.frequency.value = 1100;
+    osc2.type = 'sine';
+    gain2.gain.setValueAtTime(0.2, ctx.currentTime+0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+    osc2.start(ctx.currentTime+0.15);
+    osc2.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+// Request notification permission on first interaction
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+document.addEventListener('click', requestNotifPermission, {once:true});
+
+// Show browser notification
+function showNotification(title, body){
+  if('Notification' in window && Notification.permission === 'granted'){
+    try{ new Notification(title, {body:body, icon:'/favicon.ico'}); }catch(e){}
+  }
+}
+
+// Global message polling — runs even when not in Friends view
+function startGlobalMsgPoll(){
+  if(frGlobalPollInterval) return;
+  frGlobalPollInterval = setInterval(async function(){
+    try{
+      let res = await frFetch('/api/friends',{headers:frHeaders()});
+      let data = await res.json();
+      let friends = data.friends||[];
+      // Check each friend for new messages
+      for(let i=0;i<friends.length;i++){
+        let f = friends[i];
+        try{
+          let mres = await frFetch('/api/friends/messages/'+f.id,{headers:frHeaders()});
+          let mdata = await mres.json();
+          let msgs = mdata.messages||[];
+          let key = 'stuflover_lastmsg_'+f.id;
+          let lastKnown = parseInt(localStorage.getItem(key)||'0');
+          if(msgs.length > 0){
+            let latest = msgs[msgs.length-1];
+            let latestId = latest.id||0;
+            let user = window.stufloverUser ? window.stufloverUser() : null;
+            let myId = user ? parseInt(user.id) : 0;
+            if(latestId > lastKnown && parseInt(latest.from_user) !== myId){
+              playPing();
+              showNotification('New message from '+f.username, latest.text.substring(0,60));
+              localStorage.setItem(key, latestId.toString());
+            } else if(latestId > lastKnown){
+              localStorage.setItem(key, latestId.toString());
+            }
+          }
+        }catch(e){}
+      }
+    }catch(e){}
+  }, 8000);
+}
+
+function frFetch(path, opts){
+  let url = (window.STUFLOVER_API_URL||'') + path;
+  let f = window._origFetch || window.fetch;
+  return f.call(window, url, opts);
+}
+function frHeaders(){
+  return {'Content-Type':'application/json','Authorization':'Bearer '+(localStorage.getItem('stuflover_token')||'')};
+}
+
+async function openFriendsView(){
+  let pal = searchPal;
+  // Hide settings button so it doesn't overlap the send button
+  let csBtn = document.getElementById('cursorSettingsBtn');
+  if(csBtn) csBtn.style.display = 'none';
+  let csPanel = document.getElementById('cursorPanel');
+  if(csPanel) csPanel.style.display = 'none';
+  document.getElementById('frSidebar').style.background = pal.bg;
+  document.getElementById('frSidebar').style.color = pal.tx;
+  document.getElementById('frChat').style.background = pal.bg;
+  document.getElementById('frChat').style.color = pal.tx;
+  document.getElementById('frSendBtn').style.background = pal.ac;
+  document.getElementById('frSendBtn').style.color = pal.bg;
+  document.getElementById('frInputRow').style.background = pal.bg + 'e8';
+  document.getElementById('frAddBox').style.background = pal.bg;
+  document.getElementById('frAddBox').style.color = pal.tx;
+  document.getElementById('frAddSubmit').style.background = pal.ac;
+  document.getElementById('frAddSubmit').style.color = pal.bg;
+  await loadFrRequests();
+  await loadFrList();
+  // Poll for new messages every 5s
+  if(frPollInterval) clearInterval(frPollInterval);
+  frPollInterval = setInterval(function(){
+    if(frSelectedFriend) loadFrMessages(frSelectedFriend);
+    loadFrRequests();
+    loadFrList();
+  }, 5000);
+}
+
+async function loadFrRequests(){
+  try{
+    let res = await frFetch('/api/friends/requests',{headers:frHeaders()});
+    let data = await res.json();
+    let container = document.getElementById('frRequests');
+    if(!data.requests || data.requests.length===0){ container.innerHTML=''; return; }
+    let pal = searchPal;
+    container.innerHTML = data.requests.map(function(r){
+      return '<div class="fr-req" style="color:'+pal.tx+'">'+
+        '<span class="fr-req-name">'+escHtml(r.username)+'</span>'+
+        '<button class="fr-req-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="acceptFr('+r.id+')">Accept</button>'+
+        '<button class="fr-req-btn" style="background:transparent;border:1px solid '+pal.tx+'30;color:'+pal.tx+'" onclick="declineFr('+r.id+')">Decline</button>'+
+      '</div>';
+    }).join('');
+  }catch(e){}
+}
+
+async function loadFrList(){
+  try{
+    let pal = searchPal;
+    let container = document.getElementById('frList');
+    let results = await Promise.all([
+      frFetch('/api/friends',{headers:frHeaders()}),
+      frFetch('/api/friends/sent-requests',{headers:frHeaders()}),
+      frFetch('/api/friends/unread',{headers:frHeaders()})
+    ]);
+    let data = await results[0].json();
+    let sentData = await results[1].json();
+    let unreadData = await results[2].json();
+    let friends = data.friends || [];
+    let sent = sentData.requests || [];
+    let unreadMap = {};
+    (unreadData.perFriend||[]).forEach(function(u){ unreadMap[u.from_user] = u.count; });
+    if(friends.length===0 && sent.length===0){
+      container.innerHTML = '<div style="padding:20px;text-align:center;opacity:0.3;font-style:italic;font-size:0.82rem;">No friends yet — add someone!</div>';
+      return;
+    }
+    let html = friends.map(function(f){
+      let isOn = frSelectedFriend && frSelectedFriend.id === f.id;
+      let unread = unreadMap[f.id] || 0;
+      let badge = unread > 0 ? '<div class="fr-item-unread" style="background:'+pal.ac+';color:'+pal.bg+'">'+unread+'</div>' : '';
+      return '<div class="fr-item'+(isOn?' on':'')+'" onclick="selectFriend('+f.id+',\''+_escJsString(f.username)+'\')" style="color:'+pal.tx+'">'+
+        '<div class="fr-item-avatar" style="background:'+pal.ac+'">'+f.username.charAt(0).toUpperCase()+'</div>'+
+        '<div class="fr-item-name">'+escHtml(f.username)+'</div>'+
+        badge+
+      '</div>';
+    }).join('');
+    if(sent.length > 0){
+      html += sent.map(function(r){
+        return '<div class="fr-item" style="color:'+pal.tx+';opacity:0.6;">'+
+          '<div class="fr-item-avatar" style="background:'+pal.ac+'40">'+r.username.charAt(0).toUpperCase()+'</div>'+
+          '<div class="fr-item-name">'+escHtml(r.username)+'</div>'+
+          '<div class="fr-item-pending" style="background:'+pal.ac+'22;color:'+pal.ac+'">Pending</div>'+
+        '</div>';
+      }).join('');
+    }
+    container.innerHTML = html;
+  }catch(e){}
+}
+
+async function selectFriend(id, username){
+  frSelectedFriend = {id:id, username:username};
+  let pal = searchPal;
+  document.getElementById('frEmpty').style.display = 'none';
+  document.getElementById('frChatHeader').style.display = 'flex';
+  document.getElementById('frChatHeader').innerHTML = '<div class="fr-item-avatar" style="background:'+pal.ac+';width:28px;height:28px;font-size:0.6rem;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;">'+username.charAt(0).toUpperCase()+'</div>'+escHtml(username);
+  document.getElementById('frChatHeader').style.color = pal.tx;
+  document.getElementById('frProfile').classList.remove('open');
+  document.getElementById('frMsgs').style.display = 'flex';
+  document.getElementById('frInputRow').style.display = 'flex';
+  loadFrList(); // refresh selected state
+  await loadFrMessages(frSelectedFriend);
+}
+
+async function toggleFrProfile(){
+  if(!frSelectedFriend) return;
+  let panel = document.getElementById('frProfile');
+  let msgs = document.getElementById('frMsgs');
+  let input = document.getElementById('frInputRow');
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    msgs.style.display = 'flex';
+    input.style.display = 'flex';
+    return;
+  }
+  let pal = searchPal;
+  panel.style.color = pal.tx;
+  panel.innerHTML = '<div style="opacity:0.4;font-size:0.8rem;">Loading...</div>';
+  panel.classList.add('open');
+  msgs.style.display = 'none';
+  input.style.display = 'none';
+  try{
+    let res = await frFetch('/api/friends/profile/'+frSelectedFriend.id,{headers:frHeaders()});
+    let data = await res.json();
+    let p = data.profile || {};
+    let joined = p.created_at ? new Date(p.created_at+'Z') : null;
+    let joinedStr = joined ? joined.toLocaleDateString(undefined,{month:'long',year:'numeric'}) : '';
+    panel.innerHTML =
+      '<div class="fr-profile-avatar" style="background:'+pal.ac+'">'+escHtml((p.username||'?').charAt(0).toUpperCase())+'</div>'+
+      '<div class="fr-profile-name" style="color:'+pal.tx+'">'+escHtml(p.username||frSelectedFriend.username)+'</div>'+
+      (joinedStr ? '<div class="fr-profile-joined">Joined '+escHtml(joinedStr)+'</div>' : '')+
+      '<div class="fr-profile-actions">'+
+        '<button class="fr-profile-btn" style="background:'+pal.ac+';color:'+pal.bg+'" onclick="toggleFrProfile()">Message</button>'+
+        '<button class="fr-profile-btn danger" onclick="deleteFriend('+frSelectedFriend.id+')">Remove Friend</button>'+
+      '</div>';
+  }catch(e){
+    panel.innerHTML = '<div style="opacity:0.4;font-size:0.8rem;">Could not load profile</div>';
+  }
+}
+
+async function deleteFriend(friendId){
+  if(!confirm('Remove this friend? You won\'t be able to message them anymore.')) return;
+  try{
+    let res = await frFetch('/api/friends/'+friendId,{method:'DELETE',headers:frHeaders()});
+    let data = await res.json();
+    if(data.error){ alert(data.error); return; }
+    frSelectedFriend = null;
+    document.getElementById('frProfile').classList.remove('open');
+    document.getElementById('frProfile').innerHTML = '';
+    document.getElementById('frChatHeader').style.display = 'none';
+    document.getElementById('frMsgs').style.display = 'none';
+    document.getElementById('frInputRow').style.display = 'none';
+    document.getElementById('frEmpty').style.display = 'flex';
+    await loadFrList();
+  }catch(e){ console.error('Delete friend error:', e); }
+}
+
+async function loadFrMessages(friend){
+  try{
+    let res = await frFetch('/api/friends/messages/'+friend.id,{headers:frHeaders()});
+    let data = await res.json();
+    let container = document.getElementById('frMsgs');
+    let pal = searchPal;
+    let user = window.stufloverUser ? window.stufloverUser() : null;
+    let myId = user ? parseInt(user.id) : 0;
+    let msgs = data.messages||[];
+    // Detect new incoming message and ping
+    if(msgs.length > frLastMsgCount && frLastMsgCount > 0){
+      let latest = msgs[msgs.length-1];
+      if(parseInt(latest.from_user) !== myId) playPing();
+    }
+    frLastMsgCount = msgs.length;
+    // Update last known for global poll
+    if(msgs.length>0) localStorage.setItem('stuflover_lastmsg_'+friend.id, (msgs[msgs.length-1].id||0).toString());
+    container.innerHTML = msgs.map(function(m){
+      let isMe = parseInt(m.from_user) === myId;
+      let time = new Date(m.created_at+'Z');
+      let h = time.getHours(); let min = time.getMinutes();
+      let ts = (h%12||12)+':'+(min<10?'0':'')+min+(h<12?' am':' pm');
+      return '<div class="fr-msg '+(isMe?'me':'them')+'" style="background:'+(isMe?pal.tx+'12':pal.ac+'18')+';color:'+pal.tx+'">'+
+        escHtml(m.text)+
+        '<div class="fr-msg-time">'+ts+'</div>'+
+      '</div>';
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  }catch(e){}
+}
+
+async function sendFrMsg(){
+  if(!frSelectedFriend) return;
+  let input = document.getElementById('frInput');
+  let text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  try{
+    let res = await frFetch('/api/friends/message',{
+      method:'POST', headers:frHeaders(),
+      body:JSON.stringify({friendId:frSelectedFriend.id, text:text})
+    });
+    let data = await res.json();
+    if(data.error){
+      // Show error inline instead of alert
+      let container = document.getElementById('frMsgs');
+      let errDiv = document.createElement('div');
+      errDiv.style.cssText = 'text-align:center;padding:8px;font-size:0.75rem;opacity:0.5;color:#c44;';
+      errDiv.textContent = data.error;
+      container.appendChild(errDiv);
+      container.scrollTop = container.scrollHeight;
+      return;
+    }
+    await loadFrMessages(frSelectedFriend);
+  }catch(e){
+    console.error('Send message error:', e);
+  }
+}
+
+async function acceptFr(id){
+  try{
+    await frFetch('/api/friends/accept',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await loadFrRequests();
+    await loadFrList();
+  }catch(e){}
+}
+
+async function declineFr(id){
+  try{
+    await frFetch('/api/friends/decline',{method:'POST',headers:frHeaders(),body:JSON.stringify({requestId:id})});
+    await loadFrRequests();
+  }catch(e){}
+}
+
+function openFrAddModal(){
+  document.getElementById('frAddModal').classList.add('open');
+  document.getElementById('frAddInput').value = '';
+  document.getElementById('frAddErr').textContent = '';
+  setTimeout(function(){ document.getElementById('frAddInput').focus(); },100);
+}
+function closeFrAddModal(){ document.getElementById('frAddModal').classList.remove('open'); }
+
+async function sendFrRequest(){
+  let username = document.getElementById('frAddInput').value.trim();
+  let err = document.getElementById('frAddErr');
+  if(!username){ err.textContent='Enter a username'; err.style.color='#c44'; return; }
+  err.textContent='Searching...'; err.style.color=searchPal.tx;
+  try{
+    // First check if user exists
+    let check = await frFetch('/api/friends/search/'+encodeURIComponent(username),{headers:frHeaders()});
+    if(check.ok){
+      let checkData = await check.json();
+      if(!checkData.found){
+        err.textContent='No account found for "'+username+'" — they need to sign up at '+window.location.origin+'/auth.html first';
+        err.style.color='#c44';
+        return;
+      }
+      // Use the exact username from server
+      username = checkData.username;
+      if(checkData.suggestions && checkData.suggestions.length > 1){
+        err.textContent='Found: '+checkData.suggestions.join(', ');
+        err.style.color=searchPal.ac;
+      }
+    }
+    // Send the request
+    let res = await frFetch('/api/friends/request',{
+      method:'POST', headers:frHeaders(),
+      body:JSON.stringify({username:username})
+    });
+    let data = await res.json().catch(function(){return{error:'Server error'};});
+    if(!res.ok || data.error){ err.textContent=data.error||'Failed'; err.style.color='#c44'; return; }
+    err.textContent='Request sent to '+username+'!'; err.style.color=searchPal.ac;
+    document.getElementById('frAddInput').value='';
+    loadFrList();
+    setTimeout(closeFrAddModal, 1500);
+  }catch(e){ err.textContent='Cannot reach server — is your internet working?'; err.style.color='#c44'; console.error('Friend request error:', e); }
+}
+
+// ─── ROUTINE BUILDER ─────────────────────────────────────
+let rtMode = 'morning'; // or 'night'
+
+function getRoutines(){
+  try{ return JSON.parse(localStorage.getItem('stuflover_routines')||'null')||{morning:[],night:[]}; }
+  catch(e){ return {morning:[],night:[]}; }
+}
+function saveRoutines(r){ localStorage.setItem('stuflover_routines', JSON.stringify(r)); }
+
+function switchRoutine(mode){
+  rtMode = mode;
+  document.getElementById('rtMorningBtn').classList.toggle('on', mode==='morning');
+  document.getElementById('rtNightBtn').classList.toggle('on', mode==='night');
+  document.getElementById('rtMorningBtn').style.borderColor = mode==='morning' ? searchPal.ac : 'rgba(128,128,128,0.15)';
+  document.getElementById('rtNightBtn').style.borderColor = mode==='night' ? searchPal.ac : 'rgba(128,128,128,0.15)';
+  renderRoutineSteps();
+}
+
+function openRoutineView(){
+  let pal = searchPal;
+  document.getElementById('routineView').style.background = pal.bg;
+  document.getElementById('routineView').style.color = pal.tx;
+  document.getElementById('rtAddBtn').style.background = pal.ac;
+  document.getElementById('rtAddBtn').style.color = pal.bg;
+  document.querySelectorAll('.routine-toggle-btn').forEach(function(b){ b.style.color = pal.tx; });
+  switchRoutine(rtMode);
+}
+
+function renderRoutineSteps(){
+  let pal = searchPal;
+  let routines = getRoutines();
+  let steps = routines[rtMode] || [];
+  let title = rtMode === 'morning' ? 'My Morning Routine' : 'My Night Routine';
+  document.getElementById('rtColTitle').textContent = title;
+
+  let container = document.getElementById('rtSteps');
+  container.innerHTML = '';
+
+  if(steps.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:20px;opacity:0.3;font-style:italic;">No steps yet — add some or let AI generate a routine</div>';
+    return;
+  }
+
+  steps.forEach(function(step, i){
+    let div = document.createElement('div');
+    div.className = 'routine-step';
+    div.style.background = pal.ac + '08';
+    div.style.borderColor = pal.tx + '0a';
+    div.innerHTML =
+      '<div class="routine-step-time" style="color:'+pal.ac+'">'+escHtml(step.time||'')+'</div>'+
+      '<div class="routine-step-text" style="color:'+pal.tx+'">'+escHtml(step.text)+'</div>'+
+      '<button class="routine-step-del" onclick="deleteRoutineStep('+i+')" style="color:'+pal.tx+'">x</button>';
+    container.appendChild(div);
+  });
+}
+
+function addRoutineStep(){
+  let time = document.getElementById('rtAddTime').value.trim();
+  let text = document.getElementById('rtAddText').value.trim();
+  if(!text) return;
+  let routines = getRoutines();
+  if(!routines[rtMode]) routines[rtMode] = [];
+  routines[rtMode].push({time:time, text:text});
+  saveRoutines(routines);
+  document.getElementById('rtAddTime').value = '';
+  document.getElementById('rtAddText').value = '';
+  renderRoutineSteps();
+}
+
+function deleteRoutineStep(idx){
+  let routines = getRoutines();
+  if(routines[rtMode]) routines[rtMode].splice(idx, 1);
+  saveRoutines(routines);
+  renderRoutineSteps();
+}
+
+async function suggestRoutineSteps(){
+  let btn = document.getElementById('rtSuggestBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  let aeName = resolveAeName();
+  let interests = (P.interests||[]).join(', ') || 'various';
+  let mood = P.moodToday || 'okay';
+  let jsonInstruction = 'IMPORTANT: Return ONLY a valid JSON array like [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words).\n\n';
+  let prompt = rtMode === 'morning'
+    ? jsonInstruction + 'Generate a morning routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 7:00am. Each step should be specific and match their vibe.'
+    : jsonInstruction + 'Generate a night routine for a person with '+aeName+' aesthetic who is into '+interests+'. Current mood: '+mood+'. Include 6-8 steps with times starting from 8:00pm. Include skincare, wind-down, and relaxation that match their aesthetic.';
+
+  try{
+    let res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        system:'Generate a personalized routine. Return ONLY a valid JSON array of objects: [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text. Keep each step short (under 10 words). Be specific to their aesthetic.',
+        featureSystemPrompt:'Return ONLY a valid JSON array of objects: [{"time":"7:00","text":"step description"}]. Keys MUST be double-quoted. No markdown, no code fences, no other text.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    let data = await res.json();
+    let text = (data.content&&data.content[0]&&data.content[0].text)||'';
+    let match = text.match(/\[[\s\S]*\]/);
+    if(match){
+      let fixedJson = match[0].replace(/(\{|,)\s*(\w+)\s*:/g, '$1"$2":');
+      let steps = JSON.parse(fixedJson);
+      if(Array.isArray(steps) && steps.length > 0){
+        let routines = getRoutines();
+        routines[rtMode] = steps.map(function(s){ return {time:s.time||'', text:s.text||s.step||''}; });
+        saveRoutines(routines);
+        renderRoutineSteps();
+      } else {
+        btn.textContent = 'Failed — try again';
+        setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
+      }
+    } else {
+      btn.textContent = 'Failed — try again';
+      setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
+    }
+  }catch(e){
+    console.error('Routine generation failed:', e);
+    btn.textContent = 'Failed — try again';
+    setTimeout(function(){ btn.textContent = 'Generate routine with AI'; }, 3000);
+  }
+
+  btn.disabled = false;
+}
+
+// ─── MY PROFILE ──────────────────────────────────────────
+let PROFILE_THEMES = [
+  {name:'Rose',bg:'#f9c4c4',tx:'#1e0c06',ac:'#c4522a'},
+  {name:'Lavender',bg:'#e8d0f0',tx:'#1a0828',ac:'#8040a0'},
+  {name:'Mint',bg:'#c8ecd8',tx:'#0a2010',ac:'#2a8a4a'},
+  {name:'Sky',bg:'#c8e0f8',tx:'#081830',ac:'#3060b0'},
+  {name:'Peach',bg:'#f8dcc8',tx:'#1e0c00',ac:'#c87030'},
+  {name:'Noir',bg:'#1a1a1a',tx:'#e8e0d8',ac:'#c8a878'},
+  {name:'Sunset',bg:'#f0c8b0',tx:'#1e0800',ac:'#e06030'},
+  {name:'Berry',bg:'#e8c0d8',tx:'#280818',ac:'#a83070'},
+];
+
+let PROFILE_DECOS = [
+  {id:'sparkles',label:'Sparkles'},
+  {id:'stars',label:'Star Border'},
+  {id:'glow',label:'Glow'},
+  {id:'pattern',label:'Pattern'},
+];
+
+function openProfileView(){
+  let pal = searchPal;
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  let username = (user && user.username) || 'you';
+  let bio = localStorage.getItem('stuflover_bio') || '';
+  let theme = JSON.parse(localStorage.getItem('stuflover_profile_theme') || 'null');
+  let decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topAe = topAe ? topAe[0] : 'softgirl';
+  let aeName = resolveAeName();
+  let colName = P.faveColour ? P.faveColour.name : 'not set';
+  let colHex = P.faveColour ? P.faveColour.hex : pal.ac;
+
+  // Apply theme or default palette
+  let t = theme || pal;
+  let card = document.getElementById('profileCard');
+  card.style.background = t.bg || pal.bg;
+  card.style.color = t.tx || pal.tx;
+  card.className = 'profile-card';
+  decos.forEach(function(d){ card.classList.add('deco-'+d); });
+  if(decos.includes('glow')){
+    card.style.setProperty('--glow-color', t.ac || pal.ac);
+    let before = card.querySelector(':scope');//just set via style
+    card.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10), 0 0 40px '+(t.ac||pal.ac)+'40';
+  }
+
+  // Avatar
+  let av = document.getElementById('profileAvatar');
+  av.style.background = t.ac || pal.ac;
+  av.textContent = username.charAt(0).toUpperCase();
+
+  // Username
+  document.getElementById('profileUsername').textContent = username;
+  document.getElementById('profileUsername').style.color = t.tx || pal.tx;
+
+  // Bio
+  document.getElementById('profileBioDisplay').textContent = bio || 'no bio yet';
+  document.getElementById('profileBioInput').value = bio;
+  document.getElementById('profileBioCount').textContent = bio.length + ' / 150';
+
+  // Meta
+  document.getElementById('profileAesthetic').textContent = aeName;
+  document.getElementById('profileColourDot').style.background = colHex;
+  document.getElementById('profileColourName').textContent = colName;
+
+  // Join date
+  let jd = user && user.created_at ? new Date(user.created_at).toLocaleDateString('en-GB',{month:'short',year:'numeric'}) : '';
+  document.getElementById('profileJoinDate').textContent = jd ? 'Joined '+jd : '';
+
+  // Save button
+  let saveBtn = document.getElementById('profileBioSaveBtn');
+  saveBtn.style.background = t.ac || pal.ac;
+  saveBtn.style.color = t.bg || pal.bg;
+
+  // Theme grid
+  let tGrid = document.getElementById('profileThemeGrid');
+  tGrid.innerHTML = '';
+  PROFILE_THEMES.forEach(function(pt){
+    let sw = document.createElement('div');
+    sw.className = 'profile-theme-swatch' + (theme && theme.name===pt.name ? ' on' : '');
+    sw.style.background = 'linear-gradient(135deg,'+pt.bg+','+pt.ac+'40)';
+    sw.title = pt.name;
+    sw.onclick = function(){ pickProfileTheme(pt); };
+    tGrid.appendChild(sw);
+  });
+
+  // Deco grid
+  let dGrid = document.getElementById('profileDecoGrid');
+  dGrid.innerHTML = '';
+  PROFILE_DECOS.forEach(function(dc){
+    let btn = document.createElement('button');
+    btn.className = 'profile-deco-toggle' + (decos.includes(dc.id) ? ' on' : '');
+    btn.textContent = dc.label;
+    btn.style.color = t.tx || pal.tx;
+    if(decos.includes(dc.id)){ btn.style.borderColor = t.ac || pal.ac; }
+    btn.onclick = function(){ toggleProfileDeco(dc.id); };
+    dGrid.appendChild(btn);
+  });
+
+  // Style the profileView bg
+  document.getElementById('profileView').style.background = pal.bg;
+  document.getElementById('profileView').style.color = pal.tx;
+}
+
+function onProfileBioInput(){
+  let input = document.getElementById('profileBioInput');
+  document.getElementById('profileBioCount').textContent = input.value.length + ' / 150';
+}
+
+function saveProfileBio(){
+  let bio = document.getElementById('profileBioInput').value.trim().substring(0,150);
+  localStorage.setItem('stuflover_bio', bio);
+  document.getElementById('profileBioDisplay').textContent = bio || 'no bio yet';
+  let btn = document.getElementById('profileBioSaveBtn');
+  btn.textContent = 'Saved!';
+  setTimeout(function(){ btn.textContent = 'Save Bio'; }, 1500);
+}
+
+function pickProfileTheme(pt){
+  localStorage.setItem('stuflover_profile_theme', JSON.stringify(pt));
+  openProfileView();
+}
+
+function toggleProfileDeco(id){
+  let decos = JSON.parse(localStorage.getItem('stuflover_profile_decos') || '[]');
+  let idx = decos.indexOf(id);
+  if(idx >= 0) decos.splice(idx,1); else decos.push(id);
+  localStorage.setItem('stuflover_profile_decos', JSON.stringify(decos));
+  openProfileView();
+}
+
+// ─── VIRAL DECORATIONS ───────────────────────────────────
+// Sparkle cursor trail on lifestyle page
+let sparklePool = [];
+function initSparkleTrail(){
+  let trailOn = localStorage.getItem('stuflover_cursor_on') !== 'false';
+  if(!trailOn) return;
+  let trailType = localStorage.getItem('stuflover_cursor_type') || 'dots';
+  let trailColor = localStorage.getItem('stuflover_cursor_color') || 'palette';
+  let color = trailColor === 'palette' ? searchPal.ac : trailColor === 'pink' ? '#e8829a' : trailColor === 'purple' ? '#9070e0' : trailColor === 'gold' ? '#d4aa70' : '#ffffff';
+
+  document.addEventListener('mousemove', function(e){
+    if(sparklePool.length > 12) return;
+    let el = document.createElement('div');
+    el.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;left:'+e.clientX+'px;top:'+e.clientY+'px;transition:all 0.5s ease;';
+    if(trailType === 'hearts'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+color+'"/></svg>';
+    } else if(trailType === 'stars'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="'+color+'"/></svg>';
+    } else if(trailType === 'sparkles'){
+      el.innerHTML = '<svg width="8" height="8" viewBox="0 0 16 16"><path d="M8 0 L10 6 L16 8 L10 10 L8 16 L6 10 L0 8 L6 6Z" fill="'+color+'"/></svg>';
+    } else {
+      el.style.width='5px';el.style.height='5px';el.style.borderRadius='50%';el.style.background=color;el.style.opacity='0.7';
+    }
+    document.body.appendChild(el);sparklePool.push(el);
+    setTimeout(function(){el.style.opacity='0';el.style.transform='scale(0) translateY(-14px)';},40);
+    setTimeout(function(){el.remove();sparklePool.splice(sparklePool.indexOf(el),1);},550);
+  });
+}
+
+// Cursor trail settings panel
+// ─── INSTANT FEED (no API, loads immediately) ─────────────
+function buildInstantFeed(){
+  let feed = document.getElementById('instantFeed');
+  if(!feed || !searchPal) return;
+  let pal = searchPal;
+  let aeName = resolveAeName();
+  let topK = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  topK = topK?topK[0]:'softgirl';
+
+  // Shuffle and pick 4 items from a large pool
+  let allItems = [];
+
+  // This or That (instant, no API)
+  let totQs = [
+    ['morning person','night owl'],['sweet','savoury'],['texting','calling'],['summer','winter'],
+    ['cats','dogs'],['city','countryside'],['music with lyrics','instrumental'],['iced coffee','hot coffee'],
+    ['reading','watching'],['photos','videos'],['early bird','last minute'],['cosy in','going out'],
+    ['sweet snacks','salty snacks'],['playlist','album on shuffle'],['window seat','aisle seat'],
+    ['baths','showers'],['sunsets','sunrises'],['handwritten','typed'],['solo trip','group trip'],
+  ];
+  totQs.forEach(function(q){
+    allItems.push({type:'tot', q:q});
+  });
+
+  // Rate prompts (0 API)
+  let ratePrompts = [
+    'rate your outfit today 1-10 and be honest','rate your current mood on a scale of cosy to chaotic',
+    'rate how well your room matches your aesthetic rn','rate your music taste — are you a 10?',
+    'rate your current phone wallpaper vibes','rate how productive you have been today no lying',
+  ];
+  ratePrompts.forEach(function(p){ allItems.push({type:'rate', prompt:p}); });
+
+  // Mini challenges (instant)
+  let challenges = [
+    'open your camera roll — the 7th photo is your new aesthetic. what is it?',
+    'describe your outfit right now using only 3 words',
+    'pick a colour. now name 5 things in your room that colour.',
+    'the last song you listened to is now the title of your autobiography. what is it?',
+    'text someone "thinking of you" right now. do it. they need it.',
+    'look out your window. describe what you see like a movie scene.',
+    'name your top 3 comfort shows in order. go.',
+    'if your life had a soundtrack what song is playing rn?',
+    'pick an item you are wearing. tell its backstory.',
+    'close your eyes and think of a colour. open them. that colour is your energy today.',
+  ];
+  challenges.forEach(function(c){ allItems.push({type:'challenge', text:c}); });
+
+  // Shuffle
+  for(let i=allItems.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    let tmp=allItems[i]; allItems[i]=allItems[j]; allItems[j]=tmp;
+  }
+
+  // Pick 4
+  let picked = allItems.slice(0,4);
+  feed.innerHTML = '';
+
+  picked.forEach(function(item, idx){
+    let card = document.createElement('div');
+    card.style.cssText = 'padding:16px 18px;border-radius:14px;margin-bottom:10px;background:'+pal.tx+'05;border:1px solid '+pal.tx+'06;animation:fadeSlideIn 0.3s ease both;animation-delay:'+(idx*0.08)+'s;';
+
+    if(item.type === 'tot'){
+      // This or That — two tappable buttons
+      card.innerHTML =
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.9;color:'+pal.tx+';margin-bottom:8px;">This or That</div>'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.nextElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[0])+'</button>'+
+          '<button onclick="this.style.background=\''+pal.ac+'18\';this.style.borderColor=\''+pal.ac+'\';this.previousElementSibling.style.opacity=\'0.3\'" style="flex:1;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.2s;">'+escHtml(item.q[1])+'</button>'+
+        '</div>';
+
+    } else if(item.type === 'challenge'){
+      card.innerHTML =
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.9;color:'+pal.tx+';margin-bottom:8px;">Mini Challenge</div>'+
+        '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;">'+escHtml(item.text)+'</div>';
+
+    } else if(item.type === 'rate'){
+      card.innerHTML =
+        '<div style="font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.55;color:'+pal.tx+';margin-bottom:8px;">Quick Rate</div>'+
+        '<div style="font-size:0.9rem;line-height:1.55;color:'+pal.tx+';opacity:0.7;margin-bottom:10px;">'+escHtml(item.prompt)+'</div>'+
+        '<div style="display:flex;gap:4px;">'+
+        [1,2,3,4,5,6,7,8,9,10].map(function(n){
+          return '<button onclick="this.parentNode.querySelectorAll(\'button\').forEach(function(b,i){b.style.background=i<'+n+'?\''+pal.ac+'20\':\'transparent\';b.style.color=i<'+n+'?\''+pal.ac+'\':\''+pal.tx+'\'})" style="width:28px;height:28px;border-radius:50%;border:1px solid '+pal.tx+'10;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-weight:600;cursor:pointer;transition:all 0.15s;">'+n+'</button>';
+        }).join('')+
+        '</div>';
+    }
+
+    feed.appendChild(card);
+  });
+
+  // "Show more" button
+  let more = document.createElement('button');
+  more.style.cssText = 'width:100%;padding:12px;border-radius:12px;border:1.5px solid '+pal.tx+'33;background:transparent;color:'+pal.tx+';font-family:Space Grotesk,sans-serif;font-size:0.82rem;cursor:pointer;transition:color 0.15s, border-color 0.15s;margin-bottom:16px;';
+  more.textContent = 'show me more';
+  more.onmouseenter = function(){ this.style.color = pal.ac; this.style.borderColor = pal.ac; };
+  more.onmouseleave = function(){ this.style.color = pal.tx; this.style.borderColor = pal.tx + '33'; };
+  more.onfocus = more.onmouseenter;
+  more.onblur = more.onmouseleave;
+  more.onclick = function(){ buildInstantFeed(); };
+  feed.appendChild(more);
+}
+
+// ─── FLOVEE POST — YOUR AI BEST FRIEND ───────────────────
+let FLOVEE_DATA = {
+  lumi:   {name:'Lumi',   emoji:'✨', color:'#a8d8ea', darkColor:'#2a4a5a', vibe:'wellness queen', aesthetic:'clean girl', gradient:'linear-gradient(135deg,#a8d8ea,#dceef5)'},
+  delara: {name:'Delara', emoji:'📖', color:'#8b7355', darkColor:'#3d2f1e', vibe:'book girly',     aesthetic:'dark academia', gradient:'linear-gradient(135deg,#8b7355,#c4a882)'},
+  vesper: {name:'Vesper', emoji:'🎀', color:'#f4a0b0', darkColor:'#5a2030', vibe:'coquette princess', aesthetic:'coquette', gradient:'linear-gradient(135deg,#f4a0b0,#fcd4dc)'},
+  zola:   {name:'Zola',   emoji:'💀', color:'#ff8a65', darkColor:'#4a2010', vibe:'chaos queen',    aesthetic:'y2k',       gradient:'linear-gradient(135deg,#ff8a65,#ffccbc)'},
+  miro:   {name:'Miro',   emoji:'🎧', color:'#a5d6a7', darkColor:'#1b3a1d', vibe:'indie girly',    aesthetic:'indie',     gradient:'linear-gradient(135deg,#a5d6a7,#c8e6c9)'},
+  seraph: {name:'Seraph', emoji:'🌙', color:'#ce93d8', darkColor:'#3a1a42', vibe:'moon girl',      aesthetic:'spiritual', gradient:'linear-gradient(135deg,#ce93d8,#e1bee7)'},
+  remi:   {name:'Remi',   emoji:'🌅', color:'#ffcc80', darkColor:'#4a3010', vibe:'main character',  aesthetic:'softgirl',  gradient:'linear-gradient(135deg,#ffcc80,#ffe0b2)'},
+  nox:    {name:'Nox',    emoji:'🖤', color:'#90a4ae', darkColor:'#263238', vibe:'deadpan icon',    aesthetic:'goth',      gradient:'linear-gradient(135deg,#78909c,#b0bec5)'},
+};
+
+let floveeReacted = false;
+
+function getUserFloveeId(){
+  let topAe = Object.entries(P.aesthetics||{}).sort(function(a,b){return b[1]-a[1];})[0];
+  let aeKey = topAe ? topAe[0] : 'softgirl';
+  let aeMap = {kawaii:'lumi',softgirl:'vesper',cleangirl:'lumi',coquette:'vesper',goth:'nox',darkacad:'delara',grunge:'nox',y2k:'zola',street:'miro',cottage:'seraph',hippie:'seraph',oldmoney:'delara',preppy:'lumi',indie:'miro',emo:'nox'};
+  return aeMap[aeKey] || 'remi';
+}
+
+let _floveeTimerInterval = null;
+async function loadFloveePost(){
+  if(_floveeTimerInterval){ clearInterval(_floveeTimerInterval); _floveeTimerInterval = null; }
+  let wrap = document.getElementById('floveePostWrap');
+  if(!wrap || !searchPal) return;
+  let pal = searchPal;
+  let base = window.STUFLOVER_API_URL || '';
+  let token = localStorage.getItem('stuflover_token');
+  if(!token) return;
+
+  try{
+    let res = await (window._origFetch||fetch).call(window, base+'/api/flovee/post',{
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+    });
+    let data = await res.json();
+
+    if(data.status === 'active' && data.post){
+      let fd = FLOVEE_DATA[data.post.flovee_id] || FLOVEE_DATA.remi;
+      let exp = new Date(data.post.expires_at);
+      let hoursLeft = Math.max(0, Math.round((exp - Date.now()) / 3600000));
+      let minsLeft = Math.max(0, Math.round((exp - Date.now()) / 60000));
+      let timeLabel = hoursLeft > 6 ? hoursLeft+'h left' : hoursLeft > 1 ? hoursLeft+'h left' : (minsLeft >= 1 ? minsLeft+'m left' : '<1m left');
+      let urgency = hoursLeft <= 1 ? 'animation:pulse 1.5s ease-in-out infinite;' : '';
+      let timerWidth = Math.max(5, Math.min(100, (minsLeft / (18*60)) * 100));
+
+      // Check if first time seeing flovee
+      let seenFlovee = localStorage.getItem('stuflover_seen_flovee');
+      let introHtml = '';
+      if(!seenFlovee){
+        introHtml =
+          '<div style="padding:12px 16px;border-radius:12px;background:'+pal.tx+'05;margin-bottom:14px;border:1px dashed '+pal.tx+'10;">'+
+            '<div style="font-size:0.72rem;font-weight:700;color:'+pal.tx+';margin-bottom:4px;">'+fd.emoji+' meet your flovee</div>'+
+            '<div style="font-size:0.78rem;line-height:1.6;color:'+pal.tx+';opacity:0.55;">your flovee is your AI best friend — matched to your aesthetic. she texts you throughout the day, but her messages disappear. if you miss it, it is gone forever.</div>'+
+          '</div>';
+        localStorage.setItem('stuflover_seen_flovee', 'true');
+      }
+
+      wrap.style.display = 'block';
+      let shareText = fd.emoji+' '+fd.name+' just texted me: "'+data.post.content+'" — my AI bestie on stuflover.com';
+      let savedReaction = localStorage.getItem('flovee_react_'+data.post.id);
+
+      wrap.innerHTML = introHtml +
+        '<div style="border-radius:24px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.08);">'+
+          // Big gradient header with avatar
+          '<div style="padding:24px 22px 20px;background:'+fd.gradient+';position:relative;">'+
+            '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;min-width:0;">'+
+              '<div style="flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,0.08);">'+fd.emoji+'</div>'+
+              '<div style="flex:1 1 auto;min-width:0;word-break:normal;overflow-wrap:anywhere;">'+
+                '<div style="font-size:1.1rem;font-weight:800;color:'+fd.darkColor+';line-height:1.2;">'+fd.name+'</div>'+
+                '<div style="font-size:0.72rem;opacity:0.6;color:'+fd.darkColor+';margin-top:2px;">'+fd.vibe+' · your flovee</div>'+
+              '</div>'+
+              '<div style="flex:0 0 auto;text-align:right;">'+
+                '<div style="display:flex;align-items:center;gap:5px;justify-content:flex-end;">'+
+                  '<div id="floveeTimerDot" style="width:7px;height:7px;border-radius:50%;background:'+(hoursLeft<=1?'#ef5350':hoursLeft<=3?'#ff9800':'#4caf50')+';'+(hoursLeft<=1?'animation:pulse 1s infinite;':'')+'"></div>'+
+                  '<div id="floveeTimerLabel" style="font-size:0.62rem;font-weight:700;color:'+fd.darkColor+';opacity:0.5;'+urgency+'">'+timeLabel+'</div>'+
+                '</div>'+
+              '</div>'+
+            '</div>'+
+            // Message content right in the gradient
+            '<div style="font-size:1.08rem;line-height:1.8;color:'+fd.darkColor+';font-weight:500;">'+escHtml(data.post.content)+'</div>'+
+          '</div>'+
+          // Timer bar
+          '<div style="height:3px;background:'+pal.tx+'06;">'+
+            '<div id="floveeTimerFill" style="height:100%;width:'+timerWidth+'%;background:'+fd.gradient+';border-radius:0 2px 2px 0;transition:width 1s;"></div>'+
+          '</div>'+
+          // Bottom action bar
+          '<div style="padding:14px 20px;background:'+pal.tx+'03;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'+
+            '<div id="floveeReactions" style="display:flex;gap:6px;">'+
+              buildReactionBtn('❤️','love',data.post.id,pal,savedReaction)+
+              buildReactionBtn('😭','crying',data.post.id,pal,savedReaction)+
+              buildReactionBtn('🔥','fire',data.post.id,pal,savedReaction)+
+              buildReactionBtn('💀','dead',data.post.id,pal,savedReaction)+
+            '</div>'+
+            '<div style="display:flex;gap:8px;align-items:center;">'+
+              '<button type="button" onclick="shareFloveePost()" style="padding:8px 16px;border-radius:20px;border:1.5px solid '+pal.tx+'40;background:transparent;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;opacity:0.85;transition:all 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85">share</button>'+
+              '<button onclick="replyToFlovee()" style="padding:8px 18px;border-radius:20px;border:none;background:'+fd.color+';color:'+fd.darkColor+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;display:inline-block;transition:all 0.2s;box-shadow:0 2px 8px '+fd.color+'40;" onmouseover="this.style.transform=\'translateY(-1px)\'" onmouseout="this.style.transform=\'\'">reply to '+fd.name+'</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+
+      // Store share text for the share button
+      wrap._shareText = shareText;
+      // Store reply data for the reply button
+      wrap._replyData = { content: data.post.content, floveeId: data.post.flovee_id };
+
+      // Live countdown timer — update every 30s, reload when expired
+      let _floveeExpiry = exp.getTime();
+      _floveeTimerInterval = setInterval(function(){
+        let now = Date.now();
+        let msLeft = _floveeExpiry - now;
+        if(msLeft <= 0){
+          clearInterval(_floveeTimerInterval);
+          _floveeTimerInterval = null;
+          loadFloveePost();
+          return;
+        }
+        let h = Math.max(0, Math.round(msLeft / 3600000));
+        let m = Math.max(0, Math.round(msLeft / 60000));
+        // Clamp the "<1m" case so the label never reads "0m left" pre-reload.
+        let label = h > 6 ? h+'h left' : h > 1 ? h+'h left' : (m >= 1 ? m+'m left' : '<1m left');
+        let dot = document.getElementById('floveeTimerDot');
+        let lbl = document.getElementById('floveeTimerLabel');
+        let fill = document.getElementById('floveeTimerFill');
+        if(lbl) lbl.textContent = label;
+        if(dot){
+          dot.style.background = h<=1?'#ef5350':h<=3?'#ff9800':'#4caf50';
+          dot.style.animation = h<=1?'pulse 1s infinite':'';
+        }
+        if(lbl){
+          lbl.style.animation = h<=1?'pulse 1.5s ease-in-out infinite':'';
+        }
+        if(fill){
+          fill.style.width = Math.max(5, Math.min(100, (m / (18*60)) * 100))+'%';
+        }
+      }, 30000);
+
+    } else if(data.status === 'missed'){
+      let mfd = FLOVEE_DATA[data.missedFlovee] || FLOVEE_DATA.remi;
+      wrap.style.display = 'block';
+      wrap.innerHTML =
+        '<div style="padding:24px 22px;border-radius:22px;background:'+pal.tx+'04;border:1.5px dashed '+pal.tx+'08;text-align:center;">'+
+          '<div style="font-size:2rem;margin-bottom:8px;opacity:0.6;">'+mfd.emoji+'</div>'+
+          '<div style="font-size:1rem;font-weight:700;color:'+pal.tx+';margin-bottom:6px;">you missed a text from '+mfd.name+'</div>'+
+          '<div style="font-size:0.8rem;opacity:0.35;color:'+pal.tx+';line-height:1.6;max-width:280px;margin:0 auto 14px;">her message disappeared. she will text you again soon — don\'t miss the next one</div>'+
+          '<a href="friends.html?peer='+encodeURIComponent(data.missedFlovee||'')+'" style="padding:10px 22px;border-radius:20px;border:none;background:'+mfd.color+'30;color:'+pal.tx+';font-size:0.68rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-block;">chat with '+mfd.name+' while you wait</a>'+
+        '</div>';
+
+    } else if(data.status === 'none'){
+      try{
+        wrap.style.display = 'block';
+        wrap.innerHTML = '<div style="padding:28px 22px;border-radius:22px;background:'+pal.tx+'04;text-align:center;"><div style="font-size:1.2rem;margin-bottom:6px;">'+((FLOVEE_DATA[getUserFloveeId()]||FLOVEE_DATA.remi).emoji)+'</div><div style="font-size:0.85rem;opacity:0.4;color:'+pal.tx+';">your flovee is typing<span style="animation:pulse 1.5s infinite;">...</span></div></div>';
+        await (window._origFetch||fetch).call(window, base+'/api/flovee/generate',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}
+        });
+        setTimeout(loadFloveePost, 1500);
+      }catch(e){ wrap.style.display='none'; }
+    }
+  }catch(e){}
+}
+
+function buildReactionBtn(emoji,name,postId,pal,saved){
+  let isActive = saved === name;
+  let bg = isActive ? pal.ac+'25' : pal.tx+'08';
+  let scale = isActive ? 'transform:scale(1.15);' : '';
+  return '<button onclick="reactFlovee(\''+name+'\','+postId+',this)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid '+(isActive?pal.ac+'40':pal.tx+'08')+';background:'+bg+';font-size:0.9rem;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;'+scale+'" onmouseover="this.style.transform=\'scale(1.2)\'" onmouseout="this.style.transform=\''+(isActive?'scale(1.15)':'scale(1)')+'\'">'+emoji+'</button>';
+}
+
+function reactFlovee(name,postId,btn){
+  localStorage.setItem('flovee_react_'+postId, name);
+  // Animate the button
+  btn.style.transform = 'scale(1.4)';
+  btn.style.background = searchPal.ac+'30';
+  btn.style.borderColor = searchPal.ac+'50';
+  setTimeout(function(){ btn.style.transform = 'scale(1.15)'; }, 200);
+  // Reset others
+  let siblings = btn.parentNode.querySelectorAll('button');
+  siblings.forEach(function(s){
+    if(s !== btn){
+      s.style.background = searchPal.tx+'08';
+      s.style.borderColor = searchPal.tx+'08';
+      s.style.transform = 'scale(1)';
+    }
+  });
+  // Navigate to flovee chat with the emoji reaction as context
+  let wrap = document.getElementById('floveePostWrap');
+  if(wrap && wrap._replyData){
+    let replyData = JSON.parse(JSON.stringify(wrap._replyData));
+    replyData.reaction = name;
+    localStorage.setItem('stuflover_flovee_reply', JSON.stringify(replyData));
+  }
+  let reactPeer = (wrap && wrap._replyData && wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]) ? wrap._replyData.floveeId : '';
+  setTimeout(function(){
+    window.location.href = reactPeer
+      ? 'friends.html?peer=' + encodeURIComponent(reactPeer)
+      : 'flovee.html';
+  }, 350);
+}
+
+function shareFloveePost(){
+  let wrap = document.getElementById('floveePostWrap');
+  let text = wrap && wrap._shareText ? wrap._shareText : 'check out stuflover.com';
+  if(navigator.share){
+    navigator.share({text:text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){
+      let btn = wrap.querySelector('[onclick="shareFloveePost()"]');
+      if(btn){ btn.textContent='copied!'; setTimeout(function(){btn.textContent='share';},1500); }
+    });
+  }
+}
+
+function replyToFlovee(){
+  let wrap = document.getElementById('floveePostWrap');
+  let peer = '';
+  if(wrap && wrap._replyData){
+    localStorage.setItem('stuflover_flovee_reply', JSON.stringify(wrap._replyData));
+    if(wrap._replyData.floveeId && FLOVEE_DATA[wrap._replyData.floveeId]){
+      peer = wrap._replyData.floveeId;
+    }
+  }
+  window.location.href = peer
+    ? 'friends.html?peer=' + encodeURIComponent(peer)
+    : 'flovee.html';
+}
+
+// Poll for flovee posts every 60 seconds
+setInterval(loadFloveePost, 60000);
+
+// ─── POLL VOTE ────────────────────────────────────────────
+function votePoll(idx){
+  let key = 'stuflover_poll_'+new Date().toDateString();
+  localStorage.setItem(key, idx.toString());
+  // Refresh to show result
+  let pollOpts = document.getElementById('pollOptions');
+  if(pollOpts){
+    pollOpts.querySelectorAll('button').forEach(function(b,i){
+      b.disabled = true;
+      if(i === idx){
+        b.style.borderColor = searchPal.ac;
+        b.style.background = searchPal.ac+'18';
+        b.style.transform = 'scale(1.05)';
+      } else {
+        b.style.opacity = '0.4';
+      }
+    });
+    let result = document.createElement('div');
+    result.style.cssText = 'font-size:0.7rem;opacity:0.35;margin-top:8px;color:'+searchPal.tx+';';
+    result.textContent = 'nice pick — new poll tomorrow';
+    pollOpts.parentNode.appendChild(result);
+  }
+}
+
+// ─── SCRAPBOOK DECORATIONS ────────────────────────────────
+function addScrapbookDecos(){
+  let container = document.getElementById('scrapDecos');
+  if(!container) return;
+  let pal = searchPal;
+  container.innerHTML = '';
+
+  // Washi tape strips
+  let tapePatterns = [
+    'repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.25) 3px,rgba(255,255,255,0.25) 6px)',
+    'radial-gradient(circle,rgba(255,255,255,0.3) 1.5px,transparent 1.5px)',
+    'repeating-linear-gradient(90deg,transparent,transparent 4px,rgba(255,255,255,0.2) 4px,rgba(255,255,255,0.2) 8px)',
+  ];
+  for(let t=0;t<4;t++){
+    let tape = document.createElement('div');
+    let tx = (5+Math.random()*80);
+    let ty = (80+Math.random()*400);
+    let tw = (50+Math.random()*80);
+    let trot = (Math.random()*30-15).toFixed(1);
+    tape.style.cssText = 'position:absolute;width:'+tw+'px;height:20px;left:'+tx+'%;top:'+ty+'px;transform:rotate('+trot+'deg);background-color:'+pal.ac+'30;background-image:'+tapePatterns[t%3]+';border-radius:1px;opacity:0.5;';
+    container.appendChild(tape);
+  }
+
+  // Cute sticker doodles (SVG)
+  let stickers = [
+    '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+pal.ac+'" opacity="0.15"/></svg>',
+    '<svg width="20" height="20" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="'+pal.ac+'" opacity="0.12"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="'+pal.ac+'" opacity="0.15"/></svg>',
+    '<svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="'+pal.ac+'" opacity="0.12"/><ellipse cx="12" cy="5" rx="2.5" ry="3.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="12" cy="19" rx="2.5" ry="3.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="5" cy="12" rx="3.5" ry="2.5" fill="'+pal.ac+'" opacity="0.08"/><ellipse cx="19" cy="12" rx="3.5" ry="2.5" fill="'+pal.ac+'" opacity="0.08"/></svg>',
+  ];
+  for(let s=0;s<8;s++){
+    let stk = document.createElement('div');
+    stk.style.cssText = 'position:absolute;left:'+(3+Math.random()*90)+'%;top:'+(60+Math.random()*500)+'px;transform:rotate('+(Math.random()*40-20).toFixed(0)+'deg);opacity:0.6;';
+    stk.innerHTML = stickers[s%stickers.length];
+    container.appendChild(stk);
+  }
+
+  // Handwritten label near the grid
+  let label = document.createElement('div');
+  label.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%) rotate(-2deg);top:'+((document.querySelector('.content-grid')?document.querySelector('.content-grid').offsetTop-20:300))+'px;font-family:Caveat,cursive;font-size:1rem;opacity:0.2;letter-spacing:1px;color:'+pal.tx+';z-index:3;white-space:nowrap;';
+  label.textContent = 'tap to explore';
+  container.appendChild(label);
+}
+
+// ─── CUSTOM EMOJI SYSTEM ─────────────────────────────────
+let CUSTOM_EMOJIS = {
+  'Stuf Emojis': [
+    {code:':heart:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>'},
+    {code:':star:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 17,14 18,21 12,18 6,21 7,14 2,9 9,9" fill="currentColor"/></svg>'},
+    {code:':sparkle:', display:'<svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="currentColor"/></svg>'},
+    {code:':flower:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor"/><ellipse cx="12" cy="5" rx="2.5" ry="3.5" fill="currentColor" opacity="0.6"/><ellipse cx="12" cy="19" rx="2.5" ry="3.5" fill="currentColor" opacity="0.6"/><ellipse cx="5" cy="12" rx="3.5" ry="2.5" fill="currentColor" opacity="0.6"/><ellipse cx="19" cy="12" rx="3.5" ry="2.5" fill="currentColor" opacity="0.6"/></svg>'},
+    {code:':moon:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/></svg>'},
+    {code:':butterfly:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 10C8 4 2 6 2 10s4 8 10 4" fill="currentColor" opacity="0.7"/><path d="M12 10c4-6 10-4 10 0s-4 8-10 4" fill="currentColor" opacity="0.7"/><line x1="12" y1="8" x2="12" y2="18" stroke="currentColor" stroke-width="1"/></svg>'},
+  ],
+  'Faces': [
+    {code:':happy:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/></svg>'},
+    {code:':love:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7.5 8.5C7.5 7 9 7 9 8.5S7.5 11 7.5 11 6 10 7.5 8.5z" fill="currentColor"/><path d="M13.5 8.5C13.5 7 15 7 15 8.5S13.5 11 13.5 11 12 10 13.5 8.5z" fill="currentColor"/></svg>'},
+    {code:':sad:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/></svg>'},
+    {code:':wink:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><path d="M14 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'},
+    {code:':shy:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 15c1 1 5 1 6 0" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="8" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="14" y1="9" x2="16" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="8" cy="12" rx="2.5" ry="1.5" fill="currentColor" opacity="0.15"/><ellipse cx="16" cy="12" rx="2.5" ry="1.5" fill="currentColor" opacity="0.15"/></svg>'},
+    {code:':cool:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="6" y="8" width="5" height="3" rx="1" fill="currentColor" opacity="0.7"/><rect x="13" y="8" width="5" height="3" rx="1" fill="currentColor" opacity="0.7"/><line x1="11" y1="9.5" x2="13" y2="9.5" stroke="currentColor" stroke-width="1"/></svg>'},
+  ],
+  'Vibes': [
+    {code:':fire:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 23c-4.5 0-7-3-7-7 0-3 2-5 3-7 .5 2 2 3 2 3 0-4 3-8 6-10-1 3 1 5 2 6 1.5-1 2-3 2-3 1 2 2 4 2 6 0 4-2.5 7-7 7z" fill="currentColor" opacity="0.8"/></svg>'},
+    {code:':cloud:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z" fill="currentColor" opacity="0.6"/></svg>'},
+    {code:':rain:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M16 7h-.26A7 7 0 107 17h9a4 4 0 100-8z" fill="none" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="20" x2="7" y2="23" stroke="currentColor" stroke-width="1.2"/><line x1="12" y1="20" x2="11" y2="23" stroke="currentColor" stroke-width="1.2"/><line x1="16" y1="20" x2="15" y2="23" stroke="currentColor" stroke-width="1.2"/></svg>'},
+    {code:':bow:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 8C8 4 2 6 4 8s6 4 8 0z" fill="currentColor" opacity="0.7"/><path d="M12 8c4-4 10-2 8 0s-6 4-8 0z" fill="currentColor" opacity="0.7"/><circle cx="12" cy="8" r="2" fill="currentColor"/></svg>'},
+    {code:':crown:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M2 18l3-12 5 6 2-8 2 8 5-6 3 12z" fill="currentColor" opacity="0.7"/><rect x="2" y="18" width="20" height="3" rx="1" fill="currentColor"/></svg>'},
+    {code:':gem:', display:'<svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 3h12l4 7-10 12L2 10z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" stroke-width="1"/><line x1="12" y1="22" x2="8" y2="10" stroke="currentColor" stroke-width="0.8" opacity="0.5"/><line x1="12" y1="22" x2="16" y2="10" stroke="currentColor" stroke-width="0.8" opacity="0.5"/></svg>'},
+  ]
+};
+
+function createEmojiPicker(inputId, parentEl){
+  let wrap = document.createElement('div');
+  wrap.style.cssText = 'position:relative;display:inline-block;';
+  let btn = document.createElement('button');
+  btn.className = 'emoji-btn';
+  btn.type = 'button';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/></svg>';
+  btn.title = 'Stuf Emojis';
+  btn.setAttribute('aria-label', 'Insert emoji');
+  btn.setAttribute('aria-haspopup', 'true');
+  btn.setAttribute('aria-expanded', 'false');
+  let picker = document.createElement('div');
+  picker.className = 'emoji-picker';
+  picker.style.background = searchPal.bg;
+  picker.style.color = searchPal.tx;
+  let html = '';
+  for(let cat in CUSTOM_EMOJIS){
+    html += '<div class="emoji-picker-label">'+cat+'</div><div class="emoji-picker-grid">';
+    CUSTOM_EMOJIS[cat].forEach(function(em){
+      html += '<button type="button" class="emoji-pick" title="'+em.code+'" aria-label="Insert '+em.code.replace(/:/g,'')+' emoji" data-code="'+em.code+'" data-input="'+inputId+'">'+em.display.replace('<svg ','<svg aria-hidden="true" focusable="false" ')+'</button>';
+    });
+    html += '</div>';
+  }
+  picker.innerHTML = html;
+  btn.onclick = function(e){e.stopPropagation();picker.classList.toggle('open');btn.setAttribute('aria-expanded', picker.classList.contains('open') ? 'true' : 'false');};
+  picker.querySelectorAll || (picker.innerHTML = html); // ensure parsed
+  wrap.appendChild(btn);
+  wrap.appendChild(picker);
+  parentEl.appendChild(wrap);
+
+  // After inserting, bind click handlers
+  setTimeout(function(){
+    wrap.querySelectorAll('.emoji-pick').forEach(function(b){
+      b.onclick = function(e){
+        e.stopPropagation();
+        let input = document.getElementById(b.dataset.input);
+        if(input){
+          let code = b.dataset.code;
+          input.value += ' '+code+' ';
+          input.focus();
+        }
+        picker.classList.remove('open');
+      };
+    });
+  },50);
+  // Close on outside click
+  document.addEventListener('click',function(){picker.classList.remove('open');});
+}
+
+// Replace :emoji: codes with SVG in displayed messages
+function renderCustomEmojis(text){
+  let result = text;
+  for(let cat in CUSTOM_EMOJIS){
+    CUSTOM_EMOJIS[cat].forEach(function(em){
+      let regex = new RegExp(em.code.replace(/([.*+?^${}()|[\]\\])/g,'\\$1'),'g');
+      result = result.replace(regex, '<span class="inline-emoji" style="display:inline-flex;vertical-align:middle;margin:0 1px;">'+em.display+'</span>');
+    });
+  }
+  return result;
+}
+
+// ─── FONT PICKER ─────────────────────────────────────────
+let CHAT_FONTS = [
+  {id:'default', name:'Default', family:"'Space Grotesk',sans-serif"},
+  {id:'cute', name:'Cute', family:"'Quicksand',sans-serif"},
+  {id:'handwritten', name:'Handwritten', family:"'Caveat',cursive"},
+  {id:'fancy', name:'Fancy', family:"'Satisfy',cursive"},
+  {id:'round', name:'Round', family:"'Comfortaa',sans-serif"},
+];
+
+function getChatFont(){
+  let id = localStorage.getItem('stuflover_chat_font') || 'default';
+  return CHAT_FONTS.find(function(f){return f.id===id;})||CHAT_FONTS[0];
+}
+
+function setChatFont(id){
+  localStorage.setItem('stuflover_chat_font', id);
+  applyChatFont();
+}
+
+function applyChatFont(){
+  let font = getChatFont();
+  document.querySelectorAll('.cmsg,.fr-msg,.ri-comment,.chat-input,.fr-input').forEach(function(el){
+    el.style.fontFamily = font.family;
+  });
+}
+
+function initFontPicker(){
+  let btn = document.getElementById('cursorSettingsBtn');
+  if(!btn) return;
+  // Add font section to the cursor panel
+  let panel = document.getElementById('cursorPanel');
+  if(!panel) return;
+  let fontHtml = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(128,128,128,0.1);">'+
+    '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:6px;">Chat Font</div>';
+  let current = getChatFont();
+  CHAT_FONTS.forEach(function(f){
+    fontHtml += '<button class="font-option'+(f.id===current.id?' on':'')+'" onclick="setChatFont(\''+f.id+'\')" style="font-family:'+f.family+'">'+f.name+'</button>';
+  });
+  fontHtml += '</div>';
+  panel.innerHTML += fontHtml;
+}
+
+function initCursorSettings(){
+  let btn = document.createElement('div');
+  btn.id = 'cursorSettingsBtn';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:200;padding:8px 16px;border-radius:20px;border:1.5px solid '+searchPal.tx+'18;background:'+searchPal.bg+'f0;color:'+searchPal.tx+';backdrop-filter:blur(14px);box-shadow:0 4px 18px rgba(0,0,0,0.1);transition:all 0.25s;font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;';
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 0L10 6L16 8L10 10L8 16L6 10L0 8L6 6Z" fill="'+searchPal.ac+'"/></svg> Settings';
+  btn.title = 'Customize cursor trail, font, and more';
+  btn.onmouseenter = function(){btn.style.transform='translateY(-2px)';btn.style.boxShadow='0 6px 24px rgba(0,0,0,0.14)';};
+  btn.onmouseleave = function(){btn.style.transform='';btn.style.boxShadow='0 4px 18px rgba(0,0,0,0.1)';};
+  btn.onclick = toggleCursorPanel;
+  document.body.appendChild(btn);
+
+  let panel = document.createElement('div');
+  panel.id = 'cursorPanel';
+  panel.style.cssText = 'position:fixed;bottom:56px;right:20px;width:220px;padding:18px;border-radius:16px;z-index:200;display:none;background:'+searchPal.bg+';color:'+searchPal.tx+';border:1.5px solid '+searchPal.tx+'10;box-shadow:0 12px 40px rgba(0,0,0,0.15);backdrop-filter:blur(20px);font-size:0.78rem;animation:fadeSlideIn 0.2s ease both;';
+  let curType = localStorage.getItem('stuflover_cursor_type')||'dots';
+  let curColor = localStorage.getItem('stuflover_cursor_color')||'palette';
+  let curOn = localStorage.getItem('stuflover_cursor_on')!=='false';
+  panel.innerHTML =
+    '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;font-family:Barlow Condensed,sans-serif;font-weight:900;opacity:0.3;margin-bottom:8px;">Cursor Trail</div>'+
+    '<label style="display:flex;align-items:center;gap:6px;margin-bottom:10px;cursor:pointer;"><input type="checkbox" id="cursorOnOff" '+(curOn?'checked':'')+' onchange="saveCursorSetting(\'on\',this.checked)"/> Trail On</label>'+
+    '<div style="margin-bottom:6px;opacity:0.5;">Shape:</div>'+
+    '<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;">'+
+      ['dots','hearts','stars','sparkles'].map(function(t){return '<button onclick="saveCursorSetting(\'type\',\''+t+'\')" style="padding:4px 10px;border-radius:10px;border:1px solid '+(curType===t?searchPal.ac:'rgba(128,128,128,0.15)')+';background:transparent;color:inherit;font-size:0.7rem;cursor:pointer;">'+t+'</button>';}).join('')+
+    '</div>'+
+    '<div style="margin-bottom:6px;opacity:0.5;">Color:</div>'+
+    '<div style="display:flex;gap:4px;flex-wrap:wrap;">'+
+      [['palette','My palette'],['pink','Pink'],['purple','Purple'],['gold','Gold'],['white','White']].map(function(c){return '<button onclick="saveCursorSetting(\'color\',\''+c[0]+'\')" style="padding:4px 10px;border-radius:10px;border:1px solid '+(curColor===c[0]?searchPal.ac:'rgba(128,128,128,0.15)')+';background:transparent;color:inherit;font-size:0.7rem;cursor:pointer;">'+c[1]+'</button>';}).join('')+
+    '</div>';
+  document.body.appendChild(panel);
+}
+
+function toggleCursorPanel(){
+  let p = document.getElementById('cursorPanel');
+  p.style.display = p.style.display==='none'?'block':'none';
+}
+
+function saveCursorSetting(key, val){
+  if(key==='on') localStorage.setItem('stuflover_cursor_on', val);
+  else if(key==='type') localStorage.setItem('stuflover_cursor_type', val);
+  else if(key==='color') localStorage.setItem('stuflover_cursor_color', val);
+  // Reload to apply
+  window.location.reload();
+}
+
+// Floating hearts
+function initFloatingHearts(){
+  let page = document.getElementById('lifestylePage');
+  if(!page) return;
+  let css = document.createElement('style');
+  css.textContent = '@keyframes floatHeart{0%{transform:translateY(0) scale(1);opacity:0.12;}50%{opacity:0.18;}100%{transform:translateY(-100vh) scale(0.6);opacity:0;}}';
+  document.head.appendChild(css);
+  for(let i=0;i<4;i++){
+    let h = document.createElement('div');
+    h.style.cssText = 'position:fixed;bottom:-20px;left:'+(10+Math.random()*80)+'%;z-index:0;pointer-events:none;animation:floatHeart '+(8+Math.random()*6)+'s ease-in infinite;animation-delay:'+(i*3)+'s;';
+    h.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="'+searchPal.ac+'" opacity="0.5"/></svg>';
+    page.appendChild(h);
+  }
+}
+
+// Glowing title
+function initGlowTitle(){
+  let title = document.getElementById('aeTitle');
+  if(!title) return;
+  title.style.textShadow = '0 0 20px '+searchPal.ac+'30, 0 0 40px '+searchPal.ac+'15';
+  let css = document.createElement('style');
+  css.textContent = '@keyframes titleGlow{0%,100%{text-shadow:0 0 20px '+searchPal.ac+'30,0 0 40px '+searchPal.ac+'15;}50%{text-shadow:0 0 30px '+searchPal.ac+'50,0 0 60px '+searchPal.ac+'25;}}';
+  document.head.appendChild(css);
+  title.style.animation = 'titleGlow 4s ease-in-out infinite';
+}
+
+// ─── SECTIONS DATA ────────────────────────────────────────
+const SECTIONS = [
+  {id:'fitforit',   name:'Style',          sub:'closet + outfits',  col:0},
+  {id:'beyou',      name:'Wellness',       sub:'breathe + journal', col:1},
+  {id:'floverhub',  name:'Games',          sub:'play something',    col:3},
+  {id:'outfitroast',name:'Roast Me',       sub:'flovee judges you', col:7, newBadge:true},
+  {id:'secretdiary',name:'Diary',          sub:'just for you',      col:8, newBadge:true},
+  {id:'studyroom',  name:'Study Room',     sub:'focus by aesthetic', col:2, newBadge:true},
+  {id:'aevsgame',   name:'AE vs Reality',  sub:'the truth hurts',   col:11, newBadge:true},
+  {id:'stufloverdaily',name:'Discover',    sub:'trending + inspo',  col:4},
+  {id:'floveegroup',name:'Groups',         sub:'find your people',  col:6},
+  {id:'readit',     name:'ReadIt',         sub:'books + booktok',   col:10},
+  {id:'routine',    name:'Routine',        sub:'morning + night',   col:12},
+];
+
+// ─── GRID LAYOUT — Chrome new tab style ─────────────────
+function buildGrid(pal, aeName){
+  const hues = [0,45,90,135,180,225,270,315];
+  const icons = {
+    fitforit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a.77.77 0 00-.62.76V22l4.38-1.46L12 22l4-1.46L20.38 22V4.22a.77.77 0 00-.62-.76zM10 17l-3-3 1.41-1.41L10 14.17l5.59-5.59L17 10l-7 7z" fill="white" opacity="0.9"/></svg>',
+    beyou:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white" opacity="0.5"/></svg>',
+    myroutine:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="3" r="1" fill="white"/></svg>',
+    routine:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="3" r="1" fill="white"/></svg>',
+    myprofile:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4" fill="none" stroke="white" stroke-width="1.5"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+    floverhub:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.6"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="white" opacity="0.4"/></svg>',
+    stufloverdaily:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="white" stroke-width="1.5"/></svg>',
+    contentwithit:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="8" height="8" rx="2" fill="white" opacity="0.7"/><rect x="13" y="3" width="8" height="5" rx="2" fill="white" opacity="0.5"/><rect x="3" y="13" width="8" height="5" rx="2" fill="white" opacity="0.5"/><rect x="13" y="10" width="8" height="8" rx="2" fill="white" opacity="0.7"/></svg>',
+    friends:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" fill="none" stroke="white" stroke-width="1.5"/><circle cx="9" cy="10" r="1" fill="white"/><circle cx="12" cy="10" r="1" fill="white"/><circle cx="15" cy="10" r="1" fill="white"/></svg>',
+    floveegroup:'<svg viewBox="0 0 24 24" width="22" height="22"><circle cx="9" cy="7" r="3" fill="none" stroke="white" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/><path d="M2 20c0-3 3-5 7-5s7 2 7 5" fill="none" stroke="white" stroke-width="1.5"/><path d="M16 15c2 0 5 1 5 4" fill="none" stroke="white" stroke-width="1.2" opacity="0.6"/></svg>',
+    readit:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" fill="none" stroke="white" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" fill="none" stroke="white" stroke-width="1.5"/><line x1="8" y1="7" x2="16" y2="7" stroke="white" stroke-width="1.2" opacity="0.5"/><line x1="8" y1="11" x2="14" y2="11" stroke="white" stroke-width="1.2" opacity="0.5"/></svg>',
+    boredomhub:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    outfitroast:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="none" stroke="white" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9.5" r="1" fill="white"/><circle cx="15" cy="9.5" r="1" fill="white"/></svg>',
+    secretdiary:'<svg viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="2" width="14" height="20" rx="2" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="10" r="2" fill="none" stroke="white" stroke-width="1.5"/><path d="M12 12v3" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    studyroom:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z" fill="none" stroke="white" stroke-width="1.5"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+    aevsgame:'<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+  };
+  const grid = document.getElementById('browserGrid');
+  if(!grid) return;
+  grid.innerHTML = SECTIONS.map((s, i) => {
+    const bg = shiftHue(pal.ac, hues[i%hues.length]);
+    const icon = icons[s.id] || s.name.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase();
+    const badge = s.newBadge ? `<span class="new-badge" style="background:${pal.ac}">NEW</span>` : '';
+    return `<div class="browser-tile" onclick="openSection('${s.id}')">
+      <div class="tile-favicon" style="background:${bg}">${icon}</div>
+      <div class="tile-label" style="color:${pal.tx}">${s.name}</div>
+      ${badge}
+    </div>`;
+  }).join('');
+}
+
+// ─── SEARCH ───────────────────────────────────────────────
+let searchPal = null;
+let hideDropTimeout = null;
+let builtSuggestions = [];
+
+function initSearch(pal){
+  searchPal = pal;
+  const chrome = document.getElementById('searchChrome');
+  const input = document.getElementById('searchInput');
+  const go = document.getElementById('searchGo');
+  const drop = document.getElementById('searchDropdown');
+  if(chrome){ chrome.style.borderColor = pal.tx+'20'; chrome.style.background = pal.tx+'06'; }
+  if(input) input.style.color = pal.tx;
+  if(go){ go.style.borderColor = pal.tx+'20'; go.style.color = pal.tx; }
+  if(drop){ drop.style.background = pal.bg; drop.style.borderColor = pal.tx+'18'; }
+  // Pre-build suggestion items
+  const hues = [0,40,80,130,170,210,260,300];
+  builtSuggestions = SECTIONS.map((s,i) => {
+    const fc = shiftHue(pal.ac, hues[i]);
+    const initials = s.name.replace(/[^A-Za-z]/g,'').slice(0,2).toUpperCase();
+    return {
+      id: s.id,
+      lname: s.name.toLowerCase(),
+      lsub: s.sub.toLowerCase(),
+      html: `<div class="sug-item" style="color:${pal.tx}" onmousedown="openSection('${s.id}')"><div class="sug-fav" style="background:${fc}">${initials}</div><span class="sug-label">${s.name}</span><span class="sug-hint">${s.sub}</span></div>`
+    };
+  });
+  // Style dots
+  document.querySelectorAll('.search-dot').forEach(d => d.style.background = pal.tx+'22');
+}
+
+function onSearchInput(val){
+  showDrop(val.trim().toLowerCase());
+}
+
+function showDrop(val){
+  if(hideDropTimeout){ clearTimeout(hideDropTimeout); hideDropTimeout=null; }
+  const drop = document.getElementById('searchDropdown');
+  if(!drop || builtSuggestions.length===0) return;
+  const matches = val
+    ? builtSuggestions.filter(s => s.lname.includes(val) || s.lsub.includes(val))
+    : builtSuggestions;
+  if(matches.length===0){ drop.classList.remove('open'); return; }
+  drop.innerHTML = matches.map(s=>s.html).join('');
+  drop.classList.add('open');
+}
+
+function onSearchFocus(){
+  const val = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  showDrop(val);
+}
+
+function onSearchBlur(){
+  hideDropTimeout = setTimeout(()=>{
+    document.getElementById('searchDropdown')?.classList.remove('open');
+  }, 160);
+}
+
+function onSearchKey(e){
+  if(e.key==='Enter'){ e.preventDefault(); goSearch(); }
+  if(e.key==='Escape'){
+    document.getElementById('searchDropdown')?.classList.remove('open');
+    document.getElementById('searchInput')?.blur();
+  }
+}
+
+function goSearch(){
+  const val = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
+  if(!val) return;
+  const match = builtSuggestions.find(s=>s.lname.startsWith(val))
+    || builtSuggestions.find(s=>s.lname.includes(val)||s.lsub.includes(val));
+  if(match){
+    document.getElementById('searchInput').value='';
+    document.getElementById('searchDropdown')?.classList.remove('open');
+    openSection(match.id);
+  }
+}
+
+// ─── SECTION / CHAT ───────────────────────────────────────
+let chatHistory = [];
+let currentSection = null;
+let chatUserStyle = {count:0,avgLen:0,emoji:false,casual:true};
+
+// ─── CHAT PERSISTENCE ─────────────────────────────────────
+function chatKey(secId){ return 'stuflover_chat_'+secId; }
+
+function loadChat(secId){
+  try{ return JSON.parse(localStorage.getItem(chatKey(secId))||'null')||{messages:[],lastActive:0}; }
+  catch(e){ return {messages:[],lastActive:0}; }
+}
+
+function saveChat(secId){
+  let data = {messages: chatHistory.map(function(m){
+    return {role:m.role, content:m.content, time:m.time||Date.now()};
+  }), lastActive: Date.now()};
+  localStorage.setItem(chatKey(secId), JSON.stringify(data));
+}
+
+function clearChatHistory(){
+  if(!currentSection) return;
+  chatHistory = [];
+  localStorage.removeItem(chatKey(currentSection.id));
+  let msgsId = 'chatMessages';
+  document.getElementById(msgsId).innerHTML='';
+  let opener = buildOpener(currentSection);
+  addMsg(opener,'flovee');
+}
+
+function formatMsgTime(ts){
+  let d = new Date(ts);
+  let h = d.getHours(); let m = d.getMinutes();
+  return (h%12||12)+':'+(m<10?'0':'')+m+(h<12?' am':' pm');
+}
+
+function formatDateSep(ts){
+  let d = new Date(ts); let now = new Date();
+  let today = new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  let msgDay = new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+  if(msgDay===today) return 'Today';
+  if(msgDay===today-86400000) return 'Yesterday';
+  let days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if(today-msgDay<604800000) return days[d.getDay()];
+  return months[d.getMonth()]+' '+d.getDate();
+}
+
+function buildPreviousContext(secId){
+  let saved = loadChat(secId);
+  if(!saved.messages.length) return '';
+  let recent = saved.messages.slice(-30);
+  let lines = recent.map(function(m){ return (m.role==='user'?'Them':'You')+': '+m.content; });
+  return '\n\nPREVIOUS CONVERSATION (you already had this chat with them — remember it and reference things they told you naturally. Do not repeat yourself or re-introduce yourself):\n'+lines.join('\n');
+}
+
+function restoreMessages(secId, messages, pal){
+  let msgsId = 'chatMessages';
+  let container = document.getElementById(msgsId);
+  if(!container) return;
+
+  let lastDateStr = '';
+  messages.forEach(function(m){
+    let dateStr = formatDateSep(m.time);
+    if(dateStr !== lastDateStr){
+      let sep = document.createElement('div');
+      sep.className = 'chat-date-sep';
+      sep.textContent = dateStr;
+      sep.style.color = pal.tx;
+      container.appendChild(sep);
+      lastDateStr = dateStr;
+    }
+
+    let role = m.role==='user' ? 'user' : 'flovee';
+    let div = document.createElement('div');
+    div.className = 'cmsg '+role;
+    div.style.background = role==='user' ? pal.tx+'12' : pal.ac+'1a';
+    div.style.color = pal.tx;
+
+    div.textContent = m.content;
+
+    if(m.time){
+      let timeEl = document.createElement('div');
+      timeEl.className = 'cmsg-time';
+      timeEl.textContent = formatMsgTime(m.time);
+      timeEl.style.color = pal.tx;
+      div.appendChild(timeEl);
+    }
+
+    container.appendChild(div);
+  });
+
+  let clearRow = document.createElement('div');
+  clearRow.style.cssText = 'text-align:center;padding:8px 0 4px;';
+  clearRow.innerHTML = '<button class="clear-chat-btn" onclick="clearChatHistory()">Clear chat</button>';
+  container.appendChild(clearRow);
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function openSection(id, opts){
+  // Redirect to dedicated pages
+  if(id === 'beyou'){ window.location.href = '/beyou.html'; return; }
+  if(id === 'fitcheck'){ window.location.href = '/fitcheck.html'; return; }
+  if(id === 'academic'){ window.location.href = '/academic.html'; return; }
+  if(id === 'activities'){ window.location.href = '/activities.html'; return; }
+  // The "Games" tile/search hit opens games.html — the one canonical Games
+  // listing. Games no longer run inside this page; play.html is the game
+  // host.
+  if(id === 'floverhub'){ window.location.href = '/games.html'; return; }
+  const sec = SECTIONS.find(s=>s.id===id);
+  if(!sec) return;
+  currentSection = sec;
+  chatUserStyle = {count:0,avgLen:0,emoji:false,casual:true};
+
+  const pal = searchPal;
+  document.getElementById('homeView').style.display = 'none';
+  const sv = document.getElementById('sectionView');
+  sv.style.display = 'flex';
+  sv.style.background = pal.bg;
+  sv.style.height = '';
+  sv.style.overflow = '';
+
+  document.getElementById('sectionNameNav').textContent = sec.name;
+  document.getElementById('sectionNameNav').style.color = pal.tx;
+  let navBack = document.getElementById('navBack');
+  if(navBack){ navBack.style.borderColor = pal.tx+'25'; navBack.style.color = pal.tx; }
+
+  // Hide hub and profile views by default
+  document.getElementById('hubView').style.display = 'none';
+  document.getElementById('hubView').classList.remove('active');
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
+  document.getElementById('cardGameView').style.display = 'none';
+  document.getElementById('cardGameView').classList.remove('active');
+  if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval){ clearInterval(dtiTimerInterval); dtiTimerInterval=null; }
+  currentHubGame = null;
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileView').classList.remove('active');
+  document.getElementById('routineView').style.display = 'none';
+  document.getElementById('routineView').classList.remove('active');
+  document.getElementById('friendsView').style.display = 'none';
+  document.getElementById('friendsView').classList.remove('active');
+  document.getElementById('contentView').style.display = 'none';
+  document.getElementById('contentView').classList.remove('active');
+  document.getElementById('dailyView').style.display = 'none';
+  document.getElementById('dailyView').classList.remove('active');
+  document.getElementById('discoverTabs').style.display = 'none';
+  document.getElementById('discoverTabs').classList.remove('active');
+  document.getElementById('groupsView').style.display = 'none';
+  document.getElementById('groupsView').classList.remove('active');
+  document.getElementById('fgDetailView').style.display = 'none';
+  document.getElementById('fgDetailView').classList.remove('active');
+  document.getElementById('readitView').style.display = 'none';
+  document.getElementById('readitView').classList.remove('active');
+  document.getElementById('fitforitView').style.display = 'none';
+  document.getElementById('viralView').style.display = 'none';
+  document.getElementById('viralView').classList.remove('active');
+  if(typeof studyTimerInterval!=='undefined' && studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
+  currentHubGame = null;
+
+  // Shop bar — always visible in fitforit
+  const shopBar = document.getElementById('shopBar');
+  if(sec.id === 'floverhub'){
+    // Games live on /games.html now — always redirect there when the
+    // Games tile or a "floverhub" search hit opens.
+    window.location.href = '/games.html';
+    return;
+  } else if(sec.id === 'myprofile'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'flex';
+    document.getElementById('profileView').classList.add('active');
+    openProfileView();
+    return;
+  } else if(sec.id === 'readit'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('cardGameView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'none';
+    document.getElementById('readitView').style.display = 'flex';
+    document.getElementById('readitView').classList.add('active');
+    loadRiFeed();
+    return;
+  } else if(sec.id === 'fitforit'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('cardGameView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'none';
+    document.getElementById('readitView').style.display = 'none';
+    document.getElementById('fitforitView').style.display = 'block';
+    openFitforIt();
+    return;
+  } else if(sec.id === 'floveegroup'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('groupsView').style.display = 'flex';
+    document.getElementById('groupsView').classList.add('active');
+    loadGroups('all');
+    return;
+  } else if(sec.id === 'outfitroast'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openOutfitRoast();
+    return;
+  } else if(sec.id === 'secretdiary'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openSecretDiary();
+    return;
+  } else if(sec.id === 'studyroom'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openStudyRoom();
+    return;
+  } else if(sec.id === 'aevsgame'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    hideAllViews();
+    document.getElementById('sectionView').style.height = 'auto';
+    document.getElementById('sectionView').style.overflow = 'visible';
+    document.getElementById('viralView').style.display = 'flex';
+    document.getElementById('viralView').classList.add('active');
+    openAeVsReality();
+    return;
+  } else if(sec.id === 'stufloverdaily' || sec.id === 'contentwithit'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('discoverTabs').style.display = 'flex';
+    document.getElementById('discoverTabs').classList.add('active');
+    let defaultTab = sec.id === 'contentwithit' ? 'inspo' : 'trending';
+    switchDiscoverTab(defaultTab);
+    return;
+  } else if(sec.id === 'friends'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'flex';
+    document.getElementById('friendsView').classList.add('active');
+    openFriendsView();
+    return;
+  } else if(sec.id === 'myroutine' || sec.id === 'routine'){
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'none';
+    document.getElementById('hubView').style.display = 'none';
+    document.getElementById('dtiView').style.display = 'none';
+    document.getElementById('profileView').style.display = 'none';
+    document.getElementById('friendsView').style.display = 'none';
+    document.getElementById('contentView').style.display = 'none';
+    document.getElementById('dailyView').style.display = 'none';
+    document.getElementById('routineView').style.display = 'flex';
+    document.getElementById('routineView').classList.add('active');
+    openRoutineView();
+    return;
+  } else {
+    shopBar.style.display = 'none';
+    document.getElementById('normalChat').style.display = 'flex';
+    const send = document.getElementById('chatSend');
+    if(send){ send.style.background=pal.ac; send.style.color=pal.bg; }
+    const input = document.getElementById('chatInput');
+    if(input){ input.style.borderColor=pal.tx+'16'; input.style.color=pal.tx; input.value=''; }
+    document.getElementById('chatMessages').innerHTML='';
+  }
+
+  // Load saved messages or show opener
+  let saved = loadChat(sec.id);
+  if(saved.messages.length > 0){
+    chatHistory = saved.messages.map(function(m){ return {role:m.role, content:m.content, time:m.time}; });
+    restoreMessages(sec.id, saved.messages, searchPal);
+  } else {
+    chatHistory = [];
+    const opener = buildOpener(sec);
+    setTimeout(function(){ addMsg(opener,'flovee'); },250);
+  }
+}
+
+function buildShopBar(pal){
+  const bar = document.getElementById('shopBar');
+  if(!bar) return;
+  bar.style.borderBottomColor = pal.tx+'10';
+  bar.style.borderTopColor = pal.tx+'10';
+
+  const shops = [
+    {name:'Depop',    url:'https://www.depop.com/search/?q='},
+    {name:'ASOS',     url:'https://www.asos.com/search/?q='},
+    {name:'UO',       url:'https://www.urbanoutfitters.com/search?q='},
+    {name:'Vinted',   url:'https://www.vinted.co.uk/catalog?search_text='},
+    {name:'Nike',     url:'https://www.nike.com/gb/search?q='},
+    {name:'Sezane',   url:'https://www.sezane.com/uk/result?keywords='},
+    {name:'SHEIN',    url:'https://www.shein.com/index.php?route=product/search&q='},
+    {name:'Zara',     url:'https://www.zara.com/uk/en/search?searchTerm='},
+  ];
+
+  // Highlight their fave shop
+  const fave = P.faveShop || '';
+  const faveMap = {'Depop / Vinted':'Depop','ASOS / H&M':'ASOS','Urban Outfitters':'UO','Nike / NB':'Nike','Charity Shops':'Depop','Brandy Melville':'ASOS','Princess Polly':'ASOS','Sezane / Rouje':'Sezane'};
+  const faveShortName = faveMap[fave] || '';
+
+  bar.innerHTML = '<span style="font-size:0.62rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;flex-shrink:0;color:'+pal.tx+'">Shops</span>' +
+    shops.map(s => {
+      const isFave = s.name === faveShortName;
+      return `<a href="${s.url}" target="_blank" rel="noopener" class="shop-link" style="color:${isFave?pal.bg:pal.tx};background:${isFave?pal.ac:pal.tx+'0c'};border-color:${isFave?pal.ac:pal.tx+'18'}">${s.name}${isFave?' ★':''}</a>`;
+    }).join('');
+
+  // Also build a search in shop input
+  bar.innerHTML += `<div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">
+    <input id="shopSearch" placeholder="search a shop..." style="padding:6px 12px;font-size:0.82rem;font-family:Space Grotesk,sans-serif;border:1.5px solid ${pal.tx}18;border-radius:20px;background:transparent;color:${pal.tx};outline:none;width:160px;" onkeydown="shopSearchKey(event)"/>
+    <button onclick="doShopSearch()" style="padding:6px 14px;border:none;border-radius:20px;background:${pal.ac};color:${pal.bg};font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Go</button>
+  </div>`;
+}
+
+function shopSearchKey(e){ if(e.key==='Enter') doShopSearch(); }
+function doShopSearch(){
+  const q = document.getElementById('shopSearch')?.value.trim();
+  if(!q) return;
+  const url = getShopSearchUrl(P.faveShop||'');
+  window.open(url + encodeURIComponent(q), '_blank');
+}
+
+function goHome(){
+  slSetNavTab('mypage');
+  document.getElementById('homeView').style.display = 'block';
+  document.getElementById('sectionView').style.display = 'none';
+  // Restore settings button
+  let csBtn = document.getElementById('cursorSettingsBtn');
+  if(csBtn) csBtn.style.display = '';
+  document.getElementById('hubView').style.display = 'none';
+  document.getElementById('hubView').classList.remove('active');
+  document.getElementById('dtiView').style.display = 'none';
+  document.getElementById('dtiView').classList.remove('active');
+  document.getElementById('cardGameView').style.display = 'none';
+  document.getElementById('cardGameView').classList.remove('active');
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('profileView').classList.remove('active');
+  document.getElementById('routineView').style.display = 'none';
+  document.getElementById('routineView').classList.remove('active');
+  if(typeof dtiTimerInterval!=='undefined' && dtiTimerInterval) clearInterval(dtiTimerInterval);
+  // Restore hub section if it was overridden
+  if(currentSection && currentSection._origPrompt){
+    currentSection.prompt = currentSection._origPrompt;
+    currentSection.opener = currentSection._origOpener;
+    delete currentSection._origPrompt;
+    delete currentSection._origOpener;
+  }
+  currentSection=null;
+  currentHubGame=null;
+  document.getElementById('chatMessages').innerHTML='';
+  document.getElementById('normalChat').style.display='none';
+  // Re-render scrapbook if cards are missing from DOM but cache exists
+  let recB = document.getElementById('recBoard');
+  if(recB && !recB.querySelector('.sb-card') && _sb.cache){
+    try{ sbRender(); }catch(e){}
+  }
+}
+
+function buildSystemPrompt(sec){
+  const topAe = Object.entries(P.aesthetics||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]||'softgirl';
+  const aeName = resolveAeName();
+  const music = P.music.map(k=>ARTISTS[k]?.name||k).join(', ')||'various';
+  const interests = P.interests.map(k=>RECS[k]?.name||k).join(', ')||'various';
+  const colour = P.faveColour?.name||'unknown';
+  const shop = P.faveShop||'various';
+  const social = {introvert:'introverted',extrovert:'extroverted',ambivert:'ambivert'}[P.social]||'ambivert';
+  const mood = {good:'in a good place',creative:'in a creative mood',low:'having a low day',hyped:'hyped',cosy:'cosy',tired:'tired'}[P.moodToday]||'okay';
+  const fg = {fandom:'fandom girls',creative:'creative types',sporty:'sporty',aesthetic:'aesthetic girlies',chaotic:'chaotic group',close:'small close group',online:'mainly online',mixed:'mixed'}[P.friendGroup]||'their group';
+
+  const age = {'under-18':'under 18','18-25':'18-25','26-35':'26-35','36-50':'36-50','50+':'50+'}[P.age]||'unknown';
+
+  const rawPrompt = typeof sec.prompt === 'function' ? sec.prompt() : sec.prompt;
+  const filled = rawPrompt
+    .replace('{AE}',aeName).replace('{MUSIC}',music).replace('{INTERESTS}',interests)
+    .replace('{COL}',colour).replace('{SHOP}',shop).replace('{SOCIAL}',social)
+    .replace('{MOOD}',mood).replace('{FG}',fg).replace('{AGE}',age);
+
+  let styleHint = '';
+  if(chatUserStyle.count>1){
+    styleHint = ` User texts ${chatUserStyle.casual?'casual lowercase':'more formal'}, avg ${Math.round(chatUserStyle.avgLen)} chars${chatUserStyle.emoji?', uses emoji':''}. Mirror this.`;
+  }
+
+  let chatSaveId = currentHubGame ? 'floverhub_'+currentHubGame.id : (currentSection?currentSection.id:'');
+  let prevContext = chatSaveId ? buildPreviousContext(chatSaveId) : '';
+
+  return `${filled}\n\nPerson: aesthetic=${aeName}, music=${music}, interests=${interests}, colour=${colour}, shop=${shop}, social=${social}, mood=${mood}, friend group=${fg}.\n\nRULES: Short messages. Text like a real person. Have opinions. Never say anything negative about them. Never lecture. Be warm and real. If you have had previous conversations with them, reference things they told you — remember their name, things they shared, inside jokes. Do not re-introduce yourself if you already know them. Pay close attention to things they have shared about themselves — their name, school, friends, crushes, hobbies, problems, favourite things. Bring these up naturally in future conversations to show you remember and care. If this is your first conversation, ask their name early on so you can use it. NEVER help create websites, write code, build apps, or do programming. You are a lifestyle companion ONLY. If asked to code, politely decline and redirect to your purpose.${styleHint}${prevContext}`;
+}
+
+function buildOpener(sec){
+  let raw = typeof sec.opener === 'function' ? sec.opener() : sec.opener;
+  return raw.replace('{AE}', resolveAeName()).replace('{MUSIC}', P.music.slice(0,2).map(k=>ARTISTS[k]?.name||k).join(' and ')||'your music');
+}
+
+function handleChatKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); } }
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  if(!input||!currentSection) return;
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value=''; input.style.height='auto';
+  await runChat(msg, 'chatSend');
+}
+
+async function runChat(msg, sendBtnId){
+  chatUserStyle.count++;
+  chatUserStyle.avgLen = (chatUserStyle.avgLen*(chatUserStyle.count-1)+msg.length)/chatUserStyle.count;
+  if(/\p{Emoji}/u.test(msg)) chatUserStyle.emoji=true;
+  if(msg===msg.toLowerCase()&&msg.length>3) chatUserStyle.casual=true;
+
+  addMsg(msg,'user');
+  let now = Date.now();
+  chatHistory.push({role:'user',content:msg,time:now});
+  if(currentSection) saveChat(currentHubGame ? 'floverhub_'+currentHubGame.id : currentSection.id);
+
+  const send = document.getElementById(sendBtnId);
+  if(send) send.disabled=true;
+  const typing = addMsg(currentSection.name+' is thinking...','flovee typing');
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:350,
+        system:buildSystemPrompt(currentSection),
+        messages:chatHistory.slice(-20).map(function(m){return{role:m.role,content:m.content};})
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text||'...';
+    if(typing) typing.remove();
+    addMsg(reply,'flovee');
+    chatHistory.push({role:'assistant',content:reply,time:Date.now()});
+    if(chatHistory.length>40) chatHistory=chatHistory.slice(-40);
+    if(currentSection) saveChat(currentHubGame ? 'floverhub_'+currentHubGame.id : currentSection.id);
+  }catch(e){
+    if(typing) typing.remove();
+    addMsg('one sec, try again?','flovee');
+  }
+  const sendEl = document.getElementById(sendBtnId);
+  if(sendEl) sendEl.disabled=false;
+}
+
+function addMsg(text, roleClass){
+  const msgsId = 'chatMessages';
+  const msgs = document.getElementById(msgsId);
+  if(!msgs) return null;
+  const pal = searchPal;
+  const div = document.createElement('div');
+  div.className = 'cmsg '+roleClass;
+  const isUser = roleClass.includes('user');
+  const isTyping = roleClass.includes('typing');
+  div.style.background = isUser ? pal.tx+'12' : pal.ac+'1a';
+  div.style.color = pal.tx;
+  div.style.fontFamily = getChatFont().family;
+  // Render custom emojis
+  let rendered = renderCustomEmojis(escHtml(text));
+  if(rendered !== escHtml(text)){ div.innerHTML = rendered; } else { div.textContent = text; }
+
+  // Add timestamp (not on typing indicators)
+  if(!isTyping){
+    let timeEl = document.createElement('div');
+    timeEl.className = 'cmsg-time';
+    timeEl.textContent = formatMsgTime(Date.now());
+    timeEl.style.color = pal.tx;
+    div.appendChild(timeEl);
+  }
+
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+
+function getShopSearchUrl(shop) {
+  const map = {
+    'Depop / Vinted':    'https://www.depop.com/search/?q=',
+    'ASOS / H&M':        'https://www.asos.com/search/?q=',
+    'Urban Outfitters':  'https://www.urbanoutfitters.com/search?q=',
+    'Sezane / Rouje':    'https://www.sezane.com/uk/result?keywords=',
+    'Nike / NB':         'https://www.nike.com/gb/search?q=',
+    'Charity Shops':     'https://www.depop.com/search/?q=',
+    'Brandy Melville':   'https://www.brandymelvilleusa.com/search?q=',
+    'Princess Polly':    'https://us.princesspolly.com/search?q=',
+    'No favourite':      'https://www.depop.com/search/?q=',
+  };
+  return map[shop] || 'https://www.asos.com/search/?q=';
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+
+// ─── SVG BACKGROUND ──────────────────────────────────────
+function buildBgSvg(pal,topK){
+  const svg=document.getElementById('bgSvg');
+  const W=window.innerWidth,H=window.innerHeight;
+  const et=P.extraTags;
+  const hasBooks=P.interests.includes('reading')||topK==='darkacad';
+  const hasKpop=P.music.some(m=>['katseye','newjeans','illit','lesserafim','aespa'].includes(m));
+  const hasBows=['kawaii','coquette','softgirl'].includes(topK);
+  const hasBats=['goth','emo'].includes(topK)||et.includes('full_goth');
+  const hasFlowers=['cottage','hippie','kawaii','softgirl'].includes(topK);
+  const hasMoons=['goth','darkacad','indie'].includes(topK);
+  const hasBfly=['y2k','coquette'].includes(topK)||et.includes('pastel_goth');
+  const r=(a,b)=>a+Math.random()*(b-a);
+  let s=[];
+  const add=(n,fn)=>{ for(let i=0;i<n;i++) s.push(fn(r(0,W),r(0,H*7),r(0.05,0.15),r(-25,25))); };
+  add(18,(x,y,op,rot)=>starSVG(x,y,pal.ac,op,rot));
+  add(14,(x,y,op,rot)=>noteSVG(x,y,pal.ac,op,rot));
+  if(hasBooks) add(12,(x,y,op,rot)=>bookSVG(x,y,pal.ac,op,rot));
+  if(hasKpop) add(10,(x,y,op,rot)=>vinylSVG(x,y,pal.ac,op,rot,P.music.includes('katseye')));
+  if(hasBows) add(10,(x,y,op,rot)=>bowSVG(x,y,pal.ac,op,rot));
+  if(hasBats) add(8,(x,y,op,rot)=>batSVG(x,y,pal.ac,op,rot));
+  if(hasFlowers) add(10,(x,y,op,rot)=>flowerSVG(x,y,pal.ac,op,rot));
+  if(hasMoons) add(7,(x,y,op,rot)=>moonSVG(x,y,pal.ac,op,rot));
+  if(hasBfly) add(7,(x,y,op,rot)=>butterflySVG(x,y,pal.ac,op,rot));
+  svg.innerHTML=s.join('');
+}
+
+function g(x,y,rot,op,c){return `<g transform="translate(${x},${y}) rotate(${rot})" opacity="${op}">${c}</g>`;}
+function bookSVG(x,y,c,op,rot){return g(x,y,rot,op,`<rect width="44" height="58" rx="3" fill="${c}"/><rect x="3" y="3" width="38" height="52" rx="2" fill="white" opacity="0.1"/><line x1="6" y1="14" x2="38" y2="14" stroke="white" stroke-width="1.8" opacity="0.35"/><line x1="6" y1="22" x2="38" y2="22" stroke="white" stroke-width="1.8" opacity="0.35"/><line x1="6" y1="30" x2="38" y2="30" stroke="white" stroke-width="1.8" opacity="0.35"/><rect x="2" y="0" width="4" height="58" rx="2" fill="${c}" filter="brightness(0.6)"/>`);}
+function vinylSVG(x,y,c,op,rot,kat=false){return g(x,y,rot,op,`<circle cx="32" cy="32" r="30" fill="#111"/><circle cx="32" cy="32" r="22" fill="none" stroke="white" stroke-width="0.6" opacity="0.14"/><circle cx="32" cy="32" r="15" fill="none" stroke="white" stroke-width="0.6" opacity="0.14"/><circle cx="32" cy="32" r="9" fill="${c}" opacity="0.88"/><circle cx="32" cy="32" r="3" fill="white" opacity="0.7"/>${kat?`<text x="32" y="29" text-anchor="middle" font-size="3" fill="white" opacity="0.5" font-family="sans-serif">KATSEYE</text>`:''}`); }
+function noteSVG(x,y,c,op,rot){return g(x,y,rot,op,`<rect x="10" y="0" width="3" height="28" rx="1.5" fill="${c}"/><ellipse cx="7" cy="30" rx="7" ry="5" fill="${c}" transform="rotate(-10 7 30)"/><rect x="10" y="0" width="18" height="3" rx="1.5" fill="${c}"/><rect x="25" y="0" width="3" height="17" rx="1.5" fill="${c}"/><ellipse cx="22" cy="19" rx="6" ry="4" fill="${c}" transform="rotate(-10 22 19)"/>`);}
+function bowSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M26 14 C22 10 6 4 2 10 C-2 16 12 20 26 14Z" fill="${c}"/><path d="M27 14 C31 10 47 4 51 10 C55 16 41 20 27 14Z" fill="${c}"/><circle cx="26.5" cy="14" r="4.5" fill="${c}" filter="brightness(1.12)"/>`);}
+function starSVG(x,y,c,op,rot){return g(x,y,rot,op,`<polygon points="16,2 20,11 30,11 22,17 25,27 16,21 7,27 10,17 2,11 12,11" fill="${c}"/>`);}
+function batSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M25 13 C21 9 14 5 6 8 C1 10 -1 15 3 17 C6 12 13 12 17 15Z" fill="${c}"/><path d="M26 13 C30 9 37 5 45 8 C50 10 52 15 48 17 C45 12 38 12 34 15Z" fill="${c}"/><ellipse cx="25.5" cy="15" rx="4.5" ry="5.5" fill="${c}"/>`);}
+function flowerSVG(x,y,c,op,rot){const cx=26,cy=26;return g(x,y,rot,op,`<ellipse cx="${cx}" cy="${cy-12}" rx="5.5" ry="9" fill="${c}" opacity="0.8"/><ellipse cx="${cx}" cy="${cy+12}" rx="5.5" ry="9" fill="${c}" opacity="0.8"/><ellipse cx="${cx-12}" cy="${cy}" rx="9" ry="5.5" fill="${c}" opacity="0.8"/><ellipse cx="${cx+12}" cy="${cy}" rx="9" ry="5.5" fill="${c}" opacity="0.8"/><circle cx="${cx}" cy="${cy}" r="7" fill="#ffd700" opacity="0.88"/>`);}
+function moonSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M22 3 C11 5 4 14 4 24 C4 33 11 40 22 40 C15 37 9 31 9 24 C9 15 16 8 25 6 C24 4 23 3 22 3Z" fill="${c}"/>`);}
+function butterflySVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M24 18 C20 12 8 4 2 9 C-2 13 4 21 16 21 C19 21 22 20 24 18Z" fill="${c}" opacity="0.8"/><path d="M25 18 C29 12 41 4 47 9 C51 13 45 21 33 21 C30 21 27 20 25 18Z" fill="${c}" opacity="0.8"/><ellipse cx="24.5" cy="18" rx="1.5" ry="7" fill="#333" opacity="0.4"/>`);}
+function hangerSVG(x,y,c,op,rot){return g(x,y,rot,op,`<circle cx="26" cy="8" r="4" fill="none" stroke="${c}" stroke-width="3"/><path d="M26 12 L26 16 L44 30 L44 34 L8 34 L8 30 L26 16" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`);}
+function heartSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M26 40 C12 30 2 22 2 14 A10 10 0 0 1 26 14 A10 10 0 0 1 50 14 C50 22 40 30 26 40Z" fill="${c}"/>`);}
+function boltSVG(x,y,c,op,rot){return g(x,y,rot,op,`<polygon points="30,2 14,24 24,24 20,48 38,20 28,20" fill="${c}"/>`);}
+function arrowsSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M4 16 L18 6 L18 12 L34 12 L34 6 L48 16 L34 26 L34 20 L18 20 L18 26Z" fill="${c}"/><path d="M48 36 L34 26 L34 32 L18 32 L18 26 L4 36 L18 46 L18 40 L34 40 L34 46Z" fill="${c}" opacity="0.5"/>`);}
+function scaleSVG(x,y,c,op,rot){return g(x,y,rot,op,`<rect x="24" y="6" width="4" height="34" rx="2" fill="${c}"/><rect x="10" y="38" width="32" height="4" rx="2" fill="${c}"/><rect x="6" y="8" width="40" height="3" rx="1.5" fill="${c}"/><circle cx="10" cy="24" r="6" fill="none" stroke="${c}" stroke-width="2.5"/><circle cx="42" cy="24" r="6" fill="none" stroke="${c}" stroke-width="2.5"/>`);}
+function paletteSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M26 4 C12 4 2 14 2 26 C2 38 12 48 26 48 C30 48 32 44 30 42 C28 40 28 36 32 36 L36 36 C42 36 48 30 48 24 C48 12 38 4 26 4Z" fill="${c}"/><circle cx="16" cy="18" r="4" fill="white" opacity="0.3"/><circle cx="12" cy="30" r="4" fill="white" opacity="0.3"/><circle cx="24" cy="38" r="3" fill="white" opacity="0.3"/><circle cx="30" cy="14" r="4" fill="white" opacity="0.3"/>`);}
+function questionSVG(x,y,c,op,rot){return g(x,y,rot,op,`<path d="M18 14 A10 10 0 0 1 34 14 C34 22 26 22 26 30" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round"/><circle cx="26" cy="40" r="3.5" fill="${c}"/>`);}
+
+
+
+
+
+// ─── PRODUCT CARDS ───────────────────────────────────────
+// Uses Unsplash Source for fashion images (free, no API key)
+// Each card links to the user's fave shop search
+
+const SHOP_URLS = {
+  'Depop / Vinted':    'https://www.depop.com/search/?q=',
+  'ASOS / H&M':        'https://www.asos.com/search/?q=',
+  'Urban Outfitters':  'https://www.urbanoutfitters.com/search?q=',
+  'Sezane / Rouje':    'https://www.sezane.com/uk/result?keywords=',
+  'Nike / NB':         'https://www.nike.com/gb/search?q=',
+  'Charity Shops':     'https://www.depop.com/search/?q=',
+  'Brandy Melville':   'https://www.brandymelvilleusa.com/search?q=',
+  'Princess Polly':    'https://us.princesspolly.com/search?q=',
+  'No favourite':      'https://www.asos.com/search/?q=',
+};
+
+const EXTRA_SHOPS = [
+  {name:'ASOS',   url:'https://www.asos.com/search/?q='},
+  {name:'Depop',  url:'https://www.depop.com/search/?q='},
+  {name:'Zara',   url:'https://www.zara.com/uk/en/search?searchTerm='},
+  {name:'SHEIN',  url:'https://www.shein.com/index.php?route=product/search&q='},
+  {name:'H&M',    url:'https://www2.hm.com/en_gb/search-results.html?q='},
+];
+
+function getShopUrl(shop){ return SHOP_URLS[shop] || 'https://www.asos.com/search/?q='; }
+
+function renderProductCards(items){
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('productEmpty');
+  const status = document.getElementById('productStatus');
+  const pal = searchPal;
+  if(!grid) return;
+
+  empty.style.display = 'none';
+  grid.style.display = 'grid';
+  if(status) status.textContent = items.length + ' items';
+
+  const faveShopUrl = getShopUrl(P.faveShop||'');
+  const faveShopName = (P.faveShop||'Shop').split(' ')[0];
+
+  // Build a card for each item
+  // Use Unsplash with keywords for fashion-relevant image
+  const aeKeyword = encodeURIComponent(resolveAeName().toLowerCase().replace(/[^a-z ]/g,'').trim().split(' ')[0] || 'fashion');
+
+  const newCards = items.map((item, i) => {
+    const encoded = encodeURIComponent(item);
+    const imgKeyword = encodeURIComponent(item.toLowerCase().replace(/[^a-z ]/g,'').trim());
+    // Unsplash random fashion image — seeded by item name so same item = same image
+    const seed = item.split('').reduce((a,b)=>a+b.charCodeAt(0),0);
+    const imgUrl = 'https://source.unsplash.com/300x400/?' + imgKeyword + ',fashion,clothing&sig=' + seed;
+
+    const card = document.createElement('a');
+    card.className = 'product-card';
+    card.href = faveShopUrl + encoded;
+    card.target = '_blank';
+    card.rel = 'noopener';
+    card.style.background = pal.ac + '12';
+    card.style.border = '1px solid ' + pal.tx + '0e';
+
+    const img = document.createElement('img');
+    img.className = 'product-img loading';
+    img.src = imgUrl;
+    img.alt = item;
+    img.onload = function(){ this.classList.remove('loading'); };
+    img.onerror = function(){ this.style.background=pal.ac+'22'; this.style.height='180px'; };
+    card.appendChild(img);
+    const info = document.createElement('div');
+    info.className = 'product-info';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'product-name';
+    nameEl.style.color = pal.tx;
+    nameEl.textContent = item;
+    const shopEl = document.createElement('div');
+    shopEl.className = 'product-shop';
+    shopEl.style.color = pal.tx;
+    shopEl.textContent = faveShopName + ' →';
+    info.appendChild(nameEl);
+    info.appendChild(shopEl);
+    card.appendChild(info);
+
+    // Right-click / long-press: show other shops
+    card.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      showShopMenu(e, item, pal);
+    });
+
+    return card;
+  });
+
+  // Append new cards (don't clear existing ones)
+  newCards.forEach(card => grid.appendChild(card));
+}
+
+// Shop picker popup when right-clicking a product
+function showShopMenu(e, item, pal){
+  // Remove existing menu
+  document.getElementById('shopMenu')?.remove();
+  const menu = document.createElement('div');
+  menu.id = 'shopMenu';
+  menu.style.cssText = 'position:fixed;top:'+e.clientY+'px;left:'+e.clientX+'px;z-index:999;background:'+pal.bg+';border:1.5px solid '+pal.tx+'20;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);min-width:160px;';
+  const header = document.createElement('div');
+  header.style.cssText = 'padding:8px 14px;font-size:0.64rem;letter-spacing:3px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx;
+  header.textContent = 'Find at...';
+  menu.appendChild(header);
+
+  const allShops = [
+    {name: (P.faveShop||'').split(' ')[0]||'Your Shop', url: getShopUrl(P.faveShop||'')},
+    ...EXTRA_SHOPS
+  ];
+  // Dedupe
+  const seen = new Set();
+  allShops.filter(s=>s.name&&s.url).forEach(s => {
+    if(seen.has(s.name)) return;
+    seen.add(s.name);
+    const a = document.createElement('a');
+    a.href = s.url + encodeURIComponent(item);
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.style.cssText = 'display:block;padding:10px 14px;font-size:0.85rem;color:'+pal.tx+';text-decoration:none;transition:background 0.1s;font-weight:500;';
+    a.textContent = s.name;
+    a.onmouseenter = ()=>{ a.style.background=pal.ac+'18'; };
+    a.onmouseleave = ()=>{ a.style.background='transparent'; };
+    menu.appendChild(a);
+  });
+
+  document.body.appendChild(menu);
+  setTimeout(()=>{ document.addEventListener('click', ()=>menu.remove(), {once:true}); }, 50);
+}
+
+// ─── HELPER: HIDE ALL SECTION VIEWS ──────────────────────
+function hideAllViews(){
+  let ids = ['hubView','dtiView','cardGameView','profileView','routineView','friendsView','contentView','dailyView','groupsView','fgDetailView','readitView','fitforitView','viralView'];
+  ids.forEach(function(id){
+    let el = document.getElementById(id);
+    if(el){ el.style.display='none'; el.classList.remove('active'); }
+  });
+}
+
+// ─── OUTFIT ROAST ────────────────────────────────────────
+function openOutfitRoast(){
+  let pal = searchPal;
+  let vc = document.getElementById('viralContent');
+  if(!vc) return;
+  // Determine user's flovee
+  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  let aeKey = topAe ? topAe[0] : 'softgirl';
+  let aeMap = {kawaii:'zola',softgirl:'nox',cleangirl:'zola',coquette:'nox',goth:'zola',darkacad:'nox',grunge:'zola',y2k:'nox',street:'zola',cottage:'nox',hippie:'zola',oldmoney:'nox',preppy:'zola',indie:'nox',emo:'zola'};
+  let fid = aeMap[aeKey] || 'zola';
+  let fd = FLOVEE_DATA[fid] || FLOVEE_DATA.zola;
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:2.4rem;margin-bottom:8px;">'+fd.emoji+'</div>'+
+      '<h2 class="bc" style="font-size:clamp(1.6rem,4vw,2.2rem);color:'+pal.tx+';margin-bottom:4px;">ROAST MY FIT</h2>'+
+      '<div style="font-size:0.82rem;opacity:0.45;color:'+pal.tx+';margin-bottom:24px;line-height:1.6;">'+fd.name+' will lovingly judge your outfit. she is brutally honest but she loves you.</div>'+
+      '<textarea id="roastInput" placeholder="describe what you are wearing rn... (e.g. oversized band tee, black leggings, white air forces)" style="width:100%;min-height:90px;padding:14px 16px;border-radius:14px;border:1.5px solid '+pal.tx+'12;background:'+pal.tx+'04;font-family:Space Grotesk,sans-serif;font-size:0.92rem;color:'+pal.tx+';outline:none;resize:none;line-height:1.6;"></textarea>'+
+      '<button id="roastBtn" onclick="getOutfitRoast()" class="bc" style="width:100%;padding:16px;border:none;border-radius:14px;background:'+fd.gradient+';color:'+fd.darkColor+';font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:12px;transition:all 0.2s;">ROAST ME '+fd.name.toUpperCase()+'</button>'+
+      '<div id="roastResult" style="display:none;margin-top:20px;"></div>'+
+    '</div>';
+}
+
+async function getOutfitRoast(){
+  let input = document.getElementById('roastInput');
+  let btn = document.getElementById('roastBtn');
+  let result = document.getElementById('roastResult');
+  if(!input || !input.value.trim()) return;
+  let pal = searchPal;
+
+  btn.disabled = true;
+  btn.textContent = 'JUDGING...';
+  result.style.display = 'none';
+
+  let base = window.STUFLOVER_API_URL || '';
+  let token = localStorage.getItem('stuflover_token');
+  try{
+    let res = await (window._origFetch||fetch).call(window, base+'/api/flovee/roast',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({outfitDescription:input.value.trim()})
+    });
+    let data = await res.json();
+    if(data.roast){
+      let fd = FLOVEE_DATA[data.floveeId] || FLOVEE_DATA.zola;
+      let shareText = fd.emoji+' '+fd.name+' roasted my outfit: "'+data.roast+'" — get roasted at stuflover.com';
+      result.style.display = 'block';
+      result.innerHTML =
+        '<div style="padding:22px 24px;border-radius:20px;background:'+fd.gradient+';position:relative;text-align:left;">'+
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">'+
+            '<div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1rem;">'+fd.emoji+'</div>'+
+            '<div style="font-weight:700;color:'+fd.darkColor+';">'+fd.name+' says:</div>'+
+          '</div>'+
+          '<div style="font-size:1.05rem;line-height:1.75;color:'+fd.darkColor+';">'+escHtml(data.roast)+'</div>'+
+          '<div style="margin-top:14px;display:flex;gap:8px;">'+
+            '<button onclick="navigator.share?navigator.share({text:\''+_escJsString(shareText)+'\'}):navigator.clipboard.writeText(\''+_escJsString(shareText)+'\').then(function(){this.textContent=\'copied!\';let b=this;setTimeout(function(){b.textContent=\'share roast\'},1500)}.bind(this))" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.3);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">share roast</button>'+
+            '<button onclick="document.getElementById(\'roastInput\').value=\'\';document.getElementById(\'roastResult\').style.display=\'none\';" style="padding:8px 16px;border-radius:12px;border:none;background:rgba(255,255,255,0.15);color:'+fd.darkColor+';font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">try again</button>'+
+          '</div>'+
+        '</div>';
+    }
+  }catch(e){
+    result.style.display = 'block';
+    result.innerHTML = '<div style="font-size:0.82rem;opacity:0.4;color:'+pal.tx+';">could not reach your flovee rn. try again in a sec.</div>';
+  }
+  btn.disabled = false;
+  btn.textContent = 'ROAST ME AGAIN';
+}
+
+// ─── SECRET DIARY ────────────────────────────────────────
+function openSecretDiary(){
+  let pal = searchPal;
+  let vc = document.getElementById('viralContent');
+  if(!vc) return;
+  let entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+
+  let entriesHtml = entries.slice().reverse().slice(0,20).map(function(e){
+    let d = new Date(e.time);
+    let dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    let timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    return '<div class="diary-entry" style="background:'+pal.tx+'04;border:1px solid '+pal.tx+'06;">'+
+      '<div class="diary-date" style="color:'+pal.tx+';">'+dateStr+' at '+timeStr+'</div>'+
+      '<div class="diary-text" style="color:'+pal.tx+';">'+escHtml(e.text)+'</div>'+
+    '</div>';
+  }).join('');
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;">'+
+      '<div style="text-align:center;margin-bottom:20px;">'+
+        '<div style="font-size:2rem;margin-bottom:6px;">🔒</div>'+
+        '<h2 class="bc" style="font-size:clamp(1.5rem,4vw,2rem);color:'+pal.tx+';margin-bottom:4px;">SECRET DIARY</h2>'+
+        '<div style="font-size:0.78rem;opacity:0.4;color:'+pal.tx+';line-height:1.6;">just you. no one else can see this. ever. not even us.</div>'+
+      '</div>'+
+      '<textarea id="diaryInput" class="diary-input" style="border-color:'+pal.tx+'12;background:'+pal.tx+'04;color:'+pal.tx+';" placeholder="what is on your mind rn..."></textarea>'+
+      '<button onclick="saveDiaryEntry()" class="bc" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.82rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:10px;transition:all 0.2s;">save this thought</button>'+
+      '<div style="margin-top:24px;">'+
+        (entries.length > 0 ?
+          '<div style="font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:12px;color:'+pal.tx+';">your thoughts ('+entries.length+')</div>' + entriesHtml
+          : '<div style="text-align:center;padding:30px;opacity:0.25;font-style:italic;color:'+pal.tx+';">your first entry goes here</div>'
+        )+
+      '</div>'+
+    '</div>';
+}
+
+function saveDiaryEntry(){
+  let input = document.getElementById('diaryInput');
+  if(!input || !input.value.trim()) return;
+  let entries = JSON.parse(localStorage.getItem('stuflover_diary')||'[]');
+  entries.push({text:input.value.trim(), time:Date.now()});
+  localStorage.setItem('stuflover_diary', JSON.stringify(entries));
+  input.value = '';
+  openSecretDiary(); // Refresh
+}
+
+// ─── STUDY ROOM ──────────────────────────────────────────
+let studyTimerInterval = null;
+let studyTimeLeft = 0;
+let studyMode = 'focus'; // focus or break
+
+function openStudyRoom(){
+  let pal = searchPal;
+  let vc = document.getElementById('viralContent');
+  if(!vc) return;
+  if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
+
+  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  let aeKey = topAe ? topAe[0] : 'softgirl';
+  let aeName = (typeof AE !== 'undefined' && AE[aeKey]) ? AE[aeKey].name : aeKey;
+
+  let ambients = {
+    kawaii:'lofi beats + rain sounds',softgirl:'soft piano + ambient',cleangirl:'white noise + coffee shop',
+    coquette:'french cafe + vinyl crackle',goth:'thunderstorm + dark ambient',darkacad:'library sounds + rain',
+    grunge:'lo-fi indie + vinyl',y2k:'2000s pop instrumentals',street:'chill hip hop beats',
+    cottage:'birds + gentle stream',hippie:'nature sounds + acoustic',oldmoney:'classical piano + fireplace',
+    preppy:'upbeat lofi + typing sounds',indie:'bedroom indie + rain',emo:'acoustic covers + rain'
+  };
+  let ambient = ambients[aeKey] || 'lofi beats + rain';
+
+  vc.innerHTML =
+    '<div style="max-width:500px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">'+aeName+' study room</div>'+
+      '<div class="study-timer" id="studyTimer" style="color:'+pal.tx+';">25:00</div>'+
+      '<div id="studyModeLabel" style="font-size:0.72rem;opacity:0.4;color:'+pal.tx+';margin-top:4px;">focus time</div>'+
+      '<div style="margin:20px auto;max-width:300px;height:4px;border-radius:2px;background:'+pal.tx+'08;">'+
+        '<div id="studyProgress" style="height:100%;width:0%;background:'+pal.ac+';border-radius:2px;transition:width 1s linear;"></div>'+
+      '</div>'+
+      '<div class="study-controls">'+
+        '<button class="study-btn active bc" onclick="startStudy(25)" style="color:'+pal.tx+';border-color:'+pal.tx+'25;">25 min</button>'+
+        '<button class="study-btn bc" onclick="startStudy(45)" style="color:'+pal.tx+';border-color:'+pal.tx+'15;">45 min</button>'+
+        '<button class="study-btn bc" onclick="startStudy(60)" style="color:'+pal.tx+';border-color:'+pal.tx+'15;">60 min</button>'+
+      '</div>'+
+      '<button id="studyStartBtn" onclick="toggleStudy()" class="bc" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:14px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:20px;">start focusing</button>'+
+      '<div style="margin-top:24px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'04;text-align:left;">'+
+        '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:4px;color:'+pal.tx+';">your ambient</div>'+
+        '<div style="font-size:0.88rem;color:'+pal.tx+';opacity:0.6;">'+ambient+'</div>'+
+      '</div>'+
+      '<div style="margin-top:12px;padding:14px 18px;border-radius:12px;background:'+pal.tx+'04;text-align:left;">'+
+        '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:4px;color:'+pal.tx+';">sessions today</div>'+
+        '<div style="font-size:0.88rem;color:'+pal.tx+';opacity:0.6;" id="studySessions">'+getStudySessions()+' completed</div>'+
+      '</div>'+
+    '</div>';
+  studyTimeLeft = 25 * 60;
+}
+
+let studyTotalTime = 25 * 60;
+function startStudy(mins){
+  if(studyTimerInterval){ clearInterval(studyTimerInterval); studyTimerInterval=null; }
+  studyTimeLeft = mins * 60;
+  studyTotalTime = mins * 60;
+  studyMode = 'focus';
+  updateStudyDisplay();
+  let btns = document.querySelectorAll('.study-controls .study-btn');
+  btns.forEach(function(b){ b.classList.remove('active'); b.style.borderColor=searchPal.tx+'15'; });
+  event.target.classList.add('active');
+  event.target.style.borderColor=searchPal.tx+'25';
+  let startBtn = document.getElementById('studyStartBtn');
+  if(startBtn) startBtn.textContent = 'start focusing';
+}
+
+function toggleStudy(){
+  let btn = document.getElementById('studyStartBtn');
+  if(studyTimerInterval){
+    clearInterval(studyTimerInterval);
+    studyTimerInterval = null;
+    if(btn) btn.textContent = 'resume';
+  } else {
+    studyTimerInterval = setInterval(function(){
+      studyTimeLeft--;
+      if(studyTimeLeft <= 0){
+        clearInterval(studyTimerInterval);
+        studyTimerInterval = null;
+        if(studyMode === 'focus'){
+          incrementStudySessions();
+          studyMode = 'break';
+          studyTimeLeft = 5 * 60;
+          studyTotalTime = 5 * 60;
+          if(btn) btn.textContent = 'start break';
+          let label = document.getElementById('studyModeLabel');
+          if(label) label.textContent = 'break time — you earned it';
+          try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+        } else {
+          studyMode = 'focus';
+          studyTimeLeft = 25 * 60;
+          studyTotalTime = 25 * 60;
+          if(btn) btn.textContent = 'start focusing';
+          let label = document.getElementById('studyModeLabel');
+          if(label) label.textContent = 'focus time';
+        }
+      }
+      updateStudyDisplay();
+    }, 1000);
+    if(btn) btn.textContent = 'pause';
+    let label = document.getElementById('studyModeLabel');
+    if(label) label.textContent = studyMode === 'focus' ? 'focusing...' : 'on break...';
+  }
+}
+
+function updateStudyDisplay(){
+  let timer = document.getElementById('studyTimer');
+  let progress = document.getElementById('studyProgress');
+  if(timer){
+    let m = Math.floor(studyTimeLeft/60);
+    let s = studyTimeLeft%60;
+    timer.textContent = m+':'+(s<10?'0':'')+s;
+  }
+  if(progress){
+    let pct = ((studyTotalTime - studyTimeLeft) / studyTotalTime) * 100;
+    progress.style.width = pct+'%';
+  }
+  let sessions = document.getElementById('studySessions');
+  if(sessions) sessions.textContent = getStudySessions()+' completed';
+}
+
+function getStudySessions(){
+  let key = 'stuflover_study_'+new Date().toDateString();
+  return parseInt(localStorage.getItem(key)||'0');
+}
+function incrementStudySessions(){
+  let key = 'stuflover_study_'+new Date().toDateString();
+  let n = parseInt(localStorage.getItem(key)||'0') + 1;
+  localStorage.setItem(key, n.toString());
+}
+
+// ─── AESTHETIC VS REALITY GAME ───────────────────────────
+let aevsScore = 0;
+let aevsRound = 0;
+let aevsQuestions = [];
+
+function openAeVsReality(){
+  let pal = searchPal;
+  let vc = document.getElementById('viralContent');
+  if(!vc) return;
+  aevsScore = 0;
+  aevsRound = 0;
+
+  let topAe = Object.entries(P.aesthetics).sort(function(a,b){return b[1]-a[1];})[0];
+  let aeKey = topAe ? topAe[0] : 'softgirl';
+
+  // Build questions based on aesthetic
+  aevsQuestions = [
+    {q:'friday night plans',ae:'curating a mood board and journaling by candlelight',reality:'scrolling tiktok in bed for 4 hours straight',pick:null},
+    {q:'morning routine',ae:'5am sunrise yoga, green juice, meditation',reality:'snoozing the alarm 7 times and running out with wet hair',pick:null},
+    {q:'study session',ae:'color-coded notes in a cute cafe with a latte',reality:'panicking at 11pm with 47 tabs open',pick:null},
+    {q:'closet situation',ae:'perfectly organized by color, everything fits',reality:'floor-drobe. the chair. you know the chair.',pick:null},
+    {q:'self care sunday',ae:'face mask, journaling, herbal tea, early bed',reality:'did nothing all day, called it rest, ate cereal for dinner',pick:null},
+    {q:'playlist',ae:'curated 200 songs, each one a vibe, organized by mood',reality:'the same 12 songs on repeat for 3 months',pick:null},
+    {q:'skincare routine',ae:'10 steps, all the serums, glass skin era',reality:'face wash if i remember, moisturizer sometimes',pick:null},
+    {q:'room aesthetic',ae:'pinterest-perfect, fairy lights, plants, organized desk',reality:'organized chaos. translation: chaos.',pick:null},
+  ];
+
+  showAevsRound(pal);
+}
+
+function showAevsRound(pal){
+  if(!pal) pal = searchPal;
+  let vc = document.getElementById('viralContent');
+  if(!vc) return;
+
+  if(aevsRound >= aevsQuestions.length){
+    // Show results
+    let aeCount = aevsQuestions.filter(function(q){return q.pick==='ae';}).length;
+    let realCount = aevsQuestions.filter(function(q){return q.pick==='reality';}).length;
+    let verdict = aeCount > realCount ? 'you are living the aesthetic fantasy and honestly good for you' :
+                  aeCount === realCount ? 'perfectly balanced between delulu and real — as all things should be' :
+                  'you are SO real for this. the aesthetic is aspirational and that is valid';
+    let shareText = 'i got '+aeCount+' aesthetic vs '+realCount+' reality on stuflover — '+verdict;
+
+    vc.innerHTML =
+      '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
+        '<div style="font-size:2rem;margin-bottom:8px;">'+(aeCount>realCount?'✨':'💀')+'</div>'+
+        '<h2 class="bc" style="font-size:1.8rem;color:'+pal.tx+';margin:0 0 4px;">YOUR RESULTS</h2>'+
+        '<div style="display:flex;gap:16px;justify-content:center;margin:20px 0;">'+
+          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.ac+'15;text-align:center;">'+
+            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+aeCount+'</div>'+
+            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">aesthetic</div>'+
+          '</div>'+
+          '<div style="padding:16px 24px;border-radius:14px;background:'+pal.tx+'08;text-align:center;">'+
+            '<div style="font-size:1.8rem;font-weight:900;color:'+pal.tx+';">'+realCount+'</div>'+
+            '<div style="font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.4;font-family:Barlow Condensed,sans-serif;font-weight:900;color:'+pal.tx+';">reality</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="font-size:0.88rem;line-height:1.6;opacity:0.55;color:'+pal.tx+';margin-bottom:20px;">'+verdict+'</div>'+
+        '<div style="display:flex;gap:8px;justify-content:center;">'+
+          '<button onclick="openAeVsReality()" class="bc" style="padding:12px 24px;border:none;border-radius:12px;background:'+pal.ac+';color:'+pal.bg+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">play again</button>'+
+          '<button onclick="navigator.share?navigator.share({text:\''+shareText.replace(/'/g,"\\'")+'\'}):navigator.clipboard.writeText(\''+shareText.replace(/'/g,"\\'")+'\').then(function(){this.textContent=\'copied!\';let b=this;setTimeout(function(){b.textContent=\'share\'},1500)}.bind(this))" class="bc" style="padding:12px 24px;border:1.5px solid '+pal.tx+'15;border-radius:12px;background:transparent;color:'+pal.tx+';font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">share</button>'+
+        '</div>'+
+      '</div>';
+    return;
+  }
+
+  let q = aevsQuestions[aevsRound];
+  vc.innerHTML =
+    '<div style="max-width:460px;margin:0 auto;text-align:center;">'+
+      '<div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:6px;color:'+pal.tx+';">round '+(aevsRound+1)+' of '+aevsQuestions.length+'</div>'+
+      '<h2 class="bc" style="font-size:clamp(1.3rem,3.5vw,1.8rem);color:'+pal.tx+';margin:0 0 4px;">'+q.q.toUpperCase()+'</h2>'+
+      '<div style="font-size:0.75rem;opacity:0.35;color:'+pal.tx+';margin-bottom:10px;">which one is you? be honest.</div>'+
+      '<div class="aevs-vs">'+
+        '<div class="aevs-side" onclick="pickAevs(\'ae\')" style="background:'+pal.ac+'10;border-color:'+pal.ac+'20;border-radius:16px;">'+
+          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Aesthetic</div>'+
+          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.ae+'</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;font-size:0.65rem;opacity:0.2;font-weight:900;color:'+pal.tx+';">vs</div>'+
+        '<div class="aevs-side" onclick="pickAevs(\'reality\')" style="background:'+pal.tx+'06;border-color:'+pal.tx+'10;border-radius:16px;">'+
+          '<div style="font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:Barlow Condensed,sans-serif;font-weight:900;margin-bottom:8px;color:'+pal.tx+';">Reality</div>'+
+          '<div style="font-size:0.88rem;line-height:1.6;color:'+pal.tx+';">'+q.reality+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+
+function pickAevs(choice){
+  aevsQuestions[aevsRound].pick = choice;
+  aevsRound++;
+  setTimeout(function(){ showAevsRound(searchPal); }, 300);
+}
+
+// ─── AUTO-LOAD SAVED PROFILE ─────────────────────────────
+// If the user is signed in and already completed the quiz, skip it and show
+// their page. Anonymous visitors always see the hero so they can take the
+// quiz — their aesthetic is locked behind sign-in at the reveal step.
+(function autoLoad(){
+  if (!localStorage.getItem('stuflover_token')) return;
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem('stuflover_profile')||'null'); } catch(e) { saved=null; }
+  if(!saved || !saved.aesthetics || Object.keys(saved.aesthetics).length===0) return;
+
+  // Restore profile data into P
+  P.aesthetics = saved.aesthetics||{};
+  P.music = saved.music||[];
+  P.interests = saved.interests||[];
+  P.social = saved.social||null;
+  P.age = saved.age||null;
+  P.gender = saved.gender||null;
+  P.faveColour = saved.faveColour||null;
+  P.faveShop = saved.faveShop||null;
+  P.friendGroup = saved.friendGroup||null;
+  P.energyWord = saved.energyWord||null;
+  P.moodToday = saved.moodToday||null;
+  P.phoneScreen = saved.phoneScreen||null;
+  P.saturdayMorning = saved.saturdayMorning||null;
+  P.coffeeOrder = saved.coffeeOrder||null;
+  P.notesApp = saved.notesApp||null;
+  P.lastBought = saved.lastBought||null;
+  P.extraTags = saved.extraTags||[];
+
+  // Hide the landing hero and show the result page
+  document.getElementById('heroSection').style.display='none';
+  try{
+    buildPage();
+  }catch(e){
+    console.error('buildPage error:', e);
+    // Ensure lifestyle page is at least visible
+    document.getElementById('lifestylePage').classList.add('active');
+  }
+
+  // Show welcome message
+  let user = window.stufloverUser ? window.stufloverUser() : null;
+  if(user && user.username){
+    let wel = document.getElementById('navWelcome');
+    if(wel){ wel.textContent='Welcome, '+user.username; wel.style.display='inline'; }
+  }
+})();
+

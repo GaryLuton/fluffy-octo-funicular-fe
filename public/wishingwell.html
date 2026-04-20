@@ -81,7 +81,7 @@
 <script src="/stuflover-nav.js"></script>
 <nav id="mainNav">
   <a class="nav-logo bc" href="lifestyle.html" id="navLogo">Stuflover</a>
-  <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links">
     <a class="nav-btn bc" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
     <a class="nav-btn bc" href="account.html">Account</a>
@@ -104,7 +104,7 @@
 <div id="mainContent" style="display:none">
   <div class="section-bar">
     <div class="section-label bc" id="itemCount"></div>
-    <button class="clear-btn bc" onclick="clearAll()">Clear All</button>
+    <button type="button" class="clear-btn bc" onclick="clearAll()">Clear All</button>
   </div>
   <div class="products-wrap">
     <div class="products-grid" id="productsGrid"></div>
@@ -220,10 +220,10 @@ function render(){
         <div class="product-price" style="color:${PAL.tx}">${p.price||''}</div>
         <div class="product-actions">
           ${inCat
-            ? `<button class="catalog-btn bc" style="background:${PAL.tx}18;color:${PAL.tx}" onclick="removeFromCatalog('${p.id}')">Remove from Catalog</button>`
-            : `<button class="catalog-btn bc" style="background:${PAL.ac};color:${PAL.bg}" onclick='addToCatalog(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Add to Catalog</button>`
+            ? `<button type="button" class="catalog-btn bc" style="background:${PAL.tx}18;color:${PAL.tx}" onclick="removeFromCatalog('${p.id}')">Remove from Catalog</button>`
+            : `<button type="button" class="catalog-btn bc" style="background:${PAL.ac};color:${PAL.bg}" onclick='addToCatalog(${JSON.stringify(p).replace(/'/g,"&#39;")})'>Add to Catalog</button>`
           }
-          <button class="remove-btn bc" style="border-color:${PAL.tx}20;color:${PAL.tx}" onclick="removeFromWishlist('${p.id}')">✕</button>
+          <button type="button" class="remove-btn bc" style="border-color:${PAL.tx}20;color:${PAL.tx}" onclick="removeFromWishlist('${p.id}')">✕</button>
         </div>
       </div>
     </div>`;

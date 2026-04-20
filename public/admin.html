@@ -148,7 +148,7 @@
     <a class="logo" href="admin.html">Stuflover Admin</a>
     <div class="nav-right">
       <span id="adminEmail"></span>
-      <button onclick="adminLogout()">Sign Out</button>
+      <button type="button" onclick="adminLogout()">Sign Out</button>
     </div>
   </nav>
 
@@ -165,9 +165,9 @@
     <!-- Tabs: Users / Login Activity / Page Usage -->
     <div class="section-card">
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('users')">Users</button>
-        <button class="tab" onclick="switchTab('logins')">Login Activity</button>
-        <button class="tab" onclick="switchTab('pages')">Page Usage</button>
+        <button type="button" class="tab active" onclick="switchTab('users')">Users</button>
+        <button type="button" class="tab" onclick="switchTab('logins')">Login Activity</button>
+        <button type="button" class="tab" onclick="switchTab('pages')">Page Usage</button>
       </div>
 
       <!-- Users Tab -->
@@ -202,7 +202,7 @@
 <!-- User Detail Modal -->
 <div class="modal-overlay" id="userModal">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <button type="button" class="modal-close" onclick="closeModal()">&times;</button>
     <h2 id="modalUsername"></h2>
     <div class="modal-meta" id="modalMeta"></div>
     <h3 style="font-size:0.9rem;letter-spacing:2px;margin-bottom:12px;">Recent Activity</h3>

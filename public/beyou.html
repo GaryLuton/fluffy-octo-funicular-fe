@@ -190,7 +190,7 @@
 
 <nav id="mainNav" class="sl-nav">
   <a class="nav-logo bc sl-nav-logo" href="index.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
     <a class="nav-btn bc sl-nav-btn" href="lifestyle.html" onclick="event.preventDefault();history.back();">← Back</a>
     <a class="nav-btn bc sl-nav-btn" href="account.html">Account</a>
@@ -206,11 +206,11 @@
     <div class="breathe-instruction" id="breatheInstruction">Take a moment for yourself</div>
     <div class="breathe-timer" id="breatheTimer"></div>
     <div class="duration-row" id="durationRow">
-      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="64" onclick="setDuration(64,this)">1 min</button>
-      <button class="dur-btn bc sl-btn sl-btn-pill on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
-      <button class="dur-btn bc sl-btn sl-btn-pill" data-dur="304" onclick="setDuration(304,this)">5 min</button>
+      <button type="button" class="dur-btn bc sl-btn sl-btn-pill" data-dur="64" onclick="setDuration(64,this)">1 min</button>
+      <button type="button" class="dur-btn bc sl-btn sl-btn-pill on" data-dur="176" onclick="setDuration(176,this)">3 min</button>
+      <button type="button" class="dur-btn bc sl-btn sl-btn-pill" data-dur="304" onclick="setDuration(304,this)">5 min</button>
     </div>
-    <button class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
+    <button type="button" class="breathe-start bc" id="breatheStartBtn" onclick="startBreathe()">Begin</button>
   </div>
 </div>
 
@@ -220,7 +220,7 @@
     <div class="reflect-orb" id="reflectOrb"></div>
     <div class="reflect-prompt" id="reflectPrompt"></div>
     <div class="reflect-sub">sit with this for a moment</div>
-    <button class="reflect-next bc" id="reflectNextBtn" onclick="nextReflect()">Next</button>
+    <button type="button" class="reflect-next bc" id="reflectNextBtn" onclick="nextReflect()">Next</button>
   </div>
 </div>
 
@@ -230,14 +230,14 @@
     <div class="journal-title bc">My Journal</div>
     <textarea class="journal-textarea" id="journalText" placeholder="Write what's on your mind..."></textarea>
     <div class="mood-row" id="moodRow">
-      <button class="mood-chip" data-mood="happy" onclick="selectMood(this)">happy</button>
-      <button class="mood-chip" data-mood="calm" onclick="selectMood(this)">calm</button>
-      <button class="mood-chip" data-mood="sad" onclick="selectMood(this)">sad</button>
-      <button class="mood-chip" data-mood="anxious" onclick="selectMood(this)">anxious</button>
-      <button class="mood-chip" data-mood="grateful" onclick="selectMood(this)">grateful</button>
-      <button class="mood-chip" data-mood="tired" onclick="selectMood(this)">tired</button>
+      <button type="button" class="mood-chip" data-mood="happy" onclick="selectMood(this)">happy</button>
+      <button type="button" class="mood-chip" data-mood="calm" onclick="selectMood(this)">calm</button>
+      <button type="button" class="mood-chip" data-mood="sad" onclick="selectMood(this)">sad</button>
+      <button type="button" class="mood-chip" data-mood="anxious" onclick="selectMood(this)">anxious</button>
+      <button type="button" class="mood-chip" data-mood="grateful" onclick="selectMood(this)">grateful</button>
+      <button type="button" class="mood-chip" data-mood="tired" onclick="selectMood(this)">tired</button>
     </div>
-    <button class="journal-save bc" id="journalSaveBtn" onclick="saveJournalEntry()">Save Entry</button>
+    <button type="button" class="journal-save bc" id="journalSaveBtn" onclick="saveJournalEntry()">Save Entry</button>
     <div class="journal-entries" id="journalEntries"></div>
     <div style="text-align:center;font-size:0.65rem;opacity:0.2;margin-top:16px;padding:0 20px;line-height:1.5;">your journal is saved on this device. sign in on stuflover to back it up.</div>
   </div>
@@ -274,7 +274,7 @@
       <div class="regulate-done-emoji">&#10024;</div>
       <div class="regulate-done-title">Well done — you are here, you are present</div>
       <div class="regulate-done-sub">Your body and mind are connected again</div>
-      <button class="regulate-reset bc" onclick="resetGrounding()">Do it again</button>
+      <button type="button" class="regulate-reset bc" onclick="resetGrounding()">Do it again</button>
     </div>
   </div>
 </div>
@@ -285,18 +285,18 @@
     <div class="complete-check" id="completeCheck"></div>
     <div class="complete-title" id="completeTitle">Well done</div>
     <div class="complete-stat" id="completeStat"></div>
-    <button class="complete-btn bc" onclick="resetBreathe()">Again</button>
-    <button class="complete-btn bc" onclick="switchMode('reflect')" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Reflect</button>
-    <button class="complete-btn bc" onclick="window.location.href='index.html'" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Done</button>
+    <button type="button" class="complete-btn bc" onclick="resetBreathe()">Again</button>
+    <button type="button" class="complete-btn bc" onclick="switchMode('reflect')" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Reflect</button>
+    <button type="button" class="complete-btn bc" onclick="window.location.href='index.html'" style="background:transparent !important;border:1.5px solid rgba(128,128,128,0.15)">Done</button>
   </div>
 </div>
 
 <!-- MODE BAR -->
 <div class="mode-bar" id="modeBar">
-  <button class="mode-pill bc on" id="pillBreathe" onclick="switchMode('breathe')">Breathe</button>
-  <button class="mode-pill bc" id="pillReflect" onclick="switchMode('reflect')">Reflect</button>
-  <button class="mode-pill bc" id="pillJournal" onclick="switchMode('journal')">Journal</button>
-  <button class="mode-pill bc" id="pillRegulate" onclick="switchMode('regulate')">Regulate</button>
+  <button type="button" class="mode-pill bc on" id="pillBreathe" onclick="switchMode('breathe')">Breathe</button>
+  <button type="button" class="mode-pill bc" id="pillReflect" onclick="switchMode('reflect')">Reflect</button>
+  <button type="button" class="mode-pill bc" id="pillJournal" onclick="switchMode('journal')">Journal</button>
+  <button type="button" class="mode-pill bc" id="pillRegulate" onclick="switchMode('regulate')">Regulate</button>
 </div>
 
 <script src="/stuflover-config.js"></script>

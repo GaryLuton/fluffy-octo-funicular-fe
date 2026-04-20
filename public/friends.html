@@ -171,7 +171,7 @@
   <div class="contacts-panel" id="contactsPanel">
     <div class="contacts-header">
       <div class="contacts-title">Friends</div>
-      <button class="new-chat-btn bc" onclick="openAddModal()" title="Add friend">+</button>
+      <button type="button" class="new-chat-btn bc" onclick="openAddModal()" title="Add friend">+</button>
     </div>
     <div class="contacts-search">
       <input id="searchInput" placeholder="Search..." oninput="filterContacts(this.value)"/>
@@ -195,7 +195,7 @@
           <textarea class="chat-textarea" id="chatInput" placeholder="Message..." rows="1"
             oninput="autoResize(this);onTyping()"
             onkeydown="handleMsgKey(event)"></textarea>
-          <button class="send-btn bc" id="sendBtn" onclick="sendMessage()">-></button>
+          <button type="button" class="send-btn bc" id="sendBtn" onclick="sendMessage()">-></button>
         </div>
         <div class="flovee-help-row" id="helpChips"></div>
       </div>
@@ -234,7 +234,7 @@
       <div class="share-link-row">
         <input id="frUsernameInput" placeholder="Their username..." maxlength="40"
           onkeydown="if(event.key==='Enter') sendFriendRequestFromModal()"/>
-        <button class="share-copy-btn bc" id="frSendBtn" onclick="sendFriendRequestFromModal()">Send</button>
+        <button type="button" class="share-copy-btn bc" id="frSendBtn" onclick="sendFriendRequestFromModal()">Send</button>
       </div>
       <div id="frRequestStatus" style="font-size:0.72rem;opacity:0.7;min-height:1em;"></div>
     </div>
@@ -246,17 +246,17 @@
     <div style="display:flex;flex-direction:column;gap:6px;">
       <div style="font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.3;font-family:Barlow Condensed,sans-serif;font-weight:900;">Relationship</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;" id="relChips">
-        <button class="help-chip on" data-rel="bestie" onclick="pickRel(this)">Bestie</button>
-        <button class="help-chip" data-rel="close friend" onclick="pickRel(this)">Close friend</button>
-        <button class="help-chip" data-rel="group friend" onclick="pickRel(this)">Group friend</button>
-        <button class="help-chip" data-rel="situationship" onclick="pickRel(this)">Situationship</button>
-        <button class="help-chip" data-rel="acquaintance" onclick="pickRel(this)">Acquaintance</button>
-        <button class="help-chip" data-rel="complicated" onclick="pickRel(this)">Complicated</button>
+        <button type="button" class="help-chip on" data-rel="bestie" onclick="pickRel(this)">Bestie</button>
+        <button type="button" class="help-chip" data-rel="close friend" onclick="pickRel(this)">Close friend</button>
+        <button type="button" class="help-chip" data-rel="group friend" onclick="pickRel(this)">Group friend</button>
+        <button type="button" class="help-chip" data-rel="situationship" onclick="pickRel(this)">Situationship</button>
+        <button type="button" class="help-chip" data-rel="acquaintance" onclick="pickRel(this)">Acquaintance</button>
+        <button type="button" class="help-chip" data-rel="complicated" onclick="pickRel(this)">Complicated</button>
       </div>
     </div>
     <div class="modal-actions">
-      <button class="modal-btn bc cancel" id="cancelBtn" onclick="closeAddModal()">Cancel</button>
-      <button class="modal-btn bc" id="saveBtn" onclick="saveContact()">Add</button>
+      <button type="button" class="modal-btn bc cancel" id="cancelBtn" onclick="closeAddModal()">Cancel</button>
+      <button type="button" class="modal-btn bc" id="saveBtn" onclick="saveContact()">Add</button>
     </div>
   </div>
 </div>
@@ -536,8 +536,8 @@ function renderRemoteRequestsBlock(filter){
     <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
       <div class="contact-avatar" style="background:${getAvatarCol(String(r.id))};width:30px;height:30px;font-size:0.8rem;">${getInitials(r.username)}</div>
       <div style="flex:1;font-size:0.85rem;color:${PAL.tx};min-width:0;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.username)}</div>
-      <button class="sug-btn use bc" onclick="acceptRemoteRequest(${r.id})" style="background:${PAL.ac};color:${PAL.bg};padding:4px 10px;font-size:0.62rem;">Accept</button>
-      <button class="sug-btn skip bc" onclick="declineRemoteRequest(${r.id})" style="border-color:${PAL.tx}20;color:${PAL.tx};padding:4px 8px;font-size:0.62rem;">×</button>
+      <button type="button" class="sug-btn use bc" onclick="acceptRemoteRequest(${r.id})" style="background:${PAL.ac};color:${PAL.bg};padding:4px 10px;font-size:0.62rem;">Accept</button>
+      <button type="button" class="sug-btn skip bc" onclick="declineRemoteRequest(${r.id})" style="border-color:${PAL.tx}20;color:${PAL.tx};padding:4px 8px;font-size:0.62rem;">×</button>
     </div>`).join('');
   return `<div style="padding:10px 16px;border-bottom:1px solid rgba(128,128,128,0.1);background:${PAL.ac}0a;">
     <div style="font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:${PAL.tx}">Friend requests</div>
@@ -645,15 +645,15 @@ function openChat(id){
 
   // Header
   document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
+    <button type="button" class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
     <div class="chat-header-avatar" style="background:${getAvatarCol(id)}">${getInitials(contact.name)}</div>
     <div>
       <div class="chat-header-name" style="color:${PAL.tx}">${contact.name}</div>
       <div class="chat-header-status" style="color:${PAL.tx}">${contact.rel||'friend'}</div>
     </div>
     <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="askFloveeAdvice()" style="color:${PAL.tx};border-color:${PAL.tx}22">Ask Flovee</button>
-      <button class="header-action-btn bc" onclick="clearChat('${id}')" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
+      <button type="button" class="header-action-btn bc" onclick="askFloveeAdvice()" style="color:${PAL.tx};border-color:${PAL.tx}22">Ask Flovee</button>
+      <button type="button" class="header-action-btn bc" onclick="clearChat('${id}')" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
     </div>`;
   // Show chat panel on mobile
   document.getElementById('chatPanel').classList.add('mobile-active');
@@ -679,14 +679,14 @@ function openFloveeChat(){
   acs.style.display='flex';
 
   document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
+    <button type="button" class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
     <div class="chat-header-avatar flovee" style="background:${PAL.ac};font-size:1.2rem">${floveeChar.emoji}</div>
     <div>
       <div class="chat-header-name" style="color:${PAL.tx}">${floveeChar.name}</div>
       <div class="chat-header-status" style="color:${PAL.tx}">${floveeChar.vibe} \u2022 your AI friend</div>
     </div>
     <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="clearFloveeChat()" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
+      <button type="button" class="header-action-btn bc" onclick="clearFloveeChat()" style="color:${PAL.tx};border-color:${PAL.tx}22">Clear</button>
     </div>`;
   document.getElementById('chatPanel').classList.add('mobile-active');
 
@@ -712,7 +712,7 @@ function renderFloveeMessages(){
         <div class="no-chat-title bc" style="color:${PAL.tx}">this is ${floveeChar.name}</div>
         <div class="no-chat-sub" style="color:${PAL.tx};max-width:300px">${floveeChar.vibe}. matched to your aesthetic. she remembers your conversations and actually gets you. say anything.</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px">
-          ${starters.map(s=>`<button class="help-chip bc" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')" style="color:${PAL.tx};border-color:${PAL.tx}22">${s}</button>`).join('')}
+          ${starters.map(s=>`<button type="button" class="help-chip bc" onclick="sendFloveeStarter('${s.replace(/'/g,"\\'")}')" style="color:${PAL.tx};border-color:${PAL.tx}22">${s}</button>`).join('')}
         </div>
       </div>`;
     return;
@@ -775,9 +775,9 @@ function renderMessages(){
           <div class="flovee-suggestion-label" style="color:${PAL.tx}">${floveeChar.name} suggests</div>
           <div class="flovee-suggestion-text" style="color:${PAL.tx}">${m.text}</div>
           <div class="flovee-suggestion-actions">
-            <button class="sug-btn use bc" onclick="useSuggestion(${i})" style="background:${PAL.ac};color:${PAL.bg}">Use this</button>
-            <button class="sug-btn skip bc" onclick="dismissSuggestion(${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Skip</button>
-            <button class="sug-btn skip bc" onclick="rewriteSuggestion('${m.original||''}',${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Rewrite</button>
+            <button type="button" class="sug-btn use bc" onclick="useSuggestion(${i})" style="background:${PAL.ac};color:${PAL.bg}">Use this</button>
+            <button type="button" class="sug-btn skip bc" onclick="dismissSuggestion(${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Skip</button>
+            <button type="button" class="sug-btn skip bc" onclick="rewriteSuggestion('${m.original||''}',${i})" style="border-color:${PAL.tx}20;color:${PAL.tx}">Rewrite</button>
           </div>
         </div>
       </div>`;
@@ -831,14 +831,14 @@ function openRemoteChat(friendId){
   const acs=document.getElementById('activeChatState');
   acs.style.display='flex';
   document.getElementById('chatHeader').innerHTML=`
-    <button class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
+    <button type="button" class="mobile-back" onclick="closeMobileChat()" style="color:${PAL.tx}">&larr; Back</button>
     <div class="chat-header-avatar" style="background:${getAvatarCol(String(f.id))}">${getInitials(f.username)}</div>
     <div>
       <div class="chat-header-name" style="color:${PAL.tx}">${escapeHtml(f.username)}</div>
       <div class="chat-header-status" style="color:${PAL.tx}">friend</div>
     </div>
     <div class="chat-header-actions">
-      <button class="header-action-btn bc" onclick="clearRemoteUnreadUI(${f.id})" style="color:${PAL.tx};border-color:${PAL.tx}22">Refresh</button>
+      <button type="button" class="header-action-btn bc" onclick="clearRemoteUnreadUI(${f.id})" style="color:${PAL.tx};border-color:${PAL.tx}22">Refresh</button>
     </div>`;
   document.getElementById('chatPanel').classList.add('mobile-active');
   const chipsRow=document.getElementById('helpChips');
@@ -1034,7 +1034,7 @@ function buildHelpChips(){
   const row=document.getElementById('helpChips');
   if(!row) return;
   row.innerHTML=HELP_MODES.map(m=>`
-    <button class="help-chip ${m.id===activeHelpMode?'on':''}" onclick="setHelpMode('${m.id}')"
+    <button type="button" class="help-chip ${m.id===activeHelpMode?'on':''}" onclick="setHelpMode('${m.id}')"
       style="${m.id===activeHelpMode?'border-color:'+PAL.ac+';background:'+PAL.ac+'14':''};color:${PAL.tx}">${m.label}</button>`).join('');
 }
 
@@ -1235,7 +1235,7 @@ function updateFloveePanel(contact){
     <div class="flovee-section">
       <div class="flovee-section-label bc" style="color:${PAL.tx}">Vibe mode</div>
       <div class="vibe-chips" id="vibeChips">
-        ${['Keep it cool','Be direct','Stay warm','Set a boundary','Be low-key','No drama'].map(v=>`<button class="vibe-chip bc" onclick="setVibe('${v}',this)" style="color:${PAL.tx};border-color:${PAL.tx}18">${v}</button>`).join('')}
+        ${['Keep it cool','Be direct','Stay warm','Set a boundary','Be low-key','No drama'].map(v=>`<button type="button" class="vibe-chip bc" onclick="setVibe('${v}',this)" style="color:${PAL.tx};border-color:${PAL.tx}18">${v}</button>`).join('')}
       </div>
     </div>`;
 }
@@ -1315,7 +1315,7 @@ function buildShareSection(){
     </div>
     <div class="share-link-row">
       <input id="shareLinkInput" type="text" readonly value="${link}"/>
-      <button class="share-copy-btn bc" id="shareCopyBtn" onclick="copyShareLink(this)" style="background:${PAL.ac};color:${PAL.bg};">Copy</button>
+      <button type="button" class="share-copy-btn bc" id="shareCopyBtn" onclick="copyShareLink(this)" style="background:${PAL.ac};color:${PAL.bg};">Copy</button>
     </div>`;
 }
 function copyShareLink(btn){
@@ -1338,7 +1338,7 @@ function showInviteBanner(title){
   b.style.display='flex';
   b.className='invite-banner';
   b.innerHTML=`<div style="flex:1;min-width:0;"><strong>Invite a friend</strong>${title}</div>
-    <button class="invite-close" onclick="dismissInvite()">\u00d7</button>`;
+    <button type="button" class="invite-close" onclick="dismissInvite()">\u00d7</button>`;
 }
 function dismissInvite(){ pendingInvite=null; const b=document.getElementById('inviteBanner'); if(b){ b.style.display='none'; b.innerHTML=''; } }
 

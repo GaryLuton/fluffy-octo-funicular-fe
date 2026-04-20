@@ -131,7 +131,7 @@
   <div class="hero-hook">this will change your phone forever</div>
   <h1 class="bc">Find<br>Your<br>Aesthetic</h1>
   <p class="hero-sub">2 minutes. a few honest answers. then we build you a page so personal it is literally scary accurate.</p>
-  <button class="start-btn bc" onclick="startQuiz()">Let's Go</button>
+  <button type="button" class="start-btn bc" onclick="startQuiz()">Let's Go</button>
 </div>
 
 <!-- QUIZ -->
@@ -639,15 +639,15 @@ function renderQ(id){
     const hintHtml = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
     const optsHtml = q.opts.map((o,i)=>{
       if(o.isCustom){
-        return '<button class="opt-check" id="mc'+i+'" onclick="togCustom('+i+',\''+id+'\')">'+o.t+'</button>';
+        return '<button type="button" class="opt-check" id="mc'+i+'" onclick="togCustom('+i+',\''+id+'\')">'+o.t+'</button>';
       }
-      return '<button class="opt-check" id="mc'+i+'" onclick="tog('+i+')">'+o.t+'</button>';
+      return '<button type="button" class="opt-check" id="mc'+i+'" onclick="tog('+i+')">'+o.t+'</button>';
     }).join('');
-    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml+'<div class="opts-multi" id="mGrid">'+optsHtml+'</div><div id="customInputWrap" style="display:none;margin-bottom:12px;"><input type="text" id="customArtistInput" placeholder="Type your artist name..." style="width:100%;padding:14px 18px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.12);font-family:Space Grotesk,sans-serif;font-size:0.95rem;outline:none;background:transparent;color:inherit;"/></div><button class="next-btn bc" id="nBtn" onclick="submitMulti(\''+id+'\')">Continue</button>';
+    area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml+'<div class="opts-multi" id="mGrid">'+optsHtml+'</div><div id="customInputWrap" style="display:none;margin-bottom:12px;"><input type="text" id="customArtistInput" placeholder="Type your artist name..." style="width:100%;padding:14px 18px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.12);font-family:Space Grotesk,sans-serif;font-size:0.95rem;outline:none;background:transparent;color:inherit;"/></div><button type="button" class="next-btn bc" id="nBtn" onclick="submitMulti(\''+id+'\')">Continue</button>';
     document.getElementById('nBtn').disabled = true;
   } else {
     const hintHtml2 = q.hint ? '<div class="q-hint">'+q.hint+'</div>' : '';
-    const optsHtml2 = q.opts.map((o,i)=>'<button class="opt" onclick="pickSingle(\''+id+'\','+i+')">'+o.t+'</button>').join('');
+    const optsHtml2 = q.opts.map((o,i)=>'<button type="button" class="opt" onclick="pickSingle(\''+id+'\','+i+')">'+o.t+'</button>').join('');
     area.innerHTML = '<div class="q-cat bc">'+q.cat+'</div><div class="q-text bc">'+q.text+'</div>'+hintHtml2+'<div class="opts-single">'+optsHtml2+'</div>';
   }
 }

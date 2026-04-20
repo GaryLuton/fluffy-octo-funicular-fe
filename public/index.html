@@ -252,7 +252,7 @@
 
 <nav class="sl-nav">
   <div class="logo sl-nav-logo">Stuflover</div>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('nav ul').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('nav ul').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <ul class="sl-nav-links">
     <li><span id="navWelcome" class="sl-nav-welcome" style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;opacity:0.5;"></span></li>
     <li><a href="lifestyle.html">My Page</a></li>
@@ -372,8 +372,8 @@
   <div class="videos-header reveal sl-reveal">
     <h2>Videos</h2>
     <div style="display:flex;gap:12px;flex-wrap:wrap;">
-      <button class="add-btn" onclick="openAddModal()">+ Add Video</button>
-      <button class="refresh-btn" id="refreshBtn" onclick="refreshVideos()">Refresh My Feed</button>
+      <button type="button" class="add-btn" onclick="openAddModal()">+ Add Video</button>
+      <button type="button" class="refresh-btn" id="refreshBtn" onclick="refreshVideos()">Refresh My Feed</button>
     </div>
   </div>
   <p class="videos-hint reveal sl-reveal">Tap any video to watch it right here</p>
@@ -415,8 +415,8 @@
     <input type="text" id="ytInput" placeholder="https://www.youtube.com/watch?v=..."/>
     <div class="modal-error" id="modalError"></div>
     <div class="modal-btns">
-      <button class="btn-confirm sl-btn sl-btn-primary" onclick="addVideo()">Add Video</button>
-      <button class="btn-cancel sl-btn sl-btn-secondary" onclick="closeAddModal()">Cancel</button>
+      <button type="button" class="btn-confirm sl-btn sl-btn-primary" onclick="addVideo()">Add Video</button>
+      <button type="button" class="btn-cancel sl-btn sl-btn-secondary" onclick="closeAddModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -428,7 +428,7 @@
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
     </iframe>
   </div>
-  <button class="lb-close" onclick="closeLightbox()">✕ Close Video</button>
+  <button type="button" class="lb-close" onclick="closeLightbox()">✕ Close Video</button>
   <p class="lb-tip">press ESC or click outside to close</p>
 </div>
 
@@ -481,11 +481,11 @@
         '<img class="video-thumb" src="https://img.youtube.com/vi/' + id + '/maxresdefault.jpg"' +
         ' onerror="this.src=\'https://img.youtube.com/vi/' + id + '/hqdefault.jpg\'" alt="video"/>' +
         '<div class="play-overlay"><div class="play-circle">\u25B6</div></div>' +
-        '<button class="video-remove-btn" title="Remove" onclick="removeVid(event,' + i + ')">\u2715</button>' +
+        '<button type="button" class="video-remove-btn" title="Remove" onclick="removeVid(event,' + i + ')">\u2715</button>' +
         '<div class="video-title-bar" id="vtitle' + id + '"></div>' +
         '<div class="video-react-row">' +
-          '<button class="react-btn' + likedClass + '" title="Like — more like this" onclick="likeVid(event,\'' + id + '\')">&#x25B2;</button>' +
-          '<button class="react-btn" title="Dislike — never show this type" onclick="dislikeVid(event,' + i + ',\'' + id + '\')">&#x25BC;</button>' +
+          '<button type="button" class="react-btn' + likedClass + '" title="Like — more like this" onclick="likeVid(event,\'' + id + '\')">&#x25B2;</button>' +
+          '<button type="button" class="react-btn" title="Dislike — never show this type" onclick="dislikeVid(event,' + i + ',\'' + id + '\')">&#x25BC;</button>' +
         '</div>';
       card.addEventListener('click', function(e){
         if(e.target.closest('.react-btn') || e.target.closest('.video-remove-btn')) return;

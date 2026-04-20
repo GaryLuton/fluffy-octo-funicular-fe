@@ -36,6 +36,47 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
+// ─── Content Security Policy ──────────────────────────────
+// Enforced policy is intentionally permissive for now: lifestyle.html and
+// other pages still carry inline <script> blocks and onclick= attributes,
+// so removing 'unsafe-inline' from script-src today would break the app.
+// A strict Report-Only policy runs alongside it to surface everything that
+// would need to move before we can tighten the enforced policy. Once every
+// inline script and onclick is migrated to /js/*.js + addEventListener,
+// drop 'unsafe-inline' from the enforced policy and delete the report-only
+// header.
+app.use((req, res, next) => {
+  const enforced = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join('; ');
+  const reportOnly = [
+    "default-src 'self'",
+    "script-src 'self'",            // no unsafe-inline, no unsafe-eval
+    "style-src 'self' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join('; ');
+  res.setHeader('Content-Security-Policy', enforced);
+  res.setHeader('Content-Security-Policy-Report-Only', reportOnly);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/friends', friendsRoutes);

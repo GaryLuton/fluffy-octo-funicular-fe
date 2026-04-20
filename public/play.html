@@ -160,7 +160,7 @@
 
 <nav id="mainNav" class="sl-nav">
   <a class="logo sl-nav-logo" id="navLogo" href="index.html">Stuflover</a>
-  <button class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button type="button" class="nav-toggle sl-nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="nav-links sl-nav-links">
     <a class="nav-link sl-nav-btn" href="games.html">All Games</a>
     <a class="nav-link sl-nav-btn" href="lifestyle.html">My Page</a>
@@ -198,16 +198,16 @@
         <div class="dti-result-msg" id="dtiResultMsg"></div>
         <div class="dti-result-outfit" id="dtiResultOutfit"></div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-          <button class="dti-next bc" id="dtiNextBtn" onclick="dtiNextRound()">Next Round</button>
-          <button class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
+          <button type="button" class="dti-next bc" id="dtiNextBtn" onclick="dtiNextRound()">Next Round</button>
+          <button type="button" class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
         </div>
       </div>
       <div class="dti-bottom" id="dtiBottomBar">
         <div class="dti-score" id="dtiScore">Round 1 — 0 pts <span class="dti-xp-bar" id="dtiXpBar"><span class="dti-xp-fill" id="dtiXpFill"></span></span></div>
         <div style="display:flex;gap:8px;">
-          <button class="dti-skip bc" onclick="dtiSkipTheme()">Skip Theme</button>
-          <button class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
-          <button class="dti-submit bc" id="dtiSubmitBtn" onclick="dtiSubmit()">Walk the Runway</button>
+          <button type="button" class="dti-skip bc" onclick="dtiSkipTheme()">Skip Theme</button>
+          <button type="button" class="dti-skip bc" onclick="dtiEndGame()">End Game</button>
+          <button type="button" class="dti-submit bc" id="dtiSubmitBtn" onclick="dtiSubmit()">Walk the Runway</button>
         </div>
       </div>
     </div>
@@ -222,8 +222,8 @@
       <div class="cg-question" id="cgQuestion"></div>
       <div class="cg-cards" id="cgCards"></div>
       <div class="cg-feedback" id="cgFeedback"></div>
-      <button class="cg-next bc" id="cgNextBtn" onclick="cgNextRound()" style="display:none;">Next</button>
-      <button class="cg-end bc" id="cgEndBtn" onclick="cgEndGame()" style="display:none;">End Game</button>
+      <button type="button" class="cg-next bc" id="cgNextBtn" onclick="cgNextRound()" style="display:none;">Next</button>
+      <button type="button" class="cg-end bc" id="cgEndBtn" onclick="cgEndGame()" style="display:none;">End Game</button>
     </div>
 
 
@@ -602,7 +602,7 @@ function cgRender(d){
     inputRow.className = 'cg-input-row';
     inputRow.innerHTML =
       '<textarea class="cg-input" id="cgChallengeInput" placeholder="Describe your outfit..." style="color:'+pal.tx+'"></textarea>'+
-      '<button class="cg-submit bc" onclick="cgSubmitChallenge()" style="background:'+pal.ac+';color:'+pal.bg+'">Submit</button>';
+      '<button type="button" class="cg-submit bc" onclick="cgSubmitChallenge()" style="background:'+pal.ac+';color:'+pal.bg+'">Submit</button>';
     cards.appendChild(inputRow);
   }
 }
@@ -1657,7 +1657,7 @@ function dtiRenderCats(){
     var picked = dtiState.picks[c];
     var on = c===dtiActiveCat ? ' on' : '';
     var check = picked ? '<span class="dti-cat-count">\u2713</span>' : '';
-    html += '<button class="dti-cat'+on+'" style="color:'+pal.tx+';'+(on?'border-bottom-color:'+pal.ac:'border-bottom-color:transparent')+'" onclick="dtiRenderItems(\''+c+'\')">'+labels[c]+check+'</button>';
+    html += '<button type="button" class="dti-cat'+on+'" style="color:'+pal.tx+';'+(on?'border-bottom-color:'+pal.ac:'border-bottom-color:transparent')+'" onclick="dtiRenderItems(\''+c+'\')">'+labels[c]+check+'</button>';
   });
   document.getElementById('dtiCats').innerHTML = html;
 }
@@ -1724,7 +1724,7 @@ function dtiUpdateSummary(){
       html += '<div class="dti-outfit-item" style="color:'+pal.tx+'">'+
         '<span class="dti-outfit-dot" style="background:'+pick.color+'"></span>'+
         pick.name+
-        '<button class="dti-remove-btn" onclick="dtiRemoveItem(\''+cat+'\')" style="color:'+pal.tx+'">\u2715</button>'+
+        '<button type="button" class="dti-remove-btn" onclick="dtiRemoveItem(\''+cat+'\')" style="color:'+pal.tx+'">\u2715</button>'+
       '</div>';
     }
   });

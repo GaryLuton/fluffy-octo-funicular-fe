@@ -112,10 +112,12 @@
     banners.forEach(function (b) { b.style.display = 'none'; });
   });
 
-  // ─── Provide global getApiKey that returns a placeholder ───
-  window.getApiKey = function () {
-    return getToken() ? 'server-proxied' : '';
-  };
+  // getApiKey is deliberately NOT exposed on window. Previous versions
+  // returned the literal string 'server-proxied', which is not an actual
+  // secret but any global helper that looks like a key getter is a
+  // footgun: it encourages callers to treat it as trustworthy and any
+  // third-party script on this origin can read it. Auth is handled via
+  // localStorage['stuflover_token'] scoped through the backend proxy.
 
   // ─── Logout utility ───
   window.stufloverLogout = function () {
