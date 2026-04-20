@@ -53,11 +53,36 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
-app.use(express.static(publicDir));
+app.use(express.static(publicDir, {
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    const ext = path.extname(filePath).toLowerCase();
+    // HTML must always revalidate so deploys propagate immediately.
+    if (ext === '.html') {
+      res.setHeader('Cache-Control', 'no-cache');
+      return;
+    }
+    // Fonts and images rarely change — long-lived cache.
+    if (['.woff', '.woff2', '.ttf', '.otf', '.eot',
+         '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.avif'].includes(ext)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return;
+    }
+    // CSS / JS: cache for a day, then revalidate via ETag. Once asset URLs
+    // are content-hashed (or include ?v=… version strings), bump this to
+    // `public, max-age=31536000, immutable`.
+    if (ext === '.css' || ext === '.js' || ext === '.mjs') {
+      res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+      return;
+    }
+  },
+}));
 
 app.all('/api/*', notFoundApi);
 
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   const filePath = path.join(publicDir, req.path);
   res.sendFile(filePath, (err) => {
     if (err && !res.headersSent) {
