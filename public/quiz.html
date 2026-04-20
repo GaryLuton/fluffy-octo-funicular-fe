@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-sl-home="1">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -25,6 +25,20 @@
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     :root{--pink:#faf0f0;--pink-mid:#f0ddd6;--terra:#c87860;--brown:#2a1a14;--white:#fff;}
+    /* Quiz is always pink — never overridden by the user's saved aesthetic. */
+    html[data-sl-home="1"]{
+      --pink:#faf0f0 !important; --pink-light:#faf0f0 !important; --pink-mid:#f0ddd6 !important; --peach:#e8d5c8 !important;
+      --terra:#c87860 !important; --terracotta:#c87860 !important; --terracotta-dark:#a86050 !important;
+      --brown:#2a1a14 !important; --white:#ffffff !important;
+      --bg:#faf0f0 !important; --tx:#2a1a14 !important; --ac:#c87860 !important; --ac2:#a86050 !important;
+      --sl-pink-light:#faf0f0 !important; --sl-pink-mid:#f0ddd6 !important; --sl-peach:#e8d5c8 !important;
+      --sl-terracotta:#c87860 !important; --sl-terracotta-dark:#a86050 !important;
+      --sl-brown:#2a1a14 !important; --sl-white:#ffffff !important;
+      --sl-bg:#faf0f0 !important; --sl-tx:#2a1a14 !important; --sl-ac:#c87860 !important;
+      --sl-ac-hover:#a86050 !important; --sl-surface:#ffffff !important;
+      font-size:16px !important;
+    }
+    html[data-sl-home="1"] body{background-color:#faf0f0 !important;color:#2a1a14 !important;}
     html{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
     *{margin:0;padding:0;box-sizing:border-box;}
     .skip-link{position:absolute;left:-9999px;top:0;z-index:1000;background:var(--brown);color:var(--white);padding:10px 16px;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.9rem;letter-spacing:2px;text-transform:uppercase;border-radius:0 0 6px 0;}
