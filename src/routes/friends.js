@@ -1,7 +1,7 @@
 const express = require('express');
 const { stmts, all } = require('../../db');
 const auth = require('../middleware/auth');
-const { isCleanText } = require('../utils/content');
+const { isSafeMessage } = require('../utils/content');
 
 const router = express.Router();
 
@@ -63,12 +63,14 @@ router.get('/', auth, (req, res) => {
 router.post('/message', auth, (req, res) => {
   const { friendId, text } = req.body;
   const fid = parseInt(friendId);
-  if (!fid || !text) return res.status(400).json({ error: 'Friend ID and text required' });
-  if (text.length > 500) return res.status(400).json({ error: 'Message too long' });
-  if (!isCleanText(text)) return res.status(400).json({ error: 'Please keep messages appropriate' });
+  if (!fid || typeof text !== 'string') return res.status(400).json({ error: 'Friend ID and text required' });
+  const trimmed = text.trim();
+  if (!trimmed) return res.status(400).json({ error: 'Friend ID and text required' });
+  if (trimmed.length > 500) return res.status(400).json({ error: 'Message too long' });
+  if (!isSafeMessage(trimmed)) return res.status(400).json({ error: 'Please keep messages appropriate' });
   const friends = stmts.getFriends.all(req.user.id);
   if (!friends.some((f) => parseInt(f.id) === fid)) return res.status(403).json({ error: 'Not friends — you need to add them first' });
-  stmts.sendMessage.run(req.user.id, fid, text.trim());
+  stmts.sendMessage.run(req.user.id, fid, trimmed);
   res.json({ ok: true });
 });
 
