@@ -21,6 +21,9 @@ module.exports = {
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'noreply@stuflover.com',
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
+  PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || 'https://stuflover.com',
   allowedOrigins,
   isProd,
 };

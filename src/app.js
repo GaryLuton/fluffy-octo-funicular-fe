@@ -20,6 +20,7 @@ const fitcheckRoutes = require('./routes/fitcheck');
 const collabRoutes = require('./routes/collab');
 const chatRoutes = require('./routes/chat');
 const healthRoutes = require('./routes/health');
+const shopRoutes = require('./routes/shop');
 
 const app = express();
 
@@ -34,6 +35,11 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+// Stripe webhook needs the raw body for signature verification — must be
+// mounted BEFORE express.json() and only for this exact path.
+app.use('/api/shop/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: '1mb' }));
 
 // ─── Content Security Policy ──────────────────────────────
@@ -92,6 +98,7 @@ app.use('/api/fitcheck', fitcheckRoutes);
 app.use('/api/collab', collabRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/shop', shopRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir, {
@@ -126,11 +133,15 @@ app.get('*', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   const filePath = path.join(publicDir, req.path);
   res.sendFile(filePath, (err) => {
-    if (err && !res.headersSent) {
-      res.sendFile(path.join(publicDir, 'index.html'), (err2) => {
-        if (err2 && !res.headersSent) res.status(404).end();
+    if (!err || res.headersSent) return;
+    // Try with .html extension (e.g. /shop -> /shop.html)
+    const htmlPath = path.join(publicDir, req.path + '.html');
+    res.sendFile(htmlPath, (err2) => {
+      if (!err2 || res.headersSent) return;
+      res.sendFile(path.join(publicDir, 'index.html'), (err3) => {
+        if (err3 && !res.headersSent) res.status(404).end();
       });
-    }
+    });
   });
 });
 

@@ -350,6 +350,95 @@ async function initDb() {
     );
   `);
 
+  // ─── Marketplace (Etsy-style /shop) ─────────────────────
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shops (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      owner_id INTEGER NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      slug TEXT UNIQUE NOT NULL,
+      bio TEXT DEFAULT '',
+      banner_url TEXT DEFAULT '',
+      avatar_url TEXT DEFAULT '',
+      stripe_account_id TEXT DEFAULT '',
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      shop_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      price_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'usd',
+      image_urls TEXT DEFAULT '[]',
+      category TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      stock INTEGER DEFAULT 1,
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_shop_products_shop ON shop_products(shop_id)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_shop_products_status ON shop_products(status, created_at DESC)`);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_favorites (
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (user_id, product_id)
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_carts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(user_id, product_id)
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      buyer_id INTEGER NOT NULL,
+      stripe_session_id TEXT UNIQUE,
+      stripe_payment_intent TEXT,
+      total_cents INTEGER NOT NULL,
+      status TEXT DEFAULT 'pending',
+      shipping_json TEXT DEFAULT '{}',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      shop_id INTEGER NOT NULL,
+      title_snapshot TEXT NOT NULL,
+      price_cents_snapshot INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES shop_orders(id) ON DELETE CASCADE
+    );
+  `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      rating INTEGER NOT NULL,
+      text TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(product_id, user_id)
+    );
+  `);
+
   save();
   return db;
 }
@@ -899,4 +988,4 @@ const stmts = {
   },
 };
 
-module.exports = { initDb, stmts, all };
+module.exports = { initDb, stmts, all, get, run };
