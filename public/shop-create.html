@@ -130,6 +130,51 @@
     border:1px solid rgba(42,26,20,0.05);
   }
 
+  /* Pep talk — friendly micro-copy after each step */
+  .pep{
+    text-align:center;font-family:'Caveat',cursive;font-size:1.4rem;
+    color:var(--shop-terracotta);opacity:0;transform:translateY(8px);
+    margin-bottom:12px;min-height:32px;
+    transition:opacity 0.4s,transform 0.4s;
+  }
+  .pep.show{opacity:0.85;transform:none;}
+
+  .skip-link{
+    display:inline-block;margin-top:8px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;
+    color:rgba(42,26,20,0.45);text-decoration:underline;
+    text-underline-offset:3px;cursor:pointer;background:none;border:none;
+  }
+  .skip-link:hover{color:var(--shop-terracotta);}
+
+  .reassure{
+    margin-top:10px;font-size:0.78rem;color:rgba(42,26,20,0.5);
+    text-align:center;font-style:italic;
+  }
+
+  /* Suggest button next to inputs */
+  .suggest-btn{
+    align-self:flex-start;margin-top:4px;
+    font-family:'Caveat',cursive;font-size:1.05rem;
+    color:var(--shop-terracotta);background:none;border:none;
+    cursor:pointer;padding:2px 4px;text-decoration:underline;
+    text-underline-offset:3px;
+  }
+  .suggest-btn:hover{opacity:0.7;}
+
+  /* Confetti */
+  .confetti-layer{
+    position:fixed;inset:0;pointer-events:none;z-index:700;overflow:hidden;
+  }
+  .confetti-bit{
+    position:absolute;top:-20px;width:10px;height:14px;border-radius:2px;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translate3d(var(--dx,0),110vh,0) rotate(var(--rot,720deg)); }
+  }
+
   @media(max-width:540px){
     .wizard{padding:28px 20px 32px;border-radius:20px;}
     .opts{grid-template-columns:1fr;}
@@ -141,9 +186,10 @@
 <script src="/stuflover-nav.js"></script>
 
 <section class="shop-hero" style="min-height:auto;padding:110px 32px 30px;">
-  <div class="reveal shop-eyebrow">become a seller</div>
-  <h1 class="reveal shop-title" style="font-size:clamp(3rem,9vw,6rem);">Open<br>Your Shop</h1>
-  <p class="reveal shop-sub" style="max-width:480px;">A few quick questions and you're live. Takes about a minute.</p>
+  <div class="reveal shop-eyebrow">✨ no pressure, just fun</div>
+  <h1 class="reveal shop-title" style="font-size:clamp(3rem,9vw,6rem);">Let's make<br>your shop</h1>
+  <p class="reveal shop-sub" style="max-width:480px;">4 tiny questions. takes a minute. you can change literally anything later — no big deal.</p>
+  <div class="reveal shop-tag">it's giving small business</div>
 </section>
 
 <main class="shop-wrap" style="padding-top:0;">
