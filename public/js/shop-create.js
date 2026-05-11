@@ -172,7 +172,7 @@
             '<span class="pre">@</span>' +
             '<input id="fHandle" maxlength="30" placeholder="' + SLShop.escapeHtml(slugifyHandle(state.data.name) || 'yourshop') + '" value="' + SLShop.escapeHtml(state.data.handle) + '" autocomplete="off"/>' +
           '</div>' +
-          '<div class="hint ' + (state.handleStatus === 'ok' ? 'ok' : state.handleStatus === 'err' ? 'err' : '') + '" id="hHandle">' + SLShop.escapeHtml(state.handleMsg || 'stuflover.com/shop.html?shop=' + (state.data.handle || 'your-handle')) + '</div>' +
+          '<div class="hint ' + (state.handleStatus === 'ok' ? 'ok' : state.handleStatus === 'err' ? 'err' : '') + '" id="hHandle">' + SLShop.escapeHtml(state.handleMsg || 'stuflover.com/shop-store.html?shop=' + (state.data.handle || 'your-handle')) + '</div>' +
         '</div>' +
       '</div>';
     }
@@ -301,7 +301,7 @@
         if (v !== inp.value) inp.value = v;
         state.data.handle = v;
         state.handleStatus = null;
-        state.handleMsg = 'stuflover.com/shop.html?shop=' + (v || 'your-handle');
+        state.handleMsg = 'stuflover.com/shop-store.html?shop=' + (v || 'your-handle');
         hint.className = 'hint';
         hint.textContent = state.handleMsg;
         saveDraft();
@@ -443,12 +443,13 @@
       productKind: d.productKind,
       shipsFrom: d.shipsFrom,
       experience: d.experience,
-    } }).then(function(){
+    } }).then(function(r){
       clearDraft();
       launchConfetti();
       SLShop.toast('your shop is live! 🎉');
       btn.textContent = '🎉 live!';
-      setTimeout(function(){ location.href = '/shop-mine.html'; }, 1400);
+      var slug = (r && r.slug) || d.handle;
+      setTimeout(function(){ location.href = '/shop-store.html?shop=' + encodeURIComponent(slug) + '&new=1'; }, 1400);
     }).catch(function(e){
       if (err) err.textContent = e.message || 'couldn\'t open shop just now — try again?';
       btn.disabled = false; btn.textContent = '🚀 launch my shop';

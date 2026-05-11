@@ -55,8 +55,9 @@
           if (shop.ships_from) bits.push('ships from ' + shop.ships_from);
           return bits.length ? '<div style="font-size:0.85rem;opacity:0.6;margin-top:6px;">' + SLShop.escapeHtml(bits.join(' · ')) + '</div>' : '';
         })() +
-        '<div style="font-size:0.78rem;opacity:0.5;margin-top:6px;">stuflover.com/shop.html?shop=' + SLShop.escapeHtml(shop.slug) + '</div>' +
+        '<div style="font-size:0.78rem;opacity:0.5;margin-top:6px;">stuflover.com/shop-store.html?shop=' + SLShop.escapeHtml(shop.slug) + '</div>' +
       '</div><div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<a class="btn btn-ghost" href="/shop-store.html?shop=' + encodeURIComponent(shop.slug) + '">View storefront →</a>' +
         '<button id="editShopBtn" class="btn btn-ghost">Edit shop</button>' +
         '<button id="addBtn" class="btn btn-primary">+ Add Product</button>' +
       '</div></header>' +
