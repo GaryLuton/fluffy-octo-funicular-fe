@@ -29,7 +29,7 @@
           }).join('') + '</div>' : '') +
         '</div>' +
         '<div class="detail-info">' +
-          '<div class="detail-shop">From <a href="/shop.html?shop=' + encodeURIComponent(p.shop_slug) + '">' + SLShop.escapeHtml(p.shop_name) + '</a></div>' +
+          '<div class="detail-shop">From <a href="/shop-store.html?shop=' + encodeURIComponent(p.shop_slug) + '">' + SLShop.escapeHtml(p.shop_name) + '</a></div>' +
           '<h1 class="detail-title">' + SLShop.escapeHtml(p.title) + '</h1>' +
           '<div class="detail-price">' + SLShop.fmtPrice(p.price_cents, p.currency) + '</div>' +
           '<div class="detail-desc">' + SLShop.escapeHtml(p.description || '') + '</div>' +
