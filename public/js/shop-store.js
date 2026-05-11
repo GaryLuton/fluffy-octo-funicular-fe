@@ -12,9 +12,38 @@
 
   SLShop.api('/shops/' + encodeURIComponent(slug)).then(function(r){
     render(r.shop, r.products || []);
-  }).catch(function(){
-    c.innerHTML = '<div class="shop-wrap"><div class="empty"><div class="bc">shop not found</div><p>This shop might have been removed or the link is wrong.</p><a class="btn btn-primary" href="/shop.html" style="margin-top:14px;">Browse the shop</a></div></div>';
+  }).catch(function(err){
+    // If the signed-in visitor owns *a* shop, the slug may have changed
+    // (handle edits, slug suffixes, etc.) — bounce them to their own
+    // dashboard so they don't get stranded on a dead URL.
+    if (SLShop.authed()) {
+      SLShop.api('/shops/me').then(function(me){
+        if (me && me.shop && me.shop.slug) {
+          if (me.shop.slug !== slug) {
+            // Re-route to their real slug, preserving the ?new=1 banner.
+            var keepNew = isNew ? '&new=1' : '';
+            location.replace('/shop-store.html?shop=' + encodeURIComponent(me.shop.slug) + keepNew);
+            return;
+          }
+        }
+        showNotFound(err);
+      }).catch(function(){ showNotFound(err); });
+    } else {
+      showNotFound(err);
+    }
   });
+
+  function showNotFound(err){
+    var msg = (err && err.message) || 'shop not found';
+    c.innerHTML = '<div class="shop-wrap"><div class="empty">' +
+      '<div class="bc">' + SLShop.escapeHtml(msg) + '</div>' +
+      '<p>This link may be wrong, or the shop has been removed.</p>' +
+      '<div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">' +
+        '<a class="btn btn-primary" href="/shop.html">Browse the marketplace</a>' +
+        (SLShop.authed() ? '<a class="btn btn-ghost" href="/shop-mine.html">Your dashboard</a>' : '') +
+      '</div>' +
+    '</div></div>';
+  }
 
   function initials(name){
     return String(name || '?').trim().split(/\s+/).map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase() || '?';
