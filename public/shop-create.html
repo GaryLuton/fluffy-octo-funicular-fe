@@ -98,7 +98,7 @@
   </div>
 
   <p style="text-align:center;margin-top:32px;color:rgba(42,26,20,0.4);font-size:0.85rem;">
-    Already have a shop? <a href="/shop-mine" style="color:var(--shop-terracotta);font-weight:700;">Go to your dashboard →</a>
+    Already have a shop? <a href="/shop-mine.html" style="color:var(--shop-terracotta);font-weight:700;">Go to your dashboard →</a>
   </p>
 </main>
 
@@ -127,7 +127,7 @@
       '<div class="auth-block">' +
         '<h2 class="bc" style="font-size:1.6rem;margin-bottom:8px;">You already have a shop</h2>' +
         '<p style="color:rgba(42,26,20,0.55);margin-bottom:20px;line-height:1.6;">' + SLShop.escapeHtml(shop.name) + ' is live. Manage it from your dashboard.</p>' +
-        '<a class="btn btn-primary" href="/shop-mine">Go to Dashboard</a>' +
+        '<a class="btn btn-primary" href="/shop-mine.html">Go to Dashboard</a>' +
       '</div>';
   }
 
@@ -139,7 +139,7 @@
         '<div class="form-row">' +
           '<label for="shopName">Shop name</label>' +
           '<input id="shopName" maxlength="80" placeholder="Sunbeam Studio" autocomplete="off"/>' +
-          '<div class="slug-preview" id="slugPreview">stuflover.com/shop?shop=<b>your-shop</b></div>' +
+          '<div class="slug-preview" id="slugPreview">stuflover.com/shop.html?shop=<b>your-shop</b></div>' +
         '</div>' +
         '<div class="form-row">' +
           '<label for="shopBio">Quick intro</label>' +
@@ -153,7 +153,7 @@
     var slugEl = document.getElementById('slugPreview');
     nameEl.addEventListener('input', function(){
       var s = slugify(nameEl.value) || 'your-shop';
-      slugEl.innerHTML = 'stuflover.com/shop?shop=<b>' + SLShop.escapeHtml(s) + '</b>';
+      slugEl.innerHTML = 'stuflover.com/shop.html?shop=<b>' + SLShop.escapeHtml(s) + '</b>';
     });
 
     document.getElementById('openBtn').addEventListener('click', function(){
@@ -167,7 +167,7 @@
       SLShop.api('/shops', { method:'POST', body:{ name: name, bio: bio } })
         .then(function(){
           SLShop.toast('Shop opened!');
-          setTimeout(function(){ location.href = '/shop-mine'; }, 600);
+          setTimeout(function(){ location.href = '/shop-mine.html'; }, 600);
         })
         .catch(function(e){
           err.textContent = e.message || 'Could not open shop.';
