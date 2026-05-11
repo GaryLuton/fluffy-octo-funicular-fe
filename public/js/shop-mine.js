@@ -11,8 +11,8 @@
       return;
     }
     SLShop.api('/shops/me').then(function(r){
-      if (!r.shop) renderOpenShop();
-      else renderDashboard(r.shop, r.products || []);
+      if (!r.shop) { location.replace('/shop-create'); return; }
+      renderDashboard(r.shop, r.products || []);
     }).catch(function(e){
       document.getElementById('content').innerHTML = '<div class="empty">' + SLShop.escapeHtml(e.message) + '</div>';
     });
