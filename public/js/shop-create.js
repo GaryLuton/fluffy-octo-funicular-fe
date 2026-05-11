@@ -16,10 +16,29 @@
     { id:'full-time',   title:'My full-time thing', desc:'This is my main job.' },
   ];
 
+  var DRAFT_KEY = 'stuflover_shop_draft';
+
+  function loadDraft(){
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== 'object') return null;
+      return d;
+    } catch (e) { return null; }
+  }
+  function saveDraft(){
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ step: state.step, data: state.data })); } catch (e) {}
+  }
+  function clearDraft(){
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+
+  var draft = loadDraft();
   var state = {
-    step: 0,
+    step: draft && typeof draft.step === 'number' ? Math.min(Math.max(0, draft.step), 4) : 0,
     total: 5,
-    data: {
+    data: Object.assign({
       name: '',
       handle: '',
       productKind: '',
@@ -27,7 +46,7 @@
       shipsFrom: '',
       bio: '',
       experience: '',
-    },
+    }, (draft && draft.data) || {}),
     handleStatus: null, // 'checking' | 'ok' | 'err' | null
     handleMsg: '',
   };
@@ -50,6 +69,7 @@
   }
 
   function renderHasShop(shop){
+    clearDraft();
     root.innerHTML =
       '<div class="auth-block">' +
         '<h2 class="bc" style="font-size:1.6rem;margin-bottom:8px;">You already have a shop</h2>' +
@@ -207,7 +227,7 @@
   function wireStep(step){
     if (step === 0) {
       var inp = document.getElementById('fName');
-      inp.addEventListener('input', function(){ state.data.name = inp.value; });
+      inp.addEventListener('input', function(){ state.data.name = inp.value; saveDraft(); });
       inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') goNext(); });
     } else if (step === 1) {
       var inp = document.getElementById('fHandle');
@@ -221,6 +241,7 @@
         state.handleMsg = 'stuflover.com/shop.html?shop=' + (v || 'your-handle');
         hint.className = 'hint';
         hint.textContent = state.handleMsg;
+        saveDraft();
         clearTimeout(debounceT);
         if (v.length >= 3) {
           state.handleStatus = 'checking';
@@ -249,6 +270,7 @@
           state.data.productKind = b.getAttribute('data-id');
           Array.prototype.forEach.call(document.querySelectorAll('#kindOpts .opt'), function(x){ x.classList.remove('active'); });
           b.classList.add('active');
+          saveDraft();
         });
       });
       Array.prototype.forEach.call(document.querySelectorAll('#catChips .chip-pick'), function(b){
@@ -264,16 +286,18 @@
           } else {
             SLShop.toast('Up to 4 categories');
           }
+          saveDraft();
         });
       });
     } else if (step === 3) {
-      document.getElementById('fBio').addEventListener('input', function(e){ state.data.bio = e.target.value; });
-      document.getElementById('fShips').addEventListener('input', function(e){ state.data.shipsFrom = e.target.value; });
+      document.getElementById('fBio').addEventListener('input', function(e){ state.data.bio = e.target.value; saveDraft(); });
+      document.getElementById('fShips').addEventListener('input', function(e){ state.data.shipsFrom = e.target.value; saveDraft(); });
       Array.prototype.forEach.call(document.querySelectorAll('#expOpts .opt'), function(b){
         b.addEventListener('click', function(){
           state.data.experience = b.getAttribute('data-id');
           Array.prototype.forEach.call(document.querySelectorAll('#expOpts .opt'), function(x){ x.classList.remove('active'); });
           b.classList.add('active');
+          saveDraft();
         });
       });
     }
@@ -281,7 +305,7 @@
 
   function wireNav(step){
     var back = document.getElementById('bBack');
-    if (back) back.addEventListener('click', function(){ state.step--; drawStep(); window.scrollTo({top:0,behavior:'smooth'}); });
+    if (back) back.addEventListener('click', function(){ state.step--; saveDraft(); drawStep(); window.scrollTo({top:0,behavior:'smooth'}); });
     var next = document.getElementById('bNext');
     if (next) next.addEventListener('click', goNext);
     var sub = document.getElementById('bSubmit');
@@ -303,6 +327,7 @@
       if (!state.data.productKind) { SLShop.toast('Pick what you sell'); return; }
     }
     state.step++;
+    saveDraft();
     drawStep();
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -329,6 +354,7 @@
       shipsFrom: d.shipsFrom,
       experience: d.experience,
     } }).then(function(){
+      clearDraft();
       SLShop.toast('Shop opened!');
       setTimeout(function(){ location.href = '/shop-mine.html'; }, 600);
     }).catch(function(e){
