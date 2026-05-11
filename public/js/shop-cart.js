@@ -23,7 +23,7 @@
     var items = data.items || [];
     var c = document.getElementById('cart');
     if (!items.length) {
-      c.innerHTML = '<div class="empty"><div class="bc">Your cart is empty</div><a class="btn btn-primary" href="/shop" style="margin-top:14px;">Browse the shop</a></div>';
+      c.innerHTML = '<div class="empty"><div class="bc">Your cart is empty</div><a class="btn btn-primary" href="/shop.html" style="margin-top:14px;">Browse the shop</a></div>';
       return;
     }
     c.innerHTML =
