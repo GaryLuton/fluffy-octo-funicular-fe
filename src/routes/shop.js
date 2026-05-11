@@ -43,21 +43,60 @@ function hydrateProduct(p) {
 }
 
 // ─── Shops ────────────────────────────────────────────────
+const ALLOWED_CATEGORIES = ['Apparel','Jewelry','Art','Home','Vintage','Craft','Digital','Other'];
+const ALLOWED_KIND = ['handmade','vintage','digital','reseller','mixed'];
+const ALLOWED_EXPERIENCE = ['hobby','side-hustle','full-time'];
+
 router.post('/shops', auth, (req, res) => {
   try {
-    const { name, bio } = req.body || {};
+    const { name, handle, bio, categories, productKind, shipsFrom, experience } = req.body || {};
     if (!name || name.length < 2) return res.status(400).json({ error: 'Shop name required' });
     if (!isCleanText(name)) return res.status(400).json({ error: 'Keep name appropriate' });
     if (bio && !isCleanText(bio)) return res.status(400).json({ error: 'Keep bio appropriate' });
+
+    let cleanHandle = '';
+    if (handle != null && String(handle).length) {
+      cleanHandle = String(handle).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+      if (cleanHandle.length < 3) return res.status(400).json({ error: 'Username must be 3+ letters, numbers, or underscores' });
+      const dup = get('SELECT 1 FROM shops WHERE handle = ?', [cleanHandle]);
+      if (dup) return res.status(409).json({ error: 'That username is taken' });
+    }
+
+    const cats = Array.isArray(categories)
+      ? categories.filter((c) => ALLOWED_CATEGORIES.includes(c)).slice(0, 8)
+      : [];
+    const kind = ALLOWED_KIND.includes(productKind) ? productKind : '';
+    const exp = ALLOWED_EXPERIENCE.includes(experience) ? experience : '';
+    const ships = (shipsFrom || '').toString().substring(0, 60);
+
     const existing = get('SELECT * FROM shops WHERE owner_id = ?', [req.user.id]);
     if (existing) return res.status(409).json({ error: 'You already own a shop', shop: existing });
-    const slug = uniqueSlug(name);
+    const slug = uniqueSlug(cleanHandle || name);
     const r = run(
-      'INSERT INTO shops (owner_id, name, slug, bio) VALUES (?, ?, ?, ?)',
-      [req.user.id, name.substring(0, 80), slug, (bio || '').substring(0, 500)]
+      `INSERT INTO shops (owner_id, name, slug, bio, handle, categories, product_kind, ships_from, experience)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        req.user.id,
+        name.substring(0, 80),
+        slug,
+        (bio || '').substring(0, 500),
+        cleanHandle,
+        JSON.stringify(cats),
+        kind,
+        ships,
+        exp,
+      ]
     );
     res.json({ ok: true, shopId: r.lastInsertRowid, slug });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Cheap availability check for the wizard.
+router.get('/handle-available', auth, (req, res) => {
+  const h = String(req.query.handle || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+  if (h.length < 3) return res.json({ available: false, reason: 'too-short' });
+  const dup = get('SELECT 1 FROM shops WHERE handle = ?', [h]);
+  res.json({ available: !dup, handle: h });
 });
 
 router.get('/shops/me', auth, (req, res) => {

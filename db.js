@@ -366,6 +366,19 @@ async function initDb() {
       FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+
+  // Migrate: add seller onboarding fields to shops if missing
+  try {
+    const sc = all("PRAGMA table_info(shops)");
+    if (sc.length) {
+      if (!sc.some(c => c.name === 'handle'))      db.run("ALTER TABLE shops ADD COLUMN handle TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'categories'))  db.run("ALTER TABLE shops ADD COLUMN categories TEXT DEFAULT '[]'");
+      if (!sc.some(c => c.name === 'ships_from'))  db.run("ALTER TABLE shops ADD COLUMN ships_from TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'experience'))  db.run("ALTER TABLE shops ADD COLUMN experience TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'product_kind')) db.run("ALTER TABLE shops ADD COLUMN product_kind TEXT DEFAULT ''");
+    }
+  } catch (e) {}
+
   db.run(`
     CREATE TABLE IF NOT EXISTS shop_products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
