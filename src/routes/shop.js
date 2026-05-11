@@ -115,21 +115,59 @@ router.patch('/shops/me', auth, (req, res) => {
   try {
     const shop = get('SELECT * FROM shops WHERE owner_id = ?', [req.user.id]);
     if (!shop) return res.status(404).json({ error: 'No shop' });
-    const { name, bio, banner_url, avatar_url } = req.body || {};
+    const { name, handle, bio, banner_url, avatar_url, categories, productKind, shipsFrom, experience } = req.body || {};
     if (name && !isCleanText(name)) return res.status(400).json({ error: 'Keep name appropriate' });
     if (bio && !isCleanText(bio)) return res.status(400).json({ error: 'Keep bio appropriate' });
+
+    let cleanHandle = null;
+    if (handle !== undefined) {
+      cleanHandle = String(handle).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+      if (cleanHandle.length && cleanHandle.length < 3) {
+        return res.status(400).json({ error: 'Username must be 3+ letters, numbers, or underscores' });
+      }
+      if (cleanHandle && cleanHandle !== shop.handle) {
+        const dup = get('SELECT 1 FROM shops WHERE handle = ? AND id != ?', [cleanHandle, shop.id]);
+        if (dup) return res.status(409).json({ error: 'That username is taken' });
+      }
+    }
+
+    let catsJson = null;
+    if (categories !== undefined) {
+      const cats = Array.isArray(categories)
+        ? categories.filter((c) => ALLOWED_CATEGORIES.includes(c)).slice(0, 8)
+        : [];
+      catsJson = JSON.stringify(cats);
+    }
+    const kind = productKind !== undefined
+      ? (ALLOWED_KIND.includes(productKind) ? productKind : '')
+      : null;
+    const exp = experience !== undefined
+      ? (ALLOWED_EXPERIENCE.includes(experience) ? experience : '')
+      : null;
+    const ships = shipsFrom !== undefined ? String(shipsFrom).substring(0, 60) : null;
+
     run(
       `UPDATE shops SET
          name = COALESCE(?, name),
+         handle = COALESCE(?, handle),
          bio = COALESCE(?, bio),
          banner_url = COALESCE(?, banner_url),
-         avatar_url = COALESCE(?, avatar_url)
+         avatar_url = COALESCE(?, avatar_url),
+         categories = COALESCE(?, categories),
+         product_kind = COALESCE(?, product_kind),
+         ships_from = COALESCE(?, ships_from),
+         experience = COALESCE(?, experience)
        WHERE id = ?`,
       [
         name ? name.substring(0, 80) : null,
+        cleanHandle,
         bio !== undefined ? bio.substring(0, 500) : null,
         banner_url !== undefined ? banner_url.substring(0, 500) : null,
         avatar_url !== undefined ? avatar_url.substring(0, 500) : null,
+        catsJson,
+        kind,
+        ships,
+        exp,
         shop.id,
       ]
     );

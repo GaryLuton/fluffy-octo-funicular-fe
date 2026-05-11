@@ -376,6 +376,7 @@ async function initDb() {
       if (!sc.some(c => c.name === 'ships_from'))  db.run("ALTER TABLE shops ADD COLUMN ships_from TEXT DEFAULT ''");
       if (!sc.some(c => c.name === 'experience'))  db.run("ALTER TABLE shops ADD COLUMN experience TEXT DEFAULT ''");
       if (!sc.some(c => c.name === 'product_kind')) db.run("ALTER TABLE shops ADD COLUMN product_kind TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'design_json')) db.run("ALTER TABLE shops ADD COLUMN design_json TEXT DEFAULT ''");
     }
   } catch (e) {}
 
