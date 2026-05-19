@@ -53,6 +53,33 @@
     try { var v = JSON.parse(s || '[]'); return Array.isArray(v) ? v : []; } catch(e){ return []; }
   }
 
+  function productCard(featured, p){
+    var img = (p.image_urls && p.image_urls[0]) || '';
+    return '<a class="card' + (featured ? ' featured-card' : '') + '" href="/shop-product.html?id=' + p.id + '">' +
+      '<div class="card-img">' +
+        (img ? '<img loading="lazy" alt="" src="' + SLShop.escapeHtml(img) + '"/>' : '<div class="card-img-empty">No image</div>') +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-title">' + SLShop.escapeHtml(p.title) + '</div>' +
+        '<div class="card-price">' + SLShop.fmtPrice(p.price_cents, p.currency) + '</div>' +
+      '</div>' +
+    '</a>';
+  }
+
+  function buildSocial(s){
+    var out = [];
+    if (s.instagram) out.push('<a target="_blank" rel="noopener" href="https://instagram.com/' + encodeURIComponent(s.instagram) + '">📷 ' + SLShop.escapeHtml(s.instagram) + '</a>');
+    if (s.tiktok)    out.push('<a target="_blank" rel="noopener" href="https://tiktok.com/@' + encodeURIComponent(s.tiktok) + '">🎵 ' + SLShop.escapeHtml(s.tiktok) + '</a>');
+    if (s.website) {
+      var url = /^https?:\/\//i.test(s.website) ? s.website : 'https://' + s.website;
+      out.push('<a target="_blank" rel="noopener" href="' + SLShop.escapeHtml(url) + '">🔗 site</a>');
+    }
+    if (s.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s.email)) {
+      out.push('<a href="mailto:' + SLShop.escapeHtml(s.email) + '">✉️ email</a>');
+    }
+    return out;
+  }
+
   function kindLabel(k){
     return ({
       handmade: 'handmade',
@@ -78,9 +105,24 @@
 
     isOwnerCheck.then(function(isOwner){
       var shareUrl = location.origin + '/shop-store.html?shop=' + encodeURIComponent(shop.slug);
+      var design = shop.design || {};
+      var social = design.social || {};
+      var featuredIds = Array.isArray(design.featuredProductIds) ? design.featuredProductIds : [];
+
+      // Apply accent color to the storefront scope
+      if (design.accentColor) c.style.setProperty('--accent', design.accentColor);
 
       var html = '';
-      html += '<section class="store-hero">';
+
+      if (design.announcement) {
+        html += '<div class="announce-bar">' + SLShop.escapeHtml(design.announcement) + '</div>';
+      }
+
+      var hasBanner = !!shop.banner_url;
+      html += '<section class="store-hero' + (hasBanner ? ' has-banner' : '') + '">';
+      if (hasBanner) {
+        html += '<div class="store-banner"><img src="' + SLShop.escapeHtml(shop.banner_url) + '" alt=""/></div>';
+      }
       html +=   '<div class="store-avatar">' + (shop.avatar_url
                   ? '<img src="' + SLShop.escapeHtml(shop.avatar_url) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>'
                   : SLShop.escapeHtml(initials(shop.name))) + '</div>';
@@ -97,6 +139,11 @@
         }).join('') + '</div>';
       }
       if (shop.ships_from) html += '<div class="store-meta">ships from ' + SLShop.escapeHtml(shop.ships_from) + '</div>';
+
+      var socialLinks = buildSocial(social);
+      if (socialLinks.length) {
+        html += '<div class="store-social">' + socialLinks.join('') + '</div>';
+      }
 
       if (isOwner) {
         html += '<div class="store-owner-bar">' +
@@ -120,6 +167,23 @@
         '</div>';
       }
 
+      // Featured products section (above main grid)
+      var featured = [];
+      if (featuredIds.length) {
+        var byId = {};
+        products.forEach(function(p){ byId[p.id] = p; });
+        featuredIds.forEach(function(id){ if (byId[id]) featured.push(byId[id]); });
+      }
+      if (featured.length) {
+        html += '<section class="featured-section">';
+        html +=   '<div class="reveal section-bar"><div>' +
+                    '<div class="section-eyebrow">featured</div>' +
+                    '<h2 class="section-h2">picks from the shop</h2>' +
+                  '</div></div>';
+        html +=   '<div class="featured-grid">' + featured.map(productCard.bind(null, true)).join('') + '</div>';
+        html += '</section>';
+      }
+
       html += '<main class="shop-wrap">';
 
       if (!products.length) {
@@ -141,18 +205,16 @@
         html += '<div class="reveal section-bar">' +
           '<div><div class="section-eyebrow">listings</div><h2 class="section-h2">' + products.length + ' ' + (products.length === 1 ? 'item' : 'items') + '</h2></div>' +
         '</div>';
-        html += '<div class="grid">' + products.map(function(p){
-          var img = (p.image_urls && p.image_urls[0]) || '';
-          return '<a class="card" href="/shop-product.html?id=' + p.id + '">' +
-            '<div class="card-img">' +
-              (img ? '<img loading="lazy" alt="" src="' + SLShop.escapeHtml(img) + '"/>' : '<div class="card-img-empty">No image</div>') +
-            '</div>' +
-            '<div class="card-body">' +
-              '<div class="card-title">' + SLShop.escapeHtml(p.title) + '</div>' +
-              '<div class="card-price">' + SLShop.fmtPrice(p.price_cents, p.currency) + '</div>' +
-            '</div>' +
-          '</a>';
-        }).join('') + '</div>';
+        html += '<div class="grid">' + products.map(productCard.bind(null, false)).join('') + '</div>';
+      }
+
+      if (design.about) {
+        html += '<section class="about-section">';
+        html +=   '<div class="about-card">' +
+                    '<h2>about the shop</h2>' +
+                    '<p>' + SLShop.escapeHtml(design.about) + '</p>' +
+                  '</div>';
+        html += '</section>';
       }
 
       // Share box — useful to everyone, but specially highlighted for owners
