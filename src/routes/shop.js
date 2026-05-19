@@ -42,6 +42,51 @@ function hydrateProduct(p) {
   return p;
 }
 
+function parseDesign(s) {
+  try { const v = JSON.parse(s || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
+  catch { return {}; }
+}
+
+function hydrateShop(s) {
+  if (!s) return s;
+  s.design = parseDesign(s.design_json);
+  return s;
+}
+
+// Sanitize a partial design patch coming from the client.
+// Unknown keys are dropped, strings are trimmed and capped, colors validated.
+function sanitizeDesignPatch(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const out = {};
+  if ('accentColor' in input) {
+    const v = String(input.accentColor || '').trim();
+    out.accentColor = /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '';
+  }
+  if ('announcement' in input) {
+    out.announcement = String(input.announcement || '').trim().slice(0, 140);
+  }
+  if ('about' in input) {
+    out.about = String(input.about || '').trim().slice(0, 2000);
+  }
+  if ('social' in input && input.social && typeof input.social === 'object') {
+    const s = input.social;
+    out.social = {
+      instagram: String(s.instagram || '').trim().slice(0, 60).replace(/^@/, ''),
+      tiktok:    String(s.tiktok    || '').trim().slice(0, 60).replace(/^@/, ''),
+      email:     String(s.email     || '').trim().slice(0, 120),
+      website:   String(s.website   || '').trim().slice(0, 200),
+    };
+  }
+  if ('featuredProductIds' in input) {
+    const arr = Array.isArray(input.featuredProductIds) ? input.featuredProductIds : [];
+    out.featuredProductIds = arr
+      .map((n) => parseInt(n, 10))
+      .filter((n) => Number.isFinite(n) && n > 0)
+      .slice(0, 3);
+  }
+  return out;
+}
+
 // ─── Shops ────────────────────────────────────────────────
 const ALLOWED_CATEGORIES = ['Apparel','Jewelry','Art','Home','Vintage','Craft','Digital','Other'];
 const ALLOWED_KIND = ['handmade','vintage','digital','reseller','mixed'];
@@ -107,7 +152,7 @@ router.get('/shops/me', auth, (req, res) => {
       'SELECT * FROM shop_products WHERE shop_id = ? ORDER BY created_at DESC',
       [shop.id]
     ).map(hydrateProduct);
-    res.json({ shop, products });
+    res.json({ shop: hydrateShop(shop), products });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -115,9 +160,32 @@ router.patch('/shops/me', auth, (req, res) => {
   try {
     const shop = get('SELECT * FROM shops WHERE owner_id = ?', [req.user.id]);
     if (!shop) return res.status(404).json({ error: 'No shop' });
-    const { name, handle, bio, banner_url, avatar_url, categories, productKind, shipsFrom, experience } = req.body || {};
+    const { name, handle, bio, banner_url, avatar_url, categories, productKind, shipsFrom, experience, design } = req.body || {};
     if (name && !isCleanText(name)) return res.status(400).json({ error: 'Keep name appropriate' });
     if (bio && !isCleanText(bio)) return res.status(400).json({ error: 'Keep bio appropriate' });
+
+    let designJson = null;
+    if (design !== undefined) {
+      const patch = sanitizeDesignPatch(design);
+      if (patch) {
+        if (patch.announcement && !isCleanText(patch.announcement)) {
+          return res.status(400).json({ error: 'Keep announcement appropriate' });
+        }
+        if (patch.about && !isCleanText(patch.about)) {
+          return res.status(400).json({ error: 'Keep about text appropriate' });
+        }
+        if ('featuredProductIds' in patch && patch.featuredProductIds.length) {
+          const placeholders = patch.featuredProductIds.map(() => '?').join(',');
+          const owned = all(
+            `SELECT id FROM shop_products WHERE shop_id = ? AND id IN (${placeholders})`,
+            [shop.id, ...patch.featuredProductIds]
+          ).map((r) => r.id);
+          patch.featuredProductIds = patch.featuredProductIds.filter((id) => owned.includes(id));
+        }
+        const merged = Object.assign({}, parseDesign(shop.design_json), patch);
+        designJson = JSON.stringify(merged);
+      }
+    }
 
     let cleanHandle = null;
     if (handle !== undefined) {
@@ -156,7 +224,8 @@ router.patch('/shops/me', auth, (req, res) => {
          categories = COALESCE(?, categories),
          product_kind = COALESCE(?, product_kind),
          ships_from = COALESCE(?, ships_from),
-         experience = COALESCE(?, experience)
+         experience = COALESCE(?, experience),
+         design_json = COALESCE(?, design_json)
        WHERE id = ?`,
       [
         name ? name.substring(0, 80) : null,
@@ -168,6 +237,7 @@ router.patch('/shops/me', auth, (req, res) => {
         kind,
         ships,
         exp,
+        designJson,
         shop.id,
       ]
     );
@@ -186,7 +256,7 @@ router.get('/shops/:slug', (req, res) => {
       `SELECT * FROM shop_products WHERE shop_id = ? AND status = 'active' ORDER BY created_at DESC`,
       [shop.id]
     ).map(hydrateProduct);
-    res.json({ shop, products });
+    res.json({ shop: hydrateShop(shop), products });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
