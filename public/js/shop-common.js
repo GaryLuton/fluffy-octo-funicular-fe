@@ -13,7 +13,21 @@
     if (authed()) headers['Authorization'] = 'Bearer ' + token();
     return fetch('/api/shop' + path, Object.assign({}, opts, { headers: headers }))
       .then(function(r){
-        return r.json().then(function(j){
+        return r.text().then(function(text){
+          var j = null;
+          try { j = text ? JSON.parse(text) : {}; } catch (e) {
+            // Non-JSON response — usually a proxy/host HTML error page (502, 504,
+            // "The page could not be loaded", etc.). Surface a readable message
+            // instead of the raw JSON parse error.
+            var msg;
+            if (r.status === 502 || r.status === 504) msg = 'server is waking up — try again in a moment';
+            else if (r.status === 503) msg = 'server is temporarily unavailable — try again';
+            else if (r.status >= 500) msg = 'server error (' + r.status + ') — try again';
+            else if (r.status === 401 || r.status === 403) msg = 'please sign in again';
+            else if (r.status === 404) msg = 'service unavailable (404)';
+            else msg = 'unexpected response from server — try again';
+            throw new Error(msg);
+          }
           if (!r.ok) throw new Error(j && j.error || ('HTTP ' + r.status));
           return j;
         });
