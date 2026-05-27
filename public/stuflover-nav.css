@@ -90,6 +90,14 @@ body { padding-top: var(--sl-nav-h); }
   #sl-top-nav .sl-tabs { gap: 2px; }
   #sl-top-nav .sl-tab { padding: 8px 10px; letter-spacing: 1px; font-size: 0.7rem; gap: 4px; }
   #sl-top-nav .sl-tab svg { width: 14px; height: 14px; }
+  /* Touch targets — guarantee tappable area on phones (Apple HIG / Material). */
+  #sl-top-nav .sl-logo,
+  #sl-top-nav .sl-back-chip,
+  #sl-top-nav .sl-tab {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 /* Small phones — drop tab labels so all four tabs + logo fit. */
 @media (max-width: 480px) {
