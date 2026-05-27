@@ -138,8 +138,8 @@
     @keyframes cgConfettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(108vh) rotate(720deg);opacity:0;}}
     .cg-loading{opacity:0.3;font-style:italic;padding:40px;text-align:center;}
     .cg-rate-card{width:100%;max-width:420px;border-radius:18px;padding:24px 22px;line-height:1.7;font-size:0.92rem;margin-bottom:16px;}
-    .cg-rate-stars{display:flex;gap:6px;justify-content:center;margin-top:12px;}
-    .cg-star{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;border:2px solid rgba(128,128,128,0.12);transition:all 0.2s;background:transparent;color:inherit;}
+    .cg-rate-stars{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px;max-width:100%;}
+    .cg-star{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;border:2px solid rgba(128,128,128,0.12);transition:all 0.2s;background:transparent;color:inherit;flex:0 0 auto;}
     .cg-star:hover,.cg-star.on{transform:scale(1.15);}
     .cg-challenge-card{width:100%;max-width:460px;border-radius:18px;padding:28px 24px;text-align:center;margin-bottom:16px;}
     .cg-challenge-title{font-size:1.1rem;font-weight:700;line-height:1.4;margin-bottom:8px;}
@@ -152,6 +152,10 @@
     @media(max-width:480px){
       .cg-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:100%;width:100%;}
       .cg-card{min-width:0;max-width:none;padding:18px 14px;}
+      /* Rate/Challenge games render a single card + stars/input row inside
+         .cg-cards. The two-column grid above is meant for choice cards, so
+         force these full-width children to span the whole row. */
+      .cg-rate-card,.cg-rate-stars,.cg-challenge-card,.cg-input-row{grid-column:1 / -1;}
     }
   </style>
 </head>
