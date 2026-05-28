@@ -23,6 +23,8 @@ module.exports = {
   RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'noreply@stuflover.com',
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
+  PRINTIFY_API_TOKEN: process.env.PRINTIFY_API_TOKEN || '',
+  PRINTIFY_SHOP_ID: process.env.PRINTIFY_SHOP_ID || '',
   PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || 'https://stuflover.com',
   allowedOrigins,
   isProd,
