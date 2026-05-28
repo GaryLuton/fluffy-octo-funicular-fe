@@ -25,6 +25,7 @@ module.exports = {
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
   PRINTIFY_API_TOKEN: process.env.PRINTIFY_API_TOKEN || '',
   PRINTIFY_SHOP_ID: process.env.PRINTIFY_SHOP_ID || '',
+  PRINTIFY_WEBHOOK_KEY: process.env.PRINTIFY_WEBHOOK_KEY || '',
   PUBLIC_BASE_URL: process.env.PUBLIC_BASE_URL || 'https://stuflover.com',
   allowedOrigins,
   isProd,

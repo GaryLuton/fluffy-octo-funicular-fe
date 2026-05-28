@@ -15,7 +15,10 @@
       headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(opts.body);
     }
-    return fetch('/api/printify' + path, Object.assign({}, opts, { headers: headers }))
+    // Served from the Vercel frontend (stuflover.com) but the API lives on the
+    // Railway backend — route through STUFLOVER_API_URL when present.
+    var base = window.STUFLOVER_API_URL || '';
+    return fetch(base + '/api/printify' + path, Object.assign({}, opts, { headers: headers }))
       .then(function (r) {
         return r.text().then(function (t) {
           var j = {};
