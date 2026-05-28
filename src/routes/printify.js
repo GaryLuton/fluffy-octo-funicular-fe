@@ -145,10 +145,10 @@ async function loadProducts() {
   if (!printifyConfigured()) return DEMO_PRODUCTS;
   if (listCache.data && Date.now() - listCache.at < CACHE_TTL_MS) return listCache.data;
   const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=50`);
-  // Show anything with a priced variant — including products still flagged
-  // "publishing" by Printify (custom-integration stores leave them visible:false
-  // until a publish is acknowledged).
+  // Respect Printify's visibility toggle ("hide from API" sets visible:false),
+  // and only show products that have a priced variant.
   const data = (Array.isArray(json.data) ? json.data : [])
+    .filter((p) => p.visible !== false)
     .map(normalizeProduct)
     .filter((p) => p.priceCents > 0);
   listCache = { at: Date.now(), data };
