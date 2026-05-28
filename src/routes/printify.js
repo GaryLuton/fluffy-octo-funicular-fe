@@ -144,7 +144,7 @@ let listCache = { at: 0, data: null };
 async function loadProducts() {
   if (!printifyConfigured()) return DEMO_PRODUCTS;
   if (listCache.data && Date.now() - listCache.at < CACHE_TTL_MS) return listCache.data;
-  const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=100`);
+  const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=50`);
   // Show anything with a priced variant — including products still flagged
   // "publishing" by Printify (custom-integration stores leave them visible:false
   // until a publish is acknowledged).
@@ -225,7 +225,7 @@ router.get('/publish/resolve', async (req, res) => {
   const shopId = (req.query.shop_id || config.PRINTIFY_SHOP_ID || '').toString().trim();
   if (!token || !shopId) return res.status(400).json({ error: 'Need a token and shop_id (set env vars or pass ?token=&shop_id=)' });
   try {
-    const json = await callPrintify('GET', `/shops/${shopId}/products.json?limit=100`, { token });
+    const json = await callPrintify('GET', `/shops/${shopId}/products.json?limit=50`, { token });
     const products = Array.isArray(json.data) ? json.data : [];
     const results = [];
     for (const p of products) {
