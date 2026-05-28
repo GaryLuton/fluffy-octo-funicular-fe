@@ -33,6 +33,23 @@ async function printifyGet(path) {
   return res.json();
 }
 
+// Generic Printify call that accepts an explicit token (for setup routes that
+// take ?token=) and any HTTP method. Returns parsed JSON or {} for empty bodies.
+async function callPrintify(method, path, opts) {
+  opts = opts || {};
+  const token = opts.token || config.PRINTIFY_API_TOKEN;
+  const init = { method, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } };
+  if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
+  const res = await fetch(`${PRINTIFY_BASE}${path}`, init);
+  const text = await res.text().catch(() => '');
+  if (!res.ok) {
+    const err = new Error(`Printify ${res.status}: ${text.slice(0, 200)}`);
+    err.status = res.status;
+    throw err;
+  }
+  try { return text ? JSON.parse(text) : {}; } catch { return {}; }
+}
+
 function stripHtml(s) {
   return String(s || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -127,11 +144,13 @@ let listCache = { at: 0, data: null };
 async function loadProducts() {
   if (!printifyConfigured()) return DEMO_PRODUCTS;
   if (listCache.data && Date.now() - listCache.at < CACHE_TTL_MS) return listCache.data;
-  const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=50`);
+  const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=100`);
+  // Show anything with a priced variant — including products still flagged
+  // "publishing" by Printify (custom-integration stores leave them visible:false
+  // until a publish is acknowledged).
   const data = (Array.isArray(json.data) ? json.data : [])
-    .filter((p) => p.visible !== false)
     .map(normalizeProduct)
-    .filter((p) => p.variants.length);
+    .filter((p) => p.priceCents > 0);
   listCache = { at: Date.now(), data };
   return data;
 }
@@ -176,7 +195,7 @@ router.get('/products', async (req, res) => {
     res.json({ products, demo: !printifyConfigured() });
   } catch (e) {
     console.error('Printify list error:', e.message);
-    res.status(502).json({ error: 'Could not load products' });
+    res.status(502).json({ error: 'Could not load products', detail: e.message });
   }
 });
 
@@ -187,7 +206,83 @@ router.get('/products/:id', async (req, res) => {
     res.json({ product, demo: !printifyConfigured() });
   } catch (e) {
     console.error('Printify product error:', e.message);
-    res.status(502).json({ error: 'Could not load product' });
+    res.status(502).json({ error: 'Could not load product', detail: e.message });
+  }
+});
+
+// ─── Publish acknowledgement ──────────────────────────────
+// Custom-integration stores leave products stuck on "Publishing" until the
+// connected app confirms the publish. We don't host per-product pages, so the
+// handle just points at the storefront.
+function publishExternal(productId) {
+  return { id: String(productId), handle: `${config.PUBLIC_BASE_URL}/shopp` };
+}
+
+// One-shot helper: acknowledge publishing for every product in the shop so they
+// flip from "Publishing" to "Published". Safe to re-run. Open it in a browser.
+router.get('/publish/resolve', async (req, res) => {
+  const token = (req.query.token || config.PRINTIFY_API_TOKEN || '').toString().trim();
+  const shopId = (req.query.shop_id || config.PRINTIFY_SHOP_ID || '').toString().trim();
+  if (!token || !shopId) return res.status(400).json({ error: 'Need a token and shop_id (set env vars or pass ?token=&shop_id=)' });
+  try {
+    const json = await callPrintify('GET', `/shops/${shopId}/products.json?limit=100`, { token });
+    const products = Array.isArray(json.data) ? json.data : [];
+    const results = [];
+    for (const p of products) {
+      try {
+        await callPrintify('POST', `/shops/${shopId}/products/${p.id}/publishing_succeeded.json`, {
+          token, body: { external: publishExternal(p.id) },
+        });
+        results.push({ id: p.id, title: p.title, ok: true });
+      } catch (e) {
+        results.push({ id: p.id, title: p.title, ok: false, error: e.message });
+      }
+    }
+    listCache = { at: 0, data: null };
+    res.json({ total: products.length, resolved: results.filter((r) => r.ok).length, results });
+  } catch (e) {
+    console.error('Printify resolve error:', e.message);
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// Register the publish webhook with Printify so future publishes auto-confirm.
+router.get('/webhook/register', async (req, res) => {
+  const token = (req.query.token || config.PRINTIFY_API_TOKEN || '').toString().trim();
+  const shopId = (req.query.shop_id || config.PRINTIFY_SHOP_ID || '').toString().trim();
+  if (!token || !shopId) return res.status(400).json({ error: 'Need a token and shop_id' });
+  const key = config.PRINTIFY_WEBHOOK_KEY;
+  const url = `https://${req.get('host')}/api/printify/webhook${key ? `?key=${encodeURIComponent(key)}` : ''}`;
+  try {
+    const created = await callPrintify('POST', `/shops/${shopId}/webhooks.json`, {
+      token, body: { topic: 'product:publish:started', url },
+    });
+    res.json({ ok: true, url, webhook: created });
+  } catch (e) {
+    console.error('Printify webhook register error:', e.message);
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// Printify calls this when a product publish starts; we immediately confirm it.
+router.post('/webhook', async (req, res) => {
+  if (config.PRINTIFY_WEBHOOK_KEY && req.query.key !== config.PRINTIFY_WEBHOOK_KEY) {
+    return res.status(401).json({ error: 'bad key' });
+  }
+  res.json({ received: true }); // ack fast; Printify retries on non-2xx
+  const event = req.body || {};
+  if (event.type !== 'product:publish:started') return;
+  try {
+    const productId = event.resource && event.resource.id;
+    const shopId = (event.resource && event.resource.data && event.resource.data.shop_id) || config.PRINTIFY_SHOP_ID;
+    if (productId && shopId) {
+      await callPrintify('POST', `/shops/${shopId}/products/${productId}/publishing_succeeded.json`, {
+        body: { external: publishExternal(productId) },
+      });
+      listCache = { at: 0, data: null };
+    }
+  } catch (e) {
+    console.error('Printify webhook handler error:', e.message);
   }
 });
 
