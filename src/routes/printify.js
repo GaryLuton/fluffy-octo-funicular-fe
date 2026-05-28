@@ -145,6 +145,31 @@ async function loadProduct(id) {
 }
 
 // ─── Routes ───────────────────────────────────────────────
+// Setup helper: list the shops a token can access, so you can read off the
+// numeric PRINTIFY_SHOP_ID. Pass ?token=... for one-time setup, or rely on
+// PRINTIFY_API_TOKEN once it's configured. Returns nothing without a valid token.
+router.get('/shops', async (req, res) => {
+  const token = (req.query.token || config.PRINTIFY_API_TOKEN || '').toString().trim();
+  if (!token) return res.status(400).json({ error: 'Provide ?token=YOUR_PRINTIFY_API_TOKEN' });
+  try {
+    const r = await fetch(`${PRINTIFY_BASE}/shops.json`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      return res.status(r.status === 401 ? 401 : 502).json({ error: `Printify ${r.status}: ${text.slice(0, 200)}` });
+    }
+    const shops = await r.json();
+    const list = (Array.isArray(shops) ? shops : []).map((s) => ({
+      id: s.id, title: s.title, sales_channel: s.sales_channel,
+    }));
+    res.json({ shops: list, hint: 'Use the numeric "id" value as PRINTIFY_SHOP_ID' });
+  } catch (e) {
+    console.error('Printify shops error:', e.message);
+    res.status(502).json({ error: 'Could not reach Printify' });
+  }
+});
+
 router.get('/products', async (req, res) => {
   try {
     const products = await loadProducts();
