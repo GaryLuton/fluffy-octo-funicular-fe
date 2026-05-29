@@ -72,9 +72,25 @@
       return;
     }
     grid.innerHTML = products.map(function (p) {
-      var imgHtml = p.image
-        ? '<img src="' + esc(p.image) + '" alt="' + esc(p.title) + '" loading="lazy"/>'
-        : '<span class="card-img-empty">No image</span>';
+      var imgs = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
+      var imgHtml;
+      if (imgs.length > 1) {
+        imgHtml =
+          '<div class="card-carousel">' +
+            imgs.map(function (src) {
+              return '<img src="' + esc(src) + '" alt="' + esc(p.title) + '" loading="lazy"/>';
+            }).join('') +
+          '</div>' +
+          '<button type="button" class="carousel-nav prev" data-dir="-1" aria-label="Previous image">‹</button>' +
+          '<button type="button" class="carousel-nav next" data-dir="1" aria-label="Next image">›</button>' +
+          '<div class="carousel-dots">' +
+            imgs.map(function (_, i) { return '<span class="dot' + (i === 0 ? ' active' : '') + '"></span>'; }).join('') +
+          '</div>';
+      } else if (imgs.length === 1) {
+        imgHtml = '<img src="' + esc(imgs[0]) + '" alt="' + esc(p.title) + '" loading="lazy"/>';
+      } else {
+        imgHtml = '<span class="card-img-empty">No image</span>';
+      }
       var variantSelect = p.variants.length > 1
         ? '<select class="variant" data-id="' + esc(p.id) + '">' +
             p.variants.map(function (v) {
@@ -95,6 +111,24 @@
         '</div>' +
       '</div>';
     }).join('');
+    wireCarousels();
+  }
+
+  // Keep the dot indicators in sync as each card's image strip is scrolled
+  // or swiped through.
+  function wireCarousels() {
+    var wraps = document.querySelectorAll('#grid .card-img');
+    Array.prototype.forEach.call(wraps, function (wrap) {
+      var track = wrap.querySelector('.card-carousel');
+      var dots = wrap.querySelectorAll('.carousel-dots .dot');
+      if (!track || !dots.length) return;
+      track.addEventListener('scroll', function () {
+        var idx = Math.round(track.scrollLeft / track.clientWidth);
+        Array.prototype.forEach.call(dots, function (d, i) {
+          d.classList.toggle('active', i === idx);
+        });
+      }, { passive: true });
+    });
   }
 
   function variantChoiceFor(id) {
@@ -169,6 +203,12 @@
   // ── Events ────────────────────────────────────────────
   function wire() {
     document.getElementById('grid').addEventListener('click', function (e) {
+      var nav = e.target.closest('.carousel-nav');
+      if (nav) {
+        var track = nav.parentElement.querySelector('.card-carousel');
+        if (track) track.scrollBy({ left: Number(nav.dataset.dir) * track.clientWidth, behavior: 'smooth' });
+        return;
+      }
       var add = e.target.closest('.add');
       var buy = e.target.closest('.buy');
       if (add) {

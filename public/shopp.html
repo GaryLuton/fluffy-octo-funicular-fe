@@ -16,13 +16,53 @@
     padding:9px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;
     letter-spacing:2px;text-transform:uppercase;font-size:0.7rem;
   }
-  .card-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  /* margin-top:auto pins the actions to the bottom of the card so the
+     Add to cart / Buy now buttons line up across a row regardless of how
+     long the title is or whether a variant dropdown is present. */
+  .card-actions{display:flex;flex-direction:column;gap:8px;margin-top:auto;padding-top:12px;}
   .card-actions .variant{
     width:100%;padding:9px 14px;border-radius:12px;
     border:2px solid rgba(42,26,20,0.12);background:#fff;color:var(--shop-brown);
     font-family:'Nunito',sans-serif;font-size:0.85rem;
   }
   .card-actions .btn{justify-content:center;width:100%;}
+
+  /* Scrollable image gallery on each card */
+  .card-img{position:relative;}
+  .card-carousel{
+    display:flex;width:100%;height:100%;
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .card-carousel::-webkit-scrollbar{display:none;}
+  .card-carousel img{
+    flex:0 0 100%;width:100%;height:100%;object-fit:cover;
+    scroll-snap-align:center;display:block;
+  }
+  .carousel-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;z-index:2;
+    background:rgba(255,255,255,0.85);color:var(--shop-brown);
+    font-size:1.3rem;line-height:1;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(30,12,6,0.18);opacity:0;transition:opacity 0.2s,background 0.2s;
+  }
+  .carousel-nav.prev{left:8px;}
+  .carousel-nav.next{right:8px;}
+  .card:hover .carousel-nav{opacity:1;}
+  .carousel-nav:hover{background:#fff;}
+  .carousel-dots{
+    position:absolute;bottom:8px;left:0;right:0;z-index:2;
+    display:flex;justify-content:center;gap:5px;pointer-events:none;
+  }
+  .carousel-dots .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,0.65);box-shadow:0 0 2px rgba(0,0,0,0.35);
+    transition:background 0.2s,transform 0.2s;
+  }
+  .carousel-dots .dot.active{background:#fff;transform:scale(1.4);}
+  /* On touch devices the arrows aren't useful (and never get :hover) — rely on
+     native swipe instead. */
+  @media(hover:none){.carousel-nav{display:none;}}
 
   /* Floating cart button */
   .cart-fab{
