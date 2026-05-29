@@ -98,10 +98,14 @@
             }).join('') +
           '</select>'
         : '';
+      var descHtml = p.description
+        ? '<div class="card-desc">' + esc(p.description) + '</div>'
+        : '';
       return '<div class="card" data-id="' + esc(p.id) + '">' +
         '<div class="card-img">' + imgHtml + '</div>' +
         '<div class="card-body">' +
           '<div class="card-title">' + esc(p.title) + '</div>' +
+          descHtml +
           '<div class="card-price">' + fmt(p.priceCents) + '</div>' +
           '<div class="card-actions">' +
             variantSelect +
