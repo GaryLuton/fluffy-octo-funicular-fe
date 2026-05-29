@@ -75,6 +75,7 @@ function normalizeProduct(p) {
     image: (def && def.src) || imgs[0] || '',
     images: imgs.slice(0, 8),
     priceCents: minPrice,
+    currency: config.STORE_CURRENCY,
     variants,
   };
 }
@@ -141,8 +142,14 @@ const DEMO_PRODUCTS = [
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let listCache = { at: 0, data: null };
 
+// Demo products are static, so they don't carry the configured store currency
+// the way normalizeProduct'd ones do — stamp it on at read time.
+function withCurrency(p) {
+  return p ? Object.assign({}, p, { currency: p.currency || config.STORE_CURRENCY }) : p;
+}
+
 async function loadProducts() {
-  if (!printifyConfigured()) return DEMO_PRODUCTS;
+  if (!printifyConfigured()) return DEMO_PRODUCTS.map(withCurrency);
   if (listCache.data && Date.now() - listCache.at < CACHE_TTL_MS) return listCache.data;
   const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products.json?limit=50`);
   // Respect Printify's visibility toggle ("hide from API" sets visible:false),
@@ -157,7 +164,7 @@ async function loadProducts() {
 
 async function loadProduct(id) {
   if (!printifyConfigured()) {
-    return DEMO_PRODUCTS.find((p) => p.id === String(id)) || null;
+    return withCurrency(DEMO_PRODUCTS.find((p) => p.id === String(id)) || null);
   }
   const json = await printifyGet(`/shops/${config.PRINTIFY_SHOP_ID}/products/${encodeURIComponent(id)}.json`);
   return normalizeProduct(json);
@@ -332,7 +339,7 @@ router.post('/checkout', async (req, res) => {
       line_items: lineItems.map((it) => ({
         quantity: it.quantity,
         price_data: {
-          currency: 'usd',
+          currency: config.STORE_CURRENCY,
           unit_amount: it.priceCents,
           product_data: {
             name: `${it.title}${it.variantTitle ? ' — ' + it.variantTitle : ''}`.slice(0, 200),

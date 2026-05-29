@@ -1,12 +1,17 @@
 // Stuflover Printify storefront (/shopp) — guest cart + buy now.
 (function () {
   var S = window.SLShop || {};
-  var fmt = S.fmtPrice || function (c) { return '$' + ((c || 0) / 100).toFixed(2); };
+  var fmt = S.fmtPrice || function (c, cur) {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: (cur || 'USD').toUpperCase() }).format((c || 0) / 100);
+  };
   var esc = S.escapeHtml || function (s) { return String(s == null ? '' : s); };
   var toast = S.toast || function (m) { alert(m); };
 
   var CART_KEY = 'stuflover_printify_cart';
   var products = [];
+  // Store-wide currency, supplied by the API and used for cart totals where no
+  // single line item is in scope. Falls back to USD until products load.
+  var storeCurrency = 'USD';
 
   function api(path, opts) {
     opts = opts || {};
@@ -94,7 +99,7 @@
       var variantSelect = p.variants.length > 1
         ? '<select class="variant" data-id="' + esc(p.id) + '">' +
             p.variants.map(function (v) {
-              return '<option value="' + esc(v.id) + '">' + esc(v.title) + ' — ' + fmt(v.priceCents) + '</option>';
+              return '<option value="' + esc(v.id) + '">' + esc(v.title) + ' — ' + fmt(v.priceCents, p.currency) + '</option>';
             }).join('') +
           '</select>'
         : '';
@@ -106,7 +111,7 @@
         '<div class="card-body">' +
           '<div class="card-title">' + esc(p.title) + '</div>' +
           descHtml +
-          '<div class="card-price">' + fmt(p.priceCents) + '</div>' +
+          '<div class="card-price">' + fmt(p.priceCents, p.currency) + '</div>' +
           '<div class="card-actions">' +
             variantSelect +
             '<button class="btn btn-sm add" data-id="' + esc(p.id) + '">Add to cart</button>' +
@@ -143,6 +148,7 @@
     return {
       id: prod.id, title: prod.title, image: prod.image,
       variantId: variant.id, variantTitle: variant.title, priceCents: variant.priceCents,
+      currency: prod.currency || storeCurrency,
     };
   }
   function cssEsc(s) { return String(s).replace(/["\\]/g, '\\$&'); }
@@ -173,11 +179,11 @@
               '<button class="rm" data-id="' + esc(it.id) + '" data-v="' + esc(it.variantId) + '">remove</button>' +
             '</div>' +
           '</div>' +
-          '<div class="p">' + fmt(it.priceCents * it.quantity) + '</div>' +
+          '<div class="p">' + fmt(it.priceCents * it.quantity, it.currency || storeCurrency) + '</div>' +
         '</div>';
       }).join('');
     }
-    document.getElementById('drawerTotal').textContent = fmt(cartTotal());
+    document.getElementById('drawerTotal').textContent = fmt(cartTotal(), (cart[0] && cart[0].currency) || storeCurrency);
     document.getElementById('checkoutBtn').disabled = !cart.length;
   }
 
@@ -266,8 +272,10 @@
     api('/products')
       .then(function (r) {
         products = r.products || [];
+        if (products[0] && products[0].currency) storeCurrency = products[0].currency;
         if (r.demo) document.getElementById('demoBanner').style.display = '';
         renderGrid();
+        renderCart();
       })
       .catch(function (e) {
         document.getElementById('grid').innerHTML =
