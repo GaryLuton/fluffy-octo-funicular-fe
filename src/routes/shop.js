@@ -626,10 +626,20 @@ router.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
   try {
-    if (!config.STRIPE_WEBHOOK_SECRET) {
+    // STRIPE_WEBHOOK_SECRET may hold several comma-separated signing secrets so
+    // that test-mode and live-mode endpoints (which have different secrets) can
+    // both be verified by this one endpoint. Try each until one validates.
+    const secrets = (config.STRIPE_WEBHOOK_SECRET || '')
+      .split(',').map((x) => x.trim()).filter(Boolean);
+    if (!secrets.length) {
       event = JSON.parse(req.body.toString());
     } else {
-      event = s.webhooks.constructEvent(req.body, sig, config.STRIPE_WEBHOOK_SECRET);
+      let lastErr;
+      for (const secret of secrets) {
+        try { event = s.webhooks.constructEvent(req.body, sig, secret); lastErr = null; break; }
+        catch (e) { lastErr = e; }
+      }
+      if (!event) throw lastErr;
     }
   } catch (err) {
     console.error('Webhook sig error:', err.message);
