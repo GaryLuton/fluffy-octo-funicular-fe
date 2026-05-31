@@ -330,7 +330,7 @@ router.post('/checkout', async (req, res) => {
     const s = getStripe();
     if (!s) {
       // Mock checkout when Stripe is not configured — useful in dev/preview.
-      return res.json({ url: `${config.PUBLIC_BASE_URL}/shopp?success=1&mock=1`, mock: true, totalCents });
+      return res.json({ url: `${config.PUBLIC_BASE_URL}/shopp.html?success=1&mock=1`, mock: true, totalCents });
     }
 
     const session = await s.checkout.sessions.create({
@@ -347,8 +347,8 @@ router.post('/checkout', async (req, res) => {
           },
         },
       })),
-      success_url: `${config.PUBLIC_BASE_URL}/shopp?success=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.PUBLIC_BASE_URL}/shopp?canceled=1`,
+      success_url: `${config.PUBLIC_BASE_URL}/shopp.html?success=1&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${config.PUBLIC_BASE_URL}/shopp.html?canceled=1`,
       shipping_address_collection: { allowed_countries: ['US', 'CA', 'GB', 'AU'] },
     });
     res.json({ url: session.url });

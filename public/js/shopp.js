@@ -257,10 +257,10 @@
     if (params.get('success') === '1') {
       saveCart([]);
       toast('Thank you! Your order is confirmed.');
-      history.replaceState({}, '', '/shopp');
+      history.replaceState({}, '', '/shopp.html');
     } else if (params.get('canceled') === '1') {
       toast('Checkout canceled');
-      history.replaceState({}, '', '/shopp');
+      history.replaceState({}, '', '/shopp.html');
     }
   }
 
