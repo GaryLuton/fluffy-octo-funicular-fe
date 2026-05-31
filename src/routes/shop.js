@@ -582,7 +582,7 @@ router.post('/checkout', auth, async (req, res) => {
       for (const it of items) {
         run('UPDATE shop_products SET stock = MAX(0, stock - ?) WHERE id = ?', [it.quantity, it.id]);
       }
-      const url = `${config.PUBLIC_BASE_URL}/shop-success?orderId=${orderId}&mock=1`;
+      const url = `${config.PUBLIC_BASE_URL}/shop-success.html?orderId=${orderId}&mock=1`;
       return res.json({ url, orderId, mock: true });
     }
 
@@ -603,8 +603,8 @@ router.post('/checkout', auth, async (req, res) => {
           },
         };
       }),
-      success_url: `${config.PUBLIC_BASE_URL}/shop-success?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.PUBLIC_BASE_URL}/shop-cart`,
+      success_url: `${config.PUBLIC_BASE_URL}/shop-success.html?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${config.PUBLIC_BASE_URL}/shop-cart.html`,
       shipping_address_collection: { allowed_countries: ['US', 'CA', 'GB', 'AU'] },
       metadata: { orderId: String(orderId), buyerId: String(req.user.id) },
     });
