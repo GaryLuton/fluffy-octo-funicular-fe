@@ -1,7 +1,8 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const config = require('../config');
-const { get, run } = require('../../db');
+const { all, get, run } = require('../../db');
+const adminAuth = require('../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -448,6 +449,22 @@ async function fulfillPrintifyOrder(session) {
     run(`UPDATE printify_orders SET status = 'submit_failed' WHERE id = ?`, [orderId]);
   }
 }
+
+// Diagnostics: recent Printify orders and their fulfillment status. Admin only.
+// status flow: pending -> paid -> submitted (-> in_production) | submit_failed
+router.get('/orders', adminAuth, (req, res) => {
+  const orders = all(
+    `SELECT id, status, total_cents, currency, printify_order_id, stripe_session_id,
+            line_items_json, created_at
+     FROM printify_orders ORDER BY id DESC LIMIT 50`
+  );
+  res.json({
+    printifyConfigured: printifyConfigured(),
+    autoProduction: config.PRINTIFY_AUTO_PRODUCTION,
+    count: orders.length,
+    orders,
+  });
+});
 
 router.fulfillPrintifyOrder = fulfillPrintifyOrder;
 module.exports = router;
