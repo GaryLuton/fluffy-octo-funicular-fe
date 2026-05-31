@@ -1,7 +1,8 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const config = require('../config');
-const { get, run } = require('../../db');
+const { all, get, run } = require('../../db');
+const adminAuth = require('../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -64,9 +65,15 @@ function normalizeProduct(p) {
     id: String(v.id),
     title: v.title || 'Default',
     priceCents: Number(v.price) || 0,
+    // Printify's per-variant availability at the print provider. Absent on some
+    // payloads — treat unknown as available so we never hide a sellable item.
+    available: v.is_available !== false,
   }));
-  const prices = variants.map((v) => v.priceCents).filter((n) => n > 0);
-  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const inStockVariants = variants.filter((v) => v.available && v.priceCents > 0);
+  const pricedAll = variants.map((v) => v.priceCents).filter((n) => n > 0);
+  const minPrice = inStockVariants.length
+    ? Math.min(...inStockVariants.map((v) => v.priceCents))
+    : (pricedAll.length ? Math.min(...pricedAll) : 0);
   const imgs = (Array.isArray(p.images) ? p.images : []).map((i) => i.src).filter(Boolean);
   const def = (Array.isArray(p.images) ? p.images : []).find((i) => i.is_default);
   return {
@@ -76,6 +83,7 @@ function normalizeProduct(p) {
     image: (def && def.src) || imgs[0] || '',
     images: imgs.slice(0, 8),
     priceCents: minPrice,
+    inStock: inStockVariants.length > 0,
     currency: config.STORE_CURRENCY,
     variants,
   };
@@ -304,8 +312,12 @@ async function resolveLineItem(raw) {
   const product = await loadProduct(id);
   if (!product) return { error: 'Product unavailable' };
   let variant = product.variants.find((v) => v.id === variantId);
-  if (!variant) variant = product.variants[0];
+  // Fall back to a sellable variant, not just the first (which may be sold out).
+  if (!variant) variant = product.variants.find((v) => v.available !== false && v.priceCents > 0) || product.variants[0];
   if (!variant || variant.priceCents <= 0) return { error: `${product.title} is unavailable` };
+  if (variant.available === false) {
+    return { error: `${product.title} — ${variant.title} is out of stock` };
+  }
   return {
     productId: id,
     variantId: variant.id,
@@ -448,6 +460,22 @@ async function fulfillPrintifyOrder(session) {
     run(`UPDATE printify_orders SET status = 'submit_failed' WHERE id = ?`, [orderId]);
   }
 }
+
+// Diagnostics: recent Printify orders and their fulfillment status. Admin only.
+// status flow: pending -> paid -> submitted (-> in_production) | submit_failed
+router.get('/orders', adminAuth, (req, res) => {
+  const orders = all(
+    `SELECT id, status, total_cents, currency, printify_order_id, stripe_session_id,
+            line_items_json, created_at
+     FROM printify_orders ORDER BY id DESC LIMIT 50`
+  );
+  res.json({
+    printifyConfigured: printifyConfigured(),
+    autoProduction: config.PRINTIFY_AUTO_PRODUCTION,
+    count: orders.length,
+    orders,
+  });
+});
 
 router.fulfillPrintifyOrder = fulfillPrintifyOrder;
 module.exports = router;

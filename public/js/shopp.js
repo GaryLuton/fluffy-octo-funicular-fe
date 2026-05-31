@@ -96,13 +96,23 @@
       } else {
         imgHtml = '<span class="card-img-empty">No image</span>';
       }
+      var firstAvail = (p.variants.filter(function (v) { return v.available !== false; })[0] || {}).id;
       var variantSelect = p.variants.length > 1
         ? '<select class="variant" data-id="' + esc(p.id) + '">' +
             p.variants.map(function (v) {
-              return '<option value="' + esc(v.id) + '">' + esc(v.title) + ' — ' + fmt(v.priceCents, p.currency) + '</option>';
+              var soldOut = v.available === false;
+              return '<option value="' + esc(v.id) + '"' + (soldOut ? ' disabled' : '') +
+                (v.id === firstAvail ? ' selected' : '') + '>' +
+                esc(v.title) + ' — ' + fmt(v.priceCents, p.currency) + (soldOut ? ' (Sold out)' : '') + '</option>';
             }).join('') +
           '</select>'
         : '';
+      var out = p.inStock === false;
+      var actionsHtml = out
+        ? '<span class="sold-out">Sold out</span>'
+        : (variantSelect +
+           '<button class="btn btn-sm add" data-id="' + esc(p.id) + '">Add to cart</button>' +
+           '<button class="btn btn-primary btn-sm buy" data-id="' + esc(p.id) + '">Buy now</button>');
       var descHtml = p.description
         ? '<div class="card-desc">' + esc(p.description) + '</div>'
         : '';
@@ -113,9 +123,7 @@
           descHtml +
           '<div class="card-price">' + fmt(p.priceCents, p.currency) + '</div>' +
           '<div class="card-actions">' +
-            variantSelect +
-            '<button class="btn btn-sm add" data-id="' + esc(p.id) + '">Add to cart</button>' +
-            '<button class="btn btn-primary btn-sm buy" data-id="' + esc(p.id) + '">Buy now</button>' +
+            actionsHtml +
           '</div>' +
         '</div>' +
       '</div>';
@@ -148,6 +156,7 @@
     return {
       id: prod.id, title: prod.title, image: prod.image,
       variantId: variant.id, variantTitle: variant.title, priceCents: variant.priceCents,
+      available: variant.available,
       currency: prod.currency || storeCurrency,
     };
   }
@@ -223,9 +232,11 @@
       var buy = e.target.closest('.buy');
       if (add) {
         var choice = variantChoiceFor(add.dataset.id);
+        if (choice && choice.available === false) { toast('That option is sold out'); return; }
         if (choice) { addToCart(choice); toast('Added to cart'); }
       } else if (buy) {
         var c = variantChoiceFor(buy.dataset.id);
+        if (c && c.available === false) { toast('That option is sold out'); return; }
         if (c) checkout([{ id: c.id, variantId: c.variantId, quantity: 1 }], buy);
       }
     });
