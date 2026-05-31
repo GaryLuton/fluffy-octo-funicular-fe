@@ -1,6 +1,7 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const config = require('../config');
+const { get, run } = require('../../db');
 
 const router = express.Router();
 
@@ -306,6 +307,8 @@ async function resolveLineItem(raw) {
   if (!variant) variant = product.variants[0];
   if (!variant || variant.priceCents <= 0) return { error: `${product.title} is unavailable` };
   return {
+    productId: id,
+    variantId: variant.id,
     quantity,
     title: product.title,
     variantTitle: variant.title,
@@ -333,9 +336,25 @@ router.post('/checkout', async (req, res) => {
       return res.json({ url: `${config.PUBLIC_BASE_URL}/shopp.html?success=1&mock=1`, mock: true, totalCents });
     }
 
+    // Persist a pending order so the Stripe webhook can submit it to Printify
+    // for fulfillment after payment (and do so idempotently).
+    const orderItems = lineItems.map((it) => ({
+      product_id: it.productId,
+      variant_id: it.variantId,
+      quantity: it.quantity,
+      title: it.title,
+    }));
+    const orderRes = run(
+      `INSERT INTO printify_orders (total_cents, currency, line_items_json, status)
+       VALUES (?, ?, ?, 'pending')`,
+      [totalCents, config.STORE_CURRENCY, JSON.stringify(orderItems)]
+    );
+    const orderId = orderRes.lastInsertRowid;
+
     const session = await s.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
+      phone_number_collection: { enabled: true },
       line_items: lineItems.map((it) => ({
         quantity: it.quantity,
         price_data: {
@@ -350,7 +369,9 @@ router.post('/checkout', async (req, res) => {
       success_url: `${config.PUBLIC_BASE_URL}/shopp.html?success=1&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${config.PUBLIC_BASE_URL}/shopp.html?canceled=1`,
       shipping_address_collection: { allowed_countries: ['US', 'CA', 'GB', 'AU'] },
+      metadata: { kind: 'printify', orderId: String(orderId) },
     });
+    run('UPDATE printify_orders SET stripe_session_id = ? WHERE id = ?', [session.id, orderId]);
     res.json({ url: session.url });
   } catch (e) {
     console.error('Printify checkout error:', e.message);
@@ -358,4 +379,75 @@ router.post('/checkout', async (req, res) => {
   }
 });
 
+// Map Stripe's collected shipping/customer details to Printify's address_to shape.
+function buildPrintifyAddress(session) {
+  const sd = session.shipping_details || {};
+  const cd = session.customer_details || {};
+  const addr = sd.address || cd.address || {};
+  const fullName = (sd.name || cd.name || '').trim();
+  const parts = fullName ? fullName.split(/\s+/) : [];
+  const first = parts.shift() || 'Customer';
+  const last = parts.join(' ') || '-';
+  return {
+    first_name: first,
+    last_name: last,
+    email: cd.email || '',
+    phone: cd.phone || '',
+    country: addr.country || '',
+    region: addr.state || '',
+    address1: addr.line1 || '',
+    address2: addr.line2 || '',
+    city: addr.city || '',
+    zip: addr.postal_code || '',
+  };
+}
+
+// Called from the Stripe webhook (in shop.js) when a Printify-tagged checkout
+// session completes. Marks the order paid and submits it to Printify. Safe to
+// call more than once for the same session — it won't create duplicate orders.
+async function fulfillPrintifyOrder(session) {
+  const orderId = parseInt((session.metadata && session.metadata.orderId) || '', 10);
+  if (!orderId) return;
+  const order = get('SELECT * FROM printify_orders WHERE id = ?', [orderId]);
+  if (!order || order.printify_order_id) return; // unknown or already fulfilled
+
+  const shipping = buildPrintifyAddress(session);
+  run(
+    `UPDATE printify_orders SET status = 'paid', stripe_payment_intent = ?, shipping_json = ? WHERE id = ?`,
+    [session.payment_intent || '', JSON.stringify(shipping), orderId]
+  );
+
+  // Without Printify credentials (e.g. the demo catalog) we can only record the
+  // order — there's nothing real to fulfill.
+  if (!printifyConfigured()) return;
+
+  const items = JSON.parse(order.line_items_json || '[]');
+  const lineItems = items
+    .filter((i) => /^\d+$/.test(String(i.variant_id)))
+    .map((i) => ({ product_id: String(i.product_id), variant_id: Number(i.variant_id), quantity: i.quantity }));
+  if (!lineItems.length) return;
+
+  const body = {
+    external_id: `stuflover-${orderId}`,
+    label: `Stuflover order #${orderId}`,
+    line_items: lineItems,
+    shipping_method: 1,
+    send_shipping_notification: false,
+    address_to: shipping,
+  };
+  try {
+    const created = await callPrintify('POST', `/shops/${config.PRINTIFY_SHOP_ID}/orders.json`, { body });
+    const pid = String((created && (created.id || created.order_id)) || '');
+    run(`UPDATE printify_orders SET status = 'submitted', printify_order_id = ? WHERE id = ?`, [pid, orderId]);
+    if (config.PRINTIFY_AUTO_PRODUCTION && pid) {
+      await callPrintify('POST', `/shops/${config.PRINTIFY_SHOP_ID}/orders/${pid}/send_to_production.json`, {});
+      run(`UPDATE printify_orders SET status = 'in_production' WHERE id = ?`, [orderId]);
+    }
+  } catch (e) {
+    console.error('Printify order submit failed:', e.message);
+    run(`UPDATE printify_orders SET status = 'submit_failed' WHERE id = ?`, [orderId]);
+  }
+}
+
+router.fulfillPrintifyOrder = fulfillPrintifyOrder;
 module.exports = router;

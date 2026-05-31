@@ -452,6 +452,22 @@ async function initDb() {
       UNIQUE(product_id, user_id)
     );
   `);
+  // Printify (print-on-demand) storefront orders. Created pending at checkout,
+  // marked paid + submitted to Printify for fulfillment by the Stripe webhook.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS printify_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stripe_session_id TEXT UNIQUE,
+      stripe_payment_intent TEXT,
+      total_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'gbp',
+      status TEXT DEFAULT 'pending',
+      line_items_json TEXT DEFAULT '[]',
+      shipping_json TEXT DEFAULT '{}',
+      printify_order_id TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
 
   save();
   return db;
