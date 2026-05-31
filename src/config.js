@@ -26,6 +26,10 @@ module.exports = {
   PRINTIFY_API_TOKEN: process.env.PRINTIFY_API_TOKEN || '',
   PRINTIFY_SHOP_ID: process.env.PRINTIFY_SHOP_ID || '',
   PRINTIFY_WEBHOOK_KEY: process.env.PRINTIFY_WEBHOOK_KEY || '',
+  // When true, paid Printify orders are sent to production (charged + printed)
+  // automatically. Leave false to create orders on-hold so you can review them
+  // in the Printify dashboard before anything prints.
+  PRINTIFY_AUTO_PRODUCTION: process.env.PRINTIFY_AUTO_PRODUCTION === 'true',
   // Currency the Printify storefront prices and charges in. Printify's product
   // API doesn't reliably expose the shop's billing currency, so it's set here.
   STORE_CURRENCY: (process.env.STORE_CURRENCY || 'GBP').toLowerCase(),

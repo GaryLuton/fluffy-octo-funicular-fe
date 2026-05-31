@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const { isCleanText } = require('../utils/content');
 const config = require('../config');
+const { fulfillPrintifyOrder } = require('./printify');
 
 const router = express.Router();
 
@@ -619,7 +620,7 @@ router.post('/checkout', auth, async (req, res) => {
 
 // Webhook handler. Note: this route is mounted via raw body in app.js BEFORE
 // express.json(), so req.body is a Buffer here.
-router.post('/webhook', (req, res) => {
+router.post('/webhook', async (req, res) => {
   const s = getStripe();
   if (!s) return res.status(503).json({ error: 'Stripe not configured' });
   const sig = req.headers['stripe-signature'];
@@ -637,6 +638,18 @@ router.post('/webhook', (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+
+    // Printify storefront orders are tagged so they can be fulfilled separately.
+    // Stripe delivers every completed session to this one endpoint.
+    if (session.metadata && session.metadata.kind === 'printify') {
+      try {
+        await fulfillPrintifyOrder(session);
+      } catch (e) {
+        console.error('Printify fulfillment error:', e.message);
+      }
+      return res.json({ received: true });
+    }
+
     const orderId = parseInt(session.metadata && session.metadata.orderId);
     if (orderId) {
       const order = get('SELECT * FROM shop_orders WHERE id = ?', [orderId]);
