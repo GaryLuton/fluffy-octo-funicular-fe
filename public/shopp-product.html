@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-<title>Shop — Stuflover</title>
+<title>Product — Stuflover Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/stuflover-nav.css"/>
 <script src="/stuflover-theme-boot.js"></script>
@@ -17,13 +17,9 @@
 
 <div id="demoBanner" class="demo-banner" style="display:none;">Demo catalog — set PRINTIFY_API_TOKEN to show live products</div>
 
-<header class="shop-hero" style="min-height:auto;padding:120px 40px 50px;">
-  <div class="shop-eyebrow">Stuflover Store</div>
-  <h1 class="shop-title" style="font-size:clamp(3rem,9vw,6rem);">Shop the drop</h1>
-</header>
-
-<main class="shop-wrap">
-  <div id="grid" class="grid"></div>
+<main class="shop-wrap" style="padding-top:110px;">
+  <a class="detail-back" href="/shopp.html">‹ Back to shop</a>
+  <div id="content"></div>
 </main>
 
 <button id="cartFab" class="cart-fab" type="button">Cart <span id="cartCount"></span></button>
@@ -44,10 +40,15 @@
   </div>
 </aside>
 
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Close">&times;</button>
+  <img id="lightboxImg" src="" alt=""/>
+</div>
+
 <div id="toast" class="toast"></div>
 <script src="/stuflover-config.js"></script>
 <script src="/js/shop-common.js"></script>
 <script src="/js/shopp-common.js"></script>
-<script src="/js/shopp.js"></script>
+<script src="/js/shopp-product.js"></script>
 </body>
 </html>
