@@ -45,10 +45,10 @@
   --sl-font-serif:     'Playfair Display', serif;    /* editorial headlines */
   --sl-font-script:    'Dancing Script', cursive;    /* handwritten accents */
 
-  --sl-text-xs:        0.72rem;
-  --sl-text-sm:        0.82rem;
+  --sl-text-xs:        0.78rem;
+  --sl-text-sm:        0.85rem;
   --sl-text-base:      1rem;
-  --sl-text-lg:        1.15rem;
+   --sl-text-lg:        1.15rem;
   --sl-text-xl:        1.4rem;
   --sl-text-2xl:       clamp(1.8rem, 4vw, 2.7rem);
   --sl-text-3xl:       clamp(2.4rem, 6vw, 3.6rem);
@@ -988,4 +988,42 @@ a:hover {
     align-items: center;
   }
   body { font-size: 15px; }
+}
+
+/* ── GLOBAL FONT-SIZE FLOOR ───────────────────────────────────────────────── */
+/* Raise any utility class or inline font-size that would render below ~12px  */
+/* (0.75rem) — the minimum comfortable reading size for UI labels and tags.   */
+
+/* Tag / badge — was 0.62rem (~9.9px), now minimum 0.72rem (11.5px) */
+.sl-tag { font-size: 0.72rem; }
+
+/* Footer links — was var(--sl-text-xs), ensure at least 0.78rem */
+.sl-footer-links a { font-size: 0.78rem; }
+
+/* Feature-card tag labels (index.html inline class .feature-tag) */
+.feature-tag { font-size: 0.72rem !important; }
+
+/* Feature-card hook sub-text — was 0.78rem opacity 0.45, keep readable */
+.feature-hook { font-size: 0.82rem !important; opacity: 0.55 !important; }
+
+/* Nav user greeting — ensure visible */
+#sl-top-nav .sl-user { font-size: 0.78rem; }
+
+/* ── MENU BAR CONSISTENCY (ensure all nav tabs use same design system font) - */
+/* These ensure the shared nav font sizes are consistent across all pages.     */
+#sl-top-nav .sl-tab { font-size: 0.82rem; }
+#sl-top-nav .sl-logo { font-size: 1.4rem; }
+#sl-top-nav .sl-back-chip { font-size: 0.78rem; }
+
+@media (max-width: 999px) {
+     #sl-top-nav .sl-tab { font-size: 0.78rem; }
+}
+
+@media (max-width: 760px) {
+     #sl-top-nav .sl-tab { font-size: 0.72rem; }
+     #sl-top-nav .sl-logo { font-size: 1.15rem; }
+}
+
+@media (max-width: 480px) {
+     #sl-top-nav .sl-logo { font-size: 1.05rem; }
 }
