@@ -277,7 +277,7 @@
     if (isPlayChild()) {
       var back = document.createElement('a');
       back.className = 'sl-back-chip';
-      back.href = 'activities.html';
+      back.href = 'games.html';
       back.setAttribute('aria-label', 'Back to Play');
       back.textContent = '← Play';
       back.addEventListener('click', markNavStart);
