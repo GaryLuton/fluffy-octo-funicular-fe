@@ -41,7 +41,7 @@
     @keyframes floatSpark{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(-18px) rotate(12deg);}}
 
     /* Ensure all main content sits above background decorations */
-    nav, .hero, .refresh-row, .activities-toolbar, #activitiesContainer, #gamesRail{position:relative;z-index:1;}
+    nav, .hero, .refresh-row, .activities-toolbar, #activitiesContainer, .sl-page-header{position:relative;z-index:1;}
 
     /* TOOLBAR (search + chips) */
     .activities-toolbar{max-width:1100px;margin:0 auto 24px;padding:0 40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
@@ -73,10 +73,6 @@
     /* RAIL CARDS (override grid-mode card sizing) */
     .rail-scroller .activity-card{flex:0 0 260px;scroll-snap-align:start;margin:0;}
     .activity-card.is-filtered{display:none;}
-
-    /* GAMES RAIL — uniform grid of tiles instead of horizontal scroll */
-    #gamesRailScroller{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));grid-auto-rows:1fr;overflow-x:visible;scroll-snap-type:none;}
-    #gamesRailScroller .activity-card{flex:none;max-width:none;width:auto;scroll-snap-align:none;height:100%;}
 
     /* CARD FOOTER (Play together button) */
     .card-foot{display:flex;align-items:center;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(30,12,6,0.08);}
@@ -247,13 +243,11 @@
   </button>
 </div>
 
-<section class="rail" id="gamesRail" aria-label="Games" style="padding-top:100px;">
-  <div class="rail-header">
-    <div class="rail-title" id="gamesRailTitle"><span class="cat-emoji">🎮</span> Games</div>
-    <span class="rail-count" id="gamesRailCount"></span>
-  </div>
-  <div class="rail-scroller" id="gamesRailScroller"></div>
-</section>
+<header class="sl-page-header">
+  <p class="sl-subhead">For You</p>
+  <h2>Bored? Not Anymore</h2>
+  <p class="sl-body">Fresh things to do, picked for your vibe. Looking for games? They live in <a href="games.html">Games</a>.</p>
+</header>
 
 <div id="activitiesContainer">
   <div class="loading-msg" id="loadingMsg">
@@ -704,64 +698,6 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     btn.innerHTML = '<span class="refresh-icon">&#x21bb;</span> New Ideas';
     generating = false;
   };
-
-  // ─── GAMES RAIL (always visible, deep-links into lifestyle.html#floverhub) ───
-  const GAMES = [
-    {id:'dti',            name:'Dress To Impress', desc:'Build an outfit for a theme.',          emoji:'👗'},
-    {id:'ratethis',       name:'Rate the Look',    desc:'Rate outfits — real or fake?',          emoji:'💖'},
-    {id:'stylechallenge', name:'Style Challenge',  desc:'Wild constraints, build an outfit.',    emoji:'⚡'},
-    {id:'thisorthat',     name:'This or That',     desc:'Two cards — tap your pick.',            emoji:'🔀'},
-    {id:'wouldyourather', name:'Would You Rather', desc:'Impossible choices.',                   emoji:'⚖️'},
-    {id:'aestheticquiz',  name:'Aesthetic Quiz',   desc:'Discover your secret aesthetic.',       emoji:'🎨'},
-    {id:'trivia',         name:'Trivia Battle',    desc:'Pop culture questions.',                emoji:'❓'},
-  ];
-
-  function buildGameTile(game, idx){
-    const card = document.createElement('a');
-    card.className = 'activity-card pinned';
-    card.href = 'play.html?game=' + encodeURIComponent(game.id);
-    card.setAttribute('data-cat', 'games');
-    card.style.background = pal.bg === '#f4eae3' ? '#fff' : lightenHex(pal.bg, 0.35);
-    card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
-    card.style.animationDelay = (Math.min(idx, 10) * 0.06) + 's';
-    card.style.textDecoration = 'none';
-    card.style.color = pal.tx;
-
-    const tag = document.createElement('span');
-    tag.className = 'card-tag';
-    tag.textContent = 'Play';
-    tag.style.background = pal.ac;
-
-    const title = document.createElement('div');
-    title.className = 'card-title';
-    title.innerHTML = '<span style="margin-right:6px;">' + game.emoji + '</span>' + game.name;
-    title.style.color = pal.tx;
-
-    const desc = document.createElement('div');
-    desc.className = 'card-desc';
-    desc.textContent = game.desc;
-    desc.style.color = pal.tx;
-
-    card.appendChild(tag);
-    card.appendChild(title);
-    card.appendChild(desc);
-
-    return card;
-  }
-
-  function renderGamesRail(){
-    const rail = document.getElementById('gamesRail');
-    const title = document.getElementById('gamesRailTitle');
-    const count = document.getElementById('gamesRailCount');
-    const scroller = document.getElementById('gamesRailScroller');
-    if(!rail || !scroller) return;
-    title.style.color = pal.ac;
-    count.style.color = pal.tx;
-    count.textContent = GAMES.length + ' games';
-    scroller.innerHTML = '';
-    GAMES.forEach(function(g, i){ scroller.appendChild(buildGameTile(g, i)); });
-  }
-  renderGamesRail();
 
   // ─── AUTO-GENERATE ON LOAD (only if quiz completed) ───
   var savedProfile = JSON.parse(localStorage.getItem('stuflover_profile')||'null');
