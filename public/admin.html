@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Admin — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     :root {
@@ -18,13 +18,13 @@
       background-image:repeating-linear-gradient(45deg,transparent,transparent 18px,rgba(30,12,6,0.018) 18px,rgba(30,12,6,0.018) 19px),
         repeating-linear-gradient(-45deg,transparent,transparent 18px,rgba(30,12,6,0.018) 18px,rgba(30,12,6,0.018) 19px),
         radial-gradient(circle at 30% 20%,rgba(245,170,170,0.4) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(247,212,176,0.3) 0%,transparent 50%);}
-    h1,h2,h3,.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    h1,h2,h3,.logo{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:rgba(249,196,196,0.93);backdrop-filter:blur(10px);border-bottom:2px solid rgba(30,12,6,0.08);}
     .logo{font-size:1.9rem;letter-spacing:3px;color:var(--brown);text-decoration:none;}
     .nav-right{display:flex;align-items:center;gap:20px;}
-    .nav-right span{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.5);}
-    .nav-right button{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;background:transparent;border:2px solid rgba(30,12,6,0.15);color:var(--brown);padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+    .nav-right span{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.5);}
+    .nav-right button{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;background:transparent;border:2px solid rgba(30,12,6,0.15);color:var(--brown);padding:8px 16px;border-radius:8px;cursor:pointer;transition:all 0.2s;}
     .nav-right button:hover{border-color:var(--brown);}
 
     /* Login */
@@ -36,12 +36,12 @@
     .logo-top p{font-size:0.85rem;color:rgba(30,12,6,0.45);margin-top:4px;letter-spacing:1px;}
     .auth-card{background:var(--white);border-radius:24px;padding:40px;box-shadow:0 20px 60px rgba(30,12,6,0.1),0 0 0 1px rgba(30,12,6,0.03);}
     .form-group{margin-bottom:16px;}
-    .form-group label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.45);margin-bottom:6px;}
+    .form-group label{display:block;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.8rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.45);margin-bottom:6px;}
     .form-group input{width:100%;padding:14px 18px;border:2px solid rgba(30,12,6,0.12);border-radius:12px;font-family:'Nunito',sans-serif;font-size:0.95rem;color:var(--brown);outline:none;transition:border-color 0.25s,box-shadow 0.25s;}
     .form-group input:focus{border-color:var(--terracotta);box-shadow:0 0 0 3px rgba(196,82,42,0.15);}
     .form-group input::placeholder{color:rgba(30,12,6,0.25);}
     .error-msg{font-size:0.82rem;color:var(--terracotta);font-weight:700;min-height:22px;margin-bottom:8px;}
-    .submit-btn{width:100%;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.25s,transform 0.25s;}
+    .submit-btn{width:100%;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;background:var(--terracotta);color:white;border:none;border-radius:12px;padding:16px;cursor:pointer;transition:background 0.25s,transform 0.25s;}
     .submit-btn:hover:not(:disabled){background:var(--terracotta-dark);transform:translateY(-1px);}
     .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
@@ -52,7 +52,7 @@
     .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
     .stat-card{background:var(--white);border-radius:20px;padding:28px 24px;box-shadow:0 8px 32px rgba(30,12,6,0.06);text-align:center;transition:transform 0.2s;}
     .stat-card:hover{transform:translateY(-2px);}
-    .stat-value{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2.8rem;color:var(--terracotta);letter-spacing:1px;}
+    .stat-value{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:2.8rem;color:var(--terracotta);letter-spacing:1px;}
     .stat-label{font-size:0.78rem;color:rgba(30,12,6,0.45);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:4px;}
 
     .section-card{background:var(--white);border-radius:24px;padding:32px;box-shadow:0 12px 48px rgba(30,12,6,0.08);margin-bottom:24px;}
@@ -60,12 +60,12 @@
     .section-subtitle{font-size:0.82rem;color:rgba(30,12,6,0.4);margin-bottom:20px;}
 
     .tabs{display:flex;gap:0;margin-bottom:24px;border-radius:12px;overflow:hidden;border:2px solid rgba(30,12,6,0.1);}
-    .tab{flex:1;text-align:center;padding:11px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(30,12,6,0.35);transition:all 0.3s;}
+    .tab{flex:1;text-align:center;padding:11px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;background:transparent;border:none;color:rgba(30,12,6,0.35);transition:all 0.3s;}
     .tab:hover:not(.active){color:rgba(30,12,6,0.6);background:rgba(196,82,42,0.06);}
     .tab.active{background:var(--terracotta);color:white;}
 
     table{width:100%;border-collapse:collapse;}
-    th{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.4);text-align:left;padding:10px 12px;border-bottom:2px solid rgba(30,12,6,0.08);}
+    th{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;color:rgba(30,12,6,0.4);text-align:left;padding:10px 12px;border-bottom:2px solid rgba(30,12,6,0.08);}
     td{padding:12px;font-size:0.9rem;border-bottom:1px solid rgba(30,12,6,0.06);}
     tr:hover td{background:rgba(196,82,42,0.03);}
     .table-wrap{overflow-x:auto;}

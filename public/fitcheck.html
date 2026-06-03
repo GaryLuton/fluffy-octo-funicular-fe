@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Fit Check — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <link rel="preload" href="/stuflover-nav.css" as="style"/>
   <link rel="stylesheet" href="/stuflover-nav.css"/>
   <link rel="preload" href="/stuflover-nav.js" as="script"/>
@@ -13,14 +13,14 @@
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
     body{font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;transition:background 0.5s,color 0.5s;}
-    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    .bc{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
     @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 
     nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;backdrop-filter:blur(20px);border-bottom:1px solid rgba(128,128,128,0.06);}
     .nav-logo{font-size:1.5rem;letter-spacing:4px;text-decoration:none;color:inherit;}
     .nav-links{display:flex;gap:8px;}
-    .nav-btn{font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:6px;border:1.5px solid rgba(128,128,128,0.15);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:inherit;background:transparent;transition:opacity 0.2s;}
+    .nav-btn{font-size:0.72rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:6px;border:1.5px solid rgba(128,128,128,0.15);font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:inherit;background:transparent;transition:opacity 0.2s;}
     .nav-btn:hover{opacity:0.5;}
 
     /* ── HAMBURGER ── */
@@ -33,25 +33,25 @@
 
     /* TABS */
     .tabs{display:flex;gap:6px;padding:16px 20px;justify-content:center;}
-    .tab{padding:8px 18px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;opacity:0.4;transition:all 0.2s;}
+    .tab{padding:8px 18px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;cursor:pointer;border:1.5px solid rgba(128,128,128,0.12);background:transparent;color:inherit;opacity:0.4;transition:all 0.2s;}
     .tab.on{opacity:1;border-color:currentColor;}
 
     /* FEED */
     .feed{padding:0 20px 100px;max-width:540px;margin:0 auto;}
     .featured-section{margin-bottom:20px;}
-    .featured-label{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:'Barlow Condensed',sans-serif;font-weight:900;margin-bottom:10px;}
+    .featured-label{font-size:0.58rem;letter-spacing:3px;text-transform:uppercase;opacity:0.25;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;margin-bottom:10px;}
 
     /* CARD */
     .fc-card{border-radius:20px;overflow:hidden;margin-bottom:16px;animation:fadeIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;position:relative;}
     .fc-photo{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
     .fc-overlay{position:absolute;bottom:0;left:0;right:0;padding:16px 18px;background:linear-gradient(transparent,rgba(0,0,0,0.6));}
     .fc-top{position:absolute;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;}
-    .fc-badge{padding:4px 10px;border-radius:10px;font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-weight:900;color:white;backdrop-filter:blur(8px);}
+    .fc-badge{padding:4px 10px;border-radius:10px;font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;color:white;backdrop-filter:blur(8px);}
     .fc-user{font-size:0.78rem;font-weight:600;color:white;}
     .fc-caption{font-size:0.85rem;color:rgba(255,255,255,0.8);margin-top:4px;line-height:1.5;}
     .fc-time{font-size:0.6rem;opacity:0.5;color:white;margin-top:6px;}
     .fc-votes{display:flex;gap:8px;margin-top:12px;}
-    .fc-vote-btn{flex:1;padding:12px;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .fc-vote-btn{flex:1;padding:12px;border:none;border-radius:14px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;justify-content:center;gap:6px;}
     .fc-vote-btn:hover{transform:translateY(-2px);}
     .fc-vote-btn:active{transform:scale(0.97);}
     .fc-vote-btn.yes{background:rgba(255,255,255,0.25);color:white;}
@@ -72,7 +72,7 @@
     .mc-stats{font-size:0.75rem;opacity:0.5;margin-top:4px;}
     .mc-bar{height:4px;border-radius:2px;margin-top:6px;overflow:hidden;}
     .mc-bar-fill{height:100%;border-radius:2px;transition:width 0.5s;}
-    .mc-del{padding:6px 12px;border-radius:8px;border:1px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-size:0.6rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;opacity:0.3;transition:opacity 0.2s;}
+    .mc-del{padding:6px 12px;border-radius:8px;border:1px solid rgba(128,128,128,0.15);background:transparent;color:inherit;font-size:0.6rem;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;opacity:0.3;transition:opacity 0.2s;}
     .mc-del:hover{opacity:0.7;}
 
     /* POST MODAL */
@@ -82,7 +82,7 @@
     .modal-box h3{font-size:1.2rem;margin-bottom:16px;}
 
     /* FAB */
-    .fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);height:54px;border-radius:27px;border:none;font-size:0.82rem;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 28px rgba(0,0,0,0.25);transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);z-index:50;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 28px;}
+    .fab{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);height:54px;border-radius:27px;border:none;font-size:0.82rem;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;box-shadow:0 6px 28px rgba(0,0,0,0.25);transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);z-index:50;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 28px;}
     .fab:hover{transform:translateX(-50%) translateY(-3px) scale(1.03);box-shadow:0 10px 36px rgba(0,0,0,0.3);}
     .fab:active{transform:translateX(-50%) scale(0.97);}
     .fab svg{flex-shrink:0;}
@@ -91,7 +91,7 @@
 
     @media(max-width:768px){
       nav{padding:14px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(244, 234, 227,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
       .nav-links.open{display:flex;}
       .nav-btn{display:block;padding:10px 16px;border:none;border-radius:6px;}
       .nav-btn:hover{background:rgba(128,128,128,0.06);}
@@ -180,14 +180,14 @@
   <!-- Top bar: close + retake -->
   <div style="position:absolute;top:0;left:0;right:0;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;z-index:10;">
     <button type="button" onclick="closePost()" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);color:white;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">x</button>
-    <button type="button" id="retakeBtn" onclick="retakePhoto()" style="display:none;padding:8px 18px;border-radius:20px;border:none;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);color:white;font-size:0.7rem;font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Retake</button>
+    <button type="button" id="retakeBtn" onclick="retakePhoto()" style="display:none;padding:8px 18px;border-radius:20px;border:none;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);color:white;font-size:0.7rem;font-family:Barlow Semi Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;">Retake</button>
   </div>
 </div>
 
 <script src="/stuflover-config.js"></script>
 <script src="/stuflover-backend.js"></script>
 <script>
-var PAL = {bg:'#faf0f0',tx:'#2a1a14',ac:'#c87860'};
+var PAL = {bg:'#f4eae3',tx:'#2c1d16',ac:'#c8836a'};
 var currentTab = 'feed';
 var fcPhotoData = null;
 var fcExpiry = 24;
@@ -204,7 +204,7 @@ var pollInterval = null;
         return;
       }
       var _P = {
-        'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
+        'default':{bg:'#f4eae3',accent:'#c8836a',tx:'#2c1d16'},
         'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
         'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
         'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},

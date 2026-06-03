@@ -5,16 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>Bored? Not Anymore — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <link rel="preload" href="/stuflover-nav.css" as="style"/>
   <link rel="stylesheet" href="/stuflover-nav.css"/>
   <link rel="preload" href="/stuflover-nav.js" as="script"/>
   <script src="/stuflover-theme-boot.js"></script>
   <link rel="stylesheet" href="stuflover-design-system.css"/>
   <style>
-    :root{--bg:#faf0f0;--pink:#faf0f0;--pink-mid:#f0ddd6;--tx:#2a1a14;--ac:#c87860;--ac2:#a86050;--white:#ffffff;--peach:#e8d5c8;}
+    :root{--bg:#f4eae3;--pink:#f4eae3;--pink-mid:#efe2da;--tx:#2c1d16;--ac:#c8836a;--ac2:#b16f57;--white:#ffffff;--peach:#ece1da;}
     body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;transition:background 0.6s,color 0.6s;position:relative;}
-    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    .bc{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     /* DOT + CROSS GRID BACKGROUND */
     body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
@@ -48,10 +48,10 @@
     .search-wrap{position:relative;flex:1;min-width:220px;max-width:360px;}
     .search-input{width:100%;padding:13px 16px 13px 42px;border:1.5px solid rgba(30,12,6,0.12);border-radius:999px;background:rgba(255,255,255,0.65);font-family:'Space Grotesk',sans-serif;font-size:0.95rem;color:var(--tx);outline:none;transition:border-color 0.2s,background 0.2s,box-shadow 0.2s;}
     .search-input::placeholder{color:var(--tx);opacity:0.35;}
-    .search-input:focus{border-color:var(--ac);background:#fff;box-shadow:0 0 0 4px rgba(200,120,96,0.1);}
+    .search-input:focus{border-color:var(--ac);background:#fff;box-shadow:0 0 0 4px rgba(200, 131, 106,0.1);}
     .search-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;opacity:0.4;pointer-events:none;}
     .chip-row{display:flex;gap:8px;flex-wrap:wrap;}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s,border-color 0.2s,transform 0.2s;}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);cursor:pointer;transition:background 0.2s,color 0.2s,border-color 0.2s,transform 0.2s;}
     .chip:hover{border-color:var(--tx);transform:translateY(-1px);}
     .chip.is-active{background:var(--ac);color:#fff;border-color:var(--ac);}
     .chip-emoji{font-size:0.9rem;}
@@ -61,8 +61,8 @@
     .rail-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;position:relative;}
     .rail-header::after{content:'';position:absolute;bottom:0;left:0;height:3px;width:60px;border-radius:3px;background:linear-gradient(90deg,var(--ac),transparent);opacity:0.6;transition:width 0.4s ease;}
     .rail:hover .rail-header::after{width:120px;opacity:0.8;}
-    .rail-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);display:flex;align-items:center;gap:12px;}
-    .rail-count{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);opacity:0.35;}
+    .rail-title{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;color:var(--ac);display:flex;align-items:center;gap:12px;}
+    .rail-count{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--tx);opacity:0.35;}
     .rail-scroller{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:4px;padding:8px 4px 16px;margin:0 -4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(30,12,6,0.15) transparent;}
     .rail-scroller::-webkit-scrollbar{height:6px;}
     .rail-scroller::-webkit-scrollbar-thumb{background:rgba(30,12,6,0.15);border-radius:3px;}
@@ -80,14 +80,14 @@
 
     /* CARD FOOTER (Play together button) */
     .card-foot{display:flex;align-items:center;justify-content:flex-end;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(30,12,6,0.08);}
-    .play-together{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;color:var(--tx);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.62rem;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:background 0.2s,border-color 0.2s;}
+    .play-together{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1.5px solid rgba(30,12,6,0.12);background:transparent;color:var(--tx);font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:0.62rem;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:background 0.2s,border-color 0.2s;}
     .play-together:hover{background:var(--ac);color:#fff;border-color:var(--ac);}
     .play-together svg{width:12px;height:12px;}
 
     /* Pinned card (built-in activities like Draw Together) */
     .activity-card.pinned{cursor:pointer;}
     .activity-card.pinned:hover{transform:translateY(-8px) scale(1.02);}
-    .pin-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(30,12,6,0.08);color:var(--tx);opacity:0.6;margin-left:6px;}
+    .pin-badge{display:inline-block;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.56rem;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;background:rgba(30,12,6,0.08);color:var(--tx);opacity:0.6;margin-left:6px;}
 
     /* TILE ANIMATIONS — gentle idle float on the category dot */
     .card-tag{position:relative;}
@@ -98,23 +98,23 @@
 
     /* Empty-results state (no match) */
     .no-results{text-align:center;padding:60px 40px;font-family:'Space Grotesk',sans-serif;color:var(--tx);opacity:0.45;font-size:1rem;}
-    .no-results strong{font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:8px;font-size:1.1rem;color:var(--ac);opacity:0.85;}
+    .no-results strong{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:8px;font-size:1.1rem;color:var(--ac);opacity:0.85;}
 
     /* NAV */
-    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
-    .logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;letter-spacing:4px;text-decoration:none;color:var(--tx);}
+    nav{position:fixed;top:0;width:100%;z-index:400;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(244, 234, 227,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(30,12,6,0.07);transition:all 0.5s;}
+    .logo{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;letter-spacing:4px;text-decoration:none;color:var(--tx);}
     .nav-links{display:flex;align-items:center;gap:16px;}
-    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--tx);transition:opacity 0.2s;}
+    .nav-link{font-size:0.78rem;letter-spacing:3px;text-decoration:none;padding:9px 22px;border-radius:4px;border:1.5px solid rgba(30,12,6,0.18);font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;color:var(--tx);transition:opacity 0.2s;}
     .nav-link:hover{opacity:0.55;}
 
     /* HERO */
     .hero{padding:120px 40px 50px;text-align:center;}
-    .hero h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(3.5rem,10vw,8rem);line-height:0.88;letter-spacing:-2px;color:var(--tx);}
+    .hero h1{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(3.5rem,10vw,8rem);line-height:0.88;letter-spacing:-2px;color:var(--tx);}
     .hero-sub{font-size:1.05rem;color:var(--tx);opacity:0.5;margin-top:18px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.8;}
 
     /* REFRESH */
     .refresh-row{text-align:center;margin:24px 0 40px;}
-    .refresh-btn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;background:var(--ac);color:white;border:none;border-radius:50px;padding:14px 36px;cursor:pointer;transition:background 0.3s,transform 0.3s,box-shadow 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+    .refresh-btn{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;background:var(--ac);color:white;border:none;border-radius:50px;padding:14px 36px;cursor:pointer;transition:background 0.3s,transform 0.3s,box-shadow 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
     .refresh-btn:hover{background:var(--ac2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.15);}
     .refresh-btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
     .refresh-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
@@ -126,7 +126,7 @@
 
     /* CATEGORY */
     .category{padding:0 40px 50px;max-width:1100px;margin:0 auto;}
-    .cat-label{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;margin-bottom:20px;color:var(--ac);display:flex;align-items:center;gap:12px;padding-bottom:10px;position:relative;}
+    .cat-label{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;letter-spacing:4px;margin-bottom:20px;color:var(--ac);display:flex;align-items:center;gap:12px;padding-bottom:10px;position:relative;}
     .cat-label::after{content:'';position:absolute;bottom:0;left:0;height:3px;width:60px;border-radius:3px;background:linear-gradient(90deg, var(--ac), transparent);opacity:0.6;transition:width 0.4s ease;}
     .category:hover .cat-label::after{width:120px;opacity:0.8;}
     .cat-emoji{font-size:1.4rem;}
@@ -153,9 +153,9 @@
     /* STAGGERED CARD FADE-IN */
     @keyframes cardFadeIn{to{opacity:1;transform:translateY(0);}}
 
-    .card-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1rem;letter-spacing:1.5px;color:var(--tx);line-height:1.3;}
+    .card-title{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;font-size:1rem;letter-spacing:1.5px;color:var(--tx);line-height:1.3;}
     .card-desc{font-size:0.88rem;line-height:1.7;color:var(--tx);opacity:0.6;flex:1;}
-    .card-tag{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.62rem;letter-spacing:2.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:var(--ac);color:white;opacity:0.85;align-self:flex-start;}
+    .card-tag{display:inline-block;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.62rem;letter-spacing:2.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;background:var(--ac);color:white;opacity:0.85;align-self:flex-start;}
 
     /* LOADING STATE */
     .loading-msg{text-align:center;padding:80px 40px;font-size:1.1rem;color:var(--tx);opacity:0.4;line-height:2;}
@@ -171,7 +171,7 @@
       .category{padding:0 24px 40px;}
       .cards-row{grid-template-columns:repeat(2,1fr);}
       nav{padding:14px 20px;}
-      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.97);backdrop-filter:blur(12px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(30,12,6,0.07);box-shadow:0 6px 20px rgba(30,12,6,0.08);}
+      .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(244, 234, 227,0.97);backdrop-filter:blur(12px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(30,12,6,0.07);box-shadow:0 6px 20px rgba(30,12,6,0.08);}
       .nav-links.open{display:flex;}
       .nav-link{display:block;padding:10px 16px;border:none;border-radius:6px;}
       .nav-link:hover{background:rgba(30,12,6,0.04);}
@@ -302,7 +302,7 @@
           return { bg: cp.bg, tx: cp.tx, ac: _ac, ac2: shiftHue(_ac, 20) };
         }
         const _P = {
-          'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
+          'default':{bg:'#f4eae3',accent:'#c8836a',tx:'#2c1d16'},
           'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
           'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
           'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},
@@ -316,7 +316,7 @@
       }
     } catch(e) {}
 
-    if(!profile) return {bg:'#faf0f0',tx:'#2a1a14',ac:'#c87860',ac2:'#a86050'};
+    if(!profile) return {bg:'#f4eae3',tx:'#2c1d16',ac:'#c8836a',ac2:'#b16f57'};
     const ae=profile.aesthetics||{}; const et=profile.extraTags||[];
     const sorted=Object.entries(ae).sort((a,b)=>b[1]-a[1]);
     const top=sorted[0]?.[0];
@@ -442,7 +442,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     card.className = 'activity-card' + (item.pinned ? ' pinned' : '');
     card.setAttribute('data-cat', cat.key);
     card.setAttribute('data-search', (item.title + ' ' + item.desc).toLowerCase());
-    card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
+    card.style.background = pal.bg === '#f4eae3' ? '#fff' : lightenHex(pal.bg, 0.35);
     card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
     card.style.animationDelay = (Math.min(idx, 10) * 0.06) + 's';
 
@@ -721,7 +721,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
     card.className = 'activity-card pinned';
     card.href = 'play.html?game=' + encodeURIComponent(game.id);
     card.setAttribute('data-cat', 'games');
-    card.style.background = pal.bg === '#faf0f0' ? '#fff' : lightenHex(pal.bg, 0.35);
+    card.style.background = pal.bg === '#f4eae3' ? '#fff' : lightenHex(pal.bg, 0.35);
     card.style.boxShadow = '0 2px 16px ' + pal.tx + '0d';
     card.style.animationDelay = (Math.min(idx, 10) * 0.06) + 's';
     card.style.textDecoration = 'none';
@@ -768,7 +768,7 @@ Return ONLY valid JSON in this exact format (no markdown, no code fences):
   if(savedProfile && savedProfile.aesthetics && Object.keys(savedProfile.aesthetics).length > 0){
     generateActivities();
   } else {
-    document.getElementById('activitiesContainer').innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:0.4;"><p style="font-size:1.1rem;margin-bottom:16px;">Take the quiz to also get personalized activity ideas</p><a href="lifestyle.html" style="color:var(--ac);font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Take the Quiz</a></div>';
+    document.getElementById('activitiesContainer').innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:0.4;"><p style="font-size:1.1rem;margin-bottom:16px;">Take the quiz to also get personalized activity ideas</p><a href="lifestyle.html" style="color:var(--ac);font-family:Barlow Semi Condensed,sans-serif;font-weight:900;font-size:1rem;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">Take the Quiz</a></div>';
   }
 
 })();

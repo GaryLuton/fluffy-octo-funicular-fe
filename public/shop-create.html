@@ -6,7 +6,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 <title>Open Your Shop — Stuflover</title>
 <meta name="description" content="Set up your Stuflover shop. A few quick questions and your storefront is live."/>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Nunito:wght@400;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Nunito:wght@400;600;700&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/stuflover-nav.css"/>
 <script src="/stuflover-theme-boot.js"></script>
 <link rel="stylesheet" href="/stuflover-design-system.css"/>
@@ -15,7 +15,7 @@
   .wizard{
     max-width:640px;margin:0 auto;padding:40px 32px 48px;
     background:#fff;border-radius:28px;
-    border:1px solid rgba(42,26,20,0.05);
+    border:1px solid rgba(44, 29, 22,0.05);
     box-shadow:0 12px 40px rgba(30,12,6,0.06);
   }
   .progress{
@@ -24,14 +24,14 @@
   }
   .progress .dot{
     width:32px;height:32px;border-radius:50%;
-    background:rgba(42,26,20,0.08);color:rgba(42,26,20,0.4);
+    background:rgba(44, 29, 22,0.08);color:rgba(44, 29, 22,0.4);
     display:flex;align-items:center;justify-content:center;
-    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;
     font-size:0.85rem;transition:all 0.25s;
   }
   .progress .dot.done{background:var(--shop-terracotta);color:#fff;}
   .progress .dot.cur{background:var(--shop-brown);color:#fff;transform:scale(1.08);}
-  .progress .bar{flex:0 0 28px;height:2px;background:rgba(42,26,20,0.08);border-radius:2px;}
+  .progress .bar{flex:0 0 28px;height:2px;background:rgba(44, 29, 22,0.08);border-radius:2px;}
   .progress .bar.done{background:var(--shop-terracotta);}
 
   .step{display:none;animation:fadeIn 0.3s ease;}
@@ -39,23 +39,23 @@
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
   .step-eyebrow{
-    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;
     letter-spacing:4px;text-transform:uppercase;
     font-size:0.62rem;color:var(--shop-terracotta);
     margin-bottom:8px;
   }
   .step h2{font-size:1.9rem;letter-spacing:-0.5px;margin-bottom:8px;line-height:1.1;}
-  .step .lede{color:rgba(42,26,20,0.6);font-size:0.95rem;line-height:1.6;margin-bottom:22px;}
+  .step .lede{color:rgba(44, 29, 22,0.6);font-size:0.95rem;line-height:1.6;margin-bottom:22px;}
 
   .input-prefix{
     display:flex;align-items:center;gap:0;
-    border:2px solid rgba(42,26,20,0.12);border-radius:14px;
+    border:2px solid rgba(44, 29, 22,0.12);border-radius:14px;
     background:#fff;overflow:hidden;
     transition:border-color 0.2s;
   }
   .input-prefix:focus-within{border-color:var(--shop-terracotta);}
   .input-prefix .pre{
-    padding:13px 4px 13px 16px;color:rgba(42,26,20,0.45);
+    padding:13px 4px 13px 16px;color:rgba(44, 29, 22,0.45);
     font-family:'Nunito',sans-serif;font-size:0.95rem;
   }
   .input-prefix input{
@@ -63,7 +63,7 @@
     font-family:'Nunito',sans-serif;font-size:0.95rem;background:transparent;color:var(--shop-brown);
   }
   .hint{
-    font-size:0.78rem;margin-top:6px;color:rgba(42,26,20,0.5);
+    font-size:0.78rem;margin-top:6px;color:rgba(44, 29, 22,0.5);
     min-height:18px;
   }
   .hint.ok{color:#2f8a4a;}
@@ -73,28 +73,28 @@
   .opt{
     display:flex;align-items:flex-start;gap:10px;
     padding:14px 16px;border-radius:14px;cursor:pointer;
-    border:2px solid rgba(42,26,20,0.1);background:#fff;
+    border:2px solid rgba(44, 29, 22,0.1);background:#fff;
     transition:all 0.2s;text-align:left;
     font-family:'Nunito',sans-serif;color:var(--shop-brown);
   }
   .opt:hover{border-color:var(--shop-terracotta);}
-  .opt.active{border-color:var(--shop-terracotta);background:rgba(200,120,96,0.06);}
+  .opt.active{border-color:var(--shop-terracotta);background:rgba(200, 131, 106,0.06);}
   .opt-mark{
     flex-shrink:0;width:20px;height:20px;border-radius:50%;
-    border:2px solid rgba(42,26,20,0.18);margin-top:2px;
+    border:2px solid rgba(44, 29, 22,0.18);margin-top:2px;
     display:flex;align-items:center;justify-content:center;
   }
   .opt.active .opt-mark{border-color:var(--shop-terracotta);background:var(--shop-terracotta);}
   .opt.active .opt-mark::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff;}
   .opt-body{flex:1;min-width:0;}
   .opt-title{font-weight:700;font-size:0.95rem;margin-bottom:2px;}
-  .opt-desc{font-size:0.78rem;color:rgba(42,26,20,0.55);line-height:1.4;}
+  .opt-desc{font-size:0.78rem;color:rgba(44, 29, 22,0.55);line-height:1.4;}
 
   .chip-group{display:flex;flex-wrap:wrap;gap:8px;}
   .chip-pick{
     padding:10px 18px;border-radius:50px;
-    border:2px solid rgba(42,26,20,0.12);background:#fff;color:var(--shop-brown);
-    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    border:2px solid rgba(44, 29, 22,0.12);background:#fff;color:var(--shop-brown);
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;
     letter-spacing:2px;text-transform:uppercase;font-size:0.72rem;
     cursor:pointer;transition:all 0.18s;
   }
@@ -113,13 +113,13 @@
   .btn.btn-link:hover{opacity:1;transform:none;border:none;}
 
   .review-list{
-    background:rgba(240,221,214,0.4);border-radius:18px;
+    background:rgba(239, 226, 218,0.4);border-radius:18px;
     padding:18px 22px;margin-bottom:18px;
   }
   .review-list dt{
-    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;
     letter-spacing:2px;text-transform:uppercase;font-size:0.65rem;
-    color:rgba(42,26,20,0.55);margin-top:10px;
+    color:rgba(44, 29, 22,0.55);margin-top:10px;
   }
   .review-list dt:first-child{margin-top:0;}
   .review-list dd{font-size:0.95rem;color:var(--shop-brown);margin-top:2px;}
@@ -127,12 +127,12 @@
   .auth-block{
     max-width:480px;margin:0 auto;text-align:center;
     padding:48px 28px;background:#fff;border-radius:24px;
-    border:1px solid rgba(42,26,20,0.05);
+    border:1px solid rgba(44, 29, 22,0.05);
   }
 
   /* Pep talk — friendly micro-copy after each step */
   .pep{
-    text-align:center;font-family:'Caveat',cursive;font-size:1.4rem;
+    text-align:center;font-family:'Dancing Script',cursive;font-size:1.4rem;
     color:var(--shop-terracotta);opacity:0;transform:translateY(8px);
     margin-bottom:12px;min-height:32px;
     transition:opacity 0.4s,transform 0.4s;
@@ -141,22 +141,22 @@
 
   .skip-link{
     display:inline-block;margin-top:8px;
-    font-family:'Barlow Condensed',sans-serif;font-weight:900;
+    font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;
     font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;
-    color:rgba(42,26,20,0.45);text-decoration:underline;
+    color:rgba(44, 29, 22,0.45);text-decoration:underline;
     text-underline-offset:3px;cursor:pointer;background:none;border:none;
   }
   .skip-link:hover{color:var(--shop-terracotta);}
 
   .reassure{
-    margin-top:10px;font-size:0.78rem;color:rgba(42,26,20,0.5);
+    margin-top:10px;font-size:0.78rem;color:rgba(44, 29, 22,0.5);
     text-align:center;font-style:italic;
   }
 
   /* Suggest button next to inputs */
   .suggest-btn{
     align-self:flex-start;margin-top:4px;
-    font-family:'Caveat',cursive;font-size:1.05rem;
+    font-family:'Dancing Script',cursive;font-size:1.05rem;
     color:var(--shop-terracotta);background:none;border:none;
     cursor:pointer;padding:2px 4px;text-decoration:underline;
     text-underline-offset:3px;
@@ -194,7 +194,7 @@
 
 <main class="shop-wrap" style="padding-top:0;">
   <div id="root"></div>
-  <p style="text-align:center;margin-top:24px;color:rgba(42,26,20,0.4);font-size:0.85rem;">
+  <p style="text-align:center;margin-top:24px;color:rgba(44, 29, 22,0.4);font-size:0.85rem;">
     Already have a shop? <a href="/shop-mine.html" style="color:var(--shop-terracotta);font-weight:700;">Go to dashboard →</a>
   </p>
 </main>
