@@ -366,6 +366,20 @@ async function initDb() {
       FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
     );
   `);
+
+  // Migrate: add seller onboarding fields to shops if missing
+  try {
+    const sc = all("PRAGMA table_info(shops)");
+    if (sc.length) {
+      if (!sc.some(c => c.name === 'handle'))      db.run("ALTER TABLE shops ADD COLUMN handle TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'categories'))  db.run("ALTER TABLE shops ADD COLUMN categories TEXT DEFAULT '[]'");
+      if (!sc.some(c => c.name === 'ships_from'))  db.run("ALTER TABLE shops ADD COLUMN ships_from TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'experience'))  db.run("ALTER TABLE shops ADD COLUMN experience TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'product_kind')) db.run("ALTER TABLE shops ADD COLUMN product_kind TEXT DEFAULT ''");
+      if (!sc.some(c => c.name === 'design_json')) db.run("ALTER TABLE shops ADD COLUMN design_json TEXT DEFAULT ''");
+    }
+  } catch (e) {}
+
   db.run(`
     CREATE TABLE IF NOT EXISTS shop_products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -436,6 +450,22 @@ async function initDb() {
       text TEXT DEFAULT '',
       created_at TEXT DEFAULT (datetime('now')),
       UNIQUE(product_id, user_id)
+    );
+  `);
+  // Printify (print-on-demand) storefront orders. Created pending at checkout,
+  // marked paid + submitted to Printify for fulfillment by the Stripe webhook.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS printify_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stripe_session_id TEXT UNIQUE,
+      stripe_payment_intent TEXT,
+      total_cents INTEGER NOT NULL,
+      currency TEXT DEFAULT 'gbp',
+      status TEXT DEFAULT 'pending',
+      line_items_json TEXT DEFAULT '[]',
+      shipping_json TEXT DEFAULT '{}',
+      printify_order_id TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
     );
   `);
 

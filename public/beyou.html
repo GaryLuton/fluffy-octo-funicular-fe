@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
   <title>BeYou — Stuflover</title>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
   <link rel="preload" href="/stuflover-nav.css" as="style"/>
   <link rel="stylesheet" href="/stuflover-nav.css"/>
   <link rel="preload" href="/stuflover-nav.js" as="script"/>
@@ -14,7 +14,7 @@
   <style>
     body{font-family:'Space Grotesk',sans-serif;overflow:hidden;height:100vh;transition:color 1.2s;display:flex;flex-direction:column;position:relative;}
     .view.scrollable{overflow-y:auto;}
-    .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+    .bc{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
     /* ── 1. ANIMATED GRADIENT BACKGROUND ── */
     #gradientBg{position:fixed;inset:0;z-index:-2;animation:gradientShift 20s ease infinite;background-size:400% 400%;}
@@ -36,7 +36,7 @@
     nav.hidden{opacity:0;pointer-events:none;}
     .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
     .nav-links{display:flex;gap:8px;}
-    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
+    .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
     .nav-btn:hover{opacity:0.6;}
 
     /* ── MODE SELECTOR (4. Glass-morphism) ── */
@@ -49,7 +49,7 @@
       80%{transform:scale(0.97);}
       100%{transform:scale(1);}
     }
-    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.35s;opacity:0.45;}
+    .mode-pill{padding:10px 24px;border-radius:26px;font-size:0.72rem;letter-spacing:2.5px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:inherit;transition:all 0.35s;opacity:0.45;}
     .mode-pill.on{opacity:1;background:rgba(255,255,255,0.15);box-shadow:0 2px 12px rgba(0,0,0,0.06);animation:pillBounce 0.4s cubic-bezier(0.34,1.56,0.64,1);}
     .mode-pill:hover{opacity:0.8;background:rgba(255,255,255,0.08);}
 
@@ -69,10 +69,10 @@
     .breathe-label{font-size:0.68rem;letter-spacing:5px;text-transform:uppercase;opacity:0.4;text-align:center;}
     .breathe-instruction{font-size:1.3rem;font-weight:300;text-align:center;min-height:40px;letter-spacing:0.5px;transition:opacity 0.6s;}
     .breathe-timer{font-size:0.78rem;opacity:0.3;letter-spacing:2px;text-align:center;}
-    .breathe-start{padding:14px 44px;border:none;border-radius:30px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.9;}
+    .breathe-start{padding:14px 44px;border:none;border-radius:30px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.88rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.9;}
     .breathe-start:hover{opacity:1;transform:scale(1.03);}
     .duration-row{display:flex;gap:8px;align-items:center;}
-    .dur-btn{padding:8px 16px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.4;}
+    .dur-btn{padding:8px 16px;border-radius:20px;font-size:0.68rem;letter-spacing:2px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.4;}
     .dur-btn.on{opacity:1;}
 
     /* ── REFLECT VIEW (6. Typewriter animation) ── */
@@ -84,7 +84,7 @@
     .reflect-prompt .typewriter-cursor{display:inline-block;width:2px;height:1.1em;vertical-align:text-bottom;margin-left:2px;animation:cursorBlink 0.7s step-end infinite;}
     @keyframes cursorBlink{0%,100%{opacity:1;}50%{opacity:0;}}
     .reflect-sub{font-size:0.78rem;opacity:0.3;text-align:center;letter-spacing:1px;line-height:1.8;}
-    .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
+    .reflect-next{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.7;}
     .reflect-next:hover{opacity:1;}
 
     /* ── JOURNAL VIEW (5. Cute card design) ── */
@@ -94,9 +94,9 @@
     .journal-textarea:focus{border-color:currentColor;box-shadow:0 0 0 3px rgba(128,128,128,0.06);}
     .journal-textarea::placeholder{opacity:0.3;}
     .mood-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
-    .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
+    .mood-chip{padding:7px 16px;border-radius:20px;font-size:0.72rem;letter-spacing:1.5px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;cursor:pointer;border:1.5px solid rgba(128,128,128,0.15);background:transparent;color:inherit;transition:all 0.2s;opacity:0.45;}
     .mood-chip.on{opacity:1;border-color:currentColor;}
-    .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
+    .journal-save{padding:12px 40px;border:none;border-radius:26px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;opacity:0.85;}
     .journal-save:hover{opacity:1;transform:scale(1.02);}
     .journal-entries{width:100%;display:flex;flex-direction:column;gap:14px;margin-top:8px;}
     .journal-entry{width:100%;padding:20px 22px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);text-align:left;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);transition:transform 0.25s, box-shadow 0.25s;}
@@ -105,7 +105,7 @@
     .journal-entry:nth-child(odd){background:rgba(128,128,128,0.01) !important;}
     .journal-entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
     .journal-entry-date{font-size:0.7rem;opacity:0.35;letter-spacing:1px;}
-    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:4px 12px;border-radius:14px;opacity:0.7;}
+    .journal-entry-mood{font-size:0.65rem;letter-spacing:1.5px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;padding:4px 12px;border-radius:14px;opacity:0.7;}
     .journal-entry-text{font-size:0.88rem;line-height:1.65;opacity:0.75;white-space:pre-wrap;}
 
     /* ── REGULATE VIEW ── */
@@ -115,7 +115,7 @@
     .ground-steps{width:100%;display:flex;flex-direction:column;gap:12px;}
     .ground-step{width:100%;padding:18px 20px;border-radius:14px;border:1.5px solid rgba(128,128,128,0.12);display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.35s;opacity:0.55;}
     .ground-step.done{opacity:1;}
-    .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
+    .ground-step-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.88rem;flex-shrink:0;transition:all 0.35s;}
     .ground-step-text{font-size:0.88rem;line-height:1.5;}
     @keyframes journalShake{0%,100%{transform:translateX(0);}15%{transform:translateX(-6px);}30%{transform:translateX(5px);}45%{transform:translateX(-4px);}60%{transform:translateX(3px);}75%{transform:translateX(-2px);}90%{transform:translateX(1px);}}
     @keyframes checkPop{
@@ -132,7 +132,7 @@
     .regulate-done-emoji{font-size:2rem;}
     .regulate-done-title{font-size:1.2rem;font-weight:300;letter-spacing:0.5px;}
     .regulate-done-sub{font-size:0.82rem;opacity:0.4;letter-spacing:0.5px;}
-    .regulate-reset{margin-top:4px;padding:10px 30px;border:none;border-radius:22px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;opacity:0.7;transition:opacity 0.3s;}
+    .regulate-reset{margin-top:4px;padding:10px 30px;border:none;border-radius:22px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.75rem;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;opacity:0.7;transition:opacity 0.3s;}
     .regulate-reset:hover{opacity:1;}
 
     /* ── COMPLETE VIEW (after breathing session) ── */
@@ -140,7 +140,7 @@
     .complete-check{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:0.6;}
     .complete-title{font-size:1.6rem;font-weight:300;letter-spacing:0.5px;}
     .complete-stat{font-size:0.82rem;opacity:0.35;letter-spacing:1px;}
-    .complete-btn{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;opacity:0.7;margin-top:10px;}
+    .complete-btn{padding:12px 36px;border:none;border-radius:26px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:0.8rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.3s;opacity:0.7;margin-top:10px;}
     .complete-btn:hover{opacity:1;}
 
     /* ── HAMBURGER ── */
@@ -317,7 +317,7 @@ function resolvePalette(){
         return { bg: cp.bg, tx: cp.tx, ac: themeState.accent || cp.accent };
       }
       var PRESETS = {
-        'default': { bg: '#faf0f0', accent: '#c87860', tx: '#2a1a14' },
+        'default': { bg: '#f4eae3', accent: '#c8836a', tx: '#2c1d16' },
         'rose':    { bg: '#fbe8ec', accent: '#d84a6b', tx: '#2a0e18' },
         'mint':    { bg: '#e8f5ef', accent: '#3fa874', tx: '#0e2419' },
         'lilac':   { bg: '#f0e8fa', accent: '#8a5fd8', tx: '#1a0c2a' },
@@ -904,7 +904,7 @@ initParticles();
     var banner = document.getElementById('previewBanner');
     if (!banner) return;
     banner.style.cssText = 'position:relative;z-index:5;margin:78px 16px 0;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,0.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px dashed rgba(30,12,6,0.18);display:flex;align-items:center;gap:12px;font-family:Space Grotesk,sans-serif;font-size:0.82rem;line-height:1.5;';
-    banner.innerHTML = '<span style="flex:1;">\u2728 Previewing BeYou without an account. <strong style="font-family:Barlow Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;font-size:0.72rem;">Sign up to save your journal + streaks.</strong></span><a href="auth.html" style="font-family:Barlow Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:999px;background:#c87860;color:#fff;text-decoration:none;white-space:nowrap;">Sign up</a>';
+    banner.innerHTML = '<span style="flex:1;">\u2728 Previewing BeYou without an account. <strong style="font-family:Barlow Semi Condensed,sans-serif;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;font-size:0.72rem;">Sign up to save your journal + streaks.</strong></span><a href="auth.html" style="font-family:Barlow Semi Condensed,sans-serif;font-weight:900;font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;padding:8px 14px;border-radius:999px;background:#c8836a;color:#fff;text-decoration:none;white-space:nowrap;">Sign up</a>';
     banner.style.display = 'flex';
   } catch (e) {}
 })();

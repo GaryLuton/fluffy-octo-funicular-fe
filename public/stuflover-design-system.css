@@ -1,46 +1,58 @@
 /* ============================================================
-   STUFLOVER DESIGN SYSTEM
+   STUFLOVER DESIGN SYSTEM  —  "AESTHETIC" DIRECTION
    Shared CSS for all pages except lifestyle.html
+
+   Drop-in replacement for public/stuflover-design-system.css.
+   Every class name and --sl-* variable is preserved, so all
+   existing HTML keeps working — only the VALUES change:
+   warm blush-cream palette, terracotta accents, condensed
+   display + Playfair serif headlines + Nunito Sans body.
    ============================================================ */
 
 /* ── GOOGLE FONTS ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Nunito:wght@400;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800;900&family=Nunito+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Space+Grotesk:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&display=swap');
 
 /* ── CSS CUSTOM PROPERTIES (DESIGN TOKENS) ────────────────── */
 :root {
-  /* Core palette */
-  --sl-pink-light:     #faf0f0;
-  --sl-pink-mid:       #f0ddd6;
-  --sl-peach:          #e8d5c8;
-  --sl-terracotta:     #c87860;
-  --sl-terracotta-dark:#a86050;
-  --sl-brown:          #2a1a14;
-  --sl-white:          #ffffff;
+  /* Core palette — warm blush cream + terracotta */
+  --sl-pink-light:     #f4eae3;   /* page background */
+  --sl-pink-mid:       #efe2da;   /* accent section bg */
+  --sl-peach:          #ece1da;   /* nav pill container / deeper warm */
+  --sl-terracotta:     #c8836a;
+  --sl-terracotta-dark:#b16f57;
+  --sl-brown:          #2c1d16;   /* espresso ink */
+  --sl-white:          #ffffff;   /* true white (button text) */
+
+  /* New accents for the aesthetic direction */
+  --sl-rose:           #e6b2a0;   /* dusty rose — active pills */
+  --sl-rose-soft:      #f0d4c8;   /* soft rose bg */
 
   /* Semantic aliases */
   --sl-bg:             var(--sl-pink-light);
   --sl-tx:             var(--sl-brown);
   --sl-ac:             var(--sl-terracotta);
   --sl-ac-hover:       var(--sl-terracotta-dark);
-  --sl-surface:        var(--sl-white);
-  --sl-border:         rgba(42, 26, 20, 0.08);
-  --sl-text-muted:     rgba(42, 26, 20, 0.5);
-  --sl-text-subtle:    rgba(42, 26, 20, 0.3);
-  --sl-overlay:        rgba(42, 26, 20, 0.45);
+  --sl-surface:        #fbf6f2;                  /* cream card surface */
+  --sl-border:         rgba(44, 29, 22, 0.09);
+  --sl-text-muted:     rgba(44, 29, 22, 0.55);
+  --sl-text-subtle:    rgba(44, 29, 22, 0.32);
+  --sl-overlay:        rgba(44, 29, 22, 0.45);
 
   /* Typography scale */
-  --sl-font-body:      'Nunito', sans-serif;
+  --sl-font-body:      'Nunito Sans', sans-serif;
   --sl-font-alt:       'Space Grotesk', sans-serif;
-  --sl-font-display:   'Barlow Condensed', sans-serif;
+  --sl-font-display:   'Barlow Semi Condensed', sans-serif;
+  --sl-font-serif:     'Playfair Display', serif;    /* editorial headlines */
+  --sl-font-script:    'Dancing Script', cursive;    /* handwritten accents */
 
-  --sl-text-xs:        0.68rem;
-  --sl-text-sm:        0.78rem;
+  --sl-text-xs:        0.78rem;
+  --sl-text-sm:        0.85rem;
   --sl-text-base:      1rem;
-  --sl-text-lg:        1.15rem;
-  --sl-text-xl:        1.35rem;
-  --sl-text-2xl:       clamp(1.8rem, 4vw, 2.5rem);
-  --sl-text-3xl:       clamp(2.5rem, 6vw, 4rem);
-  --sl-text-hero:      clamp(5.5rem, 14vw, 12rem);
+   --sl-text-lg:        1.15rem;
+  --sl-text-xl:        1.4rem;
+  --sl-text-2xl:       clamp(1.8rem, 4vw, 2.7rem);
+  --sl-text-3xl:       clamp(2.4rem, 6vw, 3.6rem);
+  --sl-text-hero:      clamp(4rem, 13vw, 9rem);
 
   /* Spacing scale */
   --sl-space-xs:       4px;
@@ -52,32 +64,28 @@
   --sl-space-3xl:      64px;
   --sl-space-4xl:      100px;
 
-  /* Radii */
-  --sl-radius-sm:      4px;
-  --sl-radius-md:      12px;
-  --sl-radius-lg:      20px;
+  /* Radii — softer & rounder */
+  --sl-radius-sm:      10px;
+  --sl-radius-md:      16px;
+  --sl-radius-lg:      22px;
   --sl-radius-pill:    999px;
 
-  /* Shadows */
-  --sl-shadow-sm:      0 2px 8px rgba(42, 26, 20, 0.06);
-  --sl-shadow-md:      0 6px 20px rgba(42, 26, 20, 0.08);
-  --sl-shadow-lg:      0 10px 40px rgba(42, 26, 20, 0.13);
-  --sl-shadow-xl:      0 16px 40px rgba(0, 0, 0, 0.1);
+  /* Shadows — soft warm-brown */
+  --sl-shadow-sm:      0 4px 16px rgba(44, 29, 22, 0.06);
+  --sl-shadow-md:      0 10px 30px rgba(44, 29, 22, 0.09);
+  --sl-shadow-lg:      0 16px 40px rgba(44, 29, 22, 0.12);
+  --sl-shadow-xl:      0 20px 50px rgba(44, 29, 22, 0.14);
 
   /* Transitions */
   --sl-ease-default:   cubic-bezier(0.4, 0, 0.2, 1);
-  --sl-ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sl-ease-bounce:    cubic-bezier(0.4, 0, 0.2, 1);  /* softened — no overshoot */
   --sl-duration-fast:  0.15s;
   --sl-duration-base:  0.25s;
   --sl-duration-slow:  0.4s;
 }
 
 
-/* ── LEGACY NAV SUPPRESSION ───────────────────────────────
-   Each page used to render its own top bar. The shared
-   stuflover-nav.js replaces them, but it runs late enough
-   that the old bars can flash briefly. Hide them as soon as
-   this stylesheet loads so the swap is invisible. */
+/* ── LEGACY NAV SUPPRESSION ─────────────────────────────── */
 nav#mainNav, nav.sl-nav, .top-bar { display: none !important; }
 
 /* ── RESET & BASE ─────────────────────────────────────────── */
@@ -104,9 +112,8 @@ body {
   overflow-x: hidden;
   line-height: 1.6;
   min-height: 100vh;
-  /* Subtle dot-grid texture */
-  background-image: radial-gradient(circle, rgba(42,26,20,0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+  /* Aesthetic direction: flat warm blush — no dot-grid texture */
+  background-image: none;
 }
 
 /* Use Space Grotesk on tool / utility pages */
@@ -116,32 +123,53 @@ body.font-alt {
 
 
 /* ── TYPOGRAPHY ───────────────────────────────────────────── */
-h1, h2, h3, h4, .sl-display {
+/* h1 + .sl-display = the condensed display face (wordmark / hero). */
+h1, .sl-display {
   font-family: var(--sl-font-display);
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  line-height: 0.95;
+  letter-spacing: -0.5px;
+  line-height: 0.82;
+  color: var(--sl-tx);
+}
+h1 { font-size: var(--sl-text-hero); }
+
+/* h2 / h3 = editorial Playfair serif headlines (sentence case). */
+h2, h3 {
+  font-family: var(--sl-font-serif);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.05;
+  color: var(--sl-tx);
+}
+h2 { font-size: var(--sl-text-3xl); }
+h3 { font-size: var(--sl-text-2xl); }
+
+/* h4 = quiet bold body headline. */
+h4 {
+  font-family: var(--sl-font-body);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.2;
+  font-size: var(--sl-text-xl);
   color: var(--sl-tx);
 }
 
-h1 { font-size: var(--sl-text-hero);  line-height: 0.88; }
-h2 { font-size: var(--sl-text-3xl); }
-h3 { font-size: var(--sl-text-2xl); }
-h4 { font-size: var(--sl-text-xl); }
-
+/* Eyebrow / kicker — terracotta, wide-tracked caps (Nunito Sans). */
 .sl-subhead {
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-body);
+  font-weight: 700;
   font-size: var(--sl-text-xs);
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--sl-ac);
 }
 
 .sl-body {
   font-size: var(--sl-text-base);
-  line-height: 1.8;
+  line-height: 1.7;
   color: var(--sl-text-muted);
 }
 
@@ -155,8 +183,11 @@ h4 { font-size: var(--sl-text-xl); }
   opacity: 0.45;
 }
 
+/* Editorial serif italic accent ("you NEED to try this") */
 .sl-italic {
+  font-family: var(--sl-font-serif);
   font-style: italic;
+  font-weight: 500;
   color: var(--sl-ac);
 }
 
@@ -170,7 +201,7 @@ a:hover {
 }
 
 
-/* ── NAVIGATION ───────────────────────────────────────────── */
+/* ── NAVIGATION (legacy .sl-nav — retoned) ────────────────── */
 .sl-nav {
   position: fixed;
   top: 0;
@@ -180,7 +211,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   padding: 16px 48px;
-  background: rgba(250, 240, 240, 0.65);
+  background: color-mix(in srgb, var(--sl-bg) 88%, transparent);
   backdrop-filter: blur(18px) saturate(1.4);
   border-bottom: 1px solid var(--sl-border);
   box-shadow: var(--sl-shadow-sm);
@@ -189,8 +220,8 @@ a:hover {
 .sl-nav-logo {
   font-family: var(--sl-font-display);
   font-weight: 900;
-  font-size: 1.9rem;
-  letter-spacing: 3px;
+  font-size: 1.6rem;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--sl-tx);
   text-decoration: none;
@@ -203,10 +234,10 @@ a:hover {
 }
 
 .sl-nav-links a {
-  font-family: var(--sl-font-display);
-  font-weight: 800;
-  font-size: var(--sl-text-base);
-  letter-spacing: 2px;
+  font-family: var(--sl-font-body);
+  font-weight: 700;
+  font-size: var(--sl-text-sm);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--sl-tx);
   text-decoration: none;
@@ -214,16 +245,16 @@ a:hover {
 }
 .sl-nav-links a:hover { opacity: 0.5; }
 
-/* Nav button variant (for inner pages: Back, Account, Home) */
+/* Nav button variant (Back, Account, Home) */
 .sl-nav-btn {
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-body);
+  font-weight: 800;
   font-size: var(--sl-text-sm);
-  letter-spacing: 3px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   text-decoration: none;
   padding: 9px 22px;
-  border-radius: var(--sl-radius-sm);
+  border-radius: var(--sl-radius-pill);
   border: 1.5px solid var(--sl-border);
   color: var(--sl-tx);
   background: transparent;
@@ -235,11 +266,10 @@ a:hover {
   opacity: 1;
 }
 
-/* Mobile nav toggle */
 .sl-nav-toggle {
   display: none;
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-body);
+  font-weight: 800;
   font-size: var(--sl-text-sm);
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -250,10 +280,10 @@ a:hover {
 }
 
 .sl-nav-welcome {
-  font-family: var(--sl-font-display);
+  font-family: var(--sl-font-body);
   font-weight: 700;
   font-size: var(--sl-text-sm);
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--sl-text-muted);
 }
@@ -265,9 +295,9 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: var(--sl-font-display);
-  font-weight: 900;
-  letter-spacing: 2px;
+  font-family: var(--sl-font-body);
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
@@ -281,12 +311,13 @@ a:hover {
   background: var(--sl-ac);
   color: var(--sl-white);
   padding: 16px 40px;
-  border-radius: var(--sl-radius-md);
+  border-radius: var(--sl-radius-pill);
+  box-shadow: 0 8px 22px rgba(200, 131, 106, 0.28);
 }
 .sl-btn-primary:hover {
   background: var(--sl-ac-hover);
   transform: translateY(-2px);
-  box-shadow: var(--sl-shadow-md);
+  box-shadow: 0 12px 28px rgba(200, 131, 106, 0.36);
   opacity: 1;
   color: var(--sl-white);
 }
@@ -297,7 +328,7 @@ a:hover {
   background: transparent;
   color: var(--sl-tx);
   padding: 14px 36px;
-  border-radius: var(--sl-radius-md);
+  border-radius: var(--sl-radius-pill);
   border: 2px solid var(--sl-border);
 }
 .sl-btn-secondary:hover {
@@ -314,7 +345,7 @@ a:hover {
   padding: 10px 20px;
   border-radius: var(--sl-radius-pill);
   border: 1.5px solid var(--sl-border);
-  letter-spacing: 3px;
+  letter-spacing: 2px;
 }
 .sl-btn-ghost:hover {
   border-color: var(--sl-ac);
@@ -329,12 +360,13 @@ a:hover {
   color: var(--sl-white);
   padding: 18px 52px;
   border-radius: var(--sl-radius-pill);
-  letter-spacing: 3px;
+  letter-spacing: 2px;
+  box-shadow: 0 8px 22px rgba(200, 131, 106, 0.28);
 }
 .sl-btn-cta:hover {
   background: var(--sl-ac-hover);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--sl-shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(200, 131, 106, 0.36);
   opacity: 1;
   color: var(--sl-white);
 }
@@ -343,65 +375,72 @@ a:hover {
 .sl-btn-danger {
   font-size: var(--sl-text-base);
   background: transparent;
-  color: #c44;
+  color: #c0603f;
   padding: 14px 36px;
-  border-radius: var(--sl-radius-md);
-  border: 2px solid rgba(204, 68, 68, 0.2);
+  border-radius: var(--sl-radius-pill);
+  border: 2px solid rgba(192, 96, 63, 0.25);
 }
 .sl-btn-danger:hover {
-  border-color: #c44;
+  border-color: #c0603f;
   opacity: 1;
 }
 
-/* Small pill / tag button */
+/* Small pill / tag button — active fills dusty rose */
 .sl-btn-pill {
+  font-family: var(--sl-font-body);
+  font-weight: 600;
   font-size: var(--sl-text-xs);
-  padding: 8px 16px;
+  padding: 9px 20px;
   border-radius: var(--sl-radius-pill);
-  border: 1.5px solid rgba(128, 128, 128, 0.15);
-  background: transparent;
-  color: inherit;
-  letter-spacing: 2px;
-  opacity: 0.4;
-}
-.sl-btn-pill:hover,
-.sl-btn-pill.active {
+  border: 1px solid var(--sl-border);
+  background: var(--sl-surface);
+  color: var(--sl-text-muted);
+  letter-spacing: 0.5px;
+  text-transform: none;
   opacity: 1;
-  border-color: var(--sl-ac);
-  background: rgba(200, 120, 96, 0.08);
+  transition: all var(--sl-duration-base);
+}
+.sl-btn-pill:hover {
+  border-color: var(--sl-rose);
+  color: var(--sl-tx);
+}
+.sl-btn-pill.active {
+  border-color: var(--sl-rose);
+  background: var(--sl-rose);
+  color: var(--sl-white);
 }
 
 
 /* ── TABS ─────────────────────────────────────────────────── */
 .sl-tabs {
   display: flex;
-  gap: 0;
+  gap: 4px;
   justify-content: center;
-  background: rgba(42, 26, 20, 0.03);
+  background: var(--sl-peach);
   border-radius: var(--sl-radius-pill);
-  padding: 4px;
+  padding: 5px;
 }
 
 .sl-tab {
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-body);
+  font-weight: 700;
   font-size: var(--sl-text-sm);
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  padding: 10px 28px;
+  padding: 10px 24px;
   border-radius: var(--sl-radius-pill);
   border: none;
   background: transparent;
-  color: var(--sl-tx);
+  color: var(--sl-text-muted);
   cursor: pointer;
-  opacity: 0.45;
+  opacity: 1;
   transition: all var(--sl-duration-base);
 }
 .sl-tab:hover {
-  opacity: 0.7;
+  color: var(--sl-tx);
 }
 .sl-tab.active {
-  opacity: 1;
+  color: var(--sl-ac);
   background: var(--sl-surface);
   box-shadow: var(--sl-shadow-sm);
 }
@@ -411,13 +450,14 @@ a:hover {
 .sl-card {
   background: var(--sl-surface);
   border-radius: var(--sl-radius-lg);
-  border: 1px solid var(--sl-border);
+  border: none;
+  box-shadow: var(--sl-shadow-sm);
   overflow: hidden;
-  transition: all 0.3s var(--sl-ease-bounce);
+  transition: transform 0.25s var(--sl-ease-default), box-shadow 0.25s var(--sl-ease-default);
 }
 .sl-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: var(--sl-shadow-xl);
+  transform: translateY(-4px);
+  box-shadow: var(--sl-shadow-md);
 }
 .sl-card-body {
   padding: 20px 24px;
@@ -455,21 +495,23 @@ a:hover {
 }
 .sl-card-stack .sl-card:hover {
   transform: none;
-  box-shadow: none;
+  box-shadow: var(--sl-shadow-sm);
 }
 
 
 /* ── TAG / BADGE ──────────────────────────────────────────── */
 .sl-tag {
   display: inline-block;
-  font-family: var(--sl-font-display);
-  font-weight: 900;
-  font-size: 0.55rem;
-  letter-spacing: 2px;
+  font-family: var(--sl-font-body);
+  font-weight: 700;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 10px;
-  opacity: 0.5;
+  padding: 4px 12px;
+  border-radius: var(--sl-radius-pill);
+  background: var(--sl-rose-soft);
+  color: var(--sl-ac-hover);
+  opacity: 1;
 }
 
 
@@ -480,14 +522,14 @@ a:hover {
   font-size: var(--sl-text-base);
   padding: 14px 18px;
   border-radius: var(--sl-radius-md);
-  border: 2px solid var(--sl-border);
-  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-surface);
   color: var(--sl-tx);
   outline: none;
   transition: border-color var(--sl-duration-fast);
 }
 .sl-input:focus {
-  border-color: var(--sl-ac);
+  border-color: var(--sl-rose);
 }
 .sl-input::placeholder {
   color: var(--sl-text-subtle);
@@ -499,8 +541,8 @@ a:hover {
   font-size: var(--sl-text-base);
   padding: 14px 18px;
   border-radius: var(--sl-radius-md);
-  border: 2px solid var(--sl-border);
-  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-surface);
   color: var(--sl-tx);
   appearance: none;
   outline: none;
@@ -512,8 +554,8 @@ a:hover {
   font-size: var(--sl-text-base);
   padding: 18px;
   border-radius: var(--sl-radius-lg);
-  border: none;
-  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--sl-border);
+  background: var(--sl-surface);
   color: var(--sl-tx);
   outline: none;
   resize: vertical;
@@ -532,8 +574,8 @@ a:hover {
   flex: 1;
   border-radius: var(--sl-radius-pill);
   padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1.5px solid var(--sl-border);
+  background: var(--sl-surface);
+  border: 1px solid var(--sl-border);
 }
 
 
@@ -566,11 +608,11 @@ a:hover {
 }
 
 .sl-modal-title {
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-serif);
+  font-weight: 700;
   font-size: var(--sl-text-xl);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   margin-bottom: var(--sl-space-sm);
 }
 
@@ -601,9 +643,8 @@ a:hover {
   position: relative;
   overflow: hidden;
   background-image:
-    radial-gradient(circle at 20% 80%, rgba(200,120,96,0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(232,213,200,0.45) 0%, transparent 45%),
-    radial-gradient(circle, rgba(240,221,214,0.2) 0%, transparent 60%);
+    radial-gradient(circle at 20% 80%, rgba(200,131,106,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(230,178,160,0.18) 0%, transparent 45%);
 }
 
 /* Page header (for inner pages without full hero) */
@@ -651,7 +692,7 @@ a:hover {
   color: var(--sl-white);
 }
 .sl-banner p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 
@@ -664,8 +705,8 @@ a:hover {
 .sl-footer-logo {
   font-family: var(--sl-font-display);
   font-weight: 900;
-  font-size: 2.2rem;
-  letter-spacing: 3px;
+  font-size: 2.4rem;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
@@ -683,10 +724,10 @@ a:hover {
   flex-wrap: wrap;
 }
 .sl-footer-links a {
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  font-family: var(--sl-font-body);
+  font-weight: 700;
   font-size: var(--sl-text-xs);
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--sl-tx);
   opacity: 0.4;
@@ -708,36 +749,37 @@ a:hover {
 
 .sl-video-card {
   position: relative;
-  border-radius: var(--sl-radius-lg);
+  border-radius: var(--sl-radius-md);
   overflow: hidden;
   cursor: pointer;
   aspect-ratio: 16/9;
-  background: rgba(250, 240, 240, 0.5);
-  transition: all 0.3s var(--sl-ease-bounce);
+  background: var(--sl-surface);
+  box-shadow: var(--sl-shadow-sm);
+  transition: transform 0.25s var(--sl-ease-default), box-shadow 0.25s var(--sl-ease-default);
 }
 .sl-video-card:hover {
-  transform: scale(1.04);
-  box-shadow: var(--sl-shadow-lg);
+  transform: translateY(-4px);
+  box-shadow: var(--sl-shadow-md);
 }
 
 .sl-empty-slot {
-  border: 2px dashed rgba(200, 120, 96, 0.3);
-  border-radius: var(--sl-radius-lg);
-  background: rgba(200, 120, 96, 0.05);
+  border: 2px dashed rgba(200, 131, 106, 0.32);
+  border-radius: var(--sl-radius-md);
+  background: rgba(200, 131, 106, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   aspect-ratio: 16/9;
   cursor: pointer;
-  transition: all 0.3s;
-  font-family: var(--sl-font-display);
-  font-weight: 900;
+  transition: all 0.25s;
+  font-family: var(--sl-font-body);
+  font-weight: 800;
   font-size: var(--sl-text-xs);
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--sl-ac);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .sl-empty-slot:hover {
   opacity: 1;
@@ -750,7 +792,7 @@ a:hover {
   position: fixed;
   inset: 0;
   z-index: 600;
-  background: rgba(10, 5, 2, 0.88);
+  background: rgba(20, 12, 8, 0.88);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -778,7 +820,8 @@ a:hover {
   border-radius: var(--sl-radius-md);
   overflow: hidden;
   aspect-ratio: 3/4;
-  background: rgba(42, 26, 20, 0.03);
+  background: var(--sl-surface);
+  box-shadow: var(--sl-shadow-sm);
   transition: transform 0.2s;
 }
 .sl-closet-item:hover {
@@ -946,3 +989,82 @@ a:hover {
   }
   body { font-size: 15px; }
 }
+
+/* ── GLOBAL FONT-SIZE FLOOR ───────────────────────────────────────────────── */
+/* Raise any utility class or inline font-size that would render below ~12px  */
+/* (0.75rem) — the minimum comfortable reading size for UI labels and tags.   */
+
+/* Tag / badge — was 0.62rem (~9.9px), now minimum 0.72rem (11.5px) */
+.sl-tag { font-size: 0.72rem; }
+
+/* Footer links — was var(--sl-text-xs), ensure at least 0.78rem */
+.sl-footer-links a { font-size: 0.78rem; }
+
+/* Feature-card tag labels (index.html inline class .feature-tag) */
+.feature-tag { font-size: 0.72rem !important; }
+
+/* Feature-card hook sub-text — was 0.78rem opacity 0.45, keep readable */
+.feature-hook { font-size: 0.82rem !important; opacity: 0.55 !important; }
+
+/* Nav user greeting — ensure visible */
+#sl-top-nav .sl-user { font-size: 0.78rem; }
+
+/* ── MENU BAR CONSISTENCY (ensure all nav tabs use same design system font) - */
+/* These ensure the shared nav font sizes are consistent across all pages.     */
+#sl-top-nav .sl-tab { font-size: 0.82rem; }
+#sl-top-nav .sl-logo { font-size: 1.4rem; }
+#sl-top-nav .sl-back-chip { font-size: 0.78rem; }
+
+@media (max-width: 999px) {
+     #sl-top-nav .sl-tab { font-size: 0.78rem; }
+}
+
+@media (max-width: 760px) {
+     #sl-top-nav .sl-tab { font-size: 0.72rem; }
+     #sl-top-nav .sl-logo { font-size: 1.15rem; }
+}
+
+@media (max-width: 480px) {
+     #sl-top-nav .sl-logo { font-size: 1.05rem; }
+}
+
+/* ── LIFESTYLE.HTML SPECIFIC FONT-SIZE OVERRIDES ──────────────────────────── */
+/* Many inline styles in lifestyle.html use very small fonts (0.45–0.68rem).  */
+/* These overrides bring every UI label up to a minimum legible size.         */
+
+/* General small-caps / label utility — "bc" class used throughout */
+.bc { font-size: max(0.72rem, 11.5px) !important; }
+
+/* Progress, section titles, tab labels */
+.progress-label, .profile-section-title, .on,
+.fgd-tab, .ri-tab, .fg-tab, .fg-title, .sd-title,
+.cw-title, .fr-sidebar-title, .routine-col-title { font-size: 0.75rem !important; }
+
+/* New badges and emoji labels */
+.new-badge, .emoji-picker-label { font-size: 0.72rem !important; }
+
+/* Tile labels */
+.tile-label, .profile-bio-count, .ffi-count { font-size: 0.75rem !important; }
+
+/* Discover tabs */
+.discover-tab { font-size: 0.78rem !important; }
+
+/* Hero sub-text and hooks */
+.hero-hook, .nav-welcome { font-size: 0.78rem !important; }
+
+/* Feed CTAs and action buttons */
+.feed-cta, .ri-new-btn, .ffi-tab, .fg-create-btn,
+.sd-refresh { font-size: 0.78rem !important; }
+
+/* ── FRIENDS.HTML SPECIFIC FIXES ─────────────────────────────────────────── */
+/* Conversation labels, timestamps, status badges */
+.conv-label, .conv-time, .flovee-label,
+.friend-tag, .msg-time, .online-badge { font-size: 0.75rem !important; }
+
+/* ── FITCHECK.HTML / FITFORIT.HTML FIXES ─────────────────────────────────── */
+.fc-label, .fc-tag, .fit-tag, .closet-tag,
+.category-label, .filter-chip { font-size: 0.75rem !important; }
+
+/* ── ACTIVITIES.HTML FIXES ───────────────────────────────────────────────── */
+.act-tag, .act-label, .activity-tag,
+.difficulty-label, .time-label { font-size: 0.75rem !important; }

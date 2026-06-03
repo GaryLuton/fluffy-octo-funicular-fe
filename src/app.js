@@ -21,6 +21,7 @@ const collabRoutes = require('./routes/collab');
 const chatRoutes = require('./routes/chat');
 const healthRoutes = require('./routes/health');
 const shopRoutes = require('./routes/shop');
+const printifyRoutes = require('./routes/printify');
 
 const app = express();
 
@@ -99,6 +100,7 @@ app.use('/api/collab', collabRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/shop', shopRoutes);
+app.use('/api/printify', printifyRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir, {

@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const adminAuth = require('../middleware/adminAuth');
 const { isCleanText } = require('../utils/content');
 const config = require('../config');
+const { fulfillPrintifyOrder } = require('./printify');
 
 const router = express.Router();
 
@@ -42,22 +43,106 @@ function hydrateProduct(p) {
   return p;
 }
 
+function parseDesign(s) {
+  try { const v = JSON.parse(s || '{}'); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
+  catch { return {}; }
+}
+
+function hydrateShop(s) {
+  if (!s) return s;
+  s.design = parseDesign(s.design_json);
+  return s;
+}
+
+// Sanitize a partial design patch coming from the client.
+// Unknown keys are dropped, strings are trimmed and capped, colors validated.
+function sanitizeDesignPatch(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const out = {};
+  if ('accentColor' in input) {
+    const v = String(input.accentColor || '').trim();
+    out.accentColor = /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : '';
+  }
+  if ('announcement' in input) {
+    out.announcement = String(input.announcement || '').trim().slice(0, 140);
+  }
+  if ('about' in input) {
+    out.about = String(input.about || '').trim().slice(0, 2000);
+  }
+  if ('social' in input && input.social && typeof input.social === 'object') {
+    const s = input.social;
+    out.social = {
+      instagram: String(s.instagram || '').trim().slice(0, 60).replace(/^@/, ''),
+      tiktok:    String(s.tiktok    || '').trim().slice(0, 60).replace(/^@/, ''),
+      email:     String(s.email     || '').trim().slice(0, 120),
+      website:   String(s.website   || '').trim().slice(0, 200),
+    };
+  }
+  if ('featuredProductIds' in input) {
+    const arr = Array.isArray(input.featuredProductIds) ? input.featuredProductIds : [];
+    out.featuredProductIds = arr
+      .map((n) => parseInt(n, 10))
+      .filter((n) => Number.isFinite(n) && n > 0)
+      .slice(0, 3);
+  }
+  return out;
+}
+
 // ─── Shops ────────────────────────────────────────────────
+const ALLOWED_CATEGORIES = ['Apparel','Jewelry','Art','Home','Vintage','Craft','Digital','Other'];
+const ALLOWED_KIND = ['handmade','vintage','digital','reseller','mixed'];
+const ALLOWED_EXPERIENCE = ['hobby','side-hustle','full-time'];
+
 router.post('/shops', auth, (req, res) => {
   try {
-    const { name, bio } = req.body || {};
+    const { name, handle, bio, categories, productKind, shipsFrom, experience } = req.body || {};
     if (!name || name.length < 2) return res.status(400).json({ error: 'Shop name required' });
     if (!isCleanText(name)) return res.status(400).json({ error: 'Keep name appropriate' });
     if (bio && !isCleanText(bio)) return res.status(400).json({ error: 'Keep bio appropriate' });
+
+    let cleanHandle = '';
+    if (handle != null && String(handle).length) {
+      cleanHandle = String(handle).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+      if (cleanHandle.length < 3) return res.status(400).json({ error: 'Username must be 3+ letters, numbers, or underscores' });
+      const dup = get('SELECT 1 FROM shops WHERE handle = ?', [cleanHandle]);
+      if (dup) return res.status(409).json({ error: 'That username is taken' });
+    }
+
+    const cats = Array.isArray(categories)
+      ? categories.filter((c) => ALLOWED_CATEGORIES.includes(c)).slice(0, 8)
+      : [];
+    const kind = ALLOWED_KIND.includes(productKind) ? productKind : '';
+    const exp = ALLOWED_EXPERIENCE.includes(experience) ? experience : '';
+    const ships = (shipsFrom || '').toString().substring(0, 60);
+
     const existing = get('SELECT * FROM shops WHERE owner_id = ?', [req.user.id]);
     if (existing) return res.status(409).json({ error: 'You already own a shop', shop: existing });
-    const slug = uniqueSlug(name);
+    const slug = uniqueSlug(cleanHandle || name);
     const r = run(
-      'INSERT INTO shops (owner_id, name, slug, bio) VALUES (?, ?, ?, ?)',
-      [req.user.id, name.substring(0, 80), slug, (bio || '').substring(0, 500)]
+      `INSERT INTO shops (owner_id, name, slug, bio, handle, categories, product_kind, ships_from, experience)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        req.user.id,
+        name.substring(0, 80),
+        slug,
+        (bio || '').substring(0, 500),
+        cleanHandle,
+        JSON.stringify(cats),
+        kind,
+        ships,
+        exp,
+      ]
     );
     res.json({ ok: true, shopId: r.lastInsertRowid, slug });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
+});
+
+// Cheap availability check for the wizard.
+router.get('/handle-available', auth, (req, res) => {
+  const h = String(req.query.handle || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+  if (h.length < 3) return res.json({ available: false, reason: 'too-short' });
+  const dup = get('SELECT 1 FROM shops WHERE handle = ?', [h]);
+  res.json({ available: !dup, handle: h });
 });
 
 router.get('/shops/me', auth, (req, res) => {
@@ -68,7 +153,7 @@ router.get('/shops/me', auth, (req, res) => {
       'SELECT * FROM shop_products WHERE shop_id = ? ORDER BY created_at DESC',
       [shop.id]
     ).map(hydrateProduct);
-    res.json({ shop, products });
+    res.json({ shop: hydrateShop(shop), products });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -76,21 +161,84 @@ router.patch('/shops/me', auth, (req, res) => {
   try {
     const shop = get('SELECT * FROM shops WHERE owner_id = ?', [req.user.id]);
     if (!shop) return res.status(404).json({ error: 'No shop' });
-    const { name, bio, banner_url, avatar_url } = req.body || {};
+    const { name, handle, bio, banner_url, avatar_url, categories, productKind, shipsFrom, experience, design } = req.body || {};
     if (name && !isCleanText(name)) return res.status(400).json({ error: 'Keep name appropriate' });
     if (bio && !isCleanText(bio)) return res.status(400).json({ error: 'Keep bio appropriate' });
+
+    let designJson = null;
+    if (design !== undefined) {
+      const patch = sanitizeDesignPatch(design);
+      if (patch) {
+        if (patch.announcement && !isCleanText(patch.announcement)) {
+          return res.status(400).json({ error: 'Keep announcement appropriate' });
+        }
+        if (patch.about && !isCleanText(patch.about)) {
+          return res.status(400).json({ error: 'Keep about text appropriate' });
+        }
+        if ('featuredProductIds' in patch && patch.featuredProductIds.length) {
+          const placeholders = patch.featuredProductIds.map(() => '?').join(',');
+          const owned = all(
+            `SELECT id FROM shop_products WHERE shop_id = ? AND id IN (${placeholders})`,
+            [shop.id, ...patch.featuredProductIds]
+          ).map((r) => r.id);
+          patch.featuredProductIds = patch.featuredProductIds.filter((id) => owned.includes(id));
+        }
+        const merged = Object.assign({}, parseDesign(shop.design_json), patch);
+        designJson = JSON.stringify(merged);
+      }
+    }
+
+    let cleanHandle = null;
+    if (handle !== undefined) {
+      cleanHandle = String(handle).toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 30);
+      if (cleanHandle.length && cleanHandle.length < 3) {
+        return res.status(400).json({ error: 'Username must be 3+ letters, numbers, or underscores' });
+      }
+      if (cleanHandle && cleanHandle !== shop.handle) {
+        const dup = get('SELECT 1 FROM shops WHERE handle = ? AND id != ?', [cleanHandle, shop.id]);
+        if (dup) return res.status(409).json({ error: 'That username is taken' });
+      }
+    }
+
+    let catsJson = null;
+    if (categories !== undefined) {
+      const cats = Array.isArray(categories)
+        ? categories.filter((c) => ALLOWED_CATEGORIES.includes(c)).slice(0, 8)
+        : [];
+      catsJson = JSON.stringify(cats);
+    }
+    const kind = productKind !== undefined
+      ? (ALLOWED_KIND.includes(productKind) ? productKind : '')
+      : null;
+    const exp = experience !== undefined
+      ? (ALLOWED_EXPERIENCE.includes(experience) ? experience : '')
+      : null;
+    const ships = shipsFrom !== undefined ? String(shipsFrom).substring(0, 60) : null;
+
     run(
       `UPDATE shops SET
          name = COALESCE(?, name),
+         handle = COALESCE(?, handle),
          bio = COALESCE(?, bio),
          banner_url = COALESCE(?, banner_url),
-         avatar_url = COALESCE(?, avatar_url)
+         avatar_url = COALESCE(?, avatar_url),
+         categories = COALESCE(?, categories),
+         product_kind = COALESCE(?, product_kind),
+         ships_from = COALESCE(?, ships_from),
+         experience = COALESCE(?, experience),
+         design_json = COALESCE(?, design_json)
        WHERE id = ?`,
       [
         name ? name.substring(0, 80) : null,
+        cleanHandle,
         bio !== undefined ? bio.substring(0, 500) : null,
         banner_url !== undefined ? banner_url.substring(0, 500) : null,
         avatar_url !== undefined ? avatar_url.substring(0, 500) : null,
+        catsJson,
+        kind,
+        ships,
+        exp,
+        designJson,
         shop.id,
       ]
     );
@@ -109,7 +257,7 @@ router.get('/shops/:slug', (req, res) => {
       `SELECT * FROM shop_products WHERE shop_id = ? AND status = 'active' ORDER BY created_at DESC`,
       [shop.id]
     ).map(hydrateProduct);
-    res.json({ shop, products });
+    res.json({ shop: hydrateShop(shop), products });
   } catch (e) { console.error(e); res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -435,7 +583,7 @@ router.post('/checkout', auth, async (req, res) => {
       for (const it of items) {
         run('UPDATE shop_products SET stock = MAX(0, stock - ?) WHERE id = ?', [it.quantity, it.id]);
       }
-      const url = `${config.PUBLIC_BASE_URL}/shop-success?orderId=${orderId}&mock=1`;
+      const url = `${config.PUBLIC_BASE_URL}/shop-success.html?orderId=${orderId}&mock=1`;
       return res.json({ url, orderId, mock: true });
     }
 
@@ -456,8 +604,8 @@ router.post('/checkout', auth, async (req, res) => {
           },
         };
       }),
-      success_url: `${config.PUBLIC_BASE_URL}/shop-success?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.PUBLIC_BASE_URL}/shop-cart`,
+      success_url: `${config.PUBLIC_BASE_URL}/shop-success.html?orderId=${orderId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${config.PUBLIC_BASE_URL}/shop-cart.html`,
       shipping_address_collection: { allowed_countries: ['US', 'CA', 'GB', 'AU'] },
       metadata: { orderId: String(orderId), buyerId: String(req.user.id) },
     });
@@ -472,16 +620,26 @@ router.post('/checkout', auth, async (req, res) => {
 
 // Webhook handler. Note: this route is mounted via raw body in app.js BEFORE
 // express.json(), so req.body is a Buffer here.
-router.post('/webhook', (req, res) => {
+router.post('/webhook', async (req, res) => {
   const s = getStripe();
   if (!s) return res.status(503).json({ error: 'Stripe not configured' });
   const sig = req.headers['stripe-signature'];
   let event;
   try {
-    if (!config.STRIPE_WEBHOOK_SECRET) {
+    // STRIPE_WEBHOOK_SECRET may hold several comma-separated signing secrets so
+    // that test-mode and live-mode endpoints (which have different secrets) can
+    // both be verified by this one endpoint. Try each until one validates.
+    const secrets = (config.STRIPE_WEBHOOK_SECRET || '')
+      .split(',').map((x) => x.trim()).filter(Boolean);
+    if (!secrets.length) {
       event = JSON.parse(req.body.toString());
     } else {
-      event = s.webhooks.constructEvent(req.body, sig, config.STRIPE_WEBHOOK_SECRET);
+      let lastErr;
+      for (const secret of secrets) {
+        try { event = s.webhooks.constructEvent(req.body, sig, secret); lastErr = null; break; }
+        catch (e) { lastErr = e; }
+      }
+      if (!event) throw lastErr;
     }
   } catch (err) {
     console.error('Webhook sig error:', err.message);
@@ -490,6 +648,18 @@ router.post('/webhook', (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+
+    // Printify storefront orders are tagged so they can be fulfilled separately.
+    // Stripe delivers every completed session to this one endpoint.
+    if (session.metadata && session.metadata.kind === 'printify') {
+      try {
+        await fulfillPrintifyOrder(session);
+      } catch (e) {
+        console.error('Printify fulfillment error:', e.message);
+      }
+      return res.json({ received: true });
+    }
+
     const orderId = parseInt(session.metadata && session.metadata.orderId);
     if (orderId) {
       const order = get('SELECT * FROM shop_orders WHERE id = ?', [orderId]);

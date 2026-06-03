@@ -5,7 +5,7 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
  <title>Catalog — Stuflover</title>
- <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+ <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
  <link rel="preload" href="/stuflover-nav.css" as="style"/>
  <link rel="stylesheet" href="/stuflover-nav.css"/>
  <link rel="preload" href="/stuflover-nav.js" as="script"/>
@@ -14,12 +14,12 @@
  <style>
  *{margin:0;padding:0;box-sizing:border-box;}
  body{font-family:'Space Grotesk',sans-serif;background:var(--sl-bg);color:var(--sl-tx);overflow-x:hidden;min-height:100vh;transition:background 0.5s,color 0.5s;}
- .bc{font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
+ .bc{font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:1px;}
 
  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;backdrop-filter:blur(16px);border-bottom:1px solid rgba(128,128,128,0.1);}
  .nav-logo{font-size:1.6rem;letter-spacing:4px;text-decoration:none;}
  .nav-links{display:flex;gap:8px;}
- .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
+ .nav-btn{font-size:0.75rem;letter-spacing:2px;text-decoration:none;padding:8px 16px;border-radius:4px;border:1.5px solid rgba(128,128,128,0.2);font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;transition:opacity 0.2s;background:transparent;color:inherit;}
  .nav-btn:hover{opacity:0.6;}
 
  /* PAGE HEADER */
@@ -33,10 +33,10 @@
 
  /* LEFT — item picker */
  .items-side{padding:32px 40px;border-right:1px solid rgba(128,128,128,0.08);}
- .side-label{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.26;margin-bottom:20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .side-label{font-size:0.64rem;letter-spacing:5px;text-transform:uppercase;opacity:0.26;margin-bottom:20px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;}
 
  .cat-section{margin-bottom:28px;}
- .cat-label{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.24;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .cat-label{font-size:0.6rem;letter-spacing:4px;text-transform:uppercase;opacity:0.24;margin-bottom:12px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;}
  .cat-items{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 
  .item-card{border-radius:6px;overflow:hidden;cursor:pointer;position:relative;border:2px solid transparent;transition:all 0.15s;}
@@ -48,26 +48,26 @@
  .item-card.selected .item-check{opacity:1;}
 
  .empty-cat{padding:24px;text-align:center;opacity:0.28;font-style:italic;font-size:0.82rem;border:1.5px dashed rgba(128,128,128,0.14);border-radius:6px;}
- .empty-cat a{color:inherit;font-family:'Barlow Condensed',sans-serif;font-weight:900;letter-spacing:2px;font-size:0.72rem;text-transform:uppercase;text-decoration:none;display:block;margin-top:8px;opacity:0.7;}
+ .empty-cat a{color:inherit;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;letter-spacing:2px;font-size:0.72rem;text-transform:uppercase;text-decoration:none;display:block;margin-top:8px;opacity:0.7;}
 
  /* RIGHT — outfit builder + Flovee */
  .flovee-side{padding:32px;display:flex;flex-direction:column;gap:20px;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;}
 
  /* Selected outfit summary */
  .outfit-summary{border-radius:8px;padding:20px;border:1.5px solid rgba(128,128,128,0.12);}
- .summary-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;margin-bottom:14px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .summary-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;opacity:0.28;margin-bottom:14px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;}
  .summary-items{display:flex;flex-direction:column;gap:8px;}
  .summary-item{display:flex;align-items:center;gap:10px;}
  .summary-img{width:40px;height:52px;border-radius:4px;object-fit:cover;flex-shrink:0;background:rgba(128,128,128,0.1);}
  .summary-info{flex:1;}
  .summary-name{font-size:0.82rem;font-weight:600;line-height:1.3;}
- .summary-cat{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .summary-cat{font-size:0.62rem;letter-spacing:2px;text-transform:uppercase;opacity:0.35;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;}
  .summary-remove{font-size:0.7rem;opacity:0.3;cursor:pointer;padding:4px;transition:opacity 0.15s;}
  .summary-remove:hover{opacity:0.8;}
  .summary-empty{font-size:0.85rem;opacity:0.3;font-style:italic;padding:8px 0;}
 
  /* Check button */
- .check-btn{width:100%;padding:15px;border:none;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
+ .check-btn{width:100%;padding:15px;border:none;border-radius:4px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;font-size:1rem;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity 0.2s;}
  .check-btn:hover{opacity:0.8;}
  .check-btn:disabled{opacity:0.3;cursor:not-allowed;}
 
@@ -86,10 +86,10 @@
  /* Buy section — unlocked after approval */
  .buy-section{border-radius:8px;padding:18px;border:1.5px solid rgba(128,128,128,0.12);display:none;}
  .buy-section.unlocked{display:block;}
- .buy-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-weight:900;}
+ .buy-label{font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;}
  .buy-item{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(128,128,128,0.07);font-size:0.85rem;}
  .buy-item:last-child{border-bottom:none;}
- .buy-link-btn{font-size:0.7rem;letter-spacing:1.5px;font-family:'Barlow Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;padding:5px 12px;border-radius:3px;transition:opacity 0.2s;}
+ .buy-link-btn{font-size:0.7rem;letter-spacing:1.5px;font-family:'Barlow Semi Condensed',sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;padding:5px 12px;border-radius:3px;transition:opacity 0.2s;}
  .buy-link-btn:hover{opacity:0.7;}
 
  /* ── HAMBURGER ── */
@@ -99,7 +99,7 @@
  @media(max-width:900px){.catalog-layout{grid-template-columns:1fr;}.flovee-side{position:relative;top:0;height:auto;border-top:1px solid rgba(128,128,128,0.08);}.cat-items{grid-template-columns:repeat(3,1fr);}nav,.page-header,.items-side,.flovee-side{padding-left:20px;padding-right:20px;}}
  @media(max-width:600px){
    nav{padding:12px 16px;}
-   .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(250,240,240,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+   .nav-links{display:none;position:absolute;top:100%;right:0;flex-direction:column;gap:8px;background:rgba(244, 234, 227,0.95);backdrop-filter:blur(16px);padding:12px;min-width:180px;border-radius:0 0 12px 12px;border:1px solid rgba(128,128,128,0.1);box-shadow:0 6px 20px rgba(0,0,0,0.08);}
    .nav-links.open{display:flex;}
    .nav-btn{display:block;padding:10px 16px;border:none;border-radius:6px;}
    .nav-btn:hover{background:rgba(128,128,128,0.06);}
@@ -195,7 +195,7 @@ function resolvePalette(){
        return { bg: cp.bg, tx: cp.tx, ac: ts.accent || cp.accent };
      }
      const _P = {
-       'default':{bg:'#faf0f0',accent:'#c87860',tx:'#2a1a14'},
+       'default':{bg:'#f4eae3',accent:'#c8836a',tx:'#2c1d16'},
        'rose':{bg:'#fbe8ec',accent:'#d84a6b',tx:'#2a0e18'},
        'mint':{bg:'#e8f5ef',accent:'#3fa874',tx:'#0e2419'},
        'lilac':{bg:'#f0e8fa',accent:'#8a5fd8',tx:'#1a0c2a'},
@@ -263,9 +263,9 @@ function renderItems(){
  const container=document.getElementById('itemsContainer');
  if(catalogItems.length===0){
  container.innerHTML=`<div style="padding:60px 0;text-align:center;opacity:0.3;">
- <div style="font-size:1.5rem;margin-bottom:12px;font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase">No Items Yet</div>
+ <div style="font-size:1.5rem;margin-bottom:12px;font-family:Barlow Semi Condensed,sans-serif;font-weight:900;text-transform:uppercase">No Items Yet</div>
  <p style="font-size:0.88rem;line-height:1.7;margin-bottom:16px">Save items in FitforIt, then add them to your catalog from WishingWell.</p>
- <a href="fitforit.html" style="font-size:0.75rem;letter-spacing:2px;font-family:Barlow Condensed,sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;color:${PAL.tx};border:1.5px solid ${PAL.tx}30;padding:10px 22px;border-radius:4px;">Go to FitforIt</a>
+ <a href="fitforit.html" style="font-size:0.75rem;letter-spacing:2px;font-family:Barlow Semi Condensed,sans-serif;font-weight:900;text-transform:uppercase;text-decoration:none;color:${PAL.tx};border:1.5px solid ${PAL.tx}30;padding:10px 22px;border-radius:4px;">Go to FitforIt</a>
  </div>`;
  return;
  }

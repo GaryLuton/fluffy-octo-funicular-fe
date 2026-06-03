@@ -190,7 +190,7 @@
 
   var TABS = [
     { id: 'mypage',   label: 'My Page', href: 'lifestyle.html',  match: ['lifestyle.html'],                 icon: iconHome },
-    { id: 'play',     label: 'Play',    href: 'games.html',      match: ['activities.html','games.html','fitcheck.html','fitforit.html','catalog.html','collab.html','academic.html','wishingwell.html','shop.html','shop-product.html','shop-cart.html','shop-success.html','shop-mine.html','shop-create.html'], icon: iconPlay },
+    { id: 'play',     label: 'Play',    href: 'games.html',      match: ['activities.html','games.html','fitcheck.html','fitforit.html','catalog.html','collab.html','academic.html','wishingwell.html','shop.html','shop-product.html','shop-cart.html','shop-success.html','shop-mine.html','shop-create.html','shop-store.html'], icon: iconPlay },
     { id: 'friends',  label: 'Friends', href: 'friends.html',    match: ['friends.html','flovee.html'],     icon: iconUsers },
     { id: 'me',       label: 'Me',      href: 'account.html',    match: ['account.html','auth.html'],       icon: iconUser }
   ];
@@ -277,7 +277,7 @@
     if (isPlayChild()) {
       var back = document.createElement('a');
       back.className = 'sl-back-chip';
-      back.href = 'activities.html';
+      back.href = 'games.html';
       back.setAttribute('aria-label', 'Back to Play');
       back.textContent = '← Play';
       back.addEventListener('click', markNavStart);

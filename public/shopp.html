@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<title>Shop — Stuflover</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@800;900&family=Nunito:wght@400;600;700&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/stuflover-nav.css"/>
+<script src="/stuflover-theme-boot.js"></script>
+<link rel="stylesheet" href="/stuflover-design-system.css"/>
+<link rel="stylesheet" href="/shop.css"/>
+<link rel="stylesheet" href="/css/shopp.css"/>
+</head>
+<body>
+<script src="/stuflover-nav.js"></script>
+
+<div id="demoBanner" class="demo-banner" style="display:none;">Demo catalog — set PRINTIFY_API_TOKEN to show live products</div>
+
+<header class="shop-hero" style="min-height:auto;padding:120px 40px 50px;">
+  <div class="shop-eyebrow">Stuflover Store</div>
+  <h1 class="shop-title" style="font-size:clamp(3rem,9vw,6rem);">Shop the drop</h1>
+</header>
+
+<main class="shop-wrap">
+  <div id="grid" class="grid"></div>
+</main>
+
+<button id="cartFab" class="cart-fab" type="button">Cart <span id="cartCount"></span></button>
+
+<div id="drawerBackdrop" class="drawer-backdrop"></div>
+<aside id="drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h2>Your Cart</h2>
+    <button id="drawerClose" class="drawer-close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div id="drawerBody" class="drawer-body"></div>
+  <div class="drawer-foot">
+    <div class="drawer-total">
+      <span class="lbl">Total</span>
+      <span id="drawerTotal" class="amt">$0.00</span>
+    </div>
+    <button id="checkoutBtn" class="btn btn-primary" style="width:100%;justify-content:center;">Checkout</button>
+  </div>
+</aside>
+
+<div id="toast" class="toast"></div>
+<script src="/stuflover-config.js"></script>
+<script src="/js/shop-common.js"></script>
+<script src="/js/shopp-common.js"></script>
+<script src="/js/shopp.js"></script>
+</body>
+</html>

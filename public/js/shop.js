@@ -63,7 +63,7 @@
       var img = (p.image_urls && p.image_urls[0]) || '';
       var a = document.createElement('a');
       a.className = 'card';
-      a.href = '/shop-product?id=' + p.id;
+      a.href = '/shop-product.html?id=' + p.id;
       a.innerHTML =
         '<div class="card-img">' +
           (img ? '<img loading="lazy" alt="" src="' + SLShop.escapeHtml(img) + '"/>' : '<div class="card-img-empty">No image</div>') +
