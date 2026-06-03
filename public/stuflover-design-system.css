@@ -1027,3 +1027,44 @@ a:hover {
 @media (max-width: 480px) {
      #sl-top-nav .sl-logo { font-size: 1.05rem; }
 }
+
+/* ── LIFESTYLE.HTML SPECIFIC FONT-SIZE OVERRIDES ──────────────────────────── */
+/* Many inline styles in lifestyle.html use very small fonts (0.45–0.68rem).  */
+/* These overrides bring every UI label up to a minimum legible size.         */
+
+/* General small-caps / label utility — "bc" class used throughout */
+.bc { font-size: max(0.72rem, 11.5px) !important; }
+
+/* Progress, section titles, tab labels */
+.progress-label, .profile-section-title, .on,
+.fgd-tab, .ri-tab, .fg-tab, .fg-title, .sd-title,
+.cw-title, .fr-sidebar-title, .routine-col-title { font-size: 0.75rem !important; }
+
+/* New badges and emoji labels */
+.new-badge, .emoji-picker-label { font-size: 0.72rem !important; }
+
+/* Tile labels */
+.tile-label, .profile-bio-count, .ffi-count { font-size: 0.75rem !important; }
+
+/* Discover tabs */
+.discover-tab { font-size: 0.78rem !important; }
+
+/* Hero sub-text and hooks */
+.hero-hook, .nav-welcome { font-size: 0.78rem !important; }
+
+/* Feed CTAs and action buttons */
+.feed-cta, .ri-new-btn, .ffi-tab, .fg-create-btn,
+.sd-refresh { font-size: 0.78rem !important; }
+
+/* ── FRIENDS.HTML SPECIFIC FIXES ─────────────────────────────────────────── */
+/* Conversation labels, timestamps, status badges */
+.conv-label, .conv-time, .flovee-label,
+.friend-tag, .msg-time, .online-badge { font-size: 0.75rem !important; }
+
+/* ── FITCHECK.HTML / FITFORIT.HTML FIXES ─────────────────────────────────── */
+.fc-label, .fc-tag, .fit-tag, .closet-tag,
+.category-label, .filter-chip { font-size: 0.75rem !important; }
+
+/* ── ACTIVITIES.HTML FIXES ───────────────────────────────────────────────── */
+.act-tag, .act-label, .activity-tag,
+.difficulty-label, .time-label { font-size: 0.75rem !important; }
